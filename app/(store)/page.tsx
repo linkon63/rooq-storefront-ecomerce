@@ -1,73 +1,78 @@
-import Hero from '@/components/sections/hero';
-import Invitation from '@/components/sections/invitation';
-import Presence from '@/components/sections/presence';
-import Prestige from '@/components/sections/prestige';
-import NewArrival from '@/components/sections/newarrival';
-import Brands from '@/components/sections/brands';
-import Instagram from '@/components/sections/instagram';
-import Testimonial from '@/components/sections/testimonial';
-import TeaCollection from '@/components/sections/ui/tea-collection';
-import PresenceImage from '@/components/sections/ui/presence-image';
-import NobleBalance from '@/components/sections/ui/noble-balance';
-import WorldAssembly from '@/components/sections/ui/world-assembly';
-import Subtract from '@/components/sections/subtract';
-import LooseTea from '@/components/sections/ui/loose-tea';
-import GiftItem from '@/components/sections/gift-item';
-import MostPopuler from '@/components/sections/most-populer';
-import TheCollection from '@/components/sections/the-collection';
-import ScrollAnimate from '@/components/ui/scroll-animate';
+import HomeHero, { type HeroSlide } from "@/components/storefront/home/HomeHero";
+import MostRecentItems from "@/components/storefront/home/MostRecentItems";
+import PromoBanners from "@/components/storefront/home/PromoBanners";
+import MostLovedFoods from "@/components/storefront/home/MostLovedFoods";
+import FeatureStrip from "@/components/storefront/home/FeatureStrip";
+import CustomerVoices from "@/components/storefront/home/CustomerVoices";
+import VideoGallery from "@/components/storefront/home/VideoGallery";
+import NewsletterCta from "@/components/storefront/home/NewsletterCta";
+import {
+  fetchShopCampaigns,
+  fetchShopCategories,
+  fetchShopProducts,
+  fetchShopSettings,
+  type ShopProduct,
+} from "@/lib/shop-api";
 
-export default function Home() {
-  return (
-    <div>
-      <Hero />
-      <ScrollAnimate variant="fade-in-up">
-        <Invitation />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <TheCollection />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <NewArrival />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <LooseTea />
-      </ScrollAnimate>
-      <Subtract />
-      <ScrollAnimate variant="fade-in-up">
-        <MostPopuler />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <GiftItem />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <WorldAssembly />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <NobleBalance />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <PresenceImage />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <Presence />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <Prestige />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <TeaCollection />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <Brands />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <Testimonial />
-      </ScrollAnimate>
-      <ScrollAnimate variant="fade-in-up">
-        <Instagram />
-      </ScrollAnimate>
-    </div>
-  );
+/** The hero falls back to the artwork shipped with the design. */
+const FALLBACK_SLIDE: HeroSlide = {
+  image: "/images/home/hero-ghee.png",
+  href: "/shop?category=Ghee",
+  alt: "খাঁটি ঘি — pure hand-churned ghee",
+};
+
+const SIDE_BANNERS: HeroSlide[] = [
+  {
+    image: "/images/home/banner-coconut.png",
+    href: "/shop?category=Coconut%20Oil",
+    alt: "নারিকেল তেল — cold pressed virgin coconut oil",
+  },
+  {
+    image: "/images/home/banner-mustard.png",
+    href: "/shop?category=Mustard%20Oil",
+    alt: "খাঁটি সরিষার তেল — cold pressed mustard oil",
+  },
+];
+
+/** Biggest savings first, so the "loved" rail leads with the best offers. */
+function byDiscount(products: ShopProduct[]): ShopProduct[] {
+  const saving = (product: ShopProduct) =>
+    product.originalPrice && product.originalPrice > product.price
+      ? (product.originalPrice - product.price) / product.originalPrice
+      : 0;
+  return [...products].sort((a, b) => saving(b) - saving(a));
 }
 
+export default async function Home() {
+  // One products call feeds both rails below; each of them slices what it needs.
+  const [{ data: products }, categories, campaigns, settings] = await Promise.all([
+    fetchShopProducts({ limit: 24 }),
+    fetchShopCategories(),
+    fetchShopCampaigns(),
+    fetchShopSettings(),
+  ]);
+
+  const campaignSlides: HeroSlide[] = campaigns.flatMap((campaign) =>
+    campaign.images.map((image) => ({
+      image,
+      href: "/shop",
+      alt: campaign.title,
+    })),
+  );
+
+  return (
+    <main className="space-y-14 lg:space-y-20">
+      <HomeHero
+        slides={campaignSlides.length > 0 ? campaignSlides : [FALLBACK_SLIDE]}
+        banners={SIDE_BANNERS}
+      />
+      <MostRecentItems products={products} categories={categories} />
+      <PromoBanners />
+      <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
+      <FeatureStrip />
+      <CustomerVoices social={(settings?.socialContact ?? {}) as Record<string, string | undefined>} />
+      <VideoGallery fallbackUrl={settings?.youtubeUrl ?? ""} />
+      <NewsletterCta />
+    </main>
+  );
+}

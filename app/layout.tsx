@@ -1,7 +1,34 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Inter, Playfair_Display, Poppins } from "next/font/google";
 import "./globals.css";
 
+// ─── Storefront typography (cap-1) ───────────────────────────────────────────
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+// Headings in the Organishi mockups are a serif display face.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+// ─── Admin typography ────────────────────────────────────────────────────────
+// The admin panel styles ~95 elements with font-gotham / font-bembo, so both
+// families stay loaded even though the storefront no longer uses them.
 const bembo = localFont({
   src: [
     {
@@ -23,22 +50,6 @@ const bembo = localFont({
   variable: "--font-bembo",
 });
 
-const snell = localFont({
-  src: [
-    {
-      path: "./fonts/Snell-Roundhand/Snell Roundhand Script.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "./fonts/Snell-Roundhand/Snell Roundhand Bold Script.otf",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-snell",
-});
-
 const gotham = localFont({
   src: [
     {
@@ -56,8 +67,9 @@ const gotham = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "London Tea Exchange",
-  description: "London Tea Exchange offers an exquisite selection of single estate premium teas and unique tea collections sourced from across the globe.",
+  title: "Organishi — Pure Organic Food, Straight From the Farm",
+  description:
+    "Cold pressed mustard oil, virgin coconut oil, hand-churned ghee, raw honey and organic snacks — sourced directly from farmers and delivered across Bangladesh.",
 };
 
 export default function RootLayout({
@@ -66,10 +78,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full antialiased scroll-smooth ${bembo.variable} ${snell.variable} ${gotham.variable}`}>
-      <body className="min-h-full flex flex-col">
-        {children}
-      </body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`h-full antialiased scroll-smooth ${inter.variable} ${poppins.variable} ${playfair.variable} ${bembo.variable} ${gotham.variable}`}
+    >
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

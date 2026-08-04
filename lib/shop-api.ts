@@ -88,6 +88,11 @@ export type ShopSettings = {
   id: string;
   shopName: string;
   slogan: string;
+  logo?: string | null;
+  icon?: string | null;
+  favicon?: string | null;
+  branchName?: string | null;
+  branchAddress?: string | null;
   contactNumber?: any;
   email?: any;
   socialContact?: any;
@@ -188,16 +193,36 @@ async function safeFetchJson<T>(url: string, fallback: T): Promise<T> {
   }
 }
 
-export function fetchShopBrands(): Promise<ShopBrand[]> {
-  return safeFetchJson<ShopBrand[]>(`${API_BASE_URL}/brands`, []);
+export async function fetchShopBrands(): Promise<ShopBrand[]> {
+  const brands = await safeFetchJson<ShopBrand[]>(`${API_BASE_URL}/brands`, []);
+  return brands.map((brand) => ({
+    ...brand,
+    logoUrl: brand.logoUrl ? resolveImageUrl(brand.logoUrl) : brand.logoUrl,
+  }));
 }
 
-export function fetchShopCategories(): Promise<ShopCategory[]> {
-  return safeFetchJson<ShopCategory[]>(`${API_BASE_URL}/category`, []);
+function normaliseCategoryImages(category: ShopCategory): ShopCategory {
+  return {
+    ...category,
+    imageUrl: category.imageUrl ? resolveImageUrl(category.imageUrl) : category.imageUrl,
+    children: category.children?.map(normaliseCategoryImages),
+  };
 }
 
-export function fetchShopSettings(): Promise<ShopSettings | null> {
-  return safeFetchJson<ShopSettings | null>(`${API_BASE_URL}/settings`, null);
+export async function fetchShopCategories(): Promise<ShopCategory[]> {
+  const categories = await safeFetchJson<ShopCategory[]>(`${API_BASE_URL}/category`, []);
+  return categories.map(normaliseCategoryImages);
+}
+
+export async function fetchShopSettings(): Promise<ShopSettings | null> {
+  const settings = await safeFetchJson<ShopSettings | null>(`${API_BASE_URL}/settings`, null);
+  if (!settings) return null;
+  return {
+    ...settings,
+    logo: settings.logo ? resolveImageUrl(settings.logo) : settings.logo,
+    icon: settings.icon ? resolveImageUrl(settings.icon) : settings.icon,
+    favicon: settings.favicon ? resolveImageUrl(settings.favicon) : settings.favicon,
+  };
 }
 
 export function fetchShopTags(): Promise<any[]> {
@@ -208,3 +233,77 @@ export function fetchShopAttributes(): Promise<any[]> {
   return safeFetchJson<any[]>(`${API_BASE_URL}/attributes`, []);
 }
 
+
+// ─── Policies ────────────────────────────────────────────────────────────────
+// The backend stores one row with a JSON block per policy type. The storefront
+// footer wants a flat list, so flatten it here.
+export type ShopPolicy = {
+  id: string;
+  title: string;
+  content: string;
+};
+
+type PolicyBlock = { title?: string; content?: string } | null | undefined;
+
+type PolicyRecord = {
+  delivery?: PolicyBlock;
+  return?: PolicyBlock;
+  refund?: PolicyBlock;
+  cancellation?: PolicyBlock;
+  privacy?: PolicyBlock;
+  terms?: PolicyBlock;
+};
+
+const POLICY_KEYS: (keyof PolicyRecord)[] = [
+  "delivery",
+  "return",
+  "refund",
+  "cancellation",
+  "privacy",
+  "terms",
+];
+
+export async function fetchShopPolicies(): Promise<ShopPolicy[]> {
+  const record = await safeFetchJson<PolicyRecord | null>(`${API_BASE_URL}/policies`, null);
+  if (!record) return [];
+
+  return POLICY_KEYS.flatMap((key) => {
+    const block = record[key];
+    if (!block?.content) return [];
+    return [{ id: key, title: block.title ?? key, content: block.content }];
+  });
+}
+
+// ─── Campaigns (homepage hero / banners) ─────────────────────────────────────
+export type ShopCampaign = {
+  id: string;
+  title: string;
+  description?: string | null;
+  images: string[];
+};
+
+type CampaignRecord = {
+  id: string;
+  title: string;
+  description?: string | null;
+  status?: string;
+  images?: { images?: unknown }[];
+};
+
+/** Active campaigns with their banner images flattened into a string array. */
+export async function fetchShopCampaigns(): Promise<ShopCampaign[]> {
+  const records = await safeFetchJson<CampaignRecord[]>(`${API_BASE_URL}/campaigns`, []);
+  const list = Array.isArray(records) ? records : [];
+
+  return list
+    .filter((campaign) => (campaign.status ?? "active") === "active")
+    .map((campaign) => ({
+      id: campaign.id,
+      title: campaign.title,
+      description: campaign.description ?? null,
+      // CampaignImage.images is a JSON column holding an array of URLs.
+      images: (campaign.images ?? []).flatMap((entry) =>
+        Array.isArray(entry?.images) ? (entry.images as unknown[]).filter((u): u is string => typeof u === "string") : [],
+      ).map(resolveImageUrl),
+    }));
+}

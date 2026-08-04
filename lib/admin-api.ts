@@ -119,6 +119,16 @@ export type ProductVariant = {
   stockAlertThreshold: number;
   isDefault: boolean;
   optionValues?: { value: string; attribute: { name: string } }[];
+  /** Variant attribute links as returned by GET /products/:id. */
+  attributes?: {
+    id: string;
+    attributeValueId: string;
+    attributeValue?: {
+      id: string;
+      value: string;
+      attribute?: { id: string; name: string };
+    };
+  }[];
   media?: VariantMedia[];
   createdAt?: string;
 };

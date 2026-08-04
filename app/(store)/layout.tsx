@@ -1,37 +1,64 @@
-import { Suspense } from 'react';
-import TopHeader from '@/components/sections/top-header';
-import Header from '@/components/sections/header';
-import Mainfooter from '@/components/sections/main-footer';
-import Bottomfooter from '@/components/sections/bottom-footer';
-import { AuthProvider } from "../_providers/auth-provider";
-import { CartProvider } from "../_providers/cart-provider";
-import { WishlistProvider } from "../_providers/wishlist-provider";
-import AuthModal from "@/components/auth-modal";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 
-export default function StoreLayout({
+import Header from "@/components/storefront/shared/Header";
+import Footer from "@/components/storefront/shared/Footer";
+import { AuthProvider } from "../_providers/auth-provider";
+import { CartProvider } from "../_providers/cart-provider";
+import { WishlistProvider } from "../_providers/wishlist-provider";
+import { CompareProvider } from "../_providers/compare-provider";
+import AuthModal from "@/components/auth-modal";
+import { fetchShopCategories, fetchShopPolicies, fetchShopSettings } from "@/lib/shop-api";
+import type { Policy } from "@/types/policies";
+
+export default async function StoreLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The shop chrome is identical on every storefront page, so it is fetched
+  // once here on the server. Each call already falls back to a safe empty value.
+  const [settings, categories, shopPolicies] = await Promise.all([
+    fetchShopSettings(),
+    fetchShopCategories(),
+    fetchShopPolicies(),
+  ]);
+
+  const policies: Policy[] = shopPolicies.map((policy, index) => ({
+    id: index + 1,
+    content: policy.title,
+    content_html: policy.content,
+    created_at: "",
+    updated_at: "",
+  }));
+
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}>
-    <AuthProvider>
-      <WishlistProvider>
-        <CartProvider>
-          <TopHeader />
-          <Suspense fallback={<div className="h-16 bg-olive-slate animate-pulse w-full" />}>
-            <Header />
-          </Suspense>
-          {children}
-          <Mainfooter />
-          <Bottomfooter />
-          <AuthModal />
-          <Toaster richColors closeButton position="top-right" />
-        </CartProvider>
-      </WishlistProvider>
-    </AuthProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <CompareProvider>
+            <CartProvider>
+              <div className="storefront-root flex min-h-full flex-col">
+                <Header settings={settings} categories={categories} />
+                <div className="flex-1">{children}</div>
+                <Footer
+                  policies={policies}
+                  settings={settings}
+                  productLinks={categories
+                    .filter((category) => !category.parentId)
+                    .slice(0, 6)
+                    .map((category) => ({
+                      label: category.name,
+                      href: `/shop?category=${encodeURIComponent(category.name)}`,
+                    }))}
+                />
+              </div>
+              <AuthModal />
+              <Toaster position="bottom-right" richColors closeButton />
+            </CartProvider>
+          </CompareProvider>
+        </WishlistProvider>
+      </AuthProvider>
     </GoogleOAuthProvider>
   );
 }

@@ -1,0 +1,154 @@
+"use client";
+
+import { useState } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperClass } from "swiper";
+import { FaFacebookF, FaInstagram, FaXTwitter, FaYoutube } from "react-icons/fa6";
+
+import "swiper/css";
+
+/** Placeholder voices until the review API feeds this section. */
+const TESTIMONIALS = [
+  {
+    name: "Ralph Edwards",
+    role: "Customer",
+    quote:
+      "As a foodie, I really appreciate authenticity in my platter. So far Organishi has always delivered up to my expectation on that particular note. And having it homemade also adds a cherry on top.",
+  },
+  {
+    name: "Nusrat Jahan",
+    role: "Customer",
+    quote:
+      "The mustard oil smells exactly like the one my grandmother used to press at home. Delivery was quick and the bottle arrived sealed and clean.",
+  },
+  {
+    name: "Tanvir Hasan",
+    role: "Customer",
+    quote:
+      "I switched our whole kitchen over to their ghee and cold pressed oils. You can taste the difference, and the pricing is fair for this quality.",
+  },
+  {
+    name: "Farhana Akter",
+    role: "Customer",
+    quote:
+      "Ordered the organic chips for my kids and they finished the pack in a day. Good to finally find snacks without artificial colours.",
+  },
+];
+
+interface CustomerVoicesProps {
+  /** Social profile URLs from shop settings; tiles stay visible without them. */
+  social?: Record<string, string | undefined>;
+}
+
+export default function CustomerVoices({ social = {} }: CustomerVoicesProps) {
+  const [swiper, setSwiper] = useState<SwiperClass | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const socials = [
+    { label: "Facebook", href: social.facebook, icon: <FaFacebookF size={13} /> },
+    { label: "Instagram", href: social.instagram, icon: <FaInstagram size={13} /> },
+    { label: "Youtube", href: social.youtube, icon: <FaYoutube size={13} /> },
+    { label: "X-Twitter", href: social.twitter, icon: <FaXTwitter size={13} /> },
+  ];
+
+  // Two cards per view on desktop, so the dots step in pairs.
+  const pageCount = Math.max(1, Math.ceil(TESTIMONIALS.length / 2));
+
+  return (
+    <section className="bg-[#f4f7ee] py-14 lg:py-16">
+      <div className="mx-auto grid max-w-[1600px] gap-10 px-4 md:px-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-12">
+        {/* ── Testimonials ────────────────────────────────────────────── */}
+        <div>
+          <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
+            What Customer Say About Us
+          </h2>
+
+          <div className="mt-7">
+            <Swiper
+              onSwiper={setSwiper}
+              onSlideChange={(instance) => setActiveIndex(instance.activeIndex)}
+              spaceBetween={24}
+              breakpoints={{ 0: { slidesPerView: 1 }, 768: { slidesPerView: 2 } }}
+            >
+              {TESTIMONIALS.map((testimonial) => (
+                <SwiperSlide key={testimonial.name} className="h-auto">
+                  <figure className="h-full rounded-md bg-white p-6">
+                    <figcaption className="flex items-center gap-3">
+                      <span className="font-display flex h-12 w-12 items-center justify-center rounded-md bg-[#4a9e2f]/10 text-lg text-[#4a9e2f]">
+                        {testimonial.name.charAt(0)}
+                      </span>
+                      <span>
+                        <span className="font-display block text-[15px] font-semibold text-[#1f2a17]">
+                          {testimonial.name}
+                        </span>
+                        <span className="block text-[13px] text-gray-500">{testimonial.role}</span>
+                      </span>
+                    </figcaption>
+                    <blockquote className="mt-4 text-[14px] leading-relaxed text-gray-600">
+                      {testimonial.quote}
+                    </blockquote>
+                  </figure>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+
+          <div className="mt-8 flex justify-center gap-1.5">
+            {Array.from({ length: pageCount }, (_, page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => swiper?.slideTo(page * 2)}
+                aria-label={`Go to testimonial page ${page + 1}`}
+                className={`h-[3px] rounded-full transition-all ${
+                  Math.floor(activeIndex / 2) === page
+                    ? "w-9 bg-[#4a9e2f]"
+                    : "w-7 bg-gray-300 hover:bg-gray-400"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* ── Social ──────────────────────────────────────────────────── */}
+        <div>
+          <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
+            Follow Us On
+          </h2>
+
+          <div className="mt-7 grid grid-cols-2 gap-5">
+            {socials.map((item) => {
+              const content = (
+                <>
+                  <span className="flex h-7 w-7 items-center justify-center rounded border border-[#4a9e2f]/30 text-[#4a9e2f]">
+                    {item.icon}
+                  </span>
+                  <span className="font-display text-[16px] text-[#4a9e2f]">{item.label}</span>
+                </>
+              );
+
+              const className =
+                "flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow";
+
+              return item.href ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className={`${className} hover:shadow-md`}
+                >
+                  {content}
+                </a>
+              ) : (
+                <div key={item.label} className={className}>
+                  {content}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
