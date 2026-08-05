@@ -67,26 +67,26 @@ function ProfilePageContent() {
   return (
     <div className="relative min-h-[calc(100vh-140px)] bg-white flex flex-col justify-between">
       {!isAuthenticated ? (
-        <main className="min-h-[70vh] flex items-center justify-center bg-[#FAF9F5] px-4 py-16">
+        <main className="min-h-[70vh] flex items-center justify-center bg-[#f4f7ee] px-4 py-16">
           {loading ? (
-            <FiLoader className="w-8 h-8 text-[#C5B382] animate-spin" />
+            <FiLoader className="w-8 h-8 text-[#4a9e2f] animate-spin" />
           ) : (
-            <div className="flex flex-col items-center gap-5 text-center max-w-md mx-auto animate-fadeIn">
-              <div className="w-16 h-16 rounded-full bg-[#C5B382]/15 flex items-center justify-center text-[#C5B382] mb-1">
+            <div className="flex flex-col items-center gap-5 text-center max-w-md mx-auto bg-white p-8 sm:p-10 rounded-2xl border border-[#4a9e2f]/20 shadow-lg">
+              <div className="w-16 h-16 rounded-full bg-[#4a9e2f]/10 flex items-center justify-center text-[#4a9e2f] mb-1">
                 <FiUser className="w-8 h-8" />
               </div>
               <div>
-                <h1 className="font-['Bembo_Std'] text-3xl font-normal text-zinc-900 tracking-wide">
+                <h1 className="font-display text-3xl font-bold text-[#1f2a17] tracking-tight">
                   Sign in to your account
                 </h1>
-                <p className="mt-2 font-sans text-xs sm:text-sm text-zinc-500 leading-relaxed">
+                <p className="mt-2 font-inter text-xs sm:text-sm text-stone-600 leading-relaxed">
                   Please sign in to view your profile details, order history, address book and wishlist.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAuthModal(true)}
-                className="bg-zinc-900 hover:bg-stone-800 text-white font-sans text-xs font-bold tracking-[0.18em] uppercase py-4 px-10 rounded-full shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                className="bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-xs font-bold tracking-[0.18em] uppercase py-4 px-10 rounded-full shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
               >
                 Sign In
               </button>
@@ -96,21 +96,21 @@ function ProfilePageContent() {
       ) : (
         <div className="relative w-full flex-1 flex flex-col bg-white min-h-[calc(100vh-140px)]">
           <div
-            className="absolute inset-y-0 left-0 hidden lg:block bg-[#F7F6F2] border-r border-stone-200/80 pointer-events-none z-0"
+            className="absolute inset-y-0 left-0 hidden lg:block bg-[#f4f7ee] border-r border-stone-200/80 pointer-events-none z-0"
             style={{ width: "calc(50vw - min(100vw, 1400px) * 0.25 + 16px)" }}
           />
 
           <div className="relative max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 z-10 flex-1 flex flex-col">
             <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch flex-1 gap-8 lg:gap-0">
               
-              <aside className="lg:col-span-3 bg-[#F7F6F2] lg:bg-transparent p-4 sm:p-6 lg:py-12 lg:px-0 rounded-2xl lg:rounded-none border border-stone-200/80 lg:border-none shadow-xs lg:shadow-none pr-0 lg:pr-8 flex flex-col justify-between w-full lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-140px)] lg:max-h-[580px]">
+              <aside className="lg:col-span-3 bg-[#f4f7ee] lg:bg-transparent p-4 sm:p-6 lg:py-12 lg:px-0 rounded-2xl lg:rounded-none border border-stone-200/80 lg:border-none shadow-xs lg:shadow-none pr-0 lg:pr-8 flex flex-col justify-between w-full lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-140px)] lg:max-h-[580px]">
                 <div className="w-full">
-                  <h1 className="font-['Bembo_Std'] text-2xl sm:text-3xl lg:text-4xl font-normal text-zinc-900 tracking-wide mb-4 lg:mb-8 text-center lg:text-left">
+                  <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1f2a17] tracking-tight mb-4 lg:mb-8 text-center lg:text-left">
                     Profile
                   </h1>
                   
                   <nav 
-                    className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 gap-1.5 lg:space-y-1.5 lg:gap-0 snap-x snap-mandatory font-sans"
+                    className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 gap-1.5 lg:space-y-1.5 lg:gap-0 snap-x snap-mandatory font-gotham"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                     aria-label="Profile navigation"
                   >
@@ -134,22 +134,22 @@ function ProfilePageContent() {
                           setActiveTab(item.key as ProfileTab);
                           window.history.pushState(null, "", `/profile?tab=${item.key}`);
                         }}
-                        className={`group flex items-center justify-between px-4 sm:px-5 py-3 rounded-xl transition-all duration-200 text-[11px] sm:text-xs tracking-[0.14em] font-semibold cursor-pointer shrink-0 snap-start text-left focus-outline-none focus-visible:ring-2 focus-visible:ring-[#C5B382] focus-visible:ring-offset-1 ${
+                        className={`group flex items-center justify-between px-4 sm:px-5 py-3 rounded-xl transition-all duration-200 text-[11px] sm:text-xs tracking-[0.14em] font-semibold cursor-pointer shrink-0 snap-start text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4a9e2f] focus-visible:ring-offset-1 ${
                           item.isLogout
                             ? "text-red-500 hover:bg-red-50 lg:hidden"
                             : activeTab === item.key
-                            ? "bg-[#C5B382] text-zinc-950 font-bold shadow-xs scale-[1.01]"
-                            : "text-zinc-650 hover:bg-stone-200/50 hover:text-zinc-950"
+                            ? "bg-[#4a9e2f] text-white font-bold shadow-md scale-[1.01]"
+                            : "text-stone-700 hover:bg-white/80 hover:text-[#1f2a17]"
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <span className={`text-sm sm:text-base transition-colors ${activeTab === item.key ? "text-zinc-950" : "text-stone-500 group-hover:text-zinc-900"}`}>
+                          <span className={`text-sm sm:text-base transition-colors ${activeTab === item.key ? "text-white" : "text-stone-500 group-hover:text-[#4a9e2f]"}`}>
                             {item.icon}
                           </span>
                           <span>{item.label}</span>
                         </div>
                         {item.badge && !item.isLogout && (
-                          <span className="w-2 h-2 rounded-full bg-[#C5B382] ml-2 shrink-0 animate-pulse" />
+                          <span className={`w-2 h-2 rounded-full ml-2 shrink-0 animate-pulse ${activeTab === item.key ? "bg-white" : "bg-[#4a9e2f]"}`} />
                         )}
                       </button>
                     ))}

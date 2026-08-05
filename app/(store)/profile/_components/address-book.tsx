@@ -7,11 +7,11 @@ import { getCustomerToken } from "@/lib/storefront-api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-400";
-const FIELD_LABEL   = "block text-[10px] font-bold tracking-[0.14em] uppercase text-zinc-400 mb-1.5";
-const INPUT_BASE    = "w-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-sans text-zinc-800 outline-none transition focus:border-stone-400 rounded-lg placeholder:text-zinc-300";
-const BTN_PRIMARY   = "inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-stone-800 text-white font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-8 py-3 rounded-full transition cursor-pointer shadow-sm disabled:opacity-50";
-const BTN_GHOST     = "inline-flex items-center justify-center gap-2 bg-white hover:bg-stone-50 border border-stone-200 text-zinc-600 font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-8 py-3 rounded-full transition cursor-pointer disabled:opacity-50";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
+const FIELD_LABEL   = "block text-[10px] font-bold tracking-[0.14em] uppercase text-stone-600 mb-1.5";
+const INPUT_BASE    = "w-full border border-stone-200 bg-white px-4 py-2.5 text-sm font-sans text-zinc-800 outline-none transition focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] rounded-lg placeholder:text-zinc-300";
+const BTN_PRIMARY   = "inline-flex items-center justify-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-8 py-3 rounded-full transition cursor-pointer shadow-md disabled:opacity-50";
+const BTN_GHOST     = "inline-flex items-center justify-center gap-2 bg-white hover:bg-stone-50 border border-stone-200 text-zinc-600 font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-8 py-3 rounded-full transition cursor-pointer disabled:opacity-50";
 
 interface Address {
   id: string;
@@ -129,7 +129,7 @@ export default function AddressBookView() {
         </div>
         <button
           onClick={openNew}
-          className="shrink-0 inline-flex items-center gap-2 border border-stone-200 hover:border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white text-zinc-700 font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-5 py-2.5 rounded-full transition cursor-pointer"
+          className="shrink-0 inline-flex items-center gap-2 border border-[#4a9e2f] text-[#4a9e2f] hover:bg-[#4a9e2f] hover:text-white font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-5 py-2.5 rounded-full transition cursor-pointer shadow-xs"
         >
           <FiPlus className="text-xs" /> Add New
         </button>
@@ -138,7 +138,7 @@ export default function AddressBookView() {
       {/* ── List ────────────────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <FiLoader className="w-7 h-7 text-[#C5B382] animate-spin" />
+          <FiLoader className="w-7 h-7 text-[#4a9e2f] animate-spin" />
         </div>
       ) : addresses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 border border-dashed border-stone-200 rounded-xl">
@@ -146,7 +146,7 @@ export default function AddressBookView() {
           <p className="font-['Bembo_Std'] text-zinc-400 text-base italic">No saved addresses yet.</p>
           <button
             onClick={openNew}
-            className="mt-4 font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-[#C5B382] hover:text-zinc-800 transition cursor-pointer"
+            className="mt-4 font-gotham text-[10px] font-bold tracking-[0.16em] uppercase text-[#4a9e2f] hover:text-[#3d8626] transition cursor-pointer"
           >
             + Add your first address
           </button>
@@ -159,7 +159,7 @@ export default function AddressBookView() {
               className="relative border border-stone-200 bg-white rounded-xl p-5 flex flex-col justify-between gap-4 hover:border-stone-300 hover:shadow-sm transition-all duration-200"
             >
               {addr.isDefault && (
-                <span className="absolute top-4 right-4 bg-[#C5B382]/10 border border-[#C5B382]/30 text-[#8a7440] font-sans text-[9px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full">
+                <span className="absolute top-4 right-4 bg-[#4a9e2f]/10 border border-[#4a9e2f]/30 text-[#4a9e2f] font-gotham text-[9px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full">
                   Default
                 </span>
               )}

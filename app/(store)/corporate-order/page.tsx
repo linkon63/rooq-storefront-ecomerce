@@ -7,8 +7,8 @@ import ScrollAnimate from '@/components/ui/scroll-animate';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Corporate Orders | London Tea Exchange',
-  description: 'Curated tea experiences, corporate gifting, and bespoke tea collections for distinguished organizations.',
+  title: 'Corporate Orders | Organishi',
+  description: 'Curated organic gifts, corporate packages, and bespoke organic collections for distinguished organizations.',
 };
 
 export default function CorporateOrderPage() {

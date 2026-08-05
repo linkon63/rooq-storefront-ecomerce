@@ -24,13 +24,13 @@ export default function Quality() {
             </h2>
             
             <p className="mx-auto mt-6 font-['Gotham'] text-sm leading-6 md:text-lg font-normal">
-                We follow a strict clean confidentiality policy governing the use of client information. London Tea Exchange is{" "}
-                <span className="font-['Snell_Roundhand_LT_Std'] italic font-">registered with the Information Commissioners Office and abides by the Data Protection Act 1998</span>{" "}
+                We follow a strict clean confidentiality policy governing the use of client information. Organishi is{" "}
+                <span className="font-['Snell_Roundhand_LT_Std'] italic font-">registered with relevant regulatory bodies and abides by strict organic quality standards</span>{" "}
                 and all subsequent codes of conduct entailed therein.
             </p>
             
             <p className="mx-auto mt-4 font-['Gotham'] text-xs text-zinc-500">
-                London Tea Exchange is already a member of the
+                Organishi is committed to quality certification from recognized authorities:
             </p>
             </div>
             {/* Certification Logos */}

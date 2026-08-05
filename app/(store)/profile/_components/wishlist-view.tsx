@@ -7,7 +7,7 @@ import { useCart } from "@/app/_providers/cart-provider";
 import { toast } from "sonner";
 import ResolvedImage from "./image-resolver";
 
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-400";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
 
 export default function WishlistView() {
   const { items, toggleWishlist } = useWishlist();
@@ -59,7 +59,7 @@ export default function WishlistView() {
           </p>
           <Link
             href="/products"
-            className="mt-5 font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-[#C5B382] hover:text-zinc-800 transition"
+            className="mt-5 font-gotham text-[10px] font-bold tracking-[0.16em] uppercase text-[#4a9e2f] hover:text-[#3d8626] transition"
           >
             Explore Products →
           </Link>
@@ -83,7 +83,7 @@ export default function WishlistView() {
               {/* Info */}
               <div className="flex-grow min-w-0">
                 <Link href={`/products/${item.id}`} className="group/name">
-                  <p className="font-sans font-bold text-xs uppercase tracking-wider text-zinc-800 truncate group-hover/name:text-[#C5B382] transition-colors">
+                  <p className="font-sans font-bold text-xs uppercase tracking-wider text-zinc-800 truncate group-hover/name:text-[#4a9e2f] transition-colors">
                     {item.name}
                   </p>
                 </Link>
@@ -96,7 +96,7 @@ export default function WishlistView() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleAddToCart(item)}
-                  className="inline-flex items-center gap-2 bg-[#1A1A1A] hover:bg-stone-800 text-white font-sans text-[10px] font-bold tracking-[0.14em] uppercase px-5 py-2.5 rounded-full transition cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-[10px] font-bold tracking-[0.14em] uppercase px-5 py-2.5 rounded-full transition cursor-pointer shadow-md"
                   title="Add to cart"
                 >
                   <FiShoppingCart className="text-xs" />

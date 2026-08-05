@@ -36,12 +36,9 @@ export default function Sustainable() {
           </h3>
 
           <p className="mt-8 max-w-4xl font-['Bembo_Std'] text-sm leading-6 md:text-lg">
-            London Tea Exchange has spent the past two decades building a
-            sustainable and ethical sourcing supply chain. We visit each and every
-            estate that we purchase teas from to ensure due diligence is carried
-            out. We have developed and led the Fair Pay campaign, which this year
-            will be formally recognised by the United Nations and will be turned
-            into a international campaign.
+            Organishi is dedicated to building a sustainable and ethical sourcing
+            supply chain. We work directly with local organic farms and producers
+            to ensure due diligence, fair trade practices, and uncompromised organic purity.
           </p>
         </div>
       </div>

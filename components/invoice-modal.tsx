@@ -6,11 +6,11 @@ import { LuPrinter, LuX } from "react-icons/lu";
 import type { OrderResult } from "@/lib/types";
 
 const COMPANY = {
-  name: "London Tea Exchange",
-  logo: "/images/logo/Logo-update.png",
-  addressLine: "Room H-125A, Pan Pacific Sonargaon Hotel, 107 Kazi Nazrul Islam Avenue, Dhaka-1215, Bangladesh",
-  phone: "+880 13 3987 9494",
-  email: "store@londonteaexchangebd.com",
+  name: "Organishi",
+  logo: "/assets/Logo-English.png",
+  addressLine: "Dhaka, Bangladesh",
+  phone: "+880 1811 000111",
+  email: "support@organishi.com",
 };
 
 const currency = (n: number) =>
@@ -106,7 +106,7 @@ export default function InvoiceModal({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => window.print()}
-                className="px-5 py-2.5 bg-[#D31F3A] text-white font-sans text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#B91A32] transition-colors flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 bg-[#4a9e2f] text-white font-sans text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
               >
                 <LuPrinter className="w-4 h-4" />
                 Print

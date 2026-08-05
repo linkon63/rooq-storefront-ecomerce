@@ -212,20 +212,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between px-5 py-5">
             <Link className="block" href="/admin/dashboard">
-              {settings?.logo ? (
-                <Image
-                  src={resolveImageUrl(settings.logo)}
-                  alt={settings.shopName ?? "NeoComerz"}
-                  width={280}
-                  height={80}
-                  className="max-h-20 w-auto object-contain items-center justify-center"
-                  unoptimized
-                />
-              ) : (
-                <span className="text-5xl font-black italic tracking-tight">
-                  NeoComerz
-                </span>
-              )}
+              <Image
+                src={settings?.logo ? resolveImageUrl(settings.logo) : "/assets/Logo-English.png"}
+                alt={settings?.shopName ?? "Organishi"}
+                width={200}
+                height={60}
+                className="max-h-14 w-auto object-contain"
+                unoptimized
+              />
             </Link>
           </div>
           <nav className="flex-1 overflow-y-auto px-3 pb-6 pt-5">

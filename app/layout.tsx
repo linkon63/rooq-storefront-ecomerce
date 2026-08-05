@@ -70,6 +70,11 @@ export const metadata: Metadata = {
   title: "Organishi — Pure Organic Food, Straight From the Farm",
   description:
     "Cold pressed mustard oil, virgin coconut oil, hand-churned ghee, raw honey and organic snacks — sourced directly from farmers and delivered across Bangladesh.",
+  icons: {
+    icon: "/assets/Logo-English.png",
+    shortcut: "/assets/Logo-English.png",
+    apple: "/assets/Logo-English.png",
+  },
 };
 
 export default function RootLayout({

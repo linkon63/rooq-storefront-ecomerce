@@ -37,9 +37,8 @@ export default function CheckoutPage() {
     fullName: user?.name || "",
   }));
   const [useSameAddressForShipping, setUseSameAddressForShipping] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("cod");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [orderNote, setOrderNote] = useState("");
   const [mapPickerOpen, setMapPickerOpen] = useState(false);
 
   const handleMapSelect = useCallback(
@@ -79,7 +78,6 @@ export default function CheckoutPage() {
     try {
       const result = await placeOrder(address, {
         paymentMethod,
-        orderNote: orderNote || undefined,
       });
       sessionStorage.setItem("orderResult", JSON.stringify(result));
       router.push("/confirmation");
@@ -262,27 +260,43 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Order Note (outside dashed box) */}
-              <div className="mt-8">
-                <label className="block font-gotham text-base sm:text-lg text-[#222222] mb-2">
-                  Order note (Optional)
-                </label>
-                <textarea
-                  value={orderNote}
-                  onChange={(e) => setOrderNote(e.target.value)}
-                  rows={4}
-                  className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500 resize-none"
-                  placeholder="Write here ..."
-                  style={{ height: "100px" }}
-                />
-              </div>
             </div>
 
             {/* ── Right Column: Summary & Payment ── */}
             <div className="w-full lg:w-96">
-              <h2 className="font-bembo text-3xl sm:text-4xl text-[#4A4A4A] font-normal mb-6">
+              <h2 className="font-bembo text-3xl sm:text-4xl text-[#4A4A4A] font-normal mb-4">
                 Summary
               </h2>
+
+              {/* Product Items List */}
+              {items.length > 0 && (
+                <div className="mb-6 border border-zinc-200 rounded-lg p-3 bg-stone-50/50 space-y-3 max-h-64 overflow-y-auto">
+                  <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] font-semibold border-b border-zinc-200 pb-2">
+                    Items in Order ({items.reduce((acc, i) => acc + i.quantity, 0)})
+                  </p>
+                  {items.map((item) => (
+                    <div key={item.slug ?? item.productId} className="flex items-center gap-3 py-1.5 border-b border-zinc-100 last:border-b-0">
+                      <div className="relative w-12 h-12 shrink-0 rounded bg-white overflow-hidden border border-zinc-200">
+                        {item.image ? (
+                          <Image src={item.image} alt={item.name} fill className="object-cover" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-[9px] text-stone-400">No img</div>
+                        )}
+                        <span className="absolute top-0 right-0 bg-[#4a9e2f] text-white text-[9px] font-bold w-4 h-4 rounded-bl flex items-center justify-center">
+                          {item.quantity}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-gotham text-xs font-semibold text-[#222222] truncate">{item.name}</p>
+                        <p className="font-gotham text-[11px] text-zinc-500">Qty: {item.quantity} × {formatCurrency(item.price)}</p>
+                      </div>
+                      <div className="font-gotham text-xs font-bold text-[#222222] shrink-0">
+                        {formatCurrency(item.price * item.quantity)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Pricing Rows */}
               <div className="space-y-5">
@@ -319,72 +333,31 @@ export default function CheckoutPage() {
                 <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] mb-1">
                   Payment Method
                 </p>
-                <p className="font-gotham text-lg text-[#222222] mb-4">
-                  All transactions are secure and encrypted.
+                <p className="font-gotham text-sm text-[#555555] mb-4">
+                  Pay securely with cash upon delivery.
                 </p>
 
                 <div className="space-y-3">
-                  {/* Online Payment */}
-                  <label className={`flex items-start gap-3 p-4 border rounded-md cursor-pointer transition-colors hover:border-stone-400 ${paymentMethod === "online" ? "border-[#A3926B]" : "border-[#D1D5DB]"}`}>
-                    <div className="mt-0.5 shrink-0">
-                      {paymentMethod === "online" ? (
-                        <div className="w-5 h-5 rounded-full bg-[#A3926B] flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full border border-zinc-300" />
-                      )}
-                    </div>
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="online"
-                      checked={paymentMethod === "online"}
-                      onChange={(e) => setPaymentMethod(e.target.value as "online" | "cod")}
-                      className="sr-only"
-                    />
-                    <div className="flex-1">
-                      <p className="font-gotham text-base font-medium text-[#222222]">Online Payment</p>
-                      <p className="font-gotham text-sm text-[#999999] mt-1">
-                        After clicking &quot;Place Order&quot;, you will be redirected to online payment to complete your purchase securely.
-                      </p>
-                      <div className="mt-3">
-                        <Image
-                          src="/images/payment/all-payment.jpg"
-                          alt="Payment methods"
-                          width={280}
-                          height={40}
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-                  </label>
-
                   {/* Cash on Delivery */}
-                  <label className={`flex items-start gap-3 p-4 border rounded-md cursor-pointer transition-colors hover:border-stone-400 ${paymentMethod === "cod" ? "border-[#A3926B]" : "border-[#D1D5DB]"}`}>
+                  <label className="flex items-start gap-3 p-4 border rounded-md cursor-pointer transition-colors border-[#4a9e2f] bg-[#f4f7ee]/30">
                     <div className="mt-0.5 shrink-0">
-                      {paymentMethod === "cod" ? (
-                        <div className="w-5 h-5 rounded-full bg-[#A3926B] flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full border border-zinc-300" />
-                      )}
+                      <div className="w-5 h-5 rounded-full bg-[#4a9e2f] flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
                     </div>
                     <input
                       type="radio"
                       name="payment"
                       value="cod"
-                      checked={paymentMethod === "cod"}
-                      onChange={(e) => setPaymentMethod(e.target.value as "online" | "cod")}
+                      checked={true}
+                      readOnly
                       className="sr-only"
                     />
                     <div className="flex-1">
                       <p className="font-gotham text-base font-medium text-[#222222]">Cash on delivery</p>
+                      <p className="font-gotham text-xs text-[#777777] mt-0.5">Pay with cash when your package arrives.</p>
                     </div>
                   </label>
                 </div>
@@ -404,7 +377,7 @@ export default function CheckoutPage() {
                   />
                   <label
                     htmlFor="terms"
-                    className="w-5 h-5 border border-zinc-400 rounded cursor-pointer flex items-center justify-center peer-checked:bg-[#A3926B] peer-checked:border-[#A3926B] transition-colors"
+                    className="w-5 h-5 border border-zinc-400 rounded cursor-pointer flex items-center justify-center peer-checked:bg-[#4a9e2f] peer-checked:border-[#4a9e2f] transition-colors"
                   >
                     {agreeToTerms && (
                       <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -414,11 +387,8 @@ export default function CheckoutPage() {
                   </label>
                 </div>
                 <label htmlFor="terms" className="font-gotham text-sm text-[#222222] cursor-pointer select-none">
-                  I have read and agree to the{" "}
-                  <Link href="/terms" className="underline hover:text-stone-600">
-                    terms and conditions
-                  </Link>
-                  <span className="text-[#A3926B]"> *</span>
+                  I have read and agree to the terms and conditions
+                  <span className="text-[#4a9e2f]"> *</span>
                 </label>
               </div>
 
@@ -428,7 +398,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={submitting || !agreeToTerms}
-                className="w-full py-4 bg-[#BD2A36] text-white font-gotham text-base font-bold uppercase tracking-wider rounded-full hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 bg-[#4a9e2f] text-white font-gotham text-base font-bold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-md"
               >
                 {submitting && <LuLoader className="w-5 h-5 animate-spin" />}
                 {submitting ? "PLACING ORDER..." : "PLACE ORDER"}

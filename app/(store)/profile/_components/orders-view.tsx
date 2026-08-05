@@ -7,7 +7,7 @@ import ResolvedImage from "./image-resolver";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-400";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
 
 interface OrderItem {
   id: string;
@@ -109,7 +109,7 @@ export default function OrdersView() {
       {/* ── List ────────────────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <FiLoader className="w-7 h-7 text-[#C5B382] animate-spin" />
+          <FiLoader className="w-7 h-7 text-[#4a9e2f] animate-spin" />
         </div>
       ) : orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 border border-dashed border-stone-200 rounded-xl">

@@ -17,15 +17,14 @@ export default function TheBrands() {
               </h2>
               
               <p className="mt-6 font-['Bembo_Std'] text-lg font-normal leading-6">
-                London Tea Exchange succeeds <span className="italic">one of the oldest companies in the United Kingdom</span>. For over 
-                two decades, the brand has evolved and carved an enviable niche in the international luxury tea 
-                market. For it is here that luxury is experienced through the richness of purity and authenticity, 
-                discovered in the beauty of artistry and delivered with an intuitive response to personal 
-                expectation and taste.
+                Organishi offers pure, fresh, and high-quality organic food products sourced directly from farms. For over 
+                two decades, the brand has evolved and carved an enviable niche in the natural food 
+                market. Here, quality is experienced through the richness of purity and authenticity, 
+                discovered in the beauty of nature and delivered with care.
               </p>
               
               <p className="mt-4 font-['Bembo_Std'] text-lg font-normal">
-                No one delivers that kind of tea experience quite like London Tea Exchange.
+                No one delivers that kind of organic experience quite like Organishi.
               </p>
 
               {/* Two Small Images with Our Promise */}
@@ -73,20 +72,16 @@ export default function TheBrands() {
           <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
             <div>
               <p className="font-['Bembo_Std'] text-lg font-normal leading-6">
-                London Tea Exchange presents an exceptional prospect to build on the brand and succeed in 
-                maintaining a global presence. Serving an untapped market for luxury tea, London Tea Exchange will 
-                dominate the competitive landscape with a cost-efficient model that offers a 
-                healthy return to partners.
+                Organishi presents an exceptional prospect to build on the brand and succeed in 
+                maintaining a trusted presence. Serving a growing market for organic food, Organishi 
+                delivers direct farm-to-table products with transparency and quality.
               </p>
             </div>
             <div>
               <p className="font-['Bembo_Std'] text-lg font-normal leading-6">
-                London Tea Exchange offers a kind of luxury and depth of flavours and rarity; where 
-                less is more; simplicity speaks volumes and classic will have the choice they need or 
-                desire. The brand has tremendous momentum as it expands into major gateway cities, 
-                fashion districts and affluent neighbourhoods around the world. Uniquely throughout the world. 
-                For not only is London Tea Exchange poised for phenomenal growth and 
-                opportunity; it is poised for greatness and distinction.
+                Organishi offers a kind of purity and depth of flavor where 
+                simplicity speaks volumes and customers get the authentic quality they desire. 
+                For Organishi is poised for growth and distinction in healthy living.
               </p>
             </div>
           </div>

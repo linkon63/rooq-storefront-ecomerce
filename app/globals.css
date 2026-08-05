@@ -24,6 +24,8 @@
   --color-brand-dark: #3d8626;
   --color-brand-ink: #1f2a17;
   --color-brand-mist: #f4f7ee;
+  --color-brand-primary: #4a9e2f;
+  --color-brand-3: #4a9e2f;
 
   /* Admin typography — referenced by font-gotham / font-bembo in app/admin */
   --font-bembo: var(--font-bembo);

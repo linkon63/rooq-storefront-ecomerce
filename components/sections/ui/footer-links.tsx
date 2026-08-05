@@ -3,13 +3,10 @@ import { IoLocationOutline } from "react-icons/io5";
 
 export default function FooterLinks() {
   const footerLinks = [
-    { label: "Policies and rules", href: "/policies" },
-    { label: "Legal Notice", href: "/legal" },
-    { label: "Product Listing Policy", href: "/product-policy" },
-    { label: "Intellectual Property Protection", href: "/ip-protection" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Use", href: "/terms" },
-    { label: "Integrity Compliance", href: "/compliance" },
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/products" },
+    { label: "Delivery", href: "/delivery" },
+    { label: "Contact Us", href: "/contact" },
   ];
 
   return (
@@ -47,7 +44,7 @@ export default function FooterLinks() {
         {/* Copyright Row */}
         <div className="text-center">
           <p className="font-['Gotham'] text-white text-xs">
-            © {new Date().getFullYear()} London Tea Exchange. All rights reserved.
+            © {new Date().getFullYear()} Organishi. All rights reserved.
           </p>
         </div>
       </div>

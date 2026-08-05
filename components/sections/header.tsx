@@ -22,7 +22,6 @@ const sylhetiTeaItems = [
 
 const navItems = [
   { label: "Home", href: "/" },
-  { label: "ABOUT US", href: "/about" },
   { label: "TEAS", href: "/products", hasDropdown: true },
   { label: "GIFT SETS", href: "/gift-sets" },
   { label: "CORPORATE ORDER", href: "/corporate-order" },
@@ -400,11 +399,11 @@ export default function Header() {
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-auto"
         >
           <Image
-            src="/images/logo/Logo-update.png"
-            alt="London Tea Exchange"
-            width={56}
-            height={56}
-            className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+            src="/assets/Logo-English.png"
+            alt="Organishi"
+            width={160}
+            height={48}
+            className="w-28 sm:w-36 h-auto object-contain"
             priority
           />
         </Link>

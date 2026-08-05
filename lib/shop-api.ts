@@ -14,6 +14,7 @@ export type ShopProduct = {
   price: number;
   originalPrice?: number;
   image: string;
+  variantId?: string;
 };
 
 export type FetchShopProductsParams = {
@@ -128,6 +129,7 @@ function mapProduct(product: AdminProduct): ShopProduct {
     price: showOriginal ? discountPrice : priceNum,
     originalPrice: showOriginal ? priceNum : (costNum > priceNum ? costNum : undefined),
     image: resolveImageUrl(rawImage),
+    variantId: defaultVariant?.id,
   };
 }
 

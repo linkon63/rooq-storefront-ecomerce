@@ -32,7 +32,7 @@ export default function TrustFeatures() {
             Why Choose
           </div>
           <div className="text-center justify-start text-neutral-800 text-5xl sm:text-6xl font-normal font-['Snell_Roundhand_LT_Std'] leading-[56px]">
-            London Tea Exchange
+            Organishi
           </div>
         </div>
 

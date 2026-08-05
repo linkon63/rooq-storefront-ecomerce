@@ -58,8 +58,8 @@ export default function NobleBalance() {
           {/* Button */}
           <div className="pt-4">
             <Button 
-              href="/about" 
-              label="KNOW MORE"
+              href="/shop" 
+              label="DISCOVER MORE"
               variant="primary"
             />
           </div>

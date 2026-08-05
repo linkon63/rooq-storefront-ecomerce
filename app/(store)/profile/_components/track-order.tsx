@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-400";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
 
 interface Order {
   id: string;
@@ -84,14 +84,15 @@ export default function TrackOrderView() {
             value={invoiceId}
             onChange={(e) => setInvoiceId(e.target.value)}
             placeholder="Enter Invoice ID or Order Number"
-            className="w-full pl-10 pr-4 py-3 border border-stone-200 bg-white text-sm font-sans text-zinc-800 outline-none focus:border-stone-400 transition rounded-xl placeholder:text-zinc-300"
+            className="w-full pl-10 pr-4 py-3 border border-stone-200 bg-white text-sm font-sans text-zinc-800 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition rounded-xl placeholder:text-zinc-300"
             required
           />
         </div>
         <button
-          type="submit"
+          type="button"
+          onClick={handleTrack as any}
           disabled={loading}
-          className="shrink-0 inline-flex items-center gap-2 bg-[#1A1A1A] hover:bg-stone-800 text-white font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-7 py-3 rounded-xl transition cursor-pointer shadow-sm disabled:opacity-60"
+          className="shrink-0 inline-flex items-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-7 py-3 rounded-xl transition cursor-pointer shadow-md disabled:opacity-60"
         >
           {loading ? <FiLoader className="animate-spin w-3.5 h-3.5" /> : "Track"}
         </button>
@@ -129,7 +130,7 @@ export default function TrackOrderView() {
               {/* Progress tracker */}
               {!isCancelled ? (
                 <div>
-                  <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-400 mb-7">
+                  <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f] mb-7">
                     Delivery Progress
                   </p>
 
@@ -151,8 +152,8 @@ export default function TrackOrderView() {
                           <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
                             isActive
                               ? isCurrent
-                                ? "bg-[#C5B382] border-[#C5B382] text-white shadow-md shadow-[#C5B382]/30 scale-110"
-                                : "bg-[#C5B382] border-[#C5B382] text-white"
+                                ? "bg-[#4a9e2f] border-[#4a9e2f] text-white shadow-md shadow-[#4a9e2f]/30 scale-110"
+                                : "bg-[#4a9e2f] border-[#4a9e2f] text-white"
                               : "bg-white border-stone-200 text-stone-300"
                           }`}>
                             <Icon className="text-sm" />
@@ -163,7 +164,7 @@ export default function TrackOrderView() {
                             {step.label}
                           </p>
                           {isCurrent && (
-                            <span className="font-sans text-[9px] text-[#C5B382] font-bold tracking-wider uppercase">
+                            <span className="font-sans text-[9px] text-[#4a9e2f] font-bold tracking-wider uppercase">
                               Current
                             </span>
                           )}

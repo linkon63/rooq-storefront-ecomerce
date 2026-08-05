@@ -11,7 +11,7 @@ import {
   type CustomerNotification,
 } from "@/lib/storefront-api";
 
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-400";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
 
 export default function NotificationsView() {
   const [notifications, setNotifications] = useState<CustomerNotification[]>([]);
@@ -60,7 +60,7 @@ export default function NotificationsView() {
           <h2 className="font-['Bembo_Std'] text-2xl text-zinc-850 font-normal mt-1 flex items-baseline gap-3">
             Notifications
             {!loading && unreadCount > 0 && (
-              <span className="font-sans text-xs font-bold bg-[#C5B382] text-white rounded-full px-2 py-0.5 leading-none">
+              <span className="font-gotham text-xs font-bold bg-[#4a9e2f] text-white rounded-full px-2 py-0.5 leading-none">
                 {unreadCount}
               </span>
             )}
@@ -72,7 +72,7 @@ export default function NotificationsView() {
         {!loading && hasUnread && (
           <button
             onClick={handleMarkAllRead}
-            className="shrink-0 inline-flex items-center gap-1.5 font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-[#C5B382] hover:text-zinc-800 transition cursor-pointer"
+            className="shrink-0 inline-flex items-center gap-1.5 font-gotham text-[10px] font-bold tracking-[0.16em] uppercase text-[#4a9e2f] hover:text-[#3d8626] transition cursor-pointer"
           >
             <FiCheck className="text-xs" /> Mark all read
           </button>
@@ -82,7 +82,7 @@ export default function NotificationsView() {
       {/* ── Content ─────────────────────────────────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <FiLoader className="w-7 h-7 text-[#C5B382] animate-spin" />
+          <FiLoader className="w-7 h-7 text-[#4a9e2f] animate-spin" />
         </div>
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 border border-dashed border-stone-200 rounded-xl">
@@ -107,12 +107,12 @@ export default function NotificationsView() {
                 className={`group relative flex gap-4 px-5 py-4 rounded-xl border transition-all duration-200 ${
                   notif.isRead
                     ? "border-stone-100 bg-white hover:bg-stone-50/60"
-                    : "border-[#C5B382]/20 bg-[#C5B382]/[0.03] hover:bg-[#C5B382]/[0.05]"
+                    : "border-[#4a9e2f]/20 bg-[#4a9e2f]/[0.03] hover:bg-[#4a9e2f]/[0.05]"
                 }`}
               >
                 {/* Icon */}
                 <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center mt-0.5 ${
-                  notif.isRead ? "bg-stone-100 text-zinc-400" : "bg-[#C5B382]/15 text-[#8a7440]"
+                  notif.isRead ? "bg-stone-100 text-zinc-400" : "bg-[#4a9e2f]/15 text-[#4a9e2f]"
                 }`}>
                   {isOrder ? <FiPackage className="text-sm" /> : <FiUser className="text-sm" />}
                 </div>
@@ -124,7 +124,7 @@ export default function NotificationsView() {
                       {notif.title}
                     </p>
                     {!notif.isRead && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C5B382] shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#4a9e2f] shrink-0" />
                     )}
                   </div>
                   <p className="font-sans text-xs text-zinc-500 mt-1 leading-relaxed">{notif.message}</p>

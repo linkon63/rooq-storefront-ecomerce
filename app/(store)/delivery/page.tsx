@@ -34,7 +34,7 @@ export default function DeliveryPage() {
             {/* Introduction */}
             <div className="text-center mb-12">
               <p className="font-['Bembo_Std'] text-stone-700 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto">
-                We are pleased to offer nationwide delivery across Bangladesh, ensuring that the finest teas reach you in perfect condition.
+                We are pleased to offer nationwide delivery across Bangladesh, ensuring that the finest organic products reach you in perfect condition.
               </p>
             </div>
 

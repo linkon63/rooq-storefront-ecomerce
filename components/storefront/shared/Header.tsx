@@ -46,7 +46,7 @@ export default function Header({ settings }: HeaderProps) {
   const phone = firstOf(settings?.contactNumber, "+880 1811 000111");
 
   return (
-    <header className="w-full">
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
       {/* ── Top utility bar ─────────────────────────────────────────────── */}
       <div className="bg-[#4a9e2f] text-white text-[13px]">
         <div className="mx-auto max-w-[1600px] px-4 md:px-8">
@@ -67,8 +67,6 @@ export default function Header({ settings }: HeaderProps) {
             </div>
 
             <nav className="hidden items-center gap-3 md:flex">
-              <Link href="/about" className="hover:underline">About Us</Link>
-              <span className="text-white/50">|</span>
               <Link href="/order-tracking" className="hover:underline">Order Tracking</Link>
               <span className="text-white/50">|</span>
               <Link href="/contact" className="hover:underline">Contact</Link>

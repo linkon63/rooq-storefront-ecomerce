@@ -19,10 +19,8 @@ interface FooterProps {
 
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
-  { label: "About Us", href: "/about" },
   { label: "Shop", href: "/shop" },
   { label: "Our Blog", href: "/blog" },
-  { label: "Return Policy", href: "/policies/return" },
   { label: "Contact Us", href: "/contact" },
 ];
 
@@ -144,8 +142,8 @@ export default function Footer({ settings, productLinks }: FooterProps) {
             <SocialLink href={social.twitter} label="X"><FaXTwitter size={14} /></SocialLink>
           </div>
 
-          <p className="order-last text-center text-sm text-gray-500 md:order-none">
-            {settings?.shopName ?? "Organishi"}© {new Date().getFullYear()}. All Rights Reserved.
+          <p className="text-center text-sm font-medium text-stone-500">
+            © {new Date().getFullYear()} {settings?.shopName ?? "Organishi"}. All Rights Reserved.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2">

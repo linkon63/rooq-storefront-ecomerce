@@ -69,10 +69,31 @@ export function usePlaceOrder() {
 
         data = await orderRes.json();
       } else {
-        const lineItems = items.map((i) => {
-          if (!i.variantId) throw new Error(`Missing variant for "${i.name}". Please remove and re-add the item.`);
-          return { variantId: i.variantId, quantity: i.quantity };
-        });
+        const lineItems = await Promise.all(
+          items.map(async (i) => {
+            let variantId = i.variantId;
+            if (!variantId && (i.productId || i.slug || i.name)) {
+              try {
+                const target = i.productId || i.slug;
+                const pRes = await fetch(
+                  target ? `${BASE_URL}/products/${target}` : `${BASE_URL}/products?search=${encodeURIComponent(i.name)}`
+                );
+                if (pRes.ok) {
+                  const pData = await pRes.json();
+                  const product = Array.isArray(pData?.data) ? pData.data[0] : pData;
+                  const defaultVar = product?.variants?.find((v: { isDefault?: boolean }) => v.isDefault) ?? product?.variants?.[0];
+                  if (defaultVar?.id) {
+                    variantId = defaultVar.id;
+                  }
+                }
+              } catch {
+                /* silent catch */
+              }
+            }
+            if (!variantId) throw new Error(`Missing variant for "${i.name}". Please remove and re-add the item.`);
+            return { variantId, quantity: i.quantity };
+          })
+        );
 
         const res = await fetch(`${BASE_URL}/orders/guest`, {
           method: "POST",

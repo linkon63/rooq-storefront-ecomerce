@@ -20,12 +20,14 @@ export default function StorefrontHeader() {
             <Link href="#">Archive</Link>
           </nav>
 
-          <Link href="/" className="mx-auto lg:mx-0" aria-label="London Tea Exchange home">
+          <Link href="/" className="mx-auto lg:mx-0" aria-label="Organishi home">
             <Image
-              src={humanaLogo}
-              alt="London Tea Exchange"
+              src="/assets/Logo-English.png"
+              alt="Organishi"
+              width={160}
+              height={44}
               priority
-              className="h-9 w-auto sm:h-11"
+              className="h-9 w-auto sm:h-11 object-contain"
             />
           </Link>
 

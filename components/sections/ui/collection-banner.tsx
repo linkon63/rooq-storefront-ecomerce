@@ -30,7 +30,7 @@ export default function CollectionBanner() {
                 <div className="w-12 h-12 flex items-center justify-center relative shrink-0">
                   <Image
                     src="/images/footer/footerrightlogo.png"
-                    alt="London Tea Exchange Logo"
+                    alt="Organishi Logo"
                     width={48}
                     height={48}
                     className="object-contain"

@@ -50,7 +50,6 @@ export default function SuppliersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(null);
 
   const filteredSuppliers = useMemo(() => {
@@ -109,9 +108,7 @@ export default function SuppliersPage() {
       const data = await apiRequest<Supplier[]>("/suppliers");
       setSuppliers(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load suppliers"
-      );
+      setError(err instanceof Error ? err.message : "Failed to load suppliers");
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +119,7 @@ export default function SuppliersPage() {
   }, []);
 
   function handleEdit(supplier: Supplier) {
+    setError("");
     setForm({
       id: supplier.id,
       name: supplier.name,
@@ -134,8 +132,16 @@ export default function SuppliersPage() {
   }
 
   function handleAddNew() {
+    setError("");
     setForm(emptyForm);
     setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    if (isSaving) return;
+    setError("");
+    setForm(emptyForm);
+    setIsModalOpen(false);
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -171,332 +177,266 @@ export default function SuppliersPage() {
     }
   }
 
-  function handleDeleteClick(supplier: Supplier) {
-    setSupplierToDelete(supplier);
-    setDeleteModalOpen(true);
-  }
-
   async function handleDeleteConfirm() {
     if (!supplierToDelete) return;
     setError("");
     try {
       await apiRequest(`/suppliers/${supplierToDelete.id}`, { method: "DELETE" });
-      setDeleteModalOpen(false);
       setSupplierToDelete(null);
       await loadSuppliers();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete supplier"
-      );
+      setError(err instanceof Error ? err.message : "Failed to delete supplier");
     }
   }
 
   return (
-    <div className="flex h-full flex-col bg-slate-50">
+    <>
       <PageHeader
         title="Suppliers"
         description="Manage procurement suppliers and vendors."
         action={
-          <button
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-blue-500 px-4 text-xs font-semibold text-white shadow-xs hover:bg-blue-600 cursor-pointer"
-            onClick={handleAddNew}
-          >
-            <AdminIcon className="h-3.5 w-3.5" name="plus" />
-            Add Supplier
-          </button>
+          <div className="flex gap-3 items-center">
+            {showSearchInput ? (
+              <div className="relative flex h-11 w-64 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+                <AdminIcon className="h-5 w-5 text-slate-400" name="search" />
+                <input
+                  className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-slate-400 text-slate-800"
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search suppliers..."
+                  value={search}
+                  autoFocus
+                />
+                <button
+                  onClick={() => {
+                    setSearch("");
+                    setShowSearchInput(false);
+                  }}
+                  className="grid h-6 w-6 place-items-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+                  title="Close search"
+                  type="button"
+                >
+                  <AdminIcon className="h-4 w-4" name="x" />
+                </button>
+              </div>
+            ) : (
+              <button
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm cursor-pointer"
+                onClick={() => setShowSearchInput(true)}
+                type="button"
+                title="Search suppliers"
+              >
+                <AdminIcon className="h-5 w-5 text-slate-600" name="search" />
+              </button>
+            )}
+            <button
+              onClick={handleAddNew}
+              type="button"
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-[14px] font-semibold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 shrink-0 whitespace-nowrap cursor-pointer"
+            >
+              <AdminIcon className="h-5 w-5" name="plus" />
+              Add Supplier
+            </button>
+          </div>
         }
       />
 
-      <div className="flex-grow p-6">
-        <div className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-800">
-                {filteredSuppliers.length}
-              </span>
-              <span className="text-sm text-slate-500">
-                {filteredSuppliers.length === 1 ? "supplier" : "suppliers"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {showSearchInput || search ? (
-                <div className="relative">
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder="Search suppliers..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="h-9 w-64 rounded-lg border border-slate-200 pl-8 pr-4 text-xs outline-none focus:border-blue-500"
-                  />
-                  <AdminIcon
-                    className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400"
-                    name="search"
-                  />
-                  {search && (
-                    <button
-                      onClick={() => setSearch("")}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
-                    >
-                      <AdminIcon className="h-4 w-4" name="x" />
-                    </button>
-                  )}
-                </div>
+      <section className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+          <p className="text-sm font-medium text-slate-500">
+            {filteredSuppliers.length} {filteredSuppliers.length === 1 ? "supplier" : "suppliers"}
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px] text-left">
+            <thead className="bg-slate-50">
+              <tr>
+                {["Company Name", "Contact", "Address", "Status", "Products", "Created", "Actions"].map((h) => (
+                  <th key={h} className="px-5 py-4 text-sm font-semibold text-slate-700">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {isLoading ? (
+                <tr><td colSpan={7} className="px-5 py-8 text-slate-500">Loading suppliers...</td></tr>
+              ) : filteredSuppliers.length === 0 ? (
+                <tr><td colSpan={7} className="px-5 py-8 text-center font-medium text-slate-400">No suppliers found.</td></tr>
               ) : (
-                <button
-                  className="grid h-9 w-9 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-                  onClick={() => setShowSearchInput(true)}
-                  title="Search suppliers"
-                >
-                  <AdminIcon className="h-4 w-4" name="search" />
-                </button>
+                paginatedSuppliers.map((supplier) => (
+                  <tr key={supplier.id} className="odd:bg-white even:bg-slate-50/70">
+                    <td className="px-5 py-4 text-sm font-semibold text-slate-800">{supplier.name}</td>
+                    <td className="px-5 py-4 text-sm text-slate-600">
+                      {supplier.phone && <div className="text-slate-800 font-medium">{supplier.phone}</div>}
+                      {supplier.email && <div className="text-xs text-slate-400">{supplier.email}</div>}
+                      {!supplier.phone && !supplier.email && <span className="text-slate-400">—</span>}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-slate-600 max-w-[200px] truncate">{supplier.address ?? "—"}</td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          supplier.isActive
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-slate-100 text-slate-500 border border-slate-200"
+                        }`}
+                      >
+                        {supplier.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-slate-600">{supplier._count?.products ?? 0}</td>
+                    <td className="px-5 py-4 text-sm text-slate-600">{formatDate(supplier.createdAt)}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(supplier)}
+                          className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                          type="button"
+                          title="Edit supplier"
+                        >
+                          <AdminIcon className="h-4 w-4" name="edit" />
+                        </button>
+                        <button
+                          onClick={() => setSupplierToDelete(supplier)}
+                          className="grid h-8 w-8 place-items-center rounded-lg border border-red-100 text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                          type="button"
+                          title="Delete supplier"
+                        >
+                          <AdminIcon className="h-4 w-4" name="trash" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </div>
 
-          <div className="overflow-x-auto">
-            {isLoading ? (
-              <div className="flex h-64 items-center justify-center">
-                <span className="text-sm font-medium text-slate-400">
-                  Loading suppliers...
-                </span>
+        {/* Lazy Loading / Pagination Footer */}
+        {!isLoading && filteredSuppliers.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 px-5 py-4 bg-gradient-to-r from-slate-50 to-white">
+            <div className="flex flex-col items-start gap-1.5">
+              <p className="text-sm font-medium text-slate-500">
+                Showing <span className="font-bold text-slate-800">{paginatedSuppliers.length}</span> of{" "}
+                <span className="font-bold text-slate-800">{filteredSuppliers.length}</span> suppliers
+              </p>
+              <div className="h-1.5 w-48 overflow-hidden rounded bg-slate-200">
+                <div
+                  className="h-full bg-blue-600 transition-all duration-300 ease-out"
+                  style={{ width: `${Math.min(100, (paginatedSuppliers.length / filteredSuppliers.length) * 100)}%` }}
+                />
               </div>
-            ) : suppliers.length === 0 ? (
-              <div className="flex h-64 flex-col items-center justify-center gap-2">
-                <span className="text-sm font-semibold text-slate-800">
-                  No suppliers found
-                </span>
-                <span className="text-xs text-slate-400">
-                  Get started by adding a new supplier.
-                </span>
+            </div>
+
+            {paginatedSuppliers.length < filteredSuppliers.length ? (
+              <div
+                ref={observerTarget}
+                className="flex items-center gap-2 py-2 text-xs font-semibold text-slate-500"
+              >
+                <svg className="animate-spin h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Loading more on scroll...</span>
               </div>
             ) : (
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    <th className="px-6 py-3">Company Name</th>
-                    <th className="px-6 py-3">Contact</th>
-                    <th className="px-6 py-3">Address</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Products</th>
-                    <th className="px-6 py-3">Created At</th>
-                    <th className="px-6 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                  {paginatedSuppliers.map((supplier) => (
-                    <tr key={supplier.id} className="hover:bg-slate-50/50">
-                      <td className="px-6 py-4 font-bold text-slate-900">
-                        {supplier.name}
-                      </td>
-                      <td className="px-6 py-4 space-y-0.5">
-                        {supplier.phone && (
-                          <div className="text-slate-800">{supplier.phone}</div>
-                        )}
-                        {supplier.email && (
-                          <div className="text-slate-400 font-normal">
-                            {supplier.email}
-                          </div>
-                        )}
-                        {!supplier.phone && !supplier.email && (
-                          <span className="text-slate-400">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-slate-500 max-w-[200px] truncate">
-                        {supplier.address ?? "—"}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
-                            supplier.isActive
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-slate-50 text-slate-500"
-                          }`}
-                        >
-                          {supplier.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-500">
-                        {supplier._count?.products ?? 0}
-                      </td>
-                      <td className="px-6 py-4 text-slate-400 font-normal">
-                        {formatDate(supplier.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="inline-flex gap-2">
-                          <button
-                            className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
-                            onClick={() => handleEdit(supplier)}
-                            title="Edit supplier"
-                          >
-                            <AdminIcon className="h-3.5 w-3.5" name="edit" />
-                          </button>
-                          <button
-                            className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 cursor-pointer"
-                            onClick={() => handleDeleteClick(supplier)}
-                            title="Delete supplier"
-                          >
-                            <AdminIcon className="h-3.5 w-3.5" name="trash" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {filteredSuppliers.length > visibleCount && (
-              <div ref={observerTarget} className="flex justify-center py-6">
-                <span className="text-xs text-slate-400">
-                  {isLoadingMore ? "Loading more..." : "Scroll to load more"}
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-slate-400">All suppliers loaded</span>
             )}
           </div>
-        </div>
-      </div>
+        )}
+      </section>
 
+      {/* Add / Edit Supplier Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6">
-          <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4"
-          >
-            <div className="flex items-start justify-between gap-4">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6 modal-backdrop" role="dialog" aria-modal="true">
+          <form className="modal-panel flex w-full max-w-lg flex-col rounded-xl border border-slate-200 bg-white shadow-2xl min-h-[460px] max-h-[calc(100vh-3rem)]" onSubmit={handleSubmit}>
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 pt-6 pb-5 shrink-0">
               <div>
-                <h3 className="text-base font-semibold text-slate-900">
-                  {form.id ? "Edit Supplier" : "Add Supplier"}
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Provide company details below.
-                </p>
+                <h3 className="text-base font-semibold text-slate-900">{form.id ? "Edit Supplier" : "Add Supplier"}</h3>
+                <p className="mt-1 text-xs text-slate-500">Company details and contact information.</p>
               </div>
-              <button
-                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600"
-                disabled={isSaving}
-                onClick={() => setIsModalOpen(false)}
-                type="button"
-              >
+              <button type="button" disabled={isSaving} onClick={closeModal} className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 cursor-pointer">
                 <AdminIcon className="h-4 w-4" name="x" />
               </button>
             </div>
-
-            <div className="space-y-3">
-              <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-slate-700">
-                  Company Name *
-                </span>
-                <input
-                  required
-                  autoFocus
-                  type="text"
-                  placeholder="e.g. Acme Corporation"
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, name: e.target.value }))
-                  }
-                  className="h-10 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-slate-700">
-                  Business Phone No.
-                </span>
-                <input
-                  type="text"
-                  placeholder="e.g. +88017XXXXXXXX"
-                  value={form.phone}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, phone: e.target.value }))
-                  }
-                  className="h-10 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-slate-700">
-                  Email Address
-                </span>
-                <input
-                  type="email"
-                  placeholder="e.g. contact@acme.com"
-                  value={form.email}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, email: e.target.value }))
-                  }
-                  className="h-10 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-slate-700">
-                  Address
-                </span>
-                <input
-                  type="text"
-                  placeholder="e.g. 456 Industrial Way, Dhaka"
-                  value={form.address}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, address: e.target.value }))
-                  }
-                  className="h-10 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                />
-              </label>
-
-              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 pt-1 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.isActive}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, isActive: e.target.checked }))
-                  }
-                />
-                Active Status
-              </label>
+            <div className="flex-1 modal-body px-6 py-5">
+              <div className="space-y-4">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Company Name *</span>
+                  <input
+                    autoFocus
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                    placeholder="e.g. Acme Organic Sourcing"
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Business Phone</span>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                    placeholder="e.g. +8801811000111"
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Email Address</span>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                    placeholder="e.g. supplier@organishi.com"
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Address</span>
+                  <input
+                    value={form.address}
+                    onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                    placeholder="e.g. 12 Organic Farm Road, Sylhet"
+                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
+                  />
+                </label>
+                <label className="flex items-center gap-2 pt-1 text-sm font-medium text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.isActive}
+                    onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Active Supplier Status</span>
+                </label>
+                {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>}
+              </div>
             </div>
-
-            {error && (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                {error}
-              </p>
-            )}
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                className="h-10 rounded-lg border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                disabled={isSaving}
-                onClick={() => setIsModalOpen(false)}
-                type="button"
-              >
+            <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-4 shrink-0">
+              <button type="button" disabled={isSaving} onClick={closeModal} className="h-10 rounded-lg border border-slate-300 bg-white px-5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
                 Cancel
               </button>
-              <button
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-500 px-5 text-sm font-semibold text-white hover:bg-blue-600 disabled:bg-slate-400"
-                disabled={isSaving}
-                type="submit"
-              >
-                {isSaving ? "Saving..." : form.id ? "Save Changes" : "Add Supplier"}
+              <button type="submit" disabled={isSaving} className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white disabled:bg-slate-400 hover:bg-blue-700 transition-colors cursor-pointer">
+                <AdminIcon className="h-4 w-4" name={form.id ? "check" : "plus"} />
+                {isSaving ? "Saving..." : form.id ? "Update Supplier" : "Add Supplier"}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {deleteModalOpen && supplierToDelete && (
-        <ConfirmModal
-          isOpen={deleteModalOpen}
-          title="Delete Supplier"
-          message={`Are you sure you want to delete supplier "${supplierToDelete.name}"? This action cannot be undone.`}
-          confirmText="Delete"
-          onClose={() => {
-            setDeleteModalOpen(false);
-            setSupplierToDelete(null);
-          }}
-          onConfirm={handleDeleteConfirm}
-        />
-      )}
-    </div>
+      <ConfirmModal
+        isOpen={!!supplierToDelete}
+        onClose={() => {
+          setSupplierToDelete(null);
+          setError("");
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Supplier"
+        message={`Delete "${supplierToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Yes"
+        cancelText="No"
+        isDestructive
+        error={error}
+      />
+    </>
   );
 }

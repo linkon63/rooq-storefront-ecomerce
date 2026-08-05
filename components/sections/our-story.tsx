@@ -10,7 +10,7 @@ export default function OurStory() {
             
             {/* First paragraph */}
             <p className="text-lg md:text-xl mb-8 leading-relaxed text-gray-800">
-              In the quiet gardens of Sylhet, nature already sets the standard. Our role is not to improve it, but to respect it with discipline and intention. Inspired by the heritage philosophy of the London Tea Exchange, we follow a simple belief:
+              In the quiet gardens of Sylhet, nature already sets the standard. Our role is not to improve it, but to respect it with discipline and intention. Inspired by the heritage philosophy of Organishi, we follow a simple belief:
             </p>
             
             {/* Highlighted text */}

@@ -15,7 +15,6 @@ const leftNavItems = [
 ];
 
 const rightNavItems = [
-  { label: "ABOUT US", href: "/about" },
   { label: "GLOBAL FAIR PAY CHARTER", href: "/global-fair-pay-charter" },
   { label: "CONTACT", href: "/contact" },
 ];
@@ -204,11 +203,11 @@ export default function Navigation() {
       {/* Center Logo */}
       <Link href="/" className="mx-3 xl:mx-5 shrink-0 transition-transform duration-200 hover:scale-105">
         <Image
-          src="/images/logo/Logo-update.png"
-          alt="London Tea Exchange Logo"
-          width={80}
-          height={80}
-          className="w-20 h-20 object-contain"
+          src="/assets/Logo-English.png"
+          alt="Organishi Logo"
+          width={180}
+          height={60}
+          className="w-36 h-auto object-contain"
           priority
         />
       </Link>

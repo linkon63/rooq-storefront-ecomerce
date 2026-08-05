@@ -19,7 +19,7 @@ export default function Prestige() {
               <p 
                 className="text-sm md:text-base leading-relaxed text-stone-gray mb-8 font-['Bembo_Std']"
               >
-                Rooted in the fertile landscapes of Sylhet, our teas travel beyond origin—carrying with them the character of place, time, and craft. Inspired by the legacy of global trade excellence shaped by the London Tea Exchange, we position every selection not as a commodity, but as a refined expression of origin.
+                Rooted in the fertile landscapes of Sylhet, our teas travel beyond origin—carrying with them the character of place, time, and craft. Inspired by the legacy of organic excellence shaped by Organishi, we position every selection not as a commodity, but as a refined expression of origin.
               </p>
             </div>
           </div>

@@ -27,6 +27,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
     void addItem({
       slug: product.slug,
       productId: product.id,
+      variantId: product.variantId,
       name: product.name,
       price: product.price,
       image: product.image,

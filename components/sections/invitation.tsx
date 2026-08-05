@@ -12,7 +12,7 @@ export default function Invitation() {
     },
     {
       icon: "/images/invitation/Invitation-3.svg",
-      description: "Refined Craft — Curated with the philosophy of London Tea Exchange",
+      description: "Refined Craft — Curated with the philosophy of Organishi",
     },
   ];
 

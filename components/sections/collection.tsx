@@ -30,7 +30,7 @@ export default function Collection() {
                 <div className="w-16 h-16 flex items-center justify-center relative">
                   <Image
                     src="/images/footer/footerrightlogo.png"
-                    alt="London Tea Exchange Logo"
+                    alt="Organishi Logo"
                     width={64}
                     height={64}
                     className="object-contain"

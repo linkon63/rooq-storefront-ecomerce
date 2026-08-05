@@ -33,7 +33,7 @@ export default function AboutUs() {
                 </p>
               </div>
               <p className="text-white text-4xl font-normal font-['Bembo_Std'] leading-10">
-                With roots from the city of London spanning hundreds of years, London Tea Exchange offers one of the widest selection of single estate premium tea&apos;s from across the globe. Our unique tea collections are sourced directly from over forty different countries and includes some of the rarest teas in the world, many of which are exclusive to London Tea Exchange.
+                Organishi offers one of the widest selection of premium organic products directly from farms. Our unique collections are sourced with care to provide pure, healthy, and natural food choices for every household.
               </p>
             </div>
 
@@ -42,7 +42,7 @@ export default function AboutUs() {
               <div className="relative w-full max-w-[450px] aspect-square overflow-hidden border border-stone-800 shadow-2xl">
                 <Image
                   src="/images/about/about.png"
-                  alt="London Tea Exchange Storefront"
+                  alt="Organishi Storefront"
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-700"
                 />

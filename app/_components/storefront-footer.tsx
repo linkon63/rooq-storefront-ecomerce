@@ -6,30 +6,17 @@ const footerGroups = [
   {
     title: "Customer Service",
     links: [
-      { label: "FAQ", href: "#" },
-      { label: "Terms & Conditions", href: "#" },
-      { label: "Terms & Conditions Store", href: "#" },
-      { label: "Shipping & Delivery", href: "#" },
+      { label: "Shipping & Delivery", href: "/delivery" },
       { label: "Login", href: "/profile" },
       { label: "Wishlist", href: "/wishlist" },
     ],
   },
   {
-    title: "Who We Are",
+    title: "Quick Links",
     links: [
-      { label: "Who We Are", href: "#" },
-      { label: "Contacts", href: "#" },
-      { label: "Our Stores", href: "#" },
-      { label: "Institutional Blog", href: "#" },
-    ],
-  },
-  {
-    title: "More Information",
-    links: [
-      { label: "Privacy", href: "#" },
-      { label: "Cookie Policy", href: "#" },
-      { label: "Info and Returns", href: "#" },
-      { label: "Refunds", href: "#" },
+      { label: "Shop", href: "/shop" },
+      { label: "Blog", href: "/blog" },
+      { label: "Contact Us", href: "/contact" },
     ],
   },
 ];
@@ -91,8 +78,8 @@ export default function StorefrontFooter() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-neutral-300 pt-10 text-xs font-medium text-neutral-400">
-          © 2026 London Tea Exchange | All Rights Reserved.
+        <div className="mt-12 border-t border-neutral-300 pt-10 text-xs font-medium text-neutral-400 text-center">
+          © {new Date().getFullYear()} Organishi. All Rights Reserved.
         </div>
       </div>
     </footer>
