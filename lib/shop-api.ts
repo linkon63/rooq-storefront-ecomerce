@@ -5,6 +5,13 @@ const API_BASE_URL =
     ? (process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1")
     : (process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api/v1");
 
+/**
+ * Slug of the tag the catalogue puts on a product that is listed but has not
+ * launched yet. Those products are deliberately `active` so they stay
+ * browsable and wishlist-able, and carry zero stock on every variant.
+ */
+const COMING_SOON_TAG = "coming-soon";
+
 export type ShopProduct = {
   id: string;
   name: string;
@@ -15,6 +22,8 @@ export type ShopProduct = {
   originalPrice?: number;
   image: string;
   variantId?: string;
+  /** Listed but not yet on sale — show a badge, do not let it into the cart. */
+  comingSoon: boolean;
 };
 
 export type FetchShopProductsParams = {
@@ -130,6 +139,7 @@ function mapProduct(product: AdminProduct): ShopProduct {
     originalPrice: showOriginal ? priceNum : (costNum > priceNum ? costNum : undefined),
     image: resolveImageUrl(rawImage),
     variantId: defaultVariant?.id,
+    comingSoon: product.tags?.some((tag) => tag.slug === COMING_SOON_TAG) ?? false,
   };
 }
 

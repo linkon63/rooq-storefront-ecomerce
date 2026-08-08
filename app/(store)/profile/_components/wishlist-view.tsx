@@ -58,7 +58,7 @@ export default function WishlistView() {
             Browse our collections and save items you love.
           </p>
           <Link
-            href="/products"
+            href="/shop"
             className="mt-5 font-gotham text-[10px] font-bold tracking-[0.16em] uppercase text-[#4a9e2f] hover:text-[#3d8626] transition"
           >
             Explore Products →

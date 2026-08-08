@@ -152,19 +152,6 @@ export default function ShopBrowser({
 
   return (
     <>
-      {/* ── Page heading ────────────────────────────────────────────────── */}
-      <div className="border-b border-gray-100 py-10 text-center md:py-14">
-        <nav className="text-sm text-gray-500">
-          <Link href="/" className="hover:text-[#4a9e2f]">
-            Home
-          </Link>
-          <span>/ Shop Page</span>
-        </nav>
-        <h1 className="font-display mt-3 text-4xl font-semibold text-[#1f2a17] md:text-5xl">
-          Shop Page
-        </h1>
-        <p className="mt-2 text-sm text-gray-500">{filtered.length} Items</p>
-      </div>
 
       <div className="mx-auto max-w-[1600px] px-4 md:px-8">
         {/* ── Filter bar ────────────────────────────────────────────────── */}

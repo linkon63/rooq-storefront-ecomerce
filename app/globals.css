@@ -14,10 +14,12 @@
   --color-primary-100: #DBEAFE;
   --color-primary-600: #155DFC;
 
-  /* Storefront typography (cap-1) */
-  --font-inter: var(--font-inter);
-  --font-poppins: var(--font-poppins);
-  --font-display: var(--font-display);
+  /* Global site typography — Poppins across the whole site */
+  --font-inter: var(--font-poppins), sans-serif;
+  --font-poppins: var(--font-poppins), sans-serif;
+  --font-display: var(--font-poppins), sans-serif;
+  --font-bembo: var(--font-poppins), sans-serif;
+  --font-gotham: var(--font-poppins), sans-serif;
 
   /* Organishi brand green, taken from the approved mockups. */
   --color-brand: #4a9e2f;
@@ -27,20 +29,16 @@
   --color-brand-primary: #4a9e2f;
   --color-brand-3: #4a9e2f;
 
-  /* Admin typography — referenced by font-gotham / font-bembo in app/admin */
-  --font-bembo: var(--font-bembo);
-  --font-gotham: var(--font-gotham);
-
   /* Retained because the admin panel still references them */
   --color-stone-850: #1c1917;
   --color-zinc-850: #1f1f1f;
   --color-zinc-650: #52525b;
 }
 
-/* Storefront body type. Scoped to the store shell so the admin panel keeps
-   Gotham as its base font. */
+/* Global site body font */
+body,
 .storefront-root {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 /* Custom Logo Styles */

@@ -22,8 +22,8 @@ export default function BlogPage() {
       {/* ── Page banner ─────────────────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden">
         <Image
-          src="/images/home/newsletter-bg.png"
-          alt=""
+          src="/images/hero/blog-hero.jpg"
+          alt="Our Blog"
           fill
           sizes="100vw"
           priority

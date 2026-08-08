@@ -24,6 +24,9 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
   const hasDiscount = !!product.originalPrice && product.originalPrice > product.price;
 
   const onAddToCart = () => {
+    // Belt and braces — the button is not rendered for unreleased products,
+    // but nothing should be able to push one into the cart.
+    if (product.comingSoon) return;
     void addItem({
       slug: product.slug,
       productId: product.id,
@@ -67,6 +70,14 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
           )}
         </Link>
 
+        {/* Coming soon — always visible, not a hover state, since it changes
+            what the card can do rather than decorating it. */}
+        {product.comingSoon && (
+          <span className="absolute left-3 top-3 z-10 bg-[#1f2a17] px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-white">
+            Coming Soon
+          </span>
+        )}
+
         {/* Hover actions — quick view and wishlist stack top-right. */}
         <div className="pointer-events-none absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100">
           <button
@@ -92,19 +103,30 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
           </button>
         </div>
 
-        {/* Add to cart — label plus button, bottom-right. */}
+        {/* Add to cart — label plus button, bottom-right. Unreleased products
+            get a wishlist prompt in its place; there is nothing to add yet. */}
         <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-2 opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100">
-          <span className="whitespace-nowrap bg-[#1f2a17] px-3 py-1.5 text-xs font-medium text-white">
-            Add to Cart
-          </span>
-          <button
-            type="button"
-            onClick={onAddToCart}
-            aria-label={`Add ${product.name} to cart`}
-            className="flex h-9 w-9 items-center justify-center bg-[#4a9e2f] text-white transition-colors hover:bg-[#3d8626]"
-          >
-            <FiShoppingCart size={16} />
-          </button>
+          {product.comingSoon ? (
+            /* Kept short on purpose — the card clips its overflow, and this
+               sits in a half-width column on mobile. */
+            <span className="whitespace-nowrap bg-white/95 px-3 py-1.5 text-xs font-medium text-[#1f2a17]">
+              Wishlist it
+            </span>
+          ) : (
+            <>
+              <span className="whitespace-nowrap bg-[#1f2a17] px-3 py-1.5 text-xs font-medium text-white">
+                Add to Cart
+              </span>
+              <button
+                type="button"
+                onClick={onAddToCart}
+                aria-label={`Add ${product.name} to cart`}
+                className="flex h-9 w-9 items-center justify-center bg-[#4a9e2f] text-white transition-colors hover:bg-[#3d8626]"
+              >
+                <FiShoppingCart size={16} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
