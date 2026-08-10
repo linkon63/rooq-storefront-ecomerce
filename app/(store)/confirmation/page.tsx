@@ -192,7 +192,7 @@ export default function ConfirmationPage() {
 
           {/* Footer Note */}
           <div className="mt-8 pt-4 border-t border-stone-100 text-center font-gotham text-xs text-stone-400">
-            Thank you for choosing Organishi! For any queries regarding this order, please contact support@organishi.com or call +880 1811 000111.
+            Thank you for choosing Organishi! For any queries regarding this order, please contact support@organishi.com or call 017 3360 0964.
           </div>
 
         </div>

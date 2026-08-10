@@ -8,8 +8,8 @@ import type { OrderResult } from "@/lib/types";
 const COMPANY = {
   name: "Organishi",
   logo: "/assets/Logo-English.png",
-  addressLine: "Dhaka, Bangladesh",
-  phone: "+880 1811 000111",
+  addressLine: "Sector 13, Uttara, Dhaka 1230, Bangladesh",
+  phone: "017 3360 0964",
   email: "support@organishi.com",
 };
 

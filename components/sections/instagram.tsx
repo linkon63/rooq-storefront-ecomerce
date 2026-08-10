@@ -46,7 +46,7 @@ export default function Instagram() {
               <FaInstagram className="text-xl" />
             </a>
             <a 
-              href="https://wa.me/8801339879494" 
+              href="https://wa.me/8801733600964" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-olive-slate hover:text-neutral-600 transition"

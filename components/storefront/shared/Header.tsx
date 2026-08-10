@@ -9,7 +9,7 @@ import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
 
 import Logo from "./Logo";
 import SearchField from "./SearchField";
-import type { ShopCategory, ShopSettings } from "@/lib/shop-api";
+import { contactValues, type ShopCategory, type ShopContactJson, type ShopSettings } from "@/lib/shop-api";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
@@ -28,11 +28,9 @@ const NAV_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
-/** First entry of a JSON contact column, which the API returns as an array. */
-function firstOf(value: unknown, fallback: string): string {
-  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
-  if (typeof value === "string") return value;
-  return fallback;
+/** First value of a JSON contact column — see `contactEntries` for the shape. */
+function firstOf(field: ShopContactJson | undefined, fallback: string): string {
+  return contactValues(field)[0] ?? fallback;
 }
 
 export default function Header({ settings }: HeaderProps) {
@@ -43,7 +41,7 @@ export default function Header({ settings }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const email = firstOf(settings?.email, "support@organishi.com");
-  const phone = firstOf(settings?.contactNumber, "+880 1811 000111");
+  const phone = firstOf(settings?.contactNumber, "017 3360 0964");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
@@ -56,13 +54,13 @@ export default function Header({ settings }: HeaderProps) {
                 <HiOutlineMail className="shrink-0" size={15} />
                 <span>{email}</span>
               </a>
-              <a href={`tel:${phone}`} className="hidden items-center gap-1.5 hover:underline sm:flex">
+              <a href={`tel:${phone.replace(/\s/g, "")}`} className="hidden items-center gap-1.5 hover:underline sm:flex">
                 <HiOutlinePhone className="shrink-0" size={15} />
                 <span>{phone}</span>
               </a>
               <span className="hidden items-center gap-1.5 lg:flex">
                 <FiClock className="shrink-0" size={15} />
-                <span>Mon-Fri: 8:00am-7:00pm</span>
+                <span>Sat-Thu: 10:00am-8:00pm</span>
               </span>
             </div>
 

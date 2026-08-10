@@ -121,7 +121,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
                 type="button"
                 onClick={onAddToCart}
                 aria-label={`Add ${product.name} to cart`}
-                className="flex h-9 w-9 items-center justify-center bg-[#4a9e2f] text-white transition-colors hover:bg-[#3d8626]"
+                className="flex h-9 w-9 cursor-pointer items-center justify-center bg-[#4a9e2f] text-white transition-all duration-200 hover:scale-110 hover:bg-[#3d8626] hover:shadow-md"
               >
                 <FiShoppingCart size={16} />
               </button>

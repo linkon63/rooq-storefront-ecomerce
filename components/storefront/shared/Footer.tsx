@@ -2,13 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
-import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaLinkedinIn,
+  FaTiktok,
+  FaXTwitter,
+  FaYoutube,
+} from "react-icons/fa6";
+import { HiOutlineCheckCircle, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineMapPin } from "react-icons/hi2";
 
 import Logo from "./Logo";
 import type { Policy } from "@/types/policies";
-import type { ShopSettings } from "@/lib/shop-api";
+import { contactEntries, type ShopContactEntry, type ShopSettings } from "@/lib/shop-api";
 
 interface FooterProps {
   policies?: Policy[];
@@ -22,6 +29,8 @@ const QUICK_LINKS = [
   { label: "Shop", href: "/shop" },
   { label: "Our Blog", href: "/blog" },
   { label: "Contact Us", href: "/contact" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
 ];
 
 const FALLBACK_PRODUCTS = [
@@ -33,24 +42,56 @@ const FALLBACK_PRODUCTS = [
   { label: "Organic Soup", href: "/shop?category=Rice%2C%20Grains%20%26%20Pulses" },
 ];
 
-const PAYMENTS = ["VISA", "Mastercard", "AMEX", "GPay", "Payoneer", "stripe"];
+const PAYMENTS = ["Cash on Delivery", "bKash", "Nagad", "Rocket", "VISA", "Mastercard"];
 
-/** Contact columns come back from the API as JSON arrays. */
-function toList(value: unknown, fallback: string[]): string[] {
-  if (Array.isArray(value)) {
-    const items = value.filter((entry): entry is string => typeof entry === "string");
-    if (items.length) return items;
-  }
-  if (typeof value === "string" && value) return [value];
-  return fallback;
+/**
+ * The blurb under the logo does the trust work the tagline cannot: who we buy
+ * from, how you pay, and what happens if the parcel disappoints you.
+ */
+const BRAND_BLURB =
+  "Organishi brings you pure, unadulterated organic food sourced directly from farming families across Bangladesh — cold-pressed mustard oil, hand-churned ghee, virgin coconut oil and raw honey, with nothing added and nothing taken away. Every batch is lab-tested for purity, sealed at our own facility and delivered to your door in 48–72 hours. Pay cash on delivery after you have seen the product, and if the seal is broken or the item is not what we promised, we replace it or refund it. No questions, no paperwork.";
+
+/** Small, checkable promises — the reasons a first-time buyer clicks order. */
+const TRUST_POINTS = [
+  "100% Cash on Delivery — pay only after you receive it",
+  "Lab-tested purity, sealed at source",
+  "7-day easy replacement & refund",
+  "Nationwide delivery to all 64 districts",
+];
+
+/** Shown only until Admin → Settings → Contact has been filled in. */
+const FALLBACK_PHONES: ShopContactEntry[] = [{ title: "Hotline", value: "017 3360 0964" }];
+const FALLBACK_EMAILS: ShopContactEntry[] = [{ title: "Support", value: "support@organishi.com" }];
+const FALLBACK_ADDRESS = "Sector 13, Uttara, Dhaka 1230, Bangladesh";
+
+/** Rendered in this order, skipping any platform the admin left blank. */
+const SOCIAL_PLATFORMS = [
+  { key: "facebook", label: "Facebook", Icon: FaFacebookF },
+  { key: "instagram", label: "Instagram", Icon: FaInstagram },
+  { key: "youtube", label: "YouTube", Icon: FaYoutube },
+  { key: "tiktok", label: "TikTok", Icon: FaTiktok },
+  { key: "twitter", label: "X", Icon: FaXTwitter },
+  { key: "linkedin", label: "LinkedIn", Icon: FaLinkedinIn },
+] as const;
+
+/** Local numbers are shown as typed but must dial in international form. */
+function telHref(number: string): string {
+  const digits = number.replace(/[^\d+]/g, "");
+  if (digits.startsWith("+")) return `tel:${digits}`;
+  if (digits.startsWith("0")) return `tel:+880${digits.slice(1)}`;
+  return `tel:${digits}`;
 }
 
 export default function Footer({ settings, productLinks }: FooterProps) {
-  const phones = toList(settings?.contactNumber, ["+880 1811 000111", "+880 9613 800800"]);
-  const emails = toList(settings?.email, ["info@organishi.com", "support@organishi.com"]);
-  const address = settings?.branchAddress ?? "House 42, Road 11, Banani, Dhaka 1213, Bangladesh";
+  // Everything in the Contact Us column is admin-managed; the constants below
+  // only stand in while the settings row is still empty.
+  const apiPhones = contactEntries(settings?.contactNumber);
+  const apiEmails = contactEntries(settings?.email);
+  const phones = apiPhones.length ? apiPhones : FALLBACK_PHONES;
+  const emails = apiEmails.length ? apiEmails : FALLBACK_EMAILS;
+  const address = settings?.branchAddress?.trim() || FALLBACK_ADDRESS;
   const products = productLinks?.length ? productLinks : FALLBACK_PRODUCTS;
-  const social = (settings?.socialContact ?? {}) as Record<string, string | undefined>;
+  const social = settings?.socialContact ?? {};
 
   return (
     <footer className="bg-[#f4f7ee] text-[#1f2a17]">
@@ -72,19 +113,38 @@ export default function Footer({ settings, productLinks }: FooterProps) {
               )}
             </Link>
 
-            <p className="mt-5 text-sm leading-relaxed text-gray-600">
-              {settings?.slogan ??
-                "Pure, organic and straight from the farm — cold pressed oils, hand-churned ghee and raw honey, sourced directly from the families who make them."}
-            </p>
+            {settings?.slogan && (
+              <p className="font-display mt-5 text-[15px] font-semibold text-[#4a9e2f]">
+                {settings.slogan}
+              </p>
+            )}
+
+            <p className="mt-3 text-sm leading-relaxed text-gray-600">{BRAND_BLURB}</p>
+
+            <ul className="mt-5 space-y-2">
+              {TRUST_POINTS.map((point) => (
+                <li key={point} className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <HiOutlineCheckCircle
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[#4a9e2f]"
+                    aria-hidden
+                  />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
 
             <div className="mt-6 flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
                 <HiOutlinePhone size={20} />
               </span>
               <div>
-                <p className="text-sm text-gray-500">For Any Help</p>
-                <a href={`tel:${phones[0]}`} className="font-display text-lg font-semibold">
-                  {phones[0]}
+                <p className="text-sm text-gray-500">{phones[0].title || "For Any Help"}</p>
+                <a
+                  href={telHref(phones[0].value)}
+                  className="font-display text-lg font-semibold transition-colors hover:text-[#4a9e2f]"
+                >
+                  {phones[0].value}
                 </a>
               </div>
             </div>
@@ -107,11 +167,16 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
                   <HiOutlinePhone size={18} />
                 </span>
-                <span className="space-y-1">
-                  {phones.map((number) => (
-                    <a key={number} href={`tel:${number}`} className="block hover:text-[#4a9e2f]">
-                      {number}
-                    </a>
+                <span className="space-y-1.5">
+                  {phones.map((entry) => (
+                    <span key={entry.value} className="block">
+                      {entry.title && (
+                        <span className="block text-xs text-gray-400">{entry.title}</span>
+                      )}
+                      <a href={telHref(entry.value)} className="hover:text-[#4a9e2f]">
+                        {entry.value}
+                      </a>
+                    </span>
                   ))}
                 </span>
               </li>
@@ -119,11 +184,16 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
                   <HiOutlineMail size={18} />
                 </span>
-                <span className="space-y-1">
-                  {emails.map((mail) => (
-                    <a key={mail} href={`mailto:${mail}`} className="block hover:text-[#4a9e2f]">
-                      {mail}
-                    </a>
+                <span className="space-y-1.5">
+                  {emails.map((entry) => (
+                    <span key={entry.value} className="block">
+                      {entry.title && (
+                        <span className="block text-xs text-gray-400">{entry.title}</span>
+                      )}
+                      <a href={`mailto:${entry.value}`} className="break-all hover:text-[#4a9e2f]">
+                        {entry.value}
+                      </a>
+                    </span>
                   ))}
                 </span>
               </li>
@@ -136,10 +206,11 @@ export default function Footer({ settings, productLinks }: FooterProps) {
       <div className="border-t border-[#4a9e2f]/15">
         <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-4 px-4 py-5 md:flex-row md:justify-between md:px-8">
           <div className="flex items-center gap-2.5">
-            <SocialLink href={social.facebook} label="Facebook"><FaFacebookF size={14} /></SocialLink>
-            <SocialLink href={social.instagram} label="Instagram"><FaInstagram size={14} /></SocialLink>
-            <SocialLink href={social.linkedin} label="LinkedIn"><FaLinkedinIn size={14} /></SocialLink>
-            <SocialLink href={social.twitter} label="X"><FaXTwitter size={14} /></SocialLink>
+            {SOCIAL_PLATFORMS.map(({ key, label, Icon }) => (
+              <SocialLink key={key} href={social[key]} label={label}>
+                <Icon size={14} />
+              </SocialLink>
+            ))}
           </div>
 
           <p className="text-center text-sm font-medium text-stone-500">
@@ -194,11 +265,11 @@ function SocialLink({
   label,
   children,
 }: {
-  href?: string;
+  href?: string | null;
   label: string;
   children: React.ReactNode;
 }) {
-  if (!href) return null;
+  if (!href?.trim()) return null;
   return (
     <a
       href={href}

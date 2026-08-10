@@ -229,7 +229,7 @@ export default function ProductDetails({ product }: { product: Product }) {
               type="button"
               onClick={onAddToCart}
               disabled={!inStock}
-              className="flex h-11 flex-1 min-w-[200px] items-center justify-center gap-2 bg-[#4a9e2f] px-8 text-sm font-medium text-white transition-colors hover:bg-[#3d8626] disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="flex h-11 flex-1 min-w-[200px] cursor-pointer items-center justify-center gap-2 bg-[#4a9e2f] px-8 text-sm font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
             >
               <FiShoppingCart size={16} />
               Add to Cart

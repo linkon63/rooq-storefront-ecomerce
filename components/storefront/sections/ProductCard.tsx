@@ -111,7 +111,7 @@ export default function ProductCard({ product, viewLayout = 'grid' }: ProductCar
           {/* Add to Cart Button */}
           <div>
             <button
-              className="bg-black text-white px-6 py-3 flex items-center space-x-2 hover:bg-gray-800 transition-colors text-sm font-semibold w-full sm:w-auto justify-center"
+              className="bg-black text-white px-6 py-3 flex items-center space-x-2 cursor-pointer hover:bg-[#4a9e2f] hover:shadow-lg transition-all duration-200 text-sm font-semibold w-full sm:w-auto justify-center"
               type="button"
               onClick={handleAddToCart}
             >
@@ -145,7 +145,7 @@ export default function ProductCard({ product, viewLayout = 'grid' }: ProductCar
           {/* Hover Overlay */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
-              className="bg-white cursor-pointer text-black px-5 py-2.5 sm:px-6 sm:py-3 flex items-center space-x-2 hover:bg-gray-100 transition-colors text-sm sm:text-base font-semibold shadow-lg"
+              className="bg-white cursor-pointer text-black px-5 py-2.5 sm:px-6 sm:py-3 flex items-center space-x-2 hover:bg-[#4a9e2f] hover:text-white hover:scale-105 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg"
               type="button"
               onClick={(e) => {
                 e.preventDefault();

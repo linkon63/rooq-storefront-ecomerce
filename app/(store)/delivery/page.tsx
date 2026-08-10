@@ -82,13 +82,13 @@ export default function DeliveryPage() {
                 Need help with your order or shipment? Contact us via bKash or WhatsApp:
               </p>
               <a 
-                href="https://wa.me/8801339879494" 
+                href="https://wa.me/8801733600964" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#D2C498] to-[#B9975B] hover:opacity-95 text-white text-base font-medium font-['Gotham'] uppercase tracking-widest rounded-full transition-opacity duration-300"
               >
                 <FiPhone className="w-5 h-5" />
-                +880 13 3987 9494
+                017 3360 0964
               </a>
             </div>
 

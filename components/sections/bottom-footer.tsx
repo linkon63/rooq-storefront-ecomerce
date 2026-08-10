@@ -38,7 +38,7 @@ export default function Bottomfooter() {
                   <Link href="https://www.facebook.com/share/18CfeyLYXR/" target="_blank" className="text-white hover:text-brand-3 transition-colors">
                     <FaFacebookF className="w-5 h-5" />
                   </Link>
-                  <Link href="https://wa.me/8801339879494" target="_blank" className="text-white hover:text-brand-3 transition-colors">
+                  <Link href="https://wa.me/8801733600964" target="_blank" className="text-white hover:text-brand-3 transition-colors">
                     <FaWhatsapp className="w-5 h-5" />
                   </Link>
                 </div>

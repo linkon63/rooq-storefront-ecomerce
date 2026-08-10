@@ -94,6 +94,27 @@ export type ShopCategory = {
   children?: ShopCategory[];
 };
 
+/**
+ * Admin → Settings → Contact stores phone numbers and e-mail addresses as a
+ * JSON column shaped `{ entries: [{ title, value }] }` — the title is the label
+ * ("Hotline", "Support") and the value is the number or address itself.
+ */
+type RawContactEntry = { title?: string | null; value?: string | null } | string;
+export type ShopContactJson = { entries?: RawContactEntry[] } | RawContactEntry[] | string | null;
+
+/** A parsed entry — `value` is guaranteed non-empty, `title` may be absent. */
+export type ShopContactEntry = { title: string | null; value: string };
+
+/** The six platforms the admin Contact & Social Media screen can populate. */
+export type ShopSocialContact = {
+  facebook?: string | null;
+  instagram?: string | null;
+  youtube?: string | null;
+  tiktok?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+};
+
 export type ShopSettings = {
   id: string;
   shopName: string;
@@ -103,9 +124,9 @@ export type ShopSettings = {
   favicon?: string | null;
   branchName?: string | null;
   branchAddress?: string | null;
-  contactNumber?: any;
-  email?: any;
-  socialContact?: any;
+  contactNumber?: ShopContactJson;
+  email?: ShopContactJson;
+  socialContact?: ShopSocialContact | null;
   currency: string;
   language: string;
   deliveryChargeInside: string;
@@ -116,6 +137,41 @@ export type ShopSettings = {
   youtubeTitle?: string | null;
   youtubeDescription?: string | null;
 };
+
+/**
+ * Flatten a contact column into usable entries.
+ *
+ * The admin panel seeds its form with a blank `{ title: "", value: "" }` row,
+ * so a saved-but-never-filled column arrives as one empty entry — those are
+ * dropped here rather than rendered as an empty line in the footer. Older rows
+ * saved as a bare array or a plain string are still understood.
+ */
+export function contactEntries(field: ShopContactJson | undefined): ShopContactEntry[] {
+  if (!field) return [];
+
+  const raw: RawContactEntry[] =
+    typeof field === "string"
+      ? [field]
+      : Array.isArray(field)
+        ? field
+        : Array.isArray(field.entries)
+          ? field.entries
+          : [];
+
+  const parsed: ShopContactEntry[] = [];
+  for (const entry of raw) {
+    const value = (typeof entry === "string" ? entry : entry?.value ?? "").trim();
+    if (!value) continue;
+    const title = typeof entry === "string" ? null : entry?.title?.trim() || null;
+    parsed.push({ title, value });
+  }
+  return parsed;
+}
+
+/** Just the values — for places that show a single number or address. */
+export function contactValues(field: ShopContactJson | undefined): string[] {
+  return contactEntries(field).map((entry) => entry.value);
+}
 
 function mapProduct(product: AdminProduct): ShopProduct {
   const defaultVariant = product.variants?.find((v) => v.isDefault) ?? product.variants?.[0];

@@ -86,7 +86,7 @@ export default function Mainfooter() {
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-lg text-sage-gold font-normal">
                   <HiPhone className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span className="font-['Gotham'] font-normal">+880 1811 000111</span>
+                  <span className="font-['Gotham'] font-normal">017 3360 0964</span>
                 </div>
                 <div className="flex items-center gap-2 text-lg text-sage-gold">
                   <HiMail className="w-4 h-4 mt-0.5 shrink-0" />
@@ -95,7 +95,7 @@ export default function Mainfooter() {
                 <div className="flex items-start gap-2 text-lg font-normal text-sage-gold">
                   <HiLocationMarker className="w-4 h-4 mt-1.5 shrink-0" />
                   <span className="font-['Gotham'] leading-normal">
-                    Organishi, Dhaka-1215, Bangladesh
+                    Organishi, Sector 13, Uttara, Dhaka 1230, Bangladesh
                   </span>
                 </div>
               </div>
