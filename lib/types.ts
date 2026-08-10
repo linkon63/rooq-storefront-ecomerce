@@ -115,6 +115,9 @@ export type AddressForm = {
   country: string;
 };
 
+/** Delivery zones the checkout can pick; rates come from the settings API. */
+export type DeliveryZone = "inside" | "near_city" | "outside";
+
 export type OrderResultItem = {
   name: string;
   quantity: number;
@@ -125,6 +128,8 @@ export type OrderResultItem = {
 export type OrderResult = {
   orderNumber: string;
   total: number;
+  /** Delivery charge the API applied, from Admin → Settings → General. */
+  shippingCost?: number;
   items: OrderResultItem[];
   address: AddressForm;
   paymentMethod?: string;

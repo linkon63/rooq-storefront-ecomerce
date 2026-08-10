@@ -19,12 +19,14 @@ function num(value: unknown) {
 
 interface UseOrdersOptions {
   fixedStatus?: OrderStatus;
+  /** Tab the list opens on when the page is not pinned to a single status. */
+  defaultStatus?: OrderStatus | "";
 }
 
-export function useOrders({ fixedStatus }: UseOrdersOptions = {}) {
+export function useOrders({ fixedStatus, defaultStatus = "" }: UseOrdersOptions = {}) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [status, setStatus] = useState<OrderStatus | "">(fixedStatus ?? "");
+  const [status, setStatus] = useState<OrderStatus | "">(fixedStatus ?? defaultStatus);
   const [paymentStatus, setPaymentStatus] = useState<OrderPaymentStatus | "">("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -40,12 +42,12 @@ export function useOrders({ fixedStatus }: UseOrdersOptions = {}) {
 
   useEffect(() => {
     if (!fixedStatus) {
-      setStatus((searchParamStatus as OrderStatus) || "");
+      setStatus((searchParamStatus as OrderStatus) || defaultStatus);
     }
     setPaymentStatus((searchParamPaymentStatus as OrderPaymentStatus) || "");
     setSearch(searchParamSearch || "");
     setPage(1);
-  }, [fixedStatus, searchParamStatus, searchParamPaymentStatus, searchParamSearch]);
+  }, [fixedStatus, defaultStatus, searchParamStatus, searchParamPaymentStatus, searchParamSearch]);
 
   const reqRef = useRef(0);
 

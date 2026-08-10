@@ -46,10 +46,11 @@ const PAYMENTS = ["Cash on Delivery", "bKash", "Nagad", "Rocket", "VISA", "Maste
 
 /**
  * The blurb under the logo does the trust work the tagline cannot: who we buy
- * from, how you pay, and what happens if the parcel disappoints you.
+ * from, how you pay, and what happens if the parcel disappoints you. Kept to
+ * four lines at the footer column width — the trust points below carry the rest.
  */
 const BRAND_BLURB =
-  "Organishi brings you pure, unadulterated organic food sourced directly from farming families across Bangladesh — cold-pressed mustard oil, hand-churned ghee, virgin coconut oil and raw honey, with nothing added and nothing taken away. Every batch is lab-tested for purity, sealed at our own facility and delivered to your door in 48–72 hours. Pay cash on delivery after you have seen the product, and if the seal is broken or the item is not what we promised, we replace it or refund it. No questions, no paperwork.";
+  "Pure, unadulterated organic food sourced directly from farming families across Bangladesh. Every batch is lab-tested and sealed at source, then delivered to your door. Pay cash on delivery — if it is not what we promised, we replace it.";
 
 /** Small, checkable promises — the reasons a first-time buyer clicks order. */
 const TRUST_POINTS = [

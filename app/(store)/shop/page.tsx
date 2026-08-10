@@ -4,7 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import ShopBrowser from "@/components/storefront/shop/ShopBrowser";
-import { fetchShopCategories, fetchShopProducts } from "@/lib/shop-api";
+import {
+  fetchCampaignOffer,
+  fetchDiscountOffer,
+  fetchShopCategories,
+  fetchShopProducts,
+  type ShopOffer,
+} from "@/lib/shop-api";
 
 export const metadata: Metadata = {
   title: "Shop | Organishi",
@@ -12,13 +18,34 @@ export const metadata: Metadata = {
     "Browse cold pressed oils, hand-churned ghee, raw honey, organic chips, spices and grains — all sourced directly from the farm.",
 };
 
-export default async function ShopPage() {
+type ShopSearchParams = { discount?: string; campaign?: string };
+
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: Promise<ShopSearchParams>;
+}) {
   // The whole catalogue is small enough to filter client-side, which keeps the
   // facet counts accurate no matter which filters are applied.
-  const [{ data: products }, categories] = await Promise.all([
+  const [{ data: products }, categories, query] = await Promise.all([
     fetchShopProducts({ limit: 200 }),
     fetchShopCategories(),
+    searchParams,
   ]);
+
+  // Hero slides and banners link here carrying the offer they advertise, so the
+  // shopper lands on those products instead of the whole catalogue.
+  let offer: ShopOffer | null = null;
+  if (query.discount) offer = await fetchDiscountOffer(query.discount);
+  else if (query.campaign) offer = await fetchCampaignOffer(query.campaign);
+
+  // An offer with no products of its own (a banner that advertises the shop in
+  // general) falls through to the full catalogue rather than an empty page.
+  const offerProductIds = offer?.productIds ?? [];
+  const isFilteredByOffer = offerProductIds.length > 0;
+  const offerProducts = isFilteredByOffer
+    ? products.filter((product) => offerProductIds.includes(product.id))
+    : products;
 
   return (
     <main>
@@ -49,7 +76,11 @@ export default async function ShopPage() {
       </section>
 
       <Suspense fallback={<div className="py-32 text-center text-gray-400">Loading shop…</div>}>
-        <ShopBrowser products={products} categories={categories} />
+        <ShopBrowser
+          products={offerProducts}
+          categories={categories}
+          offerName={isFilteredByOffer ? offer!.name : null}
+        />
       </Suspense>
     </main>
   );

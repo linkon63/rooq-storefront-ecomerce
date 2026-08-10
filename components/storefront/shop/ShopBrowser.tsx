@@ -42,9 +42,12 @@ const discountOf = (product: ShopProduct) =>
 export default function ShopBrowser({
   products,
   categories,
+  offerName = null,
 }: {
   products: ShopProduct[];
   categories: ShopCategory[];
+  /** Set when a hero banner or slide narrowed the list to one campaign/offer. */
+  offerName?: string | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -116,6 +119,9 @@ export default function ShopBrowser({
   const visible = filtered.slice(0, pageSize);
 
   const activeChips = [
+    ...(offerName
+      ? [{ key: "offer", label: offerName, clear: () => router.push("/shop") }]
+      : []),
     ...selectedCategories.map((name) => ({
       key: `cat-${name}`,
       label: `${name}(${categoryFacets.find((c) => c.name === name)?.count ?? 0})`,
@@ -144,7 +150,7 @@ export default function ShopBrowser({
     setSelectedCategories([]);
     setSelectedPrice([]);
     setSelectedDiscount(null);
-    if (searchTerm || categoryParam) router.push("/shop");
+    if (searchTerm || categoryParam || offerName) router.push("/shop");
   };
 
   const toggle = <T,>(list: T[], value: T) =>

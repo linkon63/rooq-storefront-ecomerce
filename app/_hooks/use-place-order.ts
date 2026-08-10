@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/app/_providers/cart-provider";
 import { getCustomerToken } from "@/lib/storefront-api";
-import type { AddressForm, OrderResult } from "@/lib/types";
+import type { AddressForm, DeliveryZone, OrderResult } from "@/lib/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
@@ -16,10 +16,13 @@ export function usePlaceOrder() {
 
   const placeOrder = async (
     address: AddressForm,
-    extra?: { paymentMethod?: string; orderNote?: string }
+    extra?: { paymentMethod?: string; orderNote?: string; deliveryZone?: DeliveryZone }
   ): Promise<OrderResult> => {
     setSubmitting(true);
     const token = getCustomerToken();
+    // Only the zone travels to the API — the rate itself lives in settings so a
+    // tampered checkout cannot change what the customer is charged.
+    const deliveryZone = extra?.deliveryZone ?? "inside";
 
     try {
       let data: Record<string, unknown>;
@@ -59,6 +62,7 @@ export function usePlaceOrder() {
           },
           body: JSON.stringify({
             addressId: savedAddress.id,
+            deliveryZone,
           }),
         });
 
@@ -111,6 +115,7 @@ export function usePlaceOrder() {
               country: address.country,
             },
             items: lineItems,
+            deliveryZone,
           }),
         });
 
@@ -124,7 +129,8 @@ export function usePlaceOrder() {
 
       const result: OrderResult = {
         orderNumber: (data.orderNumber ?? data.id ?? "N/A") as string,
-        total: (data.total as number) ?? subtotal,
+        total: Number(data.total ?? subtotal),
+        shippingCost: Number(data.shippingCost ?? 0),
         items: items.map((i) => ({
           name: i.name,
           quantity: i.quantity,

@@ -1,4 +1,9 @@
-import { type PaginatedProducts, type Product as AdminProduct, resolveImageUrl } from "./admin-api";
+import {
+  type PaginatedProducts,
+  type Product as AdminProduct,
+  type ProductVariant,
+  resolveImageUrl,
+} from "./admin-api";
 
 const API_BASE_URL =
   typeof window === "undefined"
@@ -173,6 +178,34 @@ export function contactValues(field: ShopContactJson | undefined): string[] {
   return contactEntries(field).map((entry) => entry.value);
 }
 
+/**
+ * What a shopper pays and what it was struck through from.
+ *
+ * The API applies product discounts per variant and hands back
+ * `variant.discountedPrice`; the older top-level `product.discountPrice` is
+ * still honoured so nothing regresses if a record predates that. `undefined`
+ * for `originalPrice` means there is nothing to strike through.
+ */
+export function resolveVariantPricing(
+  variant: ProductVariant | undefined,
+  product?: Pick<AdminProduct, "discountPrice">,
+): { price: number; originalPrice?: number } {
+  const listPrice = Number(variant?.price ?? 0);
+
+  const offerCandidates = [
+    variant?.discountedPrice != null ? Number(variant.discountedPrice) : null,
+    product?.discountPrice != null ? Number(product.discountPrice) : null,
+  ].filter((value): value is number => value != null && value > 0 && value < listPrice);
+
+  if (offerCandidates.length > 0) {
+    return { price: Math.min(...offerCandidates), originalPrice: listPrice };
+  }
+
+  // No offer: fall back to showing cost as the "was" price where it is higher.
+  const cost = variant?.cost ? Number(variant.cost) : 0;
+  return { price: listPrice, originalPrice: cost > listPrice ? cost : undefined };
+}
+
 function mapProduct(product: AdminProduct): ShopProduct {
   const defaultVariant = product.variants?.find((v) => v.isDefault) ?? product.variants?.[0];
 
@@ -180,10 +213,7 @@ function mapProduct(product: AdminProduct): ShopProduct {
   const firstMedia = product.media?.[0];
   const rawImage = featuredMedia?.media.url ?? firstMedia?.media.url ?? "";
 
-  const priceNum = Number(defaultVariant?.price ?? 0);
-  const costNum = defaultVariant?.cost ? Number(defaultVariant.cost) : 0;
-  const discountPrice = product.discountPrice ? Number(product.discountPrice) : 0;
-  const showOriginal = discountPrice > 0 && discountPrice < priceNum;
+  const { price, originalPrice } = resolveVariantPricing(defaultVariant, product);
 
   return {
     id: product.id,
@@ -191,8 +221,8 @@ function mapProduct(product: AdminProduct): ShopProduct {
     slug: product.slug,
     category: product.category?.name ?? "",
     team: product.brand?.name ?? "",
-    price: showOriginal ? discountPrice : priceNum,
-    originalPrice: showOriginal ? priceNum : (costNum > priceNum ? costNum : undefined),
+    price,
+    originalPrice,
     image: resolveImageUrl(rawImage),
     variantId: defaultVariant?.id,
     comingSoon: product.tags?.some((tag) => tag.slug === COMING_SOON_TAG) ?? false,
@@ -343,11 +373,27 @@ export async function fetchShopPolicies(): Promise<ShopPolicy[]> {
 }
 
 // ─── Campaigns (homepage hero / banners) ─────────────────────────────────────
+
+/**
+ * Campaigns are split by the section the admin filed them under: anything in a
+ * "…Banner…" section fills the two static slots beside the hero, everything
+ * else rides the slider.
+ */
+export const BANNER_SECTION_TITLE = "Banner Campaign";
+
+export function isBannerSection(sectionTitle?: string | null): boolean {
+  return (sectionTitle ?? "").toLowerCase().includes("banner");
+}
+
 export type ShopCampaign = {
   id: string;
   title: string;
   description?: string | null;
   images: string[];
+  sectionTitle: string | null;
+  discountId: string | null;
+  /** Where clicking the artwork takes the shopper. */
+  href: string;
 };
 
 type CampaignRecord = {
@@ -355,8 +401,22 @@ type CampaignRecord = {
   title: string;
   description?: string | null;
   status?: string;
+  discountId?: string | null;
+  hasDiscount?: boolean;
+  section?: { id: string; title: string } | null;
   images?: { images?: unknown }[];
 };
+
+/**
+ * A campaign links to the offer it advertises. With a discount attached the
+ * shop opens filtered to that discount's products; without one it opens the
+ * campaign's own selection, so the click always lands somewhere relevant.
+ */
+export function campaignHref(campaign: { id: string; discountId?: string | null }): string {
+  return campaign.discountId
+    ? `/shop?discount=${encodeURIComponent(campaign.discountId)}`
+    : `/shop?campaign=${encodeURIComponent(campaign.id)}`;
+}
 
 /** Active campaigns with their banner images flattened into a string array. */
 export async function fetchShopCampaigns(): Promise<ShopCampaign[]> {
@@ -365,13 +425,57 @@ export async function fetchShopCampaigns(): Promise<ShopCampaign[]> {
 
   return list
     .filter((campaign) => (campaign.status ?? "active") === "active")
-    .map((campaign) => ({
-      id: campaign.id,
-      title: campaign.title,
-      description: campaign.description ?? null,
-      // CampaignImage.images is a JSON column holding an array of URLs.
-      images: (campaign.images ?? []).flatMap((entry) =>
-        Array.isArray(entry?.images) ? (entry.images as unknown[]).filter((u): u is string => typeof u === "string") : [],
-      ).map(resolveImageUrl),
-    }));
+    .map((campaign) => {
+      const discountId = campaign.discountId ?? null;
+      return {
+        id: campaign.id,
+        title: campaign.title,
+        description: campaign.description ?? null,
+        sectionTitle: campaign.section?.title ?? null,
+        discountId,
+        href: campaignHref({ id: campaign.id, discountId }),
+        // CampaignImage.images is a JSON column holding an array of URLs.
+        images: (campaign.images ?? []).flatMap((entry) =>
+          Array.isArray(entry?.images) ? (entry.images as unknown[]).filter((u): u is string => typeof u === "string") : [],
+        ).map(resolveImageUrl),
+      };
+    });
+}
+
+/** What the shop needs to narrow itself to one offer: a name and its products. */
+export type ShopOffer = { name: string; productIds: string[] };
+
+type DiscountRecord = {
+  name?: string;
+  products?: { productId?: string; product?: { id?: string } }[];
+};
+
+/** The offer behind `/shop?discount=…` — null when the id is unknown. */
+export async function fetchDiscountOffer(discountId: string): Promise<ShopOffer | null> {
+  const record = await safeFetchJson<DiscountRecord | null>(
+    `${API_BASE_URL}/product-discounts/${discountId}`,
+    null,
+  );
+  if (!record?.name) return null;
+  return {
+    name: record.name,
+    productIds: (record.products ?? [])
+      .map((entry) => entry.productId ?? entry.product?.id)
+      .filter((id): id is string => Boolean(id)),
+  };
+}
+
+/**
+ * The offer behind `/shop?campaign=…`. A campaign with no discount still names
+ * itself, so the shopper at least sees which banner brought them here.
+ */
+export async function fetchCampaignOffer(campaignId: string): Promise<ShopOffer | null> {
+  type CampaignDetail = { title?: string; discountId?: string | null };
+  const record = await safeFetchJson<CampaignDetail | null>(
+    `${API_BASE_URL}/campaigns/${campaignId}`,
+    null,
+  );
+  if (!record?.title) return null;
+  const discount = record.discountId ? await fetchDiscountOffer(record.discountId) : null;
+  return { name: record.title, productIds: discount?.productIds ?? [] };
 }

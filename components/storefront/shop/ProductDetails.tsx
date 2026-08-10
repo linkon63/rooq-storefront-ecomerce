@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import type { Product } from "@/lib/admin-api";
 import { resolveImageUrl } from "@/lib/admin-api";
+import { resolveVariantPricing } from "@/lib/shop-api";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
 
@@ -71,10 +72,10 @@ export default function ProductDetails({ product }: { product: Product }) {
       return attributeGroups.every((group) => values[group.name] === selection[group.name]);
     }) ?? defaultVariant;
 
+  // The offer price is per variant, so it follows whichever variant is picked.
   const price = Number(selectedVariant?.price ?? 0);
-  const discountPrice = product.discountPrice ? Number(product.discountPrice) : 0;
-  const hasDiscount = discountPrice > 0 && discountPrice < price;
-  const payable = hasDiscount ? discountPrice : price;
+  const { price: payable } = resolveVariantPricing(selectedVariant, product);
+  const hasDiscount = payable < price;
   const inStock = (selectedVariant?.stockQuantity ?? 0) > 0;
   const wishlisted = isInWishlist(product.id);
 

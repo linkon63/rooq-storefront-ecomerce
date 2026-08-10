@@ -115,6 +115,12 @@ export type ProductVariant = {
   sku: string;
   price: string | number;
   cost?: string | number | null;
+  /**
+   * Price after the best active product discount, added by the API on every
+   * product read. Absent when no discount currently applies.
+   */
+  discountedPrice?: number | null;
+  discountAmount?: number | null;
   stockQuantity: number;
   stockAlertThreshold: number;
   isDefault: boolean;
@@ -140,6 +146,8 @@ export type Product = {
   description?: string | null;
   shortDescription?: string | null;
   discountPrice?: string | number | null;
+  /** The active product discount the API picked for this product, if any. */
+  discount?: { id: string; type: "percentage" | "fixed"; value: number } | null;
   isFeatured?: boolean;
   metaTitle?: string | null;
   metaDescription?: string | null;

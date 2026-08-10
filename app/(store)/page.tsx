@@ -11,6 +11,7 @@ import {
   fetchShopCategories,
   fetchShopProducts,
   fetchShopSettings,
+  isBannerSection,
   type ShopProduct,
 } from "@/lib/shop-api";
 
@@ -21,7 +22,8 @@ const FALLBACK_SLIDE: HeroSlide = {
   alt: "খাঁটি ঘি — pure hand-churned ghee",
 };
 
-const SIDE_BANNERS: HeroSlide[] = [
+/** Shown until Admin → Settings → Hero Banner has artwork of its own. */
+const FALLBACK_BANNERS: HeroSlide[] = [
   {
     image: "/images/home/banner-coconut.png",
     href: "/shop?category=Coconut%20Oil",
@@ -52,19 +54,32 @@ export default async function Home() {
     fetchShopSettings(),
   ]);
 
-  const campaignSlides: HeroSlide[] = campaigns.flatMap((campaign) =>
-    campaign.images.map((image) => ({
-      image,
-      href: "/shop",
-      alt: campaign.title,
-    })),
+  // Campaigns filed under a banner section fill the two static slots beside the
+  // hero; everything else rides the slider. Each click carries the offer the
+  // artwork advertises through to the shop.
+  const toSlides = (list: typeof campaigns): HeroSlide[] =>
+    list.flatMap((campaign) =>
+      campaign.images.map((image) => ({
+        image,
+        href: campaign.href,
+        alt: campaign.title,
+      })),
+    );
+
+  const campaignSlides = toSlides(campaigns.filter((c) => !isBannerSection(c.sectionTitle)));
+  // Sorted by title so "Hero Banner 1" always takes the top slot, whatever
+  // order the admin saved them in.
+  const campaignBanners = toSlides(
+    campaigns
+      .filter((c) => isBannerSection(c.sectionTitle))
+      .sort((a, b) => a.title.localeCompare(b.title)),
   );
 
   return (
     <main className="space-y-14 lg:space-y-20">
       <HomeHero
         slides={campaignSlides.length > 0 ? campaignSlides : [FALLBACK_SLIDE]}
-        banners={SIDE_BANNERS}
+        banners={campaignBanners.length > 0 ? campaignBanners.slice(0, 2) : FALLBACK_BANNERS}
       />
       <MostRecentItems products={products} categories={categories} />
       <PromoBanners />

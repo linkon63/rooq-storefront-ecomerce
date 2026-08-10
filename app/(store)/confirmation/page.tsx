@@ -41,7 +41,9 @@ export default function ConfirmationPage() {
   }
 
   const subtotal = order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ?? order.total;
-  const deliveryCharge = order.total > subtotal ? order.total - subtotal : 0;
+  // Prefer the charge the API applied; older stored orders only have the gap.
+  const deliveryCharge =
+    order.shippingCost ?? (order.total > subtotal ? order.total - subtotal : 0);
   const orderDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

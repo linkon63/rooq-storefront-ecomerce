@@ -303,7 +303,7 @@ export default function DashboardPage() {
           <MetricCard label="Avg. order value" metric={summary?.avgOrderValue} iconName="discount" tone="bg-sky-50 text-sky-600" href="/admin/orders" caption="Per paid order" isMoney loading={isLoading} />
           <MetricCard label="Total customers" metric={{ value: summary?.totalCustomers.value ?? 0, trend: summary?.newCustomers.trend ?? null }} iconName="suppliers" tone="bg-violet-50 text-violet-600" href="/admin/reports/customer" caption="New customers vs previous" loading={isLoading} />
           <MetricCard label="Total products" metric={summary?.totalProducts} iconName="package" tone="bg-slate-100 text-slate-600" href="/admin/products" caption="Active catalogue" loading={isLoading} />
-          <MetricCard label="Refund amount" metric={summary?.refundAmount} iconName="refresh" tone="bg-rose-50 text-rose-600" href="/admin/orders?paymentStatus=refunded" isMoney goodWhenDown loading={isLoading} />
+          <MetricCard label="Refund amount" metric={summary?.refundAmount} iconName="refresh" tone="bg-rose-50 text-rose-600" href="/admin/orders/returned?paymentStatus=refunded" isMoney goodWhenDown loading={isLoading} />
         </div>
       </section>
 

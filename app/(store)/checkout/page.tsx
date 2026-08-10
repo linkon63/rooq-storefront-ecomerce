@@ -8,9 +8,17 @@ import { useCart } from "@/app/_providers/cart-provider";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrency } from "@/lib/currency-context";
 import { usePlaceOrder } from "@/app/_hooks/use-place-order";
-import { LuLoader, LuArrowLeft, LuLock, LuMapPin } from "react-icons/lu";
-import type { AddressForm } from "@/lib/types";
+import { LuLoader, LuArrowLeft, LuLock, LuMapPin, LuTruck } from "react-icons/lu";
+import type { AddressForm, DeliveryZone } from "@/lib/types";
+import { fetchShopSettings } from "@/lib/shop-api";
 import MapPickerModal from "./_components/map-picker-modal";
+
+/** Rates come from Admin → Settings → General; only the label lives here. */
+const DELIVERY_ZONES: { value: DeliveryZone; label: string; hint: string }[] = [
+  { value: "inside", label: "Inside City", hint: "Within the city limits" },
+  { value: "near_city", label: "Near City", hint: "Suburbs and nearby towns" },
+  { value: "outside", label: "Outside City", hint: "Anywhere else in the country" },
+];
 
 const emptyAddress: AddressForm = {
   email: "",
@@ -40,6 +48,12 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("cod");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [mapPickerOpen, setMapPickerOpen] = useState(false);
+  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("inside");
+  const [deliveryRates, setDeliveryRates] = useState<Record<DeliveryZone, number>>({
+    inside: 0,
+    near_city: 0,
+    outside: 0,
+  });
 
   const handleMapSelect = useCallback(
     (data: { addressLine1: string; city: string; state: string; postalCode: string; country: string }) => {
@@ -59,7 +73,24 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  const shipping = 0;
+  // The admin can change delivery rates at any time, so they are read on mount
+  // rather than baked into the bundle.
+  useEffect(() => {
+    let active = true;
+    fetchShopSettings().then((settings) => {
+      if (!active || !settings) return;
+      setDeliveryRates({
+        inside: Number(settings.deliveryChargeInside ?? 0) || 0,
+        near_city: Number(settings.deliveryChargeNearCity ?? 0) || 0,
+        outside: Number(settings.deliveryChargeOutside ?? 0) || 0,
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const shipping = deliveryRates[deliveryZone];
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const estTax = 0;
   const promoCodeDiscount = 0;
@@ -78,6 +109,7 @@ export default function CheckoutPage() {
     try {
       const result = await placeOrder(address, {
         paymentMethod,
+        deliveryZone,
       });
       sessionStorage.setItem("orderResult", JSON.stringify(result));
       router.push("/confirmation");
@@ -298,12 +330,66 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {/* Delivery Area — decides the charge added below */}
+              <div className="mb-6 border border-zinc-200 rounded-lg p-3">
+                <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] mb-3 flex items-center gap-1.5">
+                  <LuTruck className="w-3.5 h-3.5" />
+                  Delivery Area
+                </p>
+                <div className="space-y-2">
+                  {DELIVERY_ZONES.map((zone) => (
+                    <label
+                      key={zone.value}
+                      className={`flex items-center gap-3 p-3 border rounded-md cursor-pointer transition-colors ${
+                        deliveryZone === zone.value
+                          ? "border-[#4a9e2f] bg-[#f4f7ee]/40"
+                          : "border-zinc-200 hover:border-zinc-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="deliveryZone"
+                        value={zone.value}
+                        checked={deliveryZone === zone.value}
+                        onChange={() => setDeliveryZone(zone.value)}
+                        className="sr-only"
+                      />
+                      <span
+                        className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                          deliveryZone === zone.value ? "border-[#4a9e2f]" : "border-zinc-300"
+                        }`}
+                      >
+                        {deliveryZone === zone.value && (
+                          <span className="w-2 h-2 rounded-full bg-[#4a9e2f]" />
+                        )}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block font-gotham text-sm font-medium text-[#222222]">
+                          {zone.label}
+                        </span>
+                        <span className="block font-gotham text-[11px] text-zinc-500">{zone.hint}</span>
+                      </span>
+                      <span className="font-gotham text-sm font-semibold text-[#222222] shrink-0">
+                        {deliveryRates[zone.value] > 0 ? formatCurrency(deliveryRates[zone.value]) : "Free"}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Pricing Rows */}
               <div className="space-y-5">
                 <div className="flex justify-between items-center">
                   <span className="font-bembo text-base text-[#555555]">Subtotal</span>
                   <span className="font-gotham text-base font-medium text-[#222222]">
                     {formatCurrency(subtotal)}
+                  </span>
+                </div>
+                <div className="h-px bg-zinc-200" />
+                <div className="flex justify-between items-center">
+                  <span className="font-bembo text-base text-[#555555]">Delivery Charge</span>
+                  <span className="font-gotham text-base font-medium text-[#222222]">
+                    {shipping > 0 ? formatCurrency(shipping) : "Free"}
                   </span>
                 </div>
                 <div className="h-px bg-zinc-200" />

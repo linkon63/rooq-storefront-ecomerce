@@ -8,8 +8,13 @@ import { formatMoney, type OrderStatus, type OrderPaymentStatus } from "../../..
 import { useCurrency } from "../../../lib/currency-context";
 import { formatDateTime } from "../../../lib/utils";
 
-const TABS: { key: OrderStatus | ""; label: string }[] = [
-  { key: "", label: "All" },
+/**
+ * No "All" tab on purpose: a mixed list let an order that had just been
+ * accepted sit next to untouched ones with the Accept button still showing,
+ * so the same order looked acceptable twice. Each tab is now one stage, and an
+ * accepted order moves out of the tab it was accepted in.
+ */
+const TABS: { key: OrderStatus; label: string }[] = [
   { key: "pending", label: "Pending" },
   { key: "processing", label: "Processing" },
   { key: "shipped", label: "Shipped" },
@@ -42,9 +47,16 @@ interface OrderPageViewProps {
   title: string;
   description: string;
   fixedStatus?: OrderStatus;
+  /** New Orders hides payment state — it is settled after delivery, not here. */
+  showPaymentStatus?: boolean;
 }
 
-export default function OrderPageView({ title, description, fixedStatus }: OrderPageViewProps) {
+export default function OrderPageView({
+  title,
+  description,
+  fixedStatus,
+  showPaymentStatus = true,
+}: OrderPageViewProps) {
   const { symbol } = useCurrency();
   const {
     orders, selected, selectedId, setSelectedId,
@@ -53,7 +65,7 @@ export default function OrderPageView({ title, description, fixedStatus }: Order
     total, isLoading, error, isUpdatingStatus,
     totalPages, hasMore, totals,
     updateOrderStatus, updatePaymentStatus,
-  } = useOrders({ fixedStatus });
+  } = useOrders({ fixedStatus, defaultStatus: fixedStatus ? undefined : TABS[0].key });
 
   return (
     <>
@@ -132,6 +144,7 @@ export default function OrderPageView({ title, description, fixedStatus }: Order
                   value={search}
                 />
               </label>
+              {showPaymentStatus && (
               <div className="flex items-center justify-between gap-2 mt-1">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Payment:</span>
                 <select
@@ -148,6 +161,7 @@ export default function OrderPageView({ title, description, fixedStatus }: Order
                   <option value="refunded">Refunded</option>
                 </select>
               </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-2.5 p-3 xl:max-h-[calc(100vh-280px)] xl:overflow-y-auto bg-slate-50/30">
@@ -189,9 +203,11 @@ export default function OrderPageView({ title, description, fixedStatus }: Order
                           <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ${statusTone(order.status)}`}>
                             {order.status}
                           </span>
-                          <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ${paymentTone(order.paymentStatus)}`}>
-                            {order.paymentStatus}
-                          </span>
+                          {showPaymentStatus && (
+                            <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ${paymentTone(order.paymentStatus)}`}>
+                              {order.paymentStatus}
+                            </span>
+                          )}
                         </div>
                       </button>
                       {isSelected && selected && (
@@ -203,6 +219,7 @@ export default function OrderPageView({ title, description, fixedStatus }: Order
                             onUpdateOrderStatus={updateOrderStatus}
                             onUpdatePaymentStatus={updatePaymentStatus}
                             isUpdatingStatus={isUpdatingStatus}
+                            showPaymentStatus={showPaymentStatus}
                           />
                         </div>
                       )}
@@ -238,6 +255,7 @@ export default function OrderPageView({ title, description, fixedStatus }: Order
                 onUpdateOrderStatus={updateOrderStatus}
                 onUpdatePaymentStatus={updatePaymentStatus}
                 isUpdatingStatus={isUpdatingStatus}
+                showPaymentStatus={showPaymentStatus}
               />
             )}
           </section>

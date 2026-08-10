@@ -49,7 +49,7 @@ export default function InvoiceModal({
   if (!open || !mounted) return null;
 
   const subtotal = order.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shipping = 0;
+  const shipping = order.shippingCost ?? 0;
   const tax = 0;
   const discount = subtotal + shipping + tax - order.total;
   const issuedOn = new Date().toLocaleDateString("en-US", {

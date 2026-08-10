@@ -33,6 +33,8 @@ interface Order {
   orderNumber: string;
   status: string;
   total: string;
+  shippingCost?: string | number;
+  discount?: string | number;
   placedAt: string;
   createdAt: string;
   items?: OrderItem[];
@@ -88,6 +90,13 @@ export default function OrdersView() {
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const shippingAddr = selected?.shippingAddress ?? selected?.address;
+
+  const itemsSubtotal = (selected?.items ?? []).reduce(
+    (sum, item) => sum + Number(item.totalPrice ?? item.unitPrice ?? item.price ?? 0),
+    0,
+  );
+  const orderDiscount = Number(selected?.discount ?? 0) || 0;
+  const deliveryCharge = Number(selected?.shippingCost ?? 0) || 0;
 
   return (
     <div className="space-y-10">
@@ -243,6 +252,30 @@ export default function OrdersView() {
                   </div>
                 </div>
               )}
+
+              {/* Totals — the delivery charge is set in Admin → Settings */}
+              <div className="space-y-1.5 pt-1 border-t border-stone-100">
+                <div className="flex items-center justify-between">
+                  <p className="font-sans text-xs text-zinc-500">Subtotal</p>
+                  <p className="font-sans text-xs text-zinc-700">
+                    ৳{itemsSubtotal.toLocaleString()}
+                  </p>
+                </div>
+                {orderDiscount > 0 && (
+                  <div className="flex items-center justify-between">
+                    <p className="font-sans text-xs text-zinc-500">Discount</p>
+                    <p className="font-sans text-xs text-zinc-700">
+                      -৳{orderDiscount.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <p className="font-sans text-xs text-zinc-500">Delivery Charge</p>
+                  <p className="font-sans text-xs text-zinc-700">
+                    {deliveryCharge > 0 ? `৳${deliveryCharge.toLocaleString()}` : "Free"}
+                  </p>
+                </div>
+              </div>
 
               {/* Total */}
               <div className="flex items-center justify-between pt-1 border-t border-stone-100">

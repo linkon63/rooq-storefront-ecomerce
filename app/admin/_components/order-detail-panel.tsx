@@ -64,6 +64,8 @@ interface OrderDetailPanelProps {
   onUpdateOrderStatus: (status: OrderStatus) => void;
   onUpdatePaymentStatus: (paymentStatus: OrderPaymentStatus) => void;
   isUpdatingStatus?: boolean;
+  /** Off on New Orders — payment is settled once the order is delivered. */
+  showPaymentStatus?: boolean;
 }
 
 export function OrderDetailPanel({
@@ -73,6 +75,7 @@ export function OrderDetailPanel({
   onUpdateOrderStatus,
   onUpdatePaymentStatus,
   isUpdatingStatus = false,
+  showPaymentStatus = true,
 }: OrderDetailPanelProps) {
   return (
     <>
@@ -100,21 +103,23 @@ export function OrderDetailPanel({
         </div>
 
         <div className="flex flex-wrap gap-3 items-end">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Payment Status</span>
-            {order.status === "delivered" ? (
-              <RichDropdown
-                value={order.paymentStatus}
-                options={PAYMENT_STATUS_OPTIONS}
-                onChange={onUpdatePaymentStatus}
-                getTone={paymentTone}
-              />
-            ) : (
-              <span className={`inline-flex items-center rounded-lg border px-2 py-1.5 text-xs font-semibold capitalize ${paymentTone(order.paymentStatus)}`}>
-                {order.paymentStatus}
-              </span>
-            )}
-          </div>
+          {showPaymentStatus && (
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Payment Status</span>
+              {order.status === "delivered" ? (
+                <RichDropdown
+                  value={order.paymentStatus}
+                  options={PAYMENT_STATUS_OPTIONS}
+                  onChange={onUpdatePaymentStatus}
+                  getTone={paymentTone}
+                />
+              ) : (
+                <span className={`inline-flex items-center rounded-lg border px-2 py-1.5 text-xs font-semibold capitalize ${paymentTone(order.paymentStatus)}`}>
+                  {order.paymentStatus}
+                </span>
+              )}
+            </div>
+          )}
           {(order.status === "pending" || order.status === "processing") && (
             <div className="flex items-end gap-2">
               <button
@@ -303,15 +308,19 @@ export function OrderDetailPanel({
                     <span className="font-semibold text-slate-900 text-[15px]">{formatMoney(totals.grand, symbol)}</span>
                   </div>
 
-                  <div className="flex justify-between items-center text-emerald-600 bg-emerald-50/50 px-2 py-1.5 rounded-md border border-emerald-100/50 mt-1">
-                    <span className="font-semibold text-[11px]">Paid Amount</span>
-                    <span className="font-semibold text-xs">{formatMoney(totals.paid, symbol)}</span>
-                  </div>
+                  {showPaymentStatus && (
+                    <>
+                      <div className="flex justify-between items-center text-emerald-600 bg-emerald-50/50 px-2 py-1.5 rounded-md border border-emerald-100/50 mt-1">
+                        <span className="font-semibold text-[11px]">Paid Amount</span>
+                        <span className="font-semibold text-xs">{formatMoney(totals.paid, symbol)}</span>
+                      </div>
 
-                  <div className="flex justify-between items-center text-rose-600 bg-rose-50/50 px-2 py-1.5 rounded-md border border-rose-100/50 mt-1">
-                    <span className="font-semibold text-[11px]">Due Amount</span>
-                    <span className="font-semibold text-xs">{formatMoney(totals.due, symbol)}</span>
-                  </div>
+                      <div className="flex justify-between items-center text-rose-600 bg-rose-50/50 px-2 py-1.5 rounded-md border border-rose-100/50 mt-1">
+                        <span className="font-semibold text-[11px]">Due Amount</span>
+                        <span className="font-semibold text-xs">{formatMoney(totals.due, symbol)}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}

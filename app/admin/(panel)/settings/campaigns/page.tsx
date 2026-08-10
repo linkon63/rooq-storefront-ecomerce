@@ -112,7 +112,9 @@ export default function CampaignsPage() {
       if (form.description) body.append("description", form.description);
       if (form.startAt) body.append("startAt", new Date(form.startAt).toISOString());
       if (form.endAt) body.append("endAt", new Date(form.endAt).toISOString());
-      if (form.discountId) body.append("discountId", form.discountId);
+      // Always sent, empty included — that is what clears a previously
+      // selected offer instead of silently keeping it.
+      body.append("discountId", form.discountId);
       for (const file of form.images) {
         body.append("images", file);
       }

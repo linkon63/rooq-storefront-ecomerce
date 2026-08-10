@@ -7,6 +7,7 @@ export default function OrdersPage() {
     <OrderPageView
       title="Orders"
       description="Search, filter, and manage customer orders."
+      showPaymentStatus={false}
     />
   );
 }

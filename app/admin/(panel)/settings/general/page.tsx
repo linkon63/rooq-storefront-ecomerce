@@ -483,6 +483,48 @@ export default function GeneralSettingsPage() {
             </SettingsRow>
           </div> */}
 
+          {/* ── Delivery Charge ── */}
+          <div className="px-6 py-7 sm:px-8">
+            <SettingsRow
+              label="Delivery Charge"
+              hint="Charged on top of the order subtotal. The customer picks a zone at checkout and these rates decide what they pay."
+              separator={false}
+            >
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <FieldLabel>Inside City ({settings.currency ?? "BDT"})</FieldLabel>
+                  <Input
+                    min={0}
+                    onChange={(v) => setSettings((p) => ({ ...p, deliveryChargeInside: v }))}
+                    placeholder="0"
+                    type="number"
+                    value={settings.deliveryChargeInside ?? ""}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Near City ({settings.currency ?? "BDT"})</FieldLabel>
+                  <Input
+                    min={0}
+                    onChange={(v) => setSettings((p) => ({ ...p, deliveryChargeNearCity: v }))}
+                    placeholder="0"
+                    type="number"
+                    value={settings.deliveryChargeNearCity ?? ""}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Outside City ({settings.currency ?? "BDT"})</FieldLabel>
+                  <Input
+                    min={0}
+                    onChange={(v) => setSettings((p) => ({ ...p, deliveryChargeOutside: v }))}
+                    placeholder="0"
+                    type="number"
+                    value={settings.deliveryChargeOutside ?? ""}
+                  />
+                </div>
+              </div>
+            </SettingsRow>
+          </div>
+
           {/* ── Copyright & Company ── */}
           <div className="px-6 py-7 sm:px-8">
             <SettingsRow
