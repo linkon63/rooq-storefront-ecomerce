@@ -1,10 +1,10 @@
 import HomeHero, { type HeroSlide } from "@/components/storefront/home/HomeHero";
 import MostRecentItems from "@/components/storefront/home/MostRecentItems";
-import PromoBanners from "@/components/storefront/home/PromoBanners";
+import LatestArrivals from "@/components/storefront/home/LatestArrivals";
 import MostLovedFoods from "@/components/storefront/home/MostLovedFoods";
 import FeatureStrip from "@/components/storefront/home/FeatureStrip";
 import CustomerVoices from "@/components/storefront/home/CustomerVoices";
-import VideoGallery from "@/components/storefront/home/VideoGallery";
+import OrganicShowcase from "@/components/storefront/home/OrganicShowcase";
 import NewsletterCta from "@/components/storefront/home/NewsletterCta";
 import {
   fetchShopCampaigns,
@@ -82,11 +82,12 @@ export default async function Home() {
         banners={campaignBanners.length > 0 ? campaignBanners.slice(0, 2) : FALLBACK_BANNERS}
       />
       <MostRecentItems products={products} categories={categories} />
-      <PromoBanners />
+      {/* Products arrive newest first, so the first two are the latest. */}
+      <LatestArrivals products={products} />
       <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
       <FeatureStrip />
       <CustomerVoices social={(settings?.socialContact ?? {}) as Record<string, string | undefined>} />
-      <VideoGallery fallbackUrl={settings?.youtubeUrl ?? ""} />
+      <OrganicShowcase />
       <NewsletterCta />
     </main>
   );

@@ -1,37 +1,61 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
 import { FaFacebookF, FaInstagram, FaXTwitter, FaYoutube } from "react-icons/fa6";
 
 import "swiper/css";
+
+/** Portraits come from Unsplash — the host is already allow-listed in next.config.ts. */
+const avatar = (id: string) =>
+  `https://images.unsplash.com/photo-${id}?w=128&h=128&fit=crop&crop=faces&auto=format&q=80`;
 
 /** Placeholder voices until the review API feeds this section. */
 const TESTIMONIALS = [
   {
     name: "Ralph Edwards",
     role: "Customer",
+    avatar: avatar("1500648767791-00dcc994a43e"),
     quote:
       "As a foodie, I really appreciate authenticity in my platter. So far Organishi has always delivered up to my expectation on that particular note. And having it homemade also adds a cherry on top.",
   },
   {
     name: "Nusrat Jahan",
     role: "Customer",
+    avatar: avatar("1494790108377-be9c29b29330"),
     quote:
       "The mustard oil smells exactly like the one my grandmother used to press at home. Delivery was quick and the bottle arrived sealed and clean.",
   },
   {
     name: "Tanvir Hasan",
     role: "Customer",
+    avatar: avatar("1507003211169-0a1dd7228f2d"),
     quote:
       "I switched our whole kitchen over to their ghee and cold pressed oils. You can taste the difference, and the pricing is fair for this quality.",
   },
   {
     name: "Farhana Akter",
     role: "Customer",
+    avatar: avatar("1438761681033-6461ffad8d80"),
     quote:
       "Ordered the organic chips for my kids and they finished the pack in a day. Good to finally find snacks without artificial colours.",
+  },
+  {
+    name: "Imran Chowdhury",
+    role: "Customer",
+    avatar: avatar("1472099645785-5658abf4ff4e"),
+    quote:
+      "Packaging is neat and nothing leaked in transit. The honey is thick and raw — exactly what was described on the product page.",
+  },
+  {
+    name: "Sabrina Rahman",
+    role: "Customer",
+    avatar: avatar("1544005313-94ddf0286df2"),
+    quote:
+      "Support answered on WhatsApp within minutes and sorted out my delivery address. Small thing, but it is why I keep ordering here.",
   },
 ];
 
@@ -66,16 +90,28 @@ export default function CustomerVoices({ social = {} }: CustomerVoicesProps) {
           <div className="mt-7">
             <Swiper
               onSwiper={setSwiper}
-              onSlideChange={(instance) => setActiveIndex(instance.activeIndex)}
+              onSlideChange={(instance) => setActiveIndex(instance.realIndex)}
+              modules={[Autoplay]}
+              loop
+              autoplay={{ delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true }}
               spaceBetween={24}
               breakpoints={{ 0: { slidesPerView: 1 }, 768: { slidesPerView: 2 } }}
+              // Slides stretch so every card in view shares the tallest height,
+              // however long the quote runs.
+              className="[&_.swiper-wrapper]:items-stretch"
             >
               {TESTIMONIALS.map((testimonial) => (
-                <SwiperSlide key={testimonial.name} className="h-auto">
-                  <figure className="h-full rounded-md bg-white p-6">
+                <SwiperSlide key={testimonial.name} className="h-auto!">
+                  <figure className="flex h-full flex-col rounded-md bg-white p-6">
                     <figcaption className="flex items-center gap-3">
-                      <span className="font-display flex h-12 w-12 items-center justify-center rounded-md bg-[#4a9e2f]/10 text-lg text-[#4a9e2f]">
-                        {testimonial.name.charAt(0)}
+                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-[#4a9e2f]/10">
+                        <Image
+                          src={testimonial.avatar}
+                          alt={testimonial.name}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
                       </span>
                       <span>
                         <span className="font-display block text-[15px] font-semibold text-[#1f2a17]">
@@ -98,7 +134,7 @@ export default function CustomerVoices({ social = {} }: CustomerVoicesProps) {
               <button
                 key={page}
                 type="button"
-                onClick={() => swiper?.slideTo(page * 2)}
+                onClick={() => swiper?.slideToLoop(page * 2)}
                 aria-label={`Go to testimonial page ${page + 1}`}
                 className={`h-[3px] rounded-full transition-all ${
                   Math.floor(activeIndex / 2) === page

@@ -1,14 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 
 import { validateNewsletterForm } from "@/utils/validateNewsletterForm";
 
+/**
+ * Four backdrops that cross-fade behind the sign-up form. The first one ships
+ * with the design so the section paints instantly; the rest come from Unsplash,
+ * whose host is already allow-listed in next.config.ts.
+ */
+const BACKGROUNDS = [
+  "/images/home/newsletter-bg.png",
+  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1920&h=900&fit=crop&auto=format&q=80",
+  "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1920&h=900&fit=crop&auto=format&q=80",
+  "https://images.unsplash.com/photo-1447175008436-054170c2e979?w=1920&h=900&fit=crop&auto=format&q=80",
+];
+
+/** How long each backdrop holds before the next one fades in. */
+const ROTATE_MS = 5000;
+
 export default function NewsletterCta() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(
+      () => setSlide((current) => (current + 1) % BACKGROUNDS.length),
+      ROTATE_MS,
+    );
+    return () => clearInterval(timer);
+  }, []);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,13 +67,20 @@ export default function NewsletterCta() {
 
   return (
     <section className="relative isolate overflow-hidden">
-      <Image
-        src="/images/home/newsletter-bg.png"
-        alt=""
-        fill
-        sizes="100vw"
-        className="-z-10 object-cover"
-      />
+      {BACKGROUNDS.map((background, index) => (
+        <Image
+          key={background}
+          src={background}
+          alt=""
+          fill
+          // Only the first backdrop is worth blocking paint for.
+          priority={index === 0}
+          sizes="100vw"
+          className={`-z-10 object-cover transition-opacity duration-1000 ${
+            index === slide ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      ))}
       <div className="absolute inset-0 -z-10 bg-[#1f2a17]/50" />
 
       <div className="mx-auto max-w-[1600px] px-4 py-20 text-center md:px-8 lg:py-28">
