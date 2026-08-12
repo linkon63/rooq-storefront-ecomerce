@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   FiUser,
   FiShoppingBag,
@@ -26,9 +26,8 @@ type ProfileTab = "details" | "orders" | "address" | "wishlist" | "track";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
 function ProfilePageContent() {
-  const { user, isAuthenticated, loading, logout, refreshUser, setShowAuthModal } = useAuth();
+  const { isAuthenticated, loading, logout, refreshUser, setShowAuthModal } = useAuth();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const tabParam = searchParams.get("tab") as ProfileTab | null;
 
   const [activeTab, setActiveTab] = useState<ProfileTab>("details");

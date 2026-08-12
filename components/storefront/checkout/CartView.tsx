@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,11 +8,9 @@ import { FiHeart, FiMinus, FiPlus, FiTrash2 } from "react-icons/fi";
 import { toast } from "sonner";
 
 import CheckoutSteps from "./CheckoutSteps";
-import OrderSummary, { DEFAULT_ZONES, money, zonesFromRates, type DeliveryZone } from "./OrderSummary";
+import OrderSummary, { money } from "./OrderSummary";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
-import { fetchShopSettings } from "@/lib/shop-api";
-import { resolveDeliveryRates } from "@/lib/shop-contact";
 
 export default function CartView() {
   const router = useRouter();
@@ -20,21 +18,7 @@ export default function CartView() {
   const { toggleWishlist } = useWishlist();
 
   const [selected, setSelected] = useState<string[] | null>(null);
-  const [zones, setZones] = useState<DeliveryZone[]>(DEFAULT_ZONES);
-  const [zone, setZone] = useState<DeliveryZone>(DEFAULT_ZONES[2]);
   const [discount, setDiscount] = useState(0);
-
-  // Delivery charges are admin-managed, so the summary re-prices itself once
-  // the settings row arrives — keeping the picked zone selected.
-  useEffect(() => {
-    fetchShopSettings()
-      .then((settings) => {
-        const priced = zonesFromRates(resolveDeliveryRates(settings));
-        setZones(priced);
-        setZone((current) => priced.find((option) => option.id === current.id) ?? priced[2]);
-      })
-      .catch(() => {});
-  }, []);
 
   // Everything is selected until the shopper deselects something.
   const selectedKeys = selected ?? items.map((item) => item.slug);
@@ -237,12 +221,8 @@ export default function CartView() {
           <OrderSummary
             subtotal={subtotal}
             itemCount={totalUnits}
-            zone={zone}
-            zones={zones}
-            onZoneChange={setZone}
             discount={discount}
             onApplyCoupon={applyCoupon}
-            showPaymentMarks
             action={
               <button
                 type="button"

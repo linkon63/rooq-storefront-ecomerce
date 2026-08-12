@@ -9,19 +9,14 @@ import { useCart } from "@/app/_providers/cart-provider";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrency } from "@/lib/currency-context";
 import { usePlaceOrder } from "@/app/_hooks/use-place-order";
-import { LuLoader, LuArrowLeft, LuLock, LuTruck, LuPlus, LuFileText } from "react-icons/lu";
-import type { AddressForm, DeliveryZone } from "@/lib/types";
-import { fetchShopSettings, fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
+import { LuLoader, LuArrowLeft, LuLock, LuPlus, LuFileText } from "react-icons/lu";
+import type { AddressForm } from "@/lib/types";
+import { fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
 import { COUPONS_ENABLED } from "@/components/storefront/checkout/OrderSummary";
+import DeliveryZonePicker from "@/components/storefront/checkout/DeliveryZonePicker";
+import { useDeliveryZone } from "@/app/_hooks/use-delivery-zone";
 import { fetchMyAddresses, formatAddress, type CustomerAddress } from "@/lib/address-api";
-import PolicyModal from "./_components/policy-modal";
-
-/** Rates come from Admin → Settings → General; only the label lives here. */
-const DELIVERY_ZONES: { value: DeliveryZone; label: string; hint: string }[] = [
-  { value: "inside", label: "Inside Dhaka", hint: "Within Dhaka city" },
-  { value: "near_city", label: "Near Dhaka", hint: "Savar, Gazipur, Narayanganj and nearby" },
-  { value: "outside", label: "Outside Dhaka", hint: "Anywhere else in Bangladesh" },
-];
+import PolicyModal from "@/components/storefront/shared/policy-modal";
 
 /** Organishi ships within Bangladesh only, so the country is not a choice. */
 const COUNTRY = "Bangladesh";
@@ -58,12 +53,16 @@ export default function CheckoutPage() {
   }));
   const [paymentMethod] = useState<"online" | "cod">("cod");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("inside");
-  const [deliveryRates, setDeliveryRates] = useState<Record<DeliveryZone, number>>({
-    inside: 0,
-    near_city: 0,
-    outside: 0,
-  });
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Zone and rates are shared with the cart, so whatever was picked there is
+  // still selected — and priced the same — here.
+  const {
+    zone: deliveryZone,
+    setZone: setDeliveryZone,
+    rates: deliveryRates,
+    charge: shipping,
+  } = useDeliveryZone();
 
   // Saved addresses (signed-in shoppers only). `null` selection means the
   // shopper chose "use a different address" and is typing a new one.
@@ -83,23 +82,6 @@ export default function CheckoutPage() {
       }));
     }
   }, [user]);
-
-  // The admin can change delivery rates at any time, so they are read on mount
-  // rather than baked into the bundle.
-  useEffect(() => {
-    let active = true;
-    fetchShopSettings().then((settings) => {
-      if (!active || !settings) return;
-      setDeliveryRates({
-        inside: Number(settings.deliveryChargeInside ?? 0) || 0,
-        near_city: Number(settings.deliveryChargeNearCity ?? 0) || 0,
-        outside: Number(settings.deliveryChargeOutside ?? 0) || 0,
-      });
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // Return and refund policies are admin-written; the checkbox links open them.
   useEffect(() => {
@@ -143,9 +125,20 @@ export default function CheckoutPage() {
   const selectedAddress = savedAddresses.find((entry) => entry.id === selectedAddressId) ?? null;
   const usingSavedAddress = Boolean(selectedAddress) && !enteringNewAddress;
 
-  const shipping = deliveryRates[deliveryZone];
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const total = subtotal + shipping;
+
+  /**
+   * Why the order cannot go through yet. The button stays clickable so the
+   * browser can flag missing address fields itself; anything it cannot see is
+   * spelled out under the button instead of leaving a dead grey button.
+   */
+  const blockingReason =
+    items.length === 0
+      ? "Your cart is empty — add a product before placing the order."
+      : !agreeToTerms
+        ? "Please tick the box to accept the terms, return and refund policies."
+        : null;
 
   function startNewAddress() {
     setEnteringNewAddress(true);
@@ -164,14 +157,12 @@ export default function CheckoutPage() {
 
   async function handlePlaceOrder(e: FormEvent) {
     e.preventDefault();
-    if (!agreeToTerms) {
-      toast.error("Please agree to the terms, return and refund policies.");
+    if (blockingReason) {
+      setSubmitError(blockingReason);
+      toast.error(blockingReason);
       return;
     }
-    if (items.length === 0) {
-      toast.error("Your cart is empty. Please add items before placing an order.");
-      return;
-    }
+    setSubmitError(null);
 
     // A picked saved address still travels as a form payload — the confirmation
     // page and the invoice print from it.
@@ -203,10 +194,13 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="flex-grow bg-white w-full min-h-screen">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-5 py-8 sm:py-12">
+    // min-height, not a fixed height: at a fixed 70vh the site footer paints
+    // over the tail of the summary column, hiding the terms checkbox.
+    <main className="grow bg-white w-full min-h-[70vh]">
+      {/* Bottom padding clears the fixed action bar. */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-5 py-8 sm:py-12 pb-48 sm:pb-40">
         <form onSubmit={handlePlaceOrder}>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_384px] gap-8 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_384px] gap-8 lg:gap-16 lg:items-start">
             {/* ── Left Column: Billing Details ── */}
             <div>
               {/* Back Arrow & Title */}
@@ -412,8 +406,10 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* ── Right Column: Summary & Payment ── */}
-            <div className="w-full lg:w-96">
+            {/* ── Right Column: Summary & Payment ──
+                The total and Place Order live in the bar fixed to the bottom of
+                the viewport, so this column is free to scroll with the page. */}
+            <aside className="w-full lg:w-96">
               <h2 className="font-bembo text-3xl sm:text-4xl text-[#4A4A4A] font-normal mb-4">
                 Summary
               </h2>
@@ -448,55 +444,18 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Delivery Area — decides the charge added below */}
-              <div className="mb-6 border border-zinc-200 rounded-lg p-3">
-                <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] mb-3 flex items-center gap-1.5">
-                  <LuTruck className="w-3.5 h-3.5" />
-                  Delivery Area
-                </p>
-                <div className="space-y-2">
-                  {DELIVERY_ZONES.map((zone) => (
-                    <label
-                      key={zone.value}
-                      className={`flex items-center gap-3 p-3 border rounded-md cursor-pointer transition-colors ${
-                        deliveryZone === zone.value
-                          ? "border-[#4a9e2f] bg-[#f4f7ee]/40"
-                          : "border-zinc-200 hover:border-zinc-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="deliveryZone"
-                        value={zone.value}
-                        checked={deliveryZone === zone.value}
-                        onChange={() => setDeliveryZone(zone.value)}
-                        className="sr-only"
-                      />
-                      <span
-                        className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                          deliveryZone === zone.value ? "border-[#4a9e2f]" : "border-zinc-300"
-                        }`}
-                      >
-                        {deliveryZone === zone.value && (
-                          <span className="w-2 h-2 rounded-full bg-[#4a9e2f]" />
-                        )}
-                      </span>
-                      <span className="flex-1 min-w-0">
-                        <span className="block font-gotham text-sm font-medium text-[#222222]">
-                          {zone.label}
-                        </span>
-                        <span className="block font-gotham text-[11px] text-zinc-500">{zone.hint}</span>
-                      </span>
-                      <span className="font-gotham text-sm font-semibold text-[#222222] shrink-0">
-                        {deliveryRates[zone.value] > 0 ? formatCurrency(deliveryRates[zone.value]) : "Free"}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+              {/* Delivery Area — same picker (and same rates) as the cart */}
+              <div className="mb-6">
+                <DeliveryZonePicker
+                  value={deliveryZone}
+                  onChange={setDeliveryZone}
+                  rates={deliveryRates}
+                  format={formatCurrency}
+                />
               </div>
 
               {/* Pricing Rows */}
-              <div className="space-y-5">
+              <div className="space-y-5 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="font-bembo text-base text-[#555555]">Subtotal</span>
                   <span className="font-gotham text-base font-medium text-[#222222]">
@@ -520,16 +479,14 @@ export default function CheckoutPage() {
                   </>
                 )}
                 <div className="border-t border-dashed border-zinc-200/80" />
+                <div className="flex justify-between items-center">
+                  <span className="font-bembo text-2xl text-[#4A4A4A] font-normal">Total</span>
+                  <span className="font-bembo text-2xl text-[#4A4A4A] font-normal">
+                    {formatCurrency(total)}
+                  </span>
+                </div>
+                <div className="border-b border-solid border-zinc-300" />
               </div>
-
-              {/* Total */}
-              <div className="flex justify-between items-center py-4">
-                <span className="font-bembo text-3xl sm:text-4xl text-[#4A4A4A] font-normal">Total</span>
-                <span className="font-bembo text-3xl sm:text-4xl text-[#4A4A4A] font-normal">
-                  {formatCurrency(total)}
-                </span>
-              </div>
-              <div className="border-b border-solid border-zinc-300 mb-6" />
 
               {/* Payment Method */}
               <div className="mb-6">
@@ -590,47 +547,11 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Terms Checkbox */}
-              <div className="flex items-start gap-3 mb-6">
-                <div className="relative flex items-center justify-center mt-0.5">
-                  <input
-                    type="checkbox"
-                    id="terms"
-                    checked={agreeToTerms}
-                    onChange={(e) => setAgreeToTerms(e.target.checked)}
-                    className="peer sr-only"
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="w-5 h-5 border border-zinc-400 rounded cursor-pointer flex items-center justify-center peer-checked:bg-[#4a9e2f] peer-checked:border-[#4a9e2f] transition-colors"
-                  >
-                    {agreeToTerms && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </label>
-                </div>
-                <label htmlFor="terms" className="font-gotham text-sm text-[#222222] cursor-pointer select-none">
-                  I have read and agree to the terms, return and refund policies
-                  <span className="text-[#4a9e2f]"> *</span>
-                </label>
-              </div>
+              {/* The agreement checkbox itself sits in the action bar at the
+                  bottom of the screen, next to the button it gates. */}
 
-              <div className="border-t border-dashed border-zinc-200/80 mb-6" />
-
-              {/* Place Order Button */}
-              <button
-                type="submit"
-                disabled={submitting || !agreeToTerms}
-                className="w-full py-4 bg-[#4a9e2f] text-white font-gotham text-base font-bold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-md"
-              >
-                {submitting && <LuLoader className="w-5 h-5 animate-spin" />}
-                {submitting ? "PLACING ORDER..." : "PLACE ORDER"}
-              </button>
-
-              {/* Security & Privacy Footer */}
-              <div className="flex items-start gap-3 mt-6">
+              {/* Security & Privacy */}
+              <div className="flex items-start gap-3 mt-6 mb-2">
                 <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                   <LuLock className="w-4 h-4 text-green-600" />
                 </div>
@@ -640,6 +561,79 @@ export default function CheckoutPage() {
                     We protect your privacy and keep your personal details safe and secure.
                   </p>
                 </div>
+              </div>
+            </aside>
+          </div>
+
+          {/* ── Action bar, fixed to the bottom of the viewport on every size.
+                 The agreement checkbox rides here too, so nothing has to be
+                 scrolled to before the order can be placed. ── */}
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+            <div className="mx-auto flex max-w-[1200px] flex-col gap-2">
+              {/* Agreement + why the order will not go through */}
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <label
+                  htmlFor="terms"
+                  className="flex cursor-pointer items-start gap-2.5 select-none"
+                >
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={agreeToTerms}
+                    onChange={(e) => {
+                      setAgreeToTerms(e.target.checked);
+                      if (e.target.checked) setSubmitError(null);
+                    }}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                      agreeToTerms
+                        ? "border-[#4a9e2f] bg-[#4a9e2f]"
+                        : submitError
+                          ? "border-red-500 bg-white"
+                          : "border-zinc-400 bg-white"
+                    }`}
+                  >
+                    {agreeToTerms && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="font-gotham text-xs sm:text-sm text-[#222222]">
+                    I have read and agree to the terms, return and refund policies
+                    <span className="text-[#4a9e2f]"> *</span>
+                  </span>
+                </label>
+
+                {(submitError || blockingReason) && (
+                  <p
+                    className="font-gotham text-xs text-red-600 sm:text-right"
+                    role={submitError ? "alert" : undefined}
+                  >
+                    {submitError ?? blockingReason}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="min-w-0">
+                  <p className="font-gotham text-[11px] uppercase tracking-wider text-[#999999]">
+                    Total
+                  </p>
+                  <p className="font-bembo text-xl sm:text-2xl text-[#4A4A4A] leading-tight">
+                    {formatCurrency(total)}
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 sm:flex-none sm:min-w-[280px] sm:ml-auto py-3.5 px-8 bg-[#4a9e2f] text-white font-gotham text-sm font-bold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  {submitting && <LuLoader className="w-4 h-4 animate-spin" />}
+                  {submitting ? "PLACING ORDER..." : "PLACE ORDER"}
+                </button>
               </div>
             </div>
           </div>

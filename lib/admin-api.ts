@@ -348,6 +348,17 @@ export function orderCustomer(order: Order): OrderCustomer {
   };
 }
 
+/**
+ * How the order is being paid for. Checkout only offers cash on delivery, and
+ * an online payment always leaves a Payment row behind — so an order with no
+ * successful payment record is money the courier still has to collect.
+ */
+export function orderPaymentMethod(order: Order): { label: string; isCod: boolean } {
+  const settled = order.payments?.find((payment) => payment.status === "success");
+  if (settled) return { label: settled.method, isCod: false };
+  return { label: "Cash on Delivery", isCod: true };
+}
+
 export type Order = {
   id: string;
   orderNumber: string;

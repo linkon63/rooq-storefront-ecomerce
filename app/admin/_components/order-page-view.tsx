@@ -4,7 +4,13 @@ import { InfiniteScroll } from "./infinite-scroll";
 import { AdminIcon, PageHeader } from "./admin-shell";
 import { useOrders } from "../_hooks/use-orders";
 import { OrderDetailPanel } from "./order-detail-panel";
-import { formatMoney, orderCustomer, type OrderStatus, type OrderPaymentStatus } from "../../../lib/admin-api";
+import {
+  formatMoney,
+  orderCustomer,
+  orderPaymentMethod,
+  type OrderStatus,
+  type OrderPaymentStatus,
+} from "../../../lib/admin-api";
 import { useCurrency } from "../../../lib/currency-context";
 import { formatDateTime } from "../../../lib/utils";
 
@@ -177,6 +183,7 @@ export default function OrderPageView({
                   // Guest orders carry their buyer on the order itself, so the
                   // row names them the same way an account order is named.
                   const customer = orderCustomer(order);
+                  const payment = orderPaymentMethod(order);
                   return (
                     <div key={order.id}>
                       <button
@@ -215,7 +222,12 @@ export default function OrderPageView({
                           <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ${statusTone(order.status)}`}>
                             {order.status}
                           </span>
-                          {showPaymentStatus && (
+                          {payment.isCod && (
+                            <span className="inline-flex items-center rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                              COD
+                            </span>
+                          )}
+                          {(showPaymentStatus || order.status === "delivered") && (
                             <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ${paymentTone(order.paymentStatus)}`}>
                               {order.paymentStatus}
                             </span>

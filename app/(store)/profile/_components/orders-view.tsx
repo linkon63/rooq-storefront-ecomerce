@@ -89,6 +89,22 @@ export default function OrdersView() {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
+  // While the detail modal is open, Escape closes it and the page behind stays
+  // put — otherwise a long item list scrolls the profile page underneath.
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelected(null);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [selected]);
+
   const shippingAddr = selected?.shippingAddress ?? selected?.address;
 
   const itemsSubtotal = (selected?.items ?? []).reduce(
@@ -177,11 +193,26 @@ export default function OrdersView() {
 
       {/* ── Detail Modal ─────────────────────────────────────────────────────── */}
       {selected && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4"
+          onClick={() => setSelected(null)}
+          role="presentation"
+        >
+          {/*
+            The panel is bounded by the viewport and lays itself out as
+            header / scrolling body / totals footer. A long order therefore
+            scrolls inside the body instead of pushing the header and the
+            total off the screen.
+          */}
+          <div
+            aria-modal="true"
+            role="dialog"
+            onClick={(event) => event.stopPropagation()}
+            className="flex w-full max-w-lg max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
+          >
 
             {/* Modal header */}
-            <div className="flex items-start justify-between px-7 py-5 border-b border-stone-100">
+            <div className="flex shrink-0 items-start justify-between gap-3 px-5 py-4 border-b border-stone-100 sm:px-7 sm:py-5">
               <div>
                 <p className={SECTION_LABEL}>Order Details</p>
                 <h3 className="font-['Bembo_Std'] text-xl text-zinc-850 mt-0.5">{selected.orderNumber}</h3>
@@ -192,7 +223,7 @@ export default function OrdersView() {
                   })}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 <span className={`border font-sans text-[9px] font-bold tracking-wider uppercase px-3 py-1 rounded-full ${statusStyle(selected.status)}`}>
                   {selected.status}
                 </span>
@@ -206,8 +237,8 @@ export default function OrdersView() {
               </div>
             </div>
 
-            {/* Modal body */}
-            <div className="px-7 py-6 space-y-6 max-h-[65vh] overflow-y-auto">
+            {/* Modal body — the only part that scrolls */}
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 space-y-6 sm:px-7 sm:py-6">
 
               {/* Items */}
               {selected.items && selected.items.length > 0 && (
@@ -253,8 +284,12 @@ export default function OrdersView() {
                 </div>
               )}
 
-              {/* Totals — the delivery charge is set in Admin → Settings */}
-              <div className="space-y-1.5 pt-1 border-t border-stone-100">
+            </div>
+
+            {/* Totals stay pinned below the scroll area — the delivery charge
+                is set in Admin → Settings */}
+            <div className="shrink-0 border-t border-stone-100 bg-white px-5 py-4 sm:px-7 sm:py-5">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <p className="font-sans text-xs text-zinc-500">Subtotal</p>
                   <p className="font-sans text-xs text-zinc-700">
@@ -278,7 +313,7 @@ export default function OrdersView() {
               </div>
 
               {/* Total */}
-              <div className="flex items-center justify-between pt-1 border-t border-stone-100">
+              <div className="mt-2 flex items-center justify-between border-t border-stone-100 pt-2">
                 <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400">
                   Total Paid
                 </p>

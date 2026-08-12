@@ -8,6 +8,7 @@ import { ConfirmModal } from "./confirm-modal";
 import {
   formatMoney,
   orderCustomer,
+  orderPaymentMethod,
   resolveImageUrl,
   type Order,
   type OrderPaymentStatus,
@@ -85,6 +86,14 @@ export function OrderDetailPanel({
   // from this screen, so it asks first.
   const [confirmReturn, setConfirmReturn] = useState(false);
   const customer = orderCustomer(order);
+  const payment = orderPaymentMethod(order);
+
+  // Payment is settled once the parcel is delivered — that is when the courier
+  // hands over the cash — so the payment controls appear then even on the New
+  // Orders screen, which otherwise keeps them out of the way.
+  const isDelivered = order.status === "delivered";
+  const canSettlePayment = showPaymentStatus || isDelivered;
+  const awaitingCod = isDelivered && payment.isCod && order.paymentStatus === "unpaid";
 
   return (
     <>
@@ -104,6 +113,16 @@ export function OrderDetailPanel({
           <div>
             <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
               Order #{order.orderNumber}
+              <span
+                className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                  payment.isCod
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                    : "border-slate-200 bg-slate-50 text-slate-600"
+                }`}
+                title={payment.isCod ? "Cash collected by the courier on delivery" : undefined}
+              >
+                {payment.isCod ? "COD" : payment.label}
+              </span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               Placed on {formatDateTime(order.placedAt)}
@@ -112,10 +131,10 @@ export function OrderDetailPanel({
         </div>
 
         <div className="flex flex-wrap gap-3 items-end">
-          {showPaymentStatus && (
+          {canSettlePayment && (
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Payment Status</span>
-              {order.status === "delivered" ? (
+              {isDelivered ? (
                 <RichDropdown
                   value={order.paymentStatus}
                   options={PAYMENT_STATUS_OPTIONS}
@@ -128,6 +147,16 @@ export function OrderDetailPanel({
                 </span>
               )}
             </div>
+          )}
+          {awaitingCod && (
+            <button
+              type="button"
+              disabled={isUpdatingStatus}
+              onClick={() => onUpdatePaymentStatus("paid")}
+              className="h-11 rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {isUpdatingStatus ? "Saving..." : "Mark COD Received"}
+            </button>
           )}
           {(order.status === "pending" || order.status === "processing") && (
             <div className="flex items-end gap-2">
@@ -310,7 +339,7 @@ export function OrderDetailPanel({
                     <span className="font-semibold text-slate-900 text-[15px]">{formatMoney(totals.grand, symbol)}</span>
                   </div>
 
-                  {showPaymentStatus && (
+                  {canSettlePayment && (
                     <>
                       <div className="flex justify-between items-center text-emerald-600 bg-emerald-50/50 px-2 py-1.5 rounded-md border border-emerald-100/50 mt-1">
                         <span className="font-semibold text-[11px]">Paid Amount</span>
@@ -322,6 +351,13 @@ export function OrderDetailPanel({
                         <span className="font-semibold text-xs">{formatMoney(totals.due, symbol)}</span>
                       </div>
                     </>
+                  )}
+
+                  {awaitingCod && (
+                    <p className="mt-1 rounded-md border border-amber-100 bg-amber-50/60 px-2 py-1.5 text-[11px] font-semibold text-amber-700">
+                      Collect {formatMoney(totals.grand, symbol)} from the courier, then mark the
+                      payment received.
+                    </p>
                   )}
                 </div>
               </div>

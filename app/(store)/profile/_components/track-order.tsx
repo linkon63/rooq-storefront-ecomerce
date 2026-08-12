@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FiLoader, FiCheckCircle, FiTruck, FiClock, FiSearch, FiPackage } from "react-icons/fi";
 import { toast } from "sonner";
+import { getCustomerToken } from "@/lib/storefront-api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
@@ -38,25 +39,75 @@ function statusBadgeClass(status: string) {
 export default function TrackOrderView() {
   const [invoiceId, setInvoiceId] = useState("");
   const [order, setOrder]         = useState<Order | null>(null);
+  const [orders, setOrders]       = useState<Order[]>([]);
   const [loading, setLoading]     = useState(false);
   const [searched, setSearched]   = useState(false);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invoiceId.trim()) return;
+  /**
+   * Tracking searches the customer's own orders. Shoppers type the order
+   * number they see on the invoice ("ORD-1234…"), which is not the id the
+   * `/orders/:id` route expects — and that route needs the bearer token
+   * anyway, which is why the old lookup always came back empty.
+   */
+  const loadOrders = useCallback(async () => {
+    const token = getCustomerToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${BASE_URL}/orders/my-orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setOrders(Array.isArray(data) ? data : (data?.data ?? []));
+    } catch { /* silent — the search just finds nothing */ }
+  }, []);
+
+  useEffect(() => { loadOrders(); }, [loadOrders]);
+
+  const findOrder = (query: string, list: Order[]) => {
+    const needle = query.trim().toLowerCase();
+    return (
+      list.find((entry) => entry.orderNumber?.toLowerCase() === needle) ??
+      list.find((entry) => entry.id?.toLowerCase() === needle) ??
+      list.find((entry) => entry.orderNumber?.toLowerCase().includes(needle)) ??
+      null
+    );
+  };
+
+  const track = async (query: string) => {
+    if (!query.trim()) return;
     setLoading(true);
     setSearched(false);
     setOrder(null);
-    try {
-      const res = await fetch(`${BASE_URL}/orders/${invoiceId.trim()}`);
-      if (res.ok) setOrder(await res.json());
-      else toast.error("Order not found. Please check your Invoice ID.");
-    } catch {
-      toast.error("Failed to reach the server. Please try again.");
-    } finally {
-      setLoading(false);
-      setSearched(true);
+
+    // Always re-read the list so a just-placed order is trackable right away.
+    const token = getCustomerToken();
+    let list = orders;
+    if (token) {
+      try {
+        const res = await fetch(`${BASE_URL}/orders/my-orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          list = Array.isArray(data) ? data : (data?.data ?? []);
+          setOrders(list);
+        }
+      } catch {
+        toast.error("Failed to reach the server. Please try again.");
+      }
     }
+
+    const match = findOrder(query, list);
+    if (!match) toast.error("Order not found. Please check your Order Number.");
+    setOrder(match);
+    setLoading(false);
+    setSearched(true);
+  };
+
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    void track(invoiceId);
   };
 
   const isCancelled = order?.status?.toLowerCase() === "cancelled";
@@ -71,32 +122,53 @@ export default function TrackOrderView() {
           Track Your Order
         </h2>
         <p className="font-['Bembo_Std'] text-zinc-400 text-sm italic mt-0.5">
-          Enter your invoice ID to see real-time shipment status.
+          Enter your order number to see the current shipment status.
         </p>
       </div>
 
       {/* ── Search Form ─────────────────────────────────────────────────────── */}
       <form onSubmit={handleTrack} className="flex gap-3 max-w-xl">
-        <div className="flex-grow relative">
+        <div className="grow relative">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 text-sm pointer-events-none" />
           <input
             type="text"
             value={invoiceId}
             onChange={(e) => setInvoiceId(e.target.value)}
-            placeholder="Enter Invoice ID or Order Number"
+            placeholder="Enter Order Number (e.g. ORD-1712345678)"
             className="w-full pl-10 pr-4 py-3 border border-stone-200 bg-white text-sm font-sans text-zinc-800 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition rounded-xl placeholder:text-zinc-300"
             required
           />
         </div>
         <button
-          type="button"
-          onClick={handleTrack as any}
+          type="submit"
           disabled={loading}
           className="shrink-0 inline-flex items-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-7 py-3 rounded-xl transition cursor-pointer shadow-md disabled:opacity-60"
         >
           {loading ? <FiLoader className="animate-spin w-3.5 h-3.5" /> : "Track"}
         </button>
       </form>
+
+      {/* ── Recent orders — one click instead of typing the number ─────────── */}
+      {orders.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-sans text-[10px] font-bold tracking-wider uppercase text-zinc-400">
+            Recent:
+          </span>
+          {orders.slice(0, 5).map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => {
+                setInvoiceId(entry.orderNumber);
+                void track(entry.orderNumber);
+              }}
+              className="border border-stone-200 bg-white hover:border-[#4a9e2f] hover:text-[#4a9e2f] text-zinc-600 font-sans text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-full transition cursor-pointer"
+            >
+              {entry.orderNumber}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Result ──────────────────────────────────────────────────────────── */}
       {searched && (
@@ -142,11 +214,11 @@ export default function TrackOrderView() {
 
                     {STEPS.map((step, idx) => {
                       const { Icon } = step;
-                      const isActive  = step.statuses.includes(order.status.toLowerCase() as any);
-                      const isCurrent = (
+                      const current = order.status.toLowerCase();
+                      const isActive = (step.statuses as readonly string[]).includes(current);
+                      const isCurrent =
                         isActive &&
-                        !STEPS[idx + 1]?.statuses.includes(order.status.toLowerCase() as any)
-                      );
+                        !(STEPS[idx + 1]?.statuses as readonly string[] | undefined)?.includes(current);
                       return (
                         <div key={step.label} className="flex flex-col items-center gap-2 text-center relative z-10">
                           <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
@@ -189,7 +261,7 @@ export default function TrackOrderView() {
               <FiSearch className="text-3xl text-zinc-200 mb-4" />
               <p className="font-['Bembo_Std'] text-zinc-500 text-base italic">Order not found.</p>
               <p className="font-sans text-xs text-zinc-300 mt-1 text-center max-w-xs">
-                Please verify your Invoice ID or Order Number and try again.
+                Please check the order number from your invoice, or pick one of your recent orders above.
               </p>
             </div>
           )}

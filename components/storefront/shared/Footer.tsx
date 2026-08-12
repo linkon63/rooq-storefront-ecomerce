@@ -10,14 +10,13 @@ import {
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
-import { HiOutlineCheckCircle, HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
+import { HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineMapPin } from "react-icons/hi2";
 
 import Logo from "./Logo";
 import type { Policy } from "@/types/policies";
 import type { ShopSettings } from "@/lib/shop-api";
-import { formatCurrency, getCurrencySymbol } from "@/lib/currency";
-import { resolveDeliveryRates, resolveShopContact, telHref } from "@/lib/shop-contact";
+import { resolveShopContact, telHref } from "@/lib/shop-contact";
 
 interface FooterProps {
   policies?: Policy[];
@@ -46,13 +45,6 @@ const FALLBACK_PRODUCTS = [
 
 const PAYMENTS = ["Cash on Delivery", "bKash", "Nagad", "Rocket", "VISA", "Mastercard"];
 
-/** Small, checkable promises — the reasons a first-time buyer clicks order. */
-const TRUST_POINTS = [
-  "100% Cash on Delivery — pay only after you receive it",
-  "Lab-tested purity, sealed at source",
-  "7-day easy replacement & refund",
-];
-
 /** Rendered in this order, skipping any platform the admin left blank. */
 const SOCIAL_PLATFORMS = [
   { key: "facebook", label: "Facebook", Icon: FaFacebookF },
@@ -69,15 +61,6 @@ export default function Footer({ settings, productLinks }: FooterProps) {
   const { phones, emails, address, hours, footerDescription } = resolveShopContact(settings);
   const products = productLinks?.length ? productLinks : FALLBACK_PRODUCTS;
   const social = settings?.socialContact ?? {};
-
-  // The delivery charge is the first thing a shopper asks about, so it sits
-  // with the other promises rather than waiting until checkout.
-  const rates = resolveDeliveryRates(settings);
-  const symbol = getCurrencySymbol(settings?.currency);
-  const trustPoints = [
-    ...TRUST_POINTS,
-    `Delivery ${formatCurrency(rates.inside, symbol)} inside Dhaka, ${formatCurrency(rates.outside, symbol)} outside`,
-  ];
 
   return (
     <footer className="bg-[#f4f7ee] text-[#1f2a17]">
@@ -106,19 +89,6 @@ export default function Footer({ settings, productLinks }: FooterProps) {
             )}
 
             <p className="mt-3 text-sm leading-relaxed text-gray-600">{footerDescription}</p>
-
-            <ul className="mt-5 space-y-2">
-              {trustPoints.map((point) => (
-                <li key={point} className="flex items-start gap-2.5 text-sm text-gray-700">
-                  <HiOutlineCheckCircle
-                    size={18}
-                    className="mt-0.5 shrink-0 text-[#4a9e2f]"
-                    aria-hidden
-                  />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
 
             <div className="mt-6 flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
