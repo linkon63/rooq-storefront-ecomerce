@@ -16,6 +16,7 @@ import {
   type AppSettings,
   type SettingsContactEntry,
 } from "../../../../../lib/admin-api";
+import { formatHour } from "../../../../../lib/business-hours";
 import { useSettingsSaving, useSettingsLoading } from "../../../_hooks/use-settings";
 import {
   SettingsCard,
@@ -52,6 +53,9 @@ export default function ContactPage() {
   const [emails, setEmails] = useState<SettingsContactEntry[]>([{ title: "", value: "" }]);
   const [contacts, setContacts] = useState<SettingsContactEntry[]>([{ title: "", value: "" }]);
   const [social, setSocial] = useState<AppSettings["socialContact"]>({});
+  // 24-hour "HH:mm" — what <input type="time"> reads and writes.
+  const [openingTime, setOpeningTime] = useState("");
+  const [closingTime, setClosingTime] = useState("");
   const { saving, saveSettings } = useSettingsSaving();
   const { loading, loadSettings: loadData } = useSettingsLoading();
 
@@ -63,6 +67,8 @@ export default function ContactPage() {
       setEmails(getContactEntries(data.email));
       setContacts(getContactEntries(data.contactNumber));
       setSocial(data.socialContact ?? {});
+      setOpeningTime(data.openingTime ?? "");
+      setClosingTime(data.closingTime ?? "");
     }
   }, [loadData]);
 
@@ -99,6 +105,8 @@ export default function ContactPage() {
       email: packContactEntries(emails),
       contactNumber: packContactEntries(contacts),
       socialContact: social,
+      openingTime: openingTime || null,
+      closingTime: closingTime || null,
     }, {
       successMessage: "Contact settings saved successfully.",
     });
@@ -233,6 +241,43 @@ export default function ContactPage() {
                     + Add Another
                   </button>
                 )}
+              </div>
+            </div>
+          </SettingsCard>
+
+          {/* ── Business Hours ── */}
+          <SettingsCard title="Business Hours">
+            <div className="grid gap-x-8 gap-y-5 sm:grid-cols-[220px_1fr]">
+              <div className="pt-1">
+                <p className="text-sm font-black text-slate-800">Opening &amp; Closing Hours</p>
+                <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                  Shown in the storefront header, footer and contact page.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <FieldLabel>Opening Time</FieldLabel>
+                    <Input
+                      onChange={setOpeningTime}
+                      type="time"
+                      value={openingTime}
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Closing Time</FieldLabel>
+                    <Input
+                      onChange={setClosingTime}
+                      type="time"
+                      value={closingTime}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs font-medium text-slate-500">
+                  {openingTime && closingTime
+                    ? `Customers will see: ${formatHour(openingTime)} – ${formatHour(closingTime)}`
+                    : "Leave both blank to hide the opening hours on the storefront."}
+                </p>
               </div>
             </div>
           </SettingsCard>

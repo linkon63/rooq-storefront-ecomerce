@@ -1,10 +1,18 @@
-'use client';
-
 import React from 'react';
 import { FiTruck, FiMapPin, FiInfo, FiClock, FiPhone } from 'react-icons/fi';
 import ScrollAnimate from '@/components/ui/scroll-animate';
+import { formatCurrency, getCurrencySymbol } from '@/lib/currency';
+import { fetchShopSettings } from '@/lib/shop-api';
+import { resolveDeliveryRates, resolveShopContact, whatsappHref } from '@/lib/shop-contact';
 
-export default function DeliveryPage() {
+export default async function DeliveryPage() {
+  // Charges and the support number are admin-managed (Settings → General /
+  // Contact) and are the same values the checkout charges the customer.
+  const settings = await fetchShopSettings();
+  const rates = resolveDeliveryRates(settings);
+  const contact = resolveShopContact(settings);
+  const symbol = getCurrencySymbol(settings?.currency);
+
   return (
     <main className="relative w-full bg-[#4A4C48] py-16 px-4 sm:px-6 md:px-8 lg:py-24 overflow-hidden">
       {/* Repeating Luxury Pattern Image */}
@@ -48,6 +56,9 @@ export default function DeliveryPage() {
                 </div>
                 <h3 className="font-['Bembo_Std'] text-2xl text-neutral-800 font-medium mb-3">Within Dhaka</h3>
                 <p className="font-['Gotham'] text-[#C6B485] text-lg font-semibold mb-4">2 – 4 Business Days</p>
+                <p className="font-['Gotham'] text-neutral-800 text-base font-semibold mb-4">
+                  Delivery Charge: {formatCurrency(rates.inside, symbol)}
+                </p>
                 <p className="font-['Bembo_Std'] text-stone-500 text-base leading-relaxed">
                   Fast shipping directly to your doorstep in the capital city.
                 </p>
@@ -60,6 +71,9 @@ export default function DeliveryPage() {
                 </div>
                 <h3 className="font-['Bembo_Std'] text-2xl text-neutral-800 font-medium mb-3">Outside Dhaka</h3>
                 <p className="font-['Gotham'] text-[#C6B485] text-lg font-semibold mb-4">3 – 7 Business Days</p>
+                <p className="font-['Gotham'] text-neutral-800 text-base font-semibold mb-4">
+                  Delivery Charge: {formatCurrency(rates.outside, symbol)}
+                </p>
                 <p className="font-['Bembo_Std'] text-stone-500 text-base leading-relaxed">
                   Reliable shipping options reaching all other districts across Bangladesh.
                 </p>
@@ -81,14 +95,20 @@ export default function DeliveryPage() {
               <p className="font-['Bembo_Std'] text-stone-500 text-sm mb-6">
                 Need help with your order or shipment? Contact us via bKash or WhatsApp:
               </p>
-              <a 
-                href="https://wa.me/8801733600964" 
-                target="_blank" 
+              <div className="mb-6">
+                <span className="font-['Bembo_Std'] text-stone-500 text-sm inline-flex items-center gap-2">
+                  <FiClock className="w-4 h-4 text-[#A38148]" />
+                  Open daily, {contact.hours}
+                </span>
+              </div>
+              <a
+                href={whatsappHref(contact.phone)}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#D2C498] to-[#B9975B] hover:opacity-95 text-white text-base font-medium font-['Gotham'] uppercase tracking-widest rounded-full transition-opacity duration-300"
               >
                 <FiPhone className="w-5 h-5" />
-                017 3360 0964
+                {contact.phone}
               </a>
             </div>
 

@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiTruck, FiShield, FiRefreshCw } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiTruck, FiShield, FiRefreshCw, FiZap } from "react-icons/fi";
 import { toast } from "sonner";
 
 import type { Product } from "@/lib/admin-api";
@@ -46,6 +47,8 @@ function variantValues(variant: Variant) {
 export default function ProductDetails({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const router = useRouter();
+  const [buyingNow, setBuyingNow] = useState(false);
 
   const gallery = useMemo(() => {
     const media = [...(product.media ?? [])].sort(
@@ -79,21 +82,41 @@ export default function ProductDetails({ product }: { product: Product }) {
   const inStock = (selectedVariant?.stockQuantity ?? 0) > 0;
   const wishlisted = isInWishlist(product.id);
 
+  const cartLine = () => ({
+    slug: product.slug,
+    productId: product.id,
+    variantId: selectedVariant?.id,
+    name: product.name,
+    price: payable,
+    image: gallery[0] ?? "",
+    color: "",
+    size: Object.values(selection).join(" / "),
+    attributes: selection,
+    quantity,
+  });
+
   const onAddToCart = () => {
     if (!inStock) return;
-    void addItem({
-      slug: product.slug,
-      productId: product.id,
-      variantId: selectedVariant?.id,
-      name: product.name,
-      price: payable,
-      image: gallery[0] ?? "",
-      color: "",
-      size: Object.values(selection).join(" / "),
-      attributes: selection,
-      quantity,
-    });
+    void addItem(cartLine());
     toast.success(`${product.name} added to cart`);
+  };
+
+  /**
+   * Buy Now is Add to Cart without the detour: the line is added silently — a
+   * toast would be pointless when the shopper is already on the way — and the
+   * push waits for the add so an authenticated cart is on the server before
+   * checkout reads it.
+   */
+  const onBuyNow = async () => {
+    if (!inStock || buyingNow) return;
+    setBuyingNow(true);
+    try {
+      await addItem(cartLine(), { silent: true });
+      router.push("/checkout");
+    } catch {
+      // The cart provider already reports why the line could not be added.
+      setBuyingNow(false);
+    }
   };
 
   return (
@@ -230,10 +253,20 @@ export default function ProductDetails({ product }: { product: Product }) {
               type="button"
               onClick={onAddToCart}
               disabled={!inStock}
-              className="flex h-11 flex-1 min-w-[200px] cursor-pointer items-center justify-center gap-2 bg-[#4a9e2f] px-8 text-sm font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
+              className="flex h-11 flex-1 min-w-[170px] cursor-pointer items-center justify-center gap-2 border border-[#4a9e2f] bg-white px-6 text-sm font-medium text-[#4a9e2f] transition-all duration-200 hover:bg-[#f4f7ee] disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
             >
               <FiShoppingCart size={16} />
               Add to Cart
+            </button>
+
+            <button
+              type="button"
+              onClick={onBuyNow}
+              disabled={!inStock || buyingNow}
+              className="flex h-11 flex-1 min-w-[170px] cursor-pointer items-center justify-center gap-2 bg-[#4a9e2f] px-6 text-sm font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
+            >
+              <FiZap size={16} />
+              {buyingNow ? "Please wait…" : "Buy Now"}
             </button>
 
             <button

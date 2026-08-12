@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { FiChevronDown, FiRefreshCw, FiShield } from "react-icons/fi";
 
+import { FALLBACK_DELIVERY_RATES, type DeliveryRates } from "@/lib/shop-contact";
+
 export const money = (value: number) =>
   `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
@@ -12,11 +14,24 @@ export type DeliveryZone = {
   charge: number;
 };
 
-export const DEFAULT_ZONES: DeliveryZone[] = [
-  { id: "inside", label: "Inside Dhaka", charge: 60 },
-  { id: "near", label: "Near City", charge: 90 },
-  { id: "outside", label: "Outside Of Dhaka", charge: 120 },
-];
+/** The three zones the shop charges for, priced from Admin → Settings. */
+export function zonesFromRates(rates: DeliveryRates): DeliveryZone[] {
+  return [
+    { id: "inside", label: "Inside Dhaka", charge: rates.inside },
+    { id: "near", label: "Near City", charge: rates.nearCity },
+    { id: "outside", label: "Outside Of Dhaka", charge: rates.outside },
+  ];
+}
+
+/** Stand-in prices until the settings row has been fetched. */
+export const DEFAULT_ZONES: DeliveryZone[] = zonesFromRates(FALLBACK_DELIVERY_RATES);
+
+/**
+ * Coupons are switched off across the storefront for now — the admin coupon
+ * screen is not live yet, so an Apply Coupon box that always failed was worse
+ * than none. Flip this to bring the row (and the checkout discount line) back.
+ */
+export const COUPONS_ENABLED = false;
 
 const PAYMENT_MARKS = ["AMEX", "bKash", "Nagad", "Rocket", "Mastercard", "VISA", "SureCash", "Upay"];
 
@@ -28,6 +43,7 @@ export default function OrderSummary({
   subtotal,
   itemCount,
   zone,
+  zones = DEFAULT_ZONES,
   onZoneChange,
   discount = 0,
   onApplyCoupon,
@@ -38,6 +54,7 @@ export default function OrderSummary({
   subtotal: number;
   itemCount?: number;
   zone: DeliveryZone;
+  zones?: DeliveryZone[];
   onZoneChange: (zone: DeliveryZone) => void;
   discount?: number;
   onApplyCoupon?: (code: string) => void;
@@ -66,6 +83,7 @@ export default function OrderSummary({
           <dd className="font-display font-semibold text-[#1f2a17]">{money(subtotal)}</dd>
         </div>
 
+        {COUPONS_ENABLED && (
         <div className="py-4">
           <div className="flex items-center justify-between">
             <dt className="font-semibold text-[#1f2a17]">Coupon Discount</dt>
@@ -108,6 +126,7 @@ export default function OrderSummary({
             </form>
           )}
         </div>
+        )}
 
         {/* Delivery zone — charges come from Admin → Settings. */}
         <div className="relative py-4">
@@ -126,7 +145,7 @@ export default function OrderSummary({
 
           {zoneOpen && (
             <ul className="absolute z-10 mt-2 w-56 border border-gray-200 bg-white shadow-lg">
-              {DEFAULT_ZONES.map((option) => (
+              {zones.map((option) => (
                 <li key={option.id}>
                   <button
                     type="button"

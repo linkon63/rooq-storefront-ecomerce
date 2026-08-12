@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import "swiper/css";
+import { FALLBACK_PHONES, whatsappHref } from "@/lib/shop-contact";
 
 const instagramImages = [
   "/images/footer/instagram/instagram-1.png",
@@ -46,7 +47,7 @@ export default function Instagram() {
               <FaInstagram className="text-xl" />
             </a>
             <a 
-              href="https://wa.me/8801733600964" 
+              href={whatsappHref(FALLBACK_PHONES[0].value)}
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-olive-slate hover:text-neutral-600 transition"

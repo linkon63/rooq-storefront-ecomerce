@@ -4,7 +4,7 @@ import { InfiniteScroll } from "./infinite-scroll";
 import { AdminIcon, PageHeader } from "./admin-shell";
 import { useOrders } from "../_hooks/use-orders";
 import { OrderDetailPanel } from "./order-detail-panel";
-import { formatMoney, type OrderStatus, type OrderPaymentStatus } from "../../../lib/admin-api";
+import { formatMoney, orderCustomer, type OrderStatus, type OrderPaymentStatus } from "../../../lib/admin-api";
 import { useCurrency } from "../../../lib/currency-context";
 import { formatDateTime } from "../../../lib/utils";
 
@@ -174,6 +174,9 @@ export default function OrderPageView({
               ) : (
                 orders.map((order) => {
                   const isSelected = order.id === selectedId;
+                  // Guest orders carry their buyer on the order itself, so the
+                  // row names them the same way an account order is named.
+                  const customer = orderCustomer(order);
                   return (
                     <div key={order.id}>
                       <button
@@ -192,6 +195,15 @@ export default function OrderPageView({
                           <span className="shrink-0 font-semibold text-slate-900 text-sm">
                             {formatMoney(order.total, symbol)}
                           </span>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600 w-full">
+                          <span className="truncate font-medium">{customer.name}</span>
+                          {customer.isGuest && (
+                            <span className="shrink-0 rounded border border-slate-200 bg-slate-50 px-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                              Guest
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between text-[11px] text-slate-500 w-full">

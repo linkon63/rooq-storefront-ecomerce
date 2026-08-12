@@ -10,12 +10,14 @@ import {
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
-import { HiOutlineCheckCircle, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
+import { HiOutlineCheckCircle, HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineMapPin } from "react-icons/hi2";
 
 import Logo from "./Logo";
 import type { Policy } from "@/types/policies";
-import { contactEntries, type ShopContactEntry, type ShopSettings } from "@/lib/shop-api";
+import type { ShopSettings } from "@/lib/shop-api";
+import { formatCurrency, getCurrencySymbol } from "@/lib/currency";
+import { resolveDeliveryRates, resolveShopContact, telHref } from "@/lib/shop-contact";
 
 interface FooterProps {
   policies?: Policy[];
@@ -44,26 +46,12 @@ const FALLBACK_PRODUCTS = [
 
 const PAYMENTS = ["Cash on Delivery", "bKash", "Nagad", "Rocket", "VISA", "Mastercard"];
 
-/**
- * The blurb under the logo does the trust work the tagline cannot: who we buy
- * from, how you pay, and what happens if the parcel disappoints you. Kept to
- * four lines at the footer column width — the trust points below carry the rest.
- */
-const BRAND_BLURB =
-  "Pure, unadulterated organic food sourced directly from farming families across Bangladesh. Every batch is lab-tested and sealed at source, then delivered to your door. Pay cash on delivery — if it is not what we promised, we replace it.";
-
 /** Small, checkable promises — the reasons a first-time buyer clicks order. */
 const TRUST_POINTS = [
   "100% Cash on Delivery — pay only after you receive it",
   "Lab-tested purity, sealed at source",
   "7-day easy replacement & refund",
-  "Nationwide delivery to all 64 districts",
 ];
-
-/** Shown only until Admin → Settings → Contact has been filled in. */
-const FALLBACK_PHONES: ShopContactEntry[] = [{ title: "Hotline", value: "017 3360 0964" }];
-const FALLBACK_EMAILS: ShopContactEntry[] = [{ title: "Support", value: "support@organishi.com" }];
-const FALLBACK_ADDRESS = "Sector 13, Uttara, Dhaka 1230, Bangladesh";
 
 /** Rendered in this order, skipping any platform the admin left blank. */
 const SOCIAL_PLATFORMS = [
@@ -75,24 +63,21 @@ const SOCIAL_PLATFORMS = [
   { key: "linkedin", label: "LinkedIn", Icon: FaLinkedinIn },
 ] as const;
 
-/** Local numbers are shown as typed but must dial in international form. */
-function telHref(number: string): string {
-  const digits = number.replace(/[^\d+]/g, "");
-  if (digits.startsWith("+")) return `tel:${digits}`;
-  if (digits.startsWith("0")) return `tel:+880${digits.slice(1)}`;
-  return `tel:${digits}`;
-}
-
 export default function Footer({ settings, productLinks }: FooterProps) {
-  // Everything in the Contact Us column is admin-managed; the constants below
-  // only stand in while the settings row is still empty.
-  const apiPhones = contactEntries(settings?.contactNumber);
-  const apiEmails = contactEntries(settings?.email);
-  const phones = apiPhones.length ? apiPhones : FALLBACK_PHONES;
-  const emails = apiEmails.length ? apiEmails : FALLBACK_EMAILS;
-  const address = settings?.branchAddress?.trim() || FALLBACK_ADDRESS;
+  // Everything in the brand blurb and the Contact Us column is admin-managed;
+  // `resolveShopContact` falls back to the shop defaults until it is filled in.
+  const { phones, emails, address, hours, footerDescription } = resolveShopContact(settings);
   const products = productLinks?.length ? productLinks : FALLBACK_PRODUCTS;
   const social = settings?.socialContact ?? {};
+
+  // The delivery charge is the first thing a shopper asks about, so it sits
+  // with the other promises rather than waiting until checkout.
+  const rates = resolveDeliveryRates(settings);
+  const symbol = getCurrencySymbol(settings?.currency);
+  const trustPoints = [
+    ...TRUST_POINTS,
+    `Delivery ${formatCurrency(rates.inside, symbol)} inside Dhaka, ${formatCurrency(rates.outside, symbol)} outside`,
+  ];
 
   return (
     <footer className="bg-[#f4f7ee] text-[#1f2a17]">
@@ -120,10 +105,10 @@ export default function Footer({ settings, productLinks }: FooterProps) {
               </p>
             )}
 
-            <p className="mt-3 text-sm leading-relaxed text-gray-600">{BRAND_BLURB}</p>
+            <p className="mt-3 text-sm leading-relaxed text-gray-600">{footerDescription}</p>
 
             <ul className="mt-5 space-y-2">
-              {TRUST_POINTS.map((point) => (
+              {trustPoints.map((point) => (
                 <li key={point} className="flex items-start gap-2.5 text-sm text-gray-700">
                   <HiOutlineCheckCircle
                     size={18}
@@ -196,6 +181,15 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                       </a>
                     </span>
                   ))}
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
+                  <HiOutlineClock size={18} />
+                </span>
+                <span>
+                  <span className="block text-xs text-gray-400">Open Daily</span>
+                  {hours}
                 </span>
               </li>
             </ul>

@@ -1,24 +1,33 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrency } from "@/lib/currency-context";
 import { usePlaceOrder } from "@/app/_hooks/use-place-order";
-import { LuLoader, LuArrowLeft, LuLock, LuMapPin, LuTruck } from "react-icons/lu";
+import { LuLoader, LuArrowLeft, LuLock, LuTruck, LuPlus, LuFileText } from "react-icons/lu";
 import type { AddressForm, DeliveryZone } from "@/lib/types";
-import { fetchShopSettings } from "@/lib/shop-api";
-import MapPickerModal from "./_components/map-picker-modal";
+import { fetchShopSettings, fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
+import { COUPONS_ENABLED } from "@/components/storefront/checkout/OrderSummary";
+import { fetchMyAddresses, formatAddress, type CustomerAddress } from "@/lib/address-api";
+import PolicyModal from "./_components/policy-modal";
 
 /** Rates come from Admin → Settings → General; only the label lives here. */
 const DELIVERY_ZONES: { value: DeliveryZone; label: string; hint: string }[] = [
-  { value: "inside", label: "Inside City", hint: "Within the city limits" },
-  { value: "near_city", label: "Near City", hint: "Suburbs and nearby towns" },
-  { value: "outside", label: "Outside City", hint: "Anywhere else in the country" },
+  { value: "inside", label: "Inside Dhaka", hint: "Within Dhaka city" },
+  { value: "near_city", label: "Near Dhaka", hint: "Savar, Gazipur, Narayanganj and nearby" },
+  { value: "outside", label: "Outside Dhaka", hint: "Anywhere else in Bangladesh" },
 ];
+
+/** Organishi ships within Bangladesh only, so the country is not a choice. */
+const COUNTRY = "Bangladesh";
+
+/** The two policies a shopper is asked to accept before paying. */
+const CHECKOUT_POLICY_IDS = ["return", "refund"] as const;
 
 const emptyAddress: AddressForm = {
   email: "",
@@ -29,8 +38,11 @@ const emptyAddress: AddressForm = {
   city: "",
   state: "",
   postalCode: "",
-  country: "",
+  country: COUNTRY,
 };
+
+const INPUT_CLASS =
+  "w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500";
 
 export default function CheckoutPage() {
   const { items } = useCart();
@@ -44,10 +56,8 @@ export default function CheckoutPage() {
     email: user?.email || "",
     fullName: user?.name || "",
   }));
-  const [useSameAddressForShipping, setUseSameAddressForShipping] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("cod");
+  const [paymentMethod] = useState<"online" | "cod">("cod");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [mapPickerOpen, setMapPickerOpen] = useState(false);
   const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("inside");
   const [deliveryRates, setDeliveryRates] = useState<Record<DeliveryZone, number>>({
     inside: 0,
@@ -55,13 +65,14 @@ export default function CheckoutPage() {
     outside: 0,
   });
 
-  const handleMapSelect = useCallback(
-    (data: { addressLine1: string; city: string; state: string; postalCode: string; country: string }) => {
-      setAddress((prev) => ({ ...prev, ...data }));
-      setMapPickerOpen(false);
-    },
-    []
-  );
+  // Saved addresses (signed-in shoppers only). `null` selection means the
+  // shopper chose "use a different address" and is typing a new one.
+  const [savedAddresses, setSavedAddresses] = useState<CustomerAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [enteringNewAddress, setEnteringNewAddress] = useState(false);
+
+  const [policies, setPolicies] = useState<ShopPolicy[]>([]);
+  const [openPolicy, setOpenPolicy] = useState<ShopPolicy | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -90,26 +101,99 @@ export default function CheckoutPage() {
     };
   }, []);
 
+  // Return and refund policies are admin-written; the checkbox links open them.
+  useEffect(() => {
+    let active = true;
+    fetchShopPolicies().then((all) => {
+      if (active) setPolicies(all);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Saved addresses: the default one is preselected so a returning customer can
+  // place an order without retyping anything.
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSavedAddresses([]);
+      setSelectedAddressId(null);
+      return;
+    }
+    let active = true;
+    fetchMyAddresses()
+      .then((list) => {
+        if (!active) return;
+        setSavedAddresses(list);
+        setSelectedAddressId(list[0]?.id ?? null);
+        setEnteringNewAddress(list.length === 0);
+      })
+      .catch(() => {
+        if (active) setEnteringNewAddress(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
+
+  const checkoutPolicies = CHECKOUT_POLICY_IDS.map((id) =>
+    policies.find((policy) => policy.id === id),
+  ).filter((policy): policy is ShopPolicy => Boolean(policy));
+
+  const selectedAddress = savedAddresses.find((entry) => entry.id === selectedAddressId) ?? null;
+  const usingSavedAddress = Boolean(selectedAddress) && !enteringNewAddress;
+
   const shipping = deliveryRates[deliveryZone];
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const estTax = 0;
-  const promoCodeDiscount = 0;
-  const total = subtotal + shipping + estTax - promoCodeDiscount;
+  const total = subtotal + shipping;
+
+  function startNewAddress() {
+    setEnteringNewAddress(true);
+    setSelectedAddressId(null);
+    setAddress({
+      ...emptyAddress,
+      email: user?.email || "",
+      fullName: user?.name || "",
+    });
+  }
+
+  function useSavedAddresses() {
+    setEnteringNewAddress(false);
+    setSelectedAddressId(savedAddresses[0]?.id ?? null);
+  }
 
   async function handlePlaceOrder(e: FormEvent) {
     e.preventDefault();
     if (!agreeToTerms) {
-      alert("Please agree to the terms and conditions.");
+      toast.error("Please agree to the terms, return and refund policies.");
       return;
     }
     if (items.length === 0) {
-      alert("Your cart is empty. Please add items before placing an order.");
+      toast.error("Your cart is empty. Please add items before placing an order.");
       return;
     }
+
+    // A picked saved address still travels as a form payload — the confirmation
+    // page and the invoice print from it.
+    const payload: AddressForm = usingSavedAddress && selectedAddress
+      ? {
+          email: user?.email ?? address.email,
+          fullName: selectedAddress.fullName,
+          phone: selectedAddress.phone,
+          addressLine1: selectedAddress.addressLine1,
+          addressLine2: selectedAddress.addressLine2 ?? "",
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          postalCode: selectedAddress.postalCode,
+          country: selectedAddress.country || COUNTRY,
+        }
+      : { ...address, country: COUNTRY };
+
     try {
-      const result = await placeOrder(address, {
+      const result = await placeOrder(payload, {
         paymentMethod,
         deliveryZone,
+        addressId: usingSavedAddress ? selectedAddress?.id : undefined,
       });
       sessionStorage.setItem("orderResult", JSON.stringify(result));
       router.push("/confirmation");
@@ -131,167 +215,201 @@ export default function CheckoutPage() {
                   <LuArrowLeft className="w-5 sm:w-6 h-5 sm:h-6" />
                 </Link>
                 <h1 className="font-bembo text-3xl sm:text-4xl leading-9 sm:leading-10 text-[#4A4A4A] font-normal">
-                  Billing Details
+                  Delivery Details
                 </h1>
               </div>
 
-              {/* Dashed Border Billing Box */}
-              <div className="border border-dashed border-zinc-300 p-4 rounded-sm space-y-5">
-                {/* User Info */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                      Full Name *
+              {/* ── Saved addresses ── */}
+              {isAuthenticated && savedAddresses.length > 0 && !enteringNewAddress && (
+                <div className="mb-5 space-y-3">
+                  <p className="font-gotham text-xs uppercase tracking-wider text-[#999999]">
+                    Deliver to
+                  </p>
+                  {savedAddresses.map((entry) => (
+                    <label
+                      key={entry.id}
+                      className={`flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors ${
+                        selectedAddressId === entry.id
+                          ? "border-[#4a9e2f] bg-[#f4f7ee]/40"
+                          : "border-zinc-200 hover:border-zinc-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="savedAddress"
+                        value={entry.id}
+                        checked={selectedAddressId === entry.id}
+                        onChange={() => setSelectedAddressId(entry.id)}
+                        className="sr-only"
+                      />
+                      <span
+                        className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
+                          selectedAddressId === entry.id ? "border-[#4a9e2f]" : "border-zinc-300"
+                        }`}
+                      >
+                        {selectedAddressId === entry.id && (
+                          <span className="h-2 w-2 rounded-full bg-[#4a9e2f]" />
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="font-gotham text-sm font-semibold text-[#222222]">
+                            {entry.fullName}
+                          </span>
+                          {entry.isDefault && (
+                            <span className="rounded bg-[#4a9e2f]/10 px-1.5 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-[#4a9e2f]">
+                              Default
+                            </span>
+                          )}
+                        </span>
+                        <span className="mt-0.5 block font-gotham text-xs text-zinc-500">
+                          {entry.phone}
+                        </span>
+                        <span className="mt-1 block font-gotham text-xs leading-relaxed text-zinc-600">
+                          {formatAddress(entry)}
+                        </span>
+                      </span>
                     </label>
-                    <input
-                      required
-                      value={address.fullName}
-                      onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
-                      placeholder="Enter full name"
-                      className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                      Email *
-                    </label>
-                    <input
-                      required
-                      type="email"
-                      value={address.email}
-                      onChange={(e) => setAddress({ ...address, email: e.target.value })}
-                      placeholder="Enter email address"
-                      className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                      Phone *
-                    </label>
-                    <input
-                      required
-                      value={address.phone}
-                      onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                      placeholder="Enter phone number"
-                      className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
-                    />
-                  </div>
-                </div>
+                  ))}
 
-                {/* Province, City, Town Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                      Province/Region *
-                    </label>
-                    <input
-                      required
-                      value={address.state}
-                      onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                      placeholder="Enter province/region name"
-                      className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                      City *
-                    </label>
-                    <input
-                      required
-                      value={address.city}
-                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                      placeholder="Enter city name"
-                      className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                      Town *
-                    </label>
-                    <input
-                      required
-                      value={address.postalCode}
-                      onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
-                      placeholder="Enter town name"
-                      className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={startNewAddress}
+                    className="inline-flex cursor-pointer items-center gap-2 font-gotham text-xs font-bold uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                  >
+                    <LuPlus className="h-4 w-4" />
+                    Use a different address
+                  </button>
                 </div>
+              )}
 
-                {/* Full Address with Map Button */}
-                <div>
-                  <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                    Full Address *
-                  </label>
-                  <div className="flex flex-col sm:flex-row gap-2">
+              {/* ── New / guest address form ── */}
+              {(!isAuthenticated || enteringNewAddress || savedAddresses.length === 0) && (
+                <div className="border border-dashed border-zinc-300 p-4 rounded-sm space-y-5">
+                  {isAuthenticated && savedAddresses.length > 0 && (
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-gotham text-xs uppercase tracking-wider text-[#999999]">
+                        New delivery address
+                      </p>
+                      <button
+                        type="button"
+                        onClick={useSavedAddresses}
+                        className="cursor-pointer font-gotham text-xs font-bold uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                      >
+                        Use a saved address
+                      </button>
+                    </div>
+                  )}
+
+                  {/* User Info */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        Full Name *
+                      </label>
+                      <input
+                        required
+                        value={address.fullName}
+                        onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
+                        placeholder="Enter full name"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        Email *
+                      </label>
+                      <input
+                        required
+                        type="email"
+                        value={address.email}
+                        onChange={(e) => setAddress({ ...address, email: e.target.value })}
+                        placeholder="Enter email address"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        Phone *
+                      </label>
+                      <input
+                        required
+                        value={address.phone}
+                        onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+                        placeholder="01XXXXXXXXX"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+
+                  {/* District, City, Area Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        District *
+                      </label>
+                      <input
+                        required
+                        value={address.state}
+                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                        placeholder="e.g. Dhaka"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        City *
+                      </label>
+                      <input
+                        required
+                        value={address.city}
+                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                        placeholder="Enter city name"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        Area / Post Code *
+                      </label>
+                      <input
+                        required
+                        value={address.postalCode}
+                        onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
+                        placeholder="e.g. Uttara / 1230"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Full Address */}
+                  <div>
+                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                      Full Address *
+                    </label>
                     <input
                       required
                       value={address.addressLine1}
                       onChange={(e) => setAddress({ ...address, addressLine1: e.target.value })}
-                      placeholder="Full address"
-                      className="flex-1 p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500"
+                      placeholder="House, road, block — where the rider should hand it over"
+                      className={INPUT_CLASS}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setMapPickerOpen(true)}
-                      className="w-full sm:w-auto px-4 py-3 bg-stone-100 hover:bg-stone-200 text-[#222222] text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-2 cursor-pointer font-gotham"
-                    >
-                      <LuMapPin className="w-4 h-4" />
-                      Set from Map
-                    </button>
                   </div>
-                </div>
 
-                {/* Country */}
-                <div>
-                  <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                    Country *
-                  </label>
-                  <select
-                    required
-                    value={address.country}
-                    onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                    className="w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] leading-4 focus:outline-stone-500"
-                  >
-                    <option value="">Select country</option>
-                    <option value="Bangladesh">Bangladesh</option>
-                    <option value="India">India</option>
-                    <option value="Pakistan">Pakistan</option>
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Canada">Canada</option>
-                    <option value="Australia">Australia</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                {/* Checkbox: Same Address for Shipping */}
-                <div className="flex items-center gap-3">
-                  <div className="relative flex items-center justify-center">
-                    <input
-                      type="checkbox"
-                      id="sameAddress"
-                      checked={useSameAddressForShipping}
-                      onChange={(e) => setUseSameAddressForShipping(e.target.checked)}
-                      className="peer sr-only"
-                    />
-                    <label
-                      htmlFor="sameAddress"
-                      className="w-5 h-5 border border-zinc-400 rounded cursor-pointer flex items-center justify-center peer-checked:bg-[#A3A3A3] peer-checked:border-[#A3A3A3] transition-colors"
-                    >
-                      {useSameAddressForShipping && (
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
+                  {/* Country — Organishi delivers inside Bangladesh only */}
+                  <div>
+                    <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                      Country
                     </label>
+                    <div className="w-full rounded-md bg-stone-50 p-3 font-gotham text-sm text-[#555555] outline outline-1 outline-offset-[-1px] outline-zinc-200">
+                      {COUNTRY}
+                    </div>
+                    <p className="mt-1 font-gotham text-[11px] text-zinc-500">
+                      We currently deliver within Bangladesh only.
+                    </p>
                   </div>
-                  <label htmlFor="sameAddress" className="font-gotham text-sm sm:text-lg text-[#222222] cursor-pointer select-none">
-                    Use same address for shipping
-                  </label>
                 </div>
-              </div>
-
+              )}
             </div>
 
             {/* ── Right Column: Summary & Payment ── */}
@@ -392,16 +510,15 @@ export default function CheckoutPage() {
                     {shipping > 0 ? formatCurrency(shipping) : "Free"}
                   </span>
                 </div>
-                <div className="h-px bg-zinc-200" />
-                <div className="flex justify-between items-center">
-                  <span className="font-bembo text-base text-[#555555]">Promo Code Discount</span>
-                  <span className="font-gotham text-base font-medium text-[#222222]">--</span>
-                </div>
-                <div className="h-px bg-zinc-200" />
-                <div className="flex justify-between items-center">
-                  <span className="font-bembo text-base text-[#555555]">Est. Tax</span>
-                  <span className="font-gotham text-base font-medium text-[#222222]">--</span>
-                </div>
+                {COUPONS_ENABLED && (
+                  <>
+                    <div className="h-px bg-zinc-200" />
+                    <div className="flex justify-between items-center">
+                      <span className="font-bembo text-base text-[#555555]">Promo Code Discount</span>
+                      <span className="font-gotham text-base font-medium text-[#222222]">--</span>
+                    </div>
+                  </>
+                )}
                 <div className="border-t border-dashed border-zinc-200/80" />
               </div>
 
@@ -451,6 +568,28 @@ export default function CheckoutPage() {
 
               <div className="border-b border-solid border-zinc-300 mb-6" />
 
+              {/* Return & refund policies — written by the shop, read here */}
+              {checkoutPolicies.length > 0 && (
+                <div className="mb-6 rounded-md border border-zinc-200 bg-stone-50/60 p-4">
+                  <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] mb-2 flex items-center gap-1.5">
+                    <LuFileText className="w-3.5 h-3.5" />
+                    Before you order
+                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2">
+                    {checkoutPolicies.map((policy) => (
+                      <button
+                        key={policy.id}
+                        type="button"
+                        onClick={() => setOpenPolicy(policy)}
+                        className="cursor-pointer font-gotham text-sm font-semibold text-[#4a9e2f] underline underline-offset-2 hover:text-[#3d8626]"
+                      >
+                        Read {policy.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Terms Checkbox */}
               <div className="flex items-start gap-3 mb-6">
                 <div className="relative flex items-center justify-center mt-0.5">
@@ -473,7 +612,7 @@ export default function CheckoutPage() {
                   </label>
                 </div>
                 <label htmlFor="terms" className="font-gotham text-sm text-[#222222] cursor-pointer select-none">
-                  I have read and agree to the terms and conditions
+                  I have read and agree to the terms, return and refund policies
                   <span className="text-[#4a9e2f]"> *</span>
                 </label>
               </div>
@@ -506,11 +645,8 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
-      <MapPickerModal
-        open={mapPickerOpen}
-        onClose={() => setMapPickerOpen(false)}
-        onSelect={handleMapSelect}
-      />
+
+      <PolicyModal policy={openPolicy} onClose={() => setOpenPolicy(null)} />
     </main>
   );
 }

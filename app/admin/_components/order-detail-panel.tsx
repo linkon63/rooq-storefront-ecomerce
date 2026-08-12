@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import { RichDropdown } from "./rich-dropdown";
 import { AdminIcon, ProductThumb } from "./admin-shell";
+import { ConfirmModal } from "./confirm-modal";
 import {
   formatMoney,
+  orderCustomer,
   resolveImageUrl,
   type Order,
   type OrderPaymentStatus,
@@ -77,6 +81,11 @@ export function OrderDetailPanel({
   isUpdatingStatus = false,
   showPaymentStatus = true,
 }: OrderDetailPanelProps) {
+  // Marking an order returned puts it in the refund queue and cannot be undone
+  // from this screen, so it asks first.
+  const [confirmReturn, setConfirmReturn] = useState(false);
+  const customer = orderCustomer(order);
+
   return (
     <>
       <div className="mb-4 flex flex-col justify-between gap-4 rounded-lg bg-white p-4 sm:flex-row sm:items-center shadow-xs border border-slate-200/60">
@@ -157,7 +166,7 @@ export function OrderDetailPanel({
               <button
                 type="button"
                 disabled={isUpdatingStatus}
-                onClick={() => onUpdateOrderStatus("returned")}
+                onClick={() => setConfirmReturn(true)}
                 className="h-10 rounded-lg bg-amber-500 px-5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isUpdatingStatus ? "Processing..." : "Return"}
@@ -176,21 +185,26 @@ export function OrderDetailPanel({
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 font-semibold text-slate-700 text-sm">
-                {(order.user?.name ?? "G").charAt(0).toUpperCase()}
+                {customer.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">
-                  {order.user?.name ?? "Guest Customer"}
+                <p className="text-sm font-semibold text-slate-800 truncate flex items-center gap-2">
+                  {customer.name}
+                  {customer.isGuest && (
+                    <span className="shrink-0 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      Guest
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-slate-400 truncate mt-0.5">
-                  {order.user?.email ?? "No email provided"}
+                  {customer.email ?? "No email provided"}
                 </p>
               </div>
             </div>
-            {order.user?.phone && (
+            {customer.phone && (
               <div className="flex items-center gap-2 text-xs text-slate-600">
                 <span className="font-medium text-slate-400">Phone:</span>
-                <span className="font-semibold">{order.user.phone}</span>
+                <span className="font-semibold">{customer.phone}</span>
               </div>
             )}
           </div>
@@ -202,20 +216,8 @@ export function OrderDetailPanel({
             Shipping Address
           </h3>
           <p className="text-xs font-semibold text-slate-700 leading-relaxed">
-            {order.address
-              ? [
-                  order.address.fullName || order.user?.name,
-                  order.address.phone || order.user?.phone,
-                  order.address.addressLine1,
-                  order.address.addressLine2,
-                  order.address.city,
-                  order.address.state,
-                  order.address.postalCode,
-                  order.address.country,
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "No address details available"
-              : "No address details available"}
+            {[customer.name, customer.phone, customer.address].filter(Boolean).join(", ") ||
+              "No address details available"}
           </p>
         </div>
       </div>
@@ -327,6 +329,19 @@ export function OrderDetailPanel({
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmReturn}
+        onClose={() => setConfirmReturn(false)}
+        onConfirm={() => {
+          setConfirmReturn(false);
+          onUpdateOrderStatus("returned");
+        }}
+        title={`Return order #${order.orderNumber}?`}
+        message={`This marks the order as returned and moves it to Returned Orders for ${customer.name}. Restock the items and settle the refund separately.`}
+        confirmText="Yes, mark as returned"
+        cancelText="Keep as delivered"
+      />
     </>
   );
 }

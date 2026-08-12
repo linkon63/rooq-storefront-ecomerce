@@ -338,3 +338,41 @@ input:disabled {
 }
 
 .animate-fade-up { animation: fade-up-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ── Print ────────────────────────────────────────────────────────────────
+   Printing is only ever used for the order invoice, so the site chrome and
+   anything marked `no-print` is dropped and the sheet is given plain paper
+   margins instead of the on-screen card treatment. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .invoice-sheet {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  .invoice-sheet table {
+    break-inside: auto;
+  }
+
+  .invoice-sheet tr {
+    break-inside: avoid;
+  }
+}

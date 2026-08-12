@@ -295,6 +295,59 @@ export type OrderItem = {
   variant?: ProductVariant | null;
 };
 
+/** What guest checkout stores on `order.shippingAddress`. */
+export type GuestShippingAddress = {
+  email?: string | null;
+  fullName?: string | null;
+  phone?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+};
+
+/** Who an order belongs to, whether it came from an account or a guest. */
+export type OrderCustomer = {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  isGuest: boolean;
+};
+
+export function orderCustomer(order: Order): OrderCustomer {
+  const guest = order.shippingAddress ?? null;
+  const isGuest = !order.user;
+
+  const address = order.address
+    ? [
+        order.address.addressLine1,
+        order.address.addressLine2,
+        order.address.city,
+        order.address.state,
+        order.address.postalCode,
+        order.address.country,
+      ]
+    : [
+        guest?.addressLine1,
+        guest?.addressLine2,
+        guest?.city,
+        guest?.state,
+        guest?.postalCode,
+        guest?.country,
+      ];
+
+  return {
+    name: order.user?.name ?? guest?.fullName ?? "Guest customer",
+    email: order.user?.email ?? guest?.email ?? null,
+    phone: order.user?.phone ?? order.address?.phone ?? guest?.phone ?? null,
+    address: address.filter(Boolean).join(", ") || null,
+    isGuest,
+  };
+}
+
 export type Order = {
   id: string;
   orderNumber: string;
@@ -308,6 +361,11 @@ export type Order = {
   placedAt: string;
   user?: { id: string; name: string; email: string; phone?: string | null } | null;
   address?: CustomerAddress | null;
+  /**
+   * Guest checkout has no user row and no saved address — the name, phone,
+   * e-mail and address typed at checkout are stored on the order as JSON.
+   */
+  shippingAddress?: GuestShippingAddress | null;
   items?: OrderItem[];
   payments?: { id: string; amount: string | number; method: string; status: string }[];
 };
@@ -354,6 +412,11 @@ export type AppSettings = {
   icon?: string | null;
   favicon?: string | null;
   slogan?: string | null;
+  /** Paragraph under the logo in the storefront footer. */
+  footerDescription?: string | null;
+  /** Business hours as 24-hour "HH:mm" strings — the storefront formats them. */
+  openingTime?: string | null;
+  closingTime?: string | null;
   isTopBarVisible?: boolean;
   hideOutOfStock?: boolean;
   branchName?: string | null;

@@ -124,6 +124,11 @@ export type ShopSettings = {
   id: string;
   shopName: string;
   slogan: string;
+  /** Paragraph under the logo in the footer — Admin → Settings → General. */
+  footerDescription?: string | null;
+  /** 24-hour "HH:mm" — Admin → Settings → Contact. */
+  openingTime?: string | null;
+  closingTime?: string | null;
   logo?: string | null;
   icon?: string | null;
   favicon?: string | null;

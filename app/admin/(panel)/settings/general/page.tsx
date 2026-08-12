@@ -9,6 +9,7 @@ import {
   Input,
   SaveButton,
   StatusToggle,
+  Textarea,
 } from "../_components/settings-ui";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -237,6 +238,7 @@ export default function GeneralSettingsPage() {
       parentCompany: settings.parentCompany,
       parentCompanyLink: settings.parentCompanyLink,
       slogan: settings.slogan,
+      footerDescription: settings.footerDescription,
       isTopBarVisible: settings.isTopBarVisible,
       hideOutOfStock: settings.hideOutOfStock,
       deliveryChargeInside: Number(settings.deliveryChargeInside ?? 0),
@@ -457,6 +459,25 @@ export default function GeneralSettingsPage() {
                     value={settings.slogan ?? ""}
                   />
                 </div>
+              </div>
+            </SettingsRow>
+          </div>
+
+          {/* ── Footer Description ── */}
+          <div className="px-6 py-7 sm:px-8">
+            <SettingsRow
+              label="Footer Description"
+              hint="The paragraph shown under the logo in the storefront footer."
+              separator={false}
+            >
+              <div>
+                <FieldLabel>Description</FieldLabel>
+                <Textarea
+                  onChange={(v) => setSettings((p) => ({ ...p, footerDescription: v }))}
+                  placeholder="Tell shoppers what your shop stands for."
+                  rows={5}
+                  value={settings.footerDescription ?? ""}
+                />
               </div>
             </SettingsRow>
           </div>

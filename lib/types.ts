@@ -134,4 +134,8 @@ export type OrderResult = {
   address: AddressForm;
   paymentMethod?: string;
   orderNote?: string;
+  /** When the API recorded the order — printed on the invoice. */
+  placedAt?: string;
+  /** Which rate the delivery charge came from. */
+  deliveryZone?: DeliveryZone;
 };

@@ -3,9 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { FiMapPin, FiPlus, FiTrash2, FiEdit2, FiX, FiLoader, FiChevronDown } from "react-icons/fi";
 import { toast } from "sonner";
-import { getCustomerToken } from "@/lib/storefront-api";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
+import {
+  createAddress,
+  deleteAddress,
+  fetchMyAddresses,
+  updateAddress,
+  type CustomerAddress,
+} from "@/lib/address-api";
 
 const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
 const FIELD_LABEL   = "block text-[10px] font-bold tracking-[0.14em] uppercase text-stone-600 mb-1.5";
@@ -13,18 +17,7 @@ const INPUT_BASE    = "w-full border border-stone-200 bg-white px-4 py-2.5 text-
 const BTN_PRIMARY   = "inline-flex items-center justify-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-8 py-3 rounded-full transition cursor-pointer shadow-md disabled:opacity-50";
 const BTN_GHOST     = "inline-flex items-center justify-center gap-2 bg-white hover:bg-stone-50 border border-stone-200 text-zinc-600 font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-8 py-3 rounded-full transition cursor-pointer disabled:opacity-50";
 
-interface Address {
-  id: string;
-  fullName: string;
-  phone: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  isDefault: boolean;
-}
+type Address = CustomerAddress;
 
 const EMPTY_FORM = {
   fullName: "", phone: "", addressLine1: "", addressLine2: "",
@@ -43,15 +36,10 @@ export default function AddressBookView() {
     setForm((prev) => ({ ...prev, [key]: val }));
 
   const fetchAddresses = useCallback(async () => {
-    const token = getCustomerToken();
-    if (!token) return;
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/profile/addresses`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) setAddresses(await res.json());
-    } catch { /* silent */ }
+      setAddresses(await fetchMyAddresses());
+    } catch { /* silent — an unauthenticated visitor simply has none */ }
     finally { setLoading(false); }
   }, []);
 
@@ -76,41 +64,31 @@ export default function AddressBookView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = getCustomerToken();
-    if (!token) { toast.error("Please log in first."); return; }
     setSubmitting(true);
     try {
-      const url    = editing ? `${BASE_URL}/profile/addresses/${editing.id}` : `${BASE_URL}/profile/addresses`;
-      const method = editing ? "PUT" : "POST";
-      const res    = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(form),
-      });
-      if (res.ok) {
-        toast.success(editing ? "Address updated." : "Address saved.");
-        setModalOpen(false);
-        fetchAddresses();
+      if (editing) {
+        await updateAddress(editing.id, form);
       } else {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err.message || "Failed to save address.");
+        await createAddress(form);
       }
-    } catch { toast.error("Something went wrong."); }
+      toast.success(editing ? "Address updated." : "Address saved.");
+      setModalOpen(false);
+      fetchAddresses();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save address.");
+    }
     finally { setSubmitting(false); }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this address?")) return;
-    const token = getCustomerToken();
-    if (!token) return;
     try {
-      const res = await fetch(`${BASE_URL}/profile/addresses/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) { toast.success("Address deleted."); fetchAddresses(); }
-      else toast.error("Failed to delete address.");
-    } catch { toast.error("Something went wrong."); }
+      await deleteAddress(id);
+      toast.success("Address deleted.");
+      fetchAddresses();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete address.");
+    }
   };
 
   return (

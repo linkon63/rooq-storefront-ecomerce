@@ -16,7 +16,13 @@ export function usePlaceOrder() {
 
   const placeOrder = async (
     address: AddressForm,
-    extra?: { paymentMethod?: string; orderNote?: string; deliveryZone?: DeliveryZone }
+    extra?: {
+      paymentMethod?: string;
+      orderNote?: string;
+      deliveryZone?: DeliveryZone;
+      /** A saved address the shopper picked — skips creating a duplicate. */
+      addressId?: string;
+    }
   ): Promise<OrderResult> => {
     setSubmitting(true);
     const token = getCustomerToken();
@@ -28,31 +34,36 @@ export function usePlaceOrder() {
       let data: Record<string, unknown>;
 
       if (token) {
-        const addressRes = await fetch(`${BASE_URL}/addresses`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fullName: address.fullName,
-            phone: address.phone,
-            addressLine1: address.addressLine1,
-            addressLine2: address.addressLine2 || undefined,
-            city: address.city,
-            state: address.state,
-            postalCode: address.postalCode,
-            country: address.country,
-            isDefault: true,
-          }),
-        });
+        // A saved address is used as-is; only a freshly typed one is stored.
+        let addressId = extra?.addressId;
 
-        if (!addressRes.ok) {
-          const err = await addressRes.json().catch(() => ({}));
-          throw new Error((err as { message?: string }).message ?? "Failed to save address");
+        if (!addressId) {
+          const addressRes = await fetch(`${BASE_URL}/addresses`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              fullName: address.fullName,
+              phone: address.phone,
+              addressLine1: address.addressLine1,
+              addressLine2: address.addressLine2 || undefined,
+              city: address.city,
+              state: address.state,
+              postalCode: address.postalCode,
+              country: address.country,
+              isDefault: true,
+            }),
+          });
+
+          if (!addressRes.ok) {
+            const err = await addressRes.json().catch(() => ({}));
+            throw new Error((err as { message?: string }).message ?? "Failed to save address");
+          }
+
+          addressId = (await addressRes.json() as { id: string }).id;
         }
-
-        const savedAddress = await addressRes.json() as { id: string };
 
         const orderRes = await fetch(`${BASE_URL}/orders`, {
           method: "POST",
@@ -61,7 +72,7 @@ export function usePlaceOrder() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            addressId: savedAddress.id,
+            addressId,
             deliveryZone,
           }),
         });
@@ -140,6 +151,8 @@ export function usePlaceOrder() {
         address: { ...address },
         paymentMethod: extra?.paymentMethod,
         orderNote: extra?.orderNote,
+        placedAt: typeof data.placedAt === "string" ? data.placedAt : undefined,
+        deliveryZone,
       };
 
       clearCart();

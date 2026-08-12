@@ -1,11 +1,23 @@
 import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineMapPin } from "react-icons/hi2";
 
-/** Single source of truth for the support details printed on the policy pages. */
-export const SUPPORT_PHONE = "017 3360 0964";
-export const SUPPORT_PHONE_TEL = "+8801733600964";
-export const SUPPORT_EMAIL = "support@organishi.com";
-export const SUPPORT_ADDRESS = "Sector 13, Uttara, Dhaka 1230, Bangladesh";
+import {
+  FALLBACK_ADDRESS,
+  FALLBACK_EMAILS,
+  FALLBACK_PHONES,
+  telHref,
+} from "@/lib/shop-contact";
+
+/**
+ * The policy pages print the support details inside their prose, so they read
+ * the shop defaults directly rather than the (admin-editable) settings row —
+ * legal copy is reviewed by hand anyway. Everything else on the storefront
+ * resolves through `resolveShopContact`.
+ */
+export const SUPPORT_PHONE = FALLBACK_PHONES[0].value;
+export const SUPPORT_PHONE_TEL = telHref(SUPPORT_PHONE).replace("tel:", "");
+export const SUPPORT_EMAIL = FALLBACK_EMAILS[0].value;
+export const SUPPORT_ADDRESS = FALLBACK_ADDRESS;
 
 /**
  * Closing block for Privacy and Terms — the three ways to reach a human,
