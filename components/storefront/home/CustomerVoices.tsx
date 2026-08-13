@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
@@ -11,55 +10,55 @@ import type { ShopSocialContact } from "@/lib/shop-api";
 
 import "swiper/css";
 
-/** Portraits come from Unsplash — the host is already allow-listed in next.config.ts. */
-const avatar = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?w=128&h=128&fit=crop&crop=faces&auto=format&q=80`;
-
 /** Placeholder voices until the review API feeds this section. */
 const TESTIMONIALS = [
   {
     name: "Ralph Edwards",
     role: "Customer",
-    avatar: avatar("1500648767791-00dcc994a43e"),
     quote:
       "As a foodie, I really appreciate authenticity in my platter. So far Organishi has always delivered up to my expectation on that particular note. And having it homemade also adds a cherry on top.",
   },
   {
     name: "Nusrat Jahan",
     role: "Customer",
-    avatar: avatar("1494790108377-be9c29b29330"),
     quote:
       "The mustard oil smells exactly like the one my grandmother used to press at home. Delivery was quick and the bottle arrived sealed and clean.",
   },
   {
     name: "Tanvir Hasan",
     role: "Customer",
-    avatar: avatar("1507003211169-0a1dd7228f2d"),
     quote:
       "I switched our whole kitchen over to their ghee and cold pressed oils. You can taste the difference, and the pricing is fair for this quality.",
   },
   {
     name: "Farhana Akter",
     role: "Customer",
-    avatar: avatar("1438761681033-6461ffad8d80"),
     quote:
       "Ordered the organic chips for my kids and they finished the pack in a day. Good to finally find snacks without artificial colours.",
   },
   {
     name: "Imran Chowdhury",
     role: "Customer",
-    avatar: avatar("1472099645785-5658abf4ff4e"),
     quote:
       "Packaging is neat and nothing leaked in transit. The honey is thick and raw — exactly what was described on the product page.",
   },
   {
     name: "Sabrina Rahman",
     role: "Customer",
-    avatar: avatar("1544005313-94ddf0286df2"),
     quote:
       "Support answered on WhatsApp within minutes and sorted out my delivery address. Small thing, but it is why I keep ordering here.",
   },
 ];
+
+/** Stands in for a portrait: first letter of the first two names, e.g. "Nusrat Jahan" → "NJ". */
+const initials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
 interface CustomerVoicesProps {
   /** Social profile URLs from Admin → Settings → Contact & Social Media. */
@@ -107,14 +106,13 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                 <SwiperSlide key={testimonial.name} className="h-auto!">
                   <figure className="flex h-full flex-col rounded-md bg-white p-6">
                     <figcaption className="flex items-center gap-3">
-                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-[#4a9e2f]/10">
-                        <Image
-                          src={testimonial.avatar}
-                          alt={testimonial.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
+                      {/* aria-hidden: the full name sits right beside it, so a
+                          screen reader announcing "NJ" first is just noise. */}
+                      <span
+                        aria-hidden="true"
+                        className="font-display flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[#4a9e2f]/10 text-[16px] font-semibold text-[#4a9e2f]"
+                      >
+                        {initials(testimonial.name)}
                       </span>
                       <span>
                         <span className="font-display block text-[15px] font-semibold text-[#1f2a17]">

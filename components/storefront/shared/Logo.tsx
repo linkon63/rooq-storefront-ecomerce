@@ -2,6 +2,10 @@ import Image from "next/image";
 
 /**
  * Organishi Brand Logo component using public assets Logo-English.png.
+ *
+ * Size it with a height utility only (`h-16`, `md:h-20`). The artwork is
+ * 746×612, so a forced width letterboxes the mark inside a wider box and it
+ * renders far smaller than the box suggests — the width has to stay `auto`.
  */
 export default function Logo({
   className = "",
@@ -11,15 +15,15 @@ export default function Logo({
   variant?: "dark" | "light";
 }) {
   return (
-    <div className={`relative inline-block overflow-hidden ${className}`}>
-      <Image
-        src="/assets/Logo-English.png"
-        alt="Organishi — Pure Organic Food"
-        width={200}
-        height={64}
-        className={`h-full w-auto object-contain ${variant === "light" ? "brightness-0 invert" : ""}`}
-        priority
-      />
-    </div>
+    <Image
+      src="/assets/Logo-English.png"
+      alt="Organishi — Pure Organic Food"
+      width={746}
+      height={612}
+      className={`w-auto object-contain ${
+        variant === "light" ? "brightness-0 invert" : ""
+      } ${className}`}
+      priority
+    />
   );
 }

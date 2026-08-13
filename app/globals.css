@@ -35,6 +35,16 @@
   --color-zinc-650: #52525b;
 }
 
+/* ── No sideways scrolling ────────────────────────────────────────────────
+   Nothing on the storefront is meant to scroll horizontally; a stray wide
+   child should be clipped, not turn the whole page into a sideways scroller.
+   `clip` rather than `hidden` on purpose: `overflow: hidden` on html/body
+   makes them scroll containers, which silently breaks the sticky header. */
+html,
+body {
+  overflow-x: clip;
+}
+
 /* Global site body font */
 body,
 .storefront-root {

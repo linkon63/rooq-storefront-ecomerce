@@ -87,7 +87,6 @@ export default function AdminLoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-800 focus:bg-white focus:border-[#4a9e2f] focus:ring-2 focus:ring-[#4a9e2f]/20 outline-none transition-all"
                 required
-                placeholder="admin@organishi.com"
               />
             </div>
           </div>
@@ -104,7 +103,6 @@ export default function AdminLoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-10 py-3 text-sm text-slate-800 focus:bg-white focus:border-[#4a9e2f] focus:ring-2 focus:ring-[#4a9e2f]/20 outline-none transition-all"
                 required
-                placeholder="••••••••"
               />
               <button
                 type="button"

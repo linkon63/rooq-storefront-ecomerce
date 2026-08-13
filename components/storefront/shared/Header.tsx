@@ -95,20 +95,25 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
           <div className="flex h-[72px] items-center justify-between gap-4 md:h-[86px]">
             <Link href="/" className="flex shrink-0 items-center" aria-label="Organishi home">
               {settings?.logo ? (
+                /* `aspect-auto` drops the ratio the width/height props imply, so an
+                   admin-uploaded logo of any shape sizes from its own artwork
+                   instead of being letterboxed inside a fixed box. */
                 <Image
                   src={settings.logo}
                   alt={settings.shopName ?? "Organishi"}
                   width={150}
                   height={48}
-                  className="h-10 w-auto object-contain md:h-12"
+                  className="aspect-auto h-14 w-auto object-contain md:h-20 lg:h-40"
                   priority
                 />
               ) : (
-                <Logo className="h-10 w-[150px] md:h-12 md:w-[176px]" />
+                <Logo className="h-14 md:h-20 lg:h-40" />
               )}
             </Link>
 
-            <nav className="hidden items-center gap-5 xl:flex">
+            {/* min-w-0 + overflow-hidden: category names come from the admin, so a
+                long one must clip rather than widen the row past the viewport. */}
+            <nav className="hidden min-w-0 items-center gap-5 overflow-hidden xl:flex">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}

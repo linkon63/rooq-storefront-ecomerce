@@ -60,10 +60,10 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                   alt={settings.shopName ?? "Organishi"}
                   width={160}
                   height={52}
-                  className="h-12 w-auto object-contain"
+                  className="aspect-auto h-16 w-auto object-contain"
                 />
               ) : (
-                <Logo className="h-12 w-[176px]" />
+                <Logo className="h-16" />
               )}
             </Link>
 
