@@ -103,11 +103,11 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
                   alt={settings.shopName ?? "Organishi"}
                   width={150}
                   height={48}
-                  className="aspect-auto h-14 w-auto object-contain md:h-20 lg:h-40"
+                  className="aspect-auto h-14 w-auto object-contain md:h-18"
                   priority
                 />
               ) : (
-                <Logo className="h-14 md:h-20 lg:h-40" />
+                <Logo className="h-14 md:h-18" />
               )}
             </Link>
 

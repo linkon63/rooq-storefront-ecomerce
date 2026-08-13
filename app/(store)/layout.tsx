@@ -11,6 +11,14 @@ import AuthModal from "@/components/auth-modal";
 import { fetchShopCategories, fetchShopPolicies, fetchShopSettings } from "@/lib/shop-api";
 import type { Policy } from "@/types/policies";
 
+/**
+ * The header's category nav, the shop settings and the footer links all come
+ * from the fetches below. Left at the default the layout is baked at build time
+ * and a category added in the admin never shows up, so it regenerates on the
+ * same 60s cadence as the pages beneath it.
+ */
+export const revalidate = 60;
+
 export default async function StoreLayout({
   children,
 }: Readonly<{

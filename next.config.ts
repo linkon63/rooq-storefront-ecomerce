@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "/**",
       },
+      // production API for Organishi — uploaded product/brand/news artwork
+      {
+        protocol: "https",
+        hostname: "api.organishi.com",
+        pathname: "/**",
+      },
       // production path resolver for TinyEcom API - Humana Vintage
       {
         protocol: "https",

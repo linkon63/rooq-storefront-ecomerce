@@ -15,6 +15,13 @@ import {
   type ShopProduct,
 } from "@/lib/shop-api";
 
+/**
+ * Without this the homepage is prerendered once at build and never regenerates,
+ * so a product added in the admin never appears. 60s keeps the page static and
+ * fast while picking up catalogue changes on its own.
+ */
+export const revalidate = 60;
+
 /** The hero falls back to the artwork shipped with the design. */
 const FALLBACK_SLIDE: HeroSlide = {
   image: "/images/home/hero-ghee.png",
