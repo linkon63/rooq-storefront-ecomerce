@@ -78,15 +78,71 @@ export type Attribute = {
 export type Unit = {
   id: string;
   name: string;
+  /** Short form — surfaced in the admin as "Abbreviation". */
   code: string;
   description?: string | null;
   isActive: boolean;
+  /** The unit this one converts into. Null on a base unit. */
+  parentUnitId?: string | null;
+  parentUnit?: Pick<Unit, "id" | "name" | "code"> | null;
+  /**
+   * How many parent units one of this equals — Kilogram under Gram carries
+   * 1000. Always 1 on a base unit. Prisma serialises Decimal as a string, so
+   * read it through `unitFactor` rather than trusting the raw value.
+   */
+  factor?: string | number | null;
   createdAt?: string;
   updatedAt?: string;
   _count?: {
     products?: number;
+    childUnits?: number;
   };
 };
+
+/** Decimal columns arrive as strings over JSON; normalise before doing maths. */
+export function unitFactor(unit: Pick<Unit, "factor">): number {
+  const value = Number(unit.factor);
+  return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+/**
+ * "1 Kilogram = 1000 Gram", or null for a base unit. Used wherever a unit is
+ * picked so the conversion is visible at the point of choosing.
+ */
+export function unitConversionLabel(unit: Unit): string | null {
+  if (!unit.parentUnit) return null;
+  const factor = unitFactor(unit);
+  return `1 ${unit.name} = ${factor.toLocaleString(undefined, {
+    maximumFractionDigits: 6,
+  })} ${unit.parentUnit.name}`;
+}
+
+/**
+ * Walk a unit up to the root of its conversion tree, multiplying as it goes.
+ * Kilogram → Gram returns `{ base: Gram, factor: 1000 }`. Guards against a
+ * corrupt cycle so a bad row cannot hang the admin.
+ */
+export function resolveBaseUnit(
+  unit: Unit,
+  all: Unit[],
+): { base: Unit; factor: number } {
+  const byId = new Map(all.map((candidate) => [candidate.id, candidate]));
+  const seen = new Set<string>([unit.id]);
+
+  let base = unit;
+  let factor = 1;
+
+  while (base.parentUnitId) {
+    const parent = byId.get(base.parentUnitId);
+    if (!parent || seen.has(parent.id)) break;
+
+    seen.add(parent.id);
+    factor *= unitFactor(base);
+    base = parent;
+  }
+
+  return { base, factor };
+}
 
 export type ProductMedia = {
   id: string;
@@ -773,7 +829,8 @@ export async function apiRequest<T>(
     const text = await response.text();
 
     if (!response.ok) {
-      let message = `Request failed with status ${response.status}`;
+      let message = "";
+
       if (text) {
         try {
           const parsed = JSON.parse(text);
@@ -783,10 +840,13 @@ export async function apiRequest<T>(
               : String(parsed.message);
           }
         } catch {
-          message = text;
+          // A non-JSON body is usually a proxy or gateway page rather than
+          // anything the API wrote — better to fall through to the status text.
+          message = text.length < 200 ? text : "";
         }
       }
-      throw new Error(message);
+
+      throw new Error(message || describeStatus(response.status));
     }
 
     if (!text) return undefined as T;
@@ -801,9 +861,50 @@ export async function apiRequest<T>(
       throw new Error("Backend API did not respond. Start the backend server and try again.");
     }
 
+    // fetch only rejects with TypeError when the request never completed —
+    // server down, DNS failure, or a CORS rejection. "Failed to fetch" tells an
+    // admin nothing, so name what could not be reached.
+    if (err instanceof TypeError) {
+      throw new Error(
+        `Could not reach the backend API at ${API_BASE_URL}. Check that the server is running and that this origin is allowed by CORS.`,
+      );
+    }
+
     throw err instanceof Error ? err : new Error("API request failed");
   } finally {
     window.clearTimeout(timeout);
+  }
+}
+
+/**
+ * Fallback wording for a failed response that carried no usable body — a
+ * gateway timeout, say, or a proxy error page. The API's own message is always
+ * preferred when there is one.
+ */
+function describeStatus(status: number) {
+  switch (status) {
+    case 400:
+      return "The server rejected this request as invalid. Check the values entered and try again.";
+    case 401:
+      return "Your session has expired. Sign in again to continue.";
+    case 403:
+      return "Your account does not have permission to do this.";
+    case 404:
+      return "That record no longer exists. Refresh the page and try again.";
+    case 409:
+      return "This conflicts with a record that already exists.";
+    case 413:
+      return "The file or data sent is too large for the server to accept.";
+    case 429:
+      return "Too many requests in a short time. Wait a moment and try again.";
+    case 502:
+    case 503:
+    case 504:
+      return "The backend is unreachable or still starting up. Try again in a moment.";
+    default:
+      return status >= 500
+        ? `The server failed while handling this request (status ${status}). Nothing was saved.`
+        : `Request failed with status ${status}.`;
   }
 }
 

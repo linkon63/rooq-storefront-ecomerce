@@ -7,6 +7,7 @@ import { AdminIcon, PageHeader } from "../../../_components/admin-shell";
 import {
   apiRequest,
   slugify,
+  unitConversionLabel,
   type Attribute,
   type Brand,
   type Category,
@@ -47,20 +48,15 @@ type ProductCreateForm = {
   description: string;
   brandId: string;
   unitId: string;
-  baseUnitId: string;
   status: "active" | "inactive" | "draft";
   tagIds: string[];
   supplierId: string;
   supplierPrice: string;
-  branchId: string;
-  channelIds: string[];
-  vatId: string;
   factor: string;
   markup: string;
   purchaseDate: string;
   purchaseOrderReturnable: boolean;
   includeStock: boolean;
-  sizeChart: File | null;
   careGuide: File | null;
   productType: "simple" | "variant";
   sku: string;
@@ -77,20 +73,15 @@ const emptyForm: ProductCreateForm = {
   description: "",
   brandId: "",
   unitId: "",
-  baseUnitId: "",
   status: "active",
   tagIds: [],
   supplierId: "",
   supplierPrice: "",
-  branchId: "",
-  channelIds: [],
-  vatId: "",
   factor: "1",
   markup: "",
   purchaseDate: "",
   purchaseOrderReturnable: false,
   includeStock: true,
-  sizeChart: null,
   careGuide: null,
   productType: "simple",
   sku: "",
@@ -135,9 +126,6 @@ export default function NewProductPage() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [suppliers, setSuppliers] = useState<Array<{ id: string; name: string }>>([]);
-  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
-  const [channels, setChannels] = useState<Array<{ id: string; name: string }>>([]);
-  const [vats, setVats] = useState<Array<{ id: string; name: string; rate: number }>>([]);
   const [variantOptions, setVariantOptions] = useState<Attribute[]>([]);
   const [form, setForm] = useState<ProductCreateForm>(emptyForm);
   // Track whether the user has manually edited the slug so we stop auto-generating
@@ -156,6 +144,9 @@ export default function NewProductPage() {
     [categories],
   );
   const selectedUnit = units.find((unit) => unit.id === form.unitId);
+  // Show how the chosen unit converts, so stock figures are unambiguous at the
+  // point of entry rather than something to look up on /admin/units.
+  const unitHint = selectedUnit ? unitConversionLabel(selectedUnit) : null;
   const selectedVariantGroups = useMemo(() => {
     return variantSelections
       .map((selection) => {
@@ -258,13 +249,7 @@ export default function NewProductPage() {
 
         // Optional lookups — silently degrade to empty arrays if the
         // backend endpoint doesn't exist yet.
-        const [supplierList, branchList, channelList, vatList] =
-          await Promise.all([
-            safeFetch<{ id: string; name: string }>("/suppliers"),
-            safeFetch<{ id: string; name: string }>("/branches"),
-            safeFetch<{ id: string; name: string }>("/channels"),
-            safeFetch<{ id: string; name: string; rate: number }>("/vat"),
-          ]);
+        const supplierList = await safeFetch<{ id: string; name: string }>("/suppliers");
 
         const activeUnits = unitList.filter((unit) => unit.isActive);
         const activeTags = tagList.filter((tag) => tag.isActive);
@@ -275,9 +260,6 @@ export default function NewProductPage() {
         setTags(activeTags);
         setVariantOptions(attributeList);
         setSuppliers(supplierList);
-        setBranches(branchList);
-        setChannels(channelList);
-        setVats(vatList);
         setVariantSelections((current) =>
           current.map((selection, index) =>
             index === 0 && !selection.optionId
@@ -333,15 +315,6 @@ export default function NewProductPage() {
       tagIds: current.tagIds.includes(tagId)
         ? current.tagIds.filter((id) => id !== tagId)
         : [...current.tagIds, tagId],
-    }));
-  }
-
-  function toggleChannel(channelId: string) {
-    setForm((current) => ({
-      ...current,
-      channelIds: current.channelIds.includes(channelId)
-        ? current.channelIds.filter((id) => id !== channelId)
-        : [...current.channelIds, channelId],
     }));
   }
 
@@ -634,15 +607,6 @@ export default function NewProductPage() {
           }),
         );
       }
-      if (form.sizeChart) {
-        const body = new FormData();
-        body.append("file", form.sizeChart);
-        body.append("type", "image");
-        await apiRequest(`/products/${product.id}/size-chart`, {
-          method: "POST",
-          body,
-        });
-      }
       if (form.careGuide) {
         const body = new FormData();
         body.append("file", form.careGuide);
@@ -825,25 +789,6 @@ export default function NewProductPage() {
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-xs font-semibold text-slate-700">
-                    Base unit
-                  </span>
-                  <select
-                    className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                    onChange={(event) =>
-                      setForm((current) => ({ ...current, baseUnitId: event.target.value }))
-                    }
-                    value={form.baseUnitId}
-                  >
-                    <option value="">Select unit</option>
-                    {units.map((unit) => (
-                      <option key={unit.id} value={unit.id}>
-                        {unit.name} ({unit.code})
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold text-slate-700">
                     Unit
                   </span>
                   <select
@@ -860,6 +805,11 @@ export default function NewProductPage() {
                       </option>
                     ))}
                   </select>
+                  {unitHint && (
+                    <span className="mt-1.5 block text-xs font-medium text-slate-500">
+                      {unitHint}
+                    </span>
+                  )}
                 </label>
                 <div className="flex items-center gap-6">
                   <label className="flex items-center gap-2 text-xs font-semibold text-slate-600">
@@ -977,27 +927,6 @@ export default function NewProductPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
-                    <p className="text-xs font-semibold text-slate-700">Upload Size Chart</p>
-                    <p className="text-xs text-slate-500">Click to upload</p>
-                    <label className="mt-3 inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700">
-                      Select file
-                      <input
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            sizeChart: event.target.files?.[0] ?? null,
-                          }))
-                        }
-                        type="file"
-                      />
-                    </label>
-                    {form.sizeChart && (
-                      <p className="mt-2 text-[11px] text-slate-500">{form.sizeChart.name}</p>
-                    )}
-                  </div>
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
                     <p className="text-xs font-semibold text-slate-700">Upload Care Guide</p>
                     <p className="text-xs text-slate-500">Click to upload</p>
                     <label className="mt-3 inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700">
@@ -1022,53 +951,6 @@ export default function NewProductPage() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-slate-200 bg-white p-5">
-              <div className="mb-4">
-                <h2 className="text-sm font-semibold text-slate-900">Channel & Branch</h2>
-                <p className="text-xs text-slate-500">Set where the product is available</p>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold text-slate-700">Channel</span>
-                  <div className="flex flex-wrap gap-2">
-                    {channels.map((channel) => {
-                      const selected = form.channelIds.includes(channel.id);
-                      return (
-                        <button
-                          key={channel.id}
-                          type="button"
-                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                            selected
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-slate-300 bg-white text-slate-600"
-                          }`}
-                          onClick={() => toggleChannel(channel.id)}
-                        >
-                          {channel.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </label>
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold text-slate-700">Branch</span>
-                  <select
-                    className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                    onChange={(event) =>
-                      setForm((current) => ({ ...current, branchId: event.target.value }))
-                    }
-                    value={form.branchId}
-                  >
-                    <option value="">Select branch</option>
-                    {branches.map((branch) => (
-                      <option key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </section>
 
             <section className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="mb-4">
@@ -1123,32 +1005,38 @@ export default function NewProductPage() {
                 </button>
               </div>
 
-              {form.productType === "simple" && (
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  <label className="block">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="block text-xs font-semibold text-slate-700">
-                        SKU <span className="text-red-500">*</span>
-                      </span>
-                      <button
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
-                        onClick={generateSku}
-                        type="button"
-                      >
-                        <AdminIcon className="h-3 w-3" name="refresh" />
-                        Generate SKU
-                      </button>
-                    </div>
-                    <input
-                      className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm uppercase outline-none focus:border-blue-500"
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, sku: event.target.value }))
-                      }
-                      placeholder="PRODUCT-SKU"
-                      required
-                      value={form.sku}
-                    />
-                  </label>
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <label className="block">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="block text-xs font-semibold text-slate-700">
+                      {form.productType === "variant" ? "Base SKU" : "SKU"}{" "}
+                      <span className="text-red-500">*</span>
+                    </span>
+                    <button
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+                      onClick={generateSku}
+                      type="button"
+                    >
+                      <AdminIcon className="h-3 w-3" name="refresh" />
+                      Generate SKU
+                    </button>
+                  </div>
+                  <input
+                    className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm uppercase outline-none focus:border-blue-500"
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, sku: event.target.value }))
+                    }
+                    placeholder="PRODUCT-SKU"
+                    required
+                    value={form.sku}
+                  />
+                  {form.productType === "variant" && (
+                    <p className="mt-2 text-[11px] text-slate-500">
+                      Prefixes every generated variant SKU, e.g. {form.sku || "PRODUCT-SKU"}-500G
+                    </p>
+                  )}
+                </label>
+                {form.productType === "simple" && (
                   <label className="block">
                     <span className="mb-2 block text-xs font-semibold text-slate-700">Initial stock</span>
                     <input
@@ -1166,8 +1054,8 @@ export default function NewProductPage() {
                       value={form.stockQuantity}
                     />
                   </label>
-                </div>
-              )}
+                )}
+              </div>
 
               <div className="mt-6 border-t border-slate-100 pt-6">
                 <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Supplier & Purchasing</h3>
@@ -1222,29 +1110,6 @@ export default function NewProductPage() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-slate-200 bg-white p-5">
-              <div className="mb-4">
-                <h2 className="text-sm font-semibold text-slate-900">VAT</h2>
-                <p className="text-xs text-slate-500">Set the VAT configuration for this product</p>
-              </div>
-              <div>
-                <span className="mb-2 block text-xs font-semibold text-slate-700">VAT</span>
-                <select
-                  className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
-                  value={form.vatId}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, vatId: event.target.value }))
-                  }
-                >
-                  <option value="">Select VAT</option>
-                  {vats.map((vat) => (
-                    <option key={vat.id} value={vat.id}>
-                      {vat.name} ({vat.rate}%)
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </section>
 
             <section className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="mb-4">

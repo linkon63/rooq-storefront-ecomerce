@@ -12,6 +12,7 @@ import {
   apiRequest,
   slugify,
   resolveImageUrl,
+  unitConversionLabel,
   type Attribute,
   type Brand,
   type Category,
@@ -58,21 +59,15 @@ type ProductEditForm = {
   description: string;
   brandId: string;
   unitId: string;
-  baseUnitId: string;
   status: "active" | "inactive" | "draft";
   tagIds: string[];
   supplierId: string;
   supplierPrice: string;
-  branchId: string;
-  channelIds: string[];
-  vatId: string;
   factor: string;
   markup: string;
   purchaseDate: string;
   purchaseOrderReturnable: boolean;
   includeStock: boolean;
-  sizeChart: File | null;
-  sizeChartUrl: string | null;
   careGuide: File | null;
   careGuideUrl: string | null;
   productType: "simple" | "variant";
@@ -124,9 +119,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [tags, setTags] = useState<Tag[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [suppliers, setSuppliers] = useState<Array<{ id: string; name: string }>>([]);
-  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
-  const [channels, setChannels] = useState<Array<{ id: string; name: string }>>([]);
-  const [vats, setVats] = useState<Array<{ id: string; name: string; rate: number }>>([]);
   const [variantOptions, setVariantOptions] = useState<Attribute[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -149,16 +141,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   const [form, setForm] = useState<ProductEditForm>({
     name: "", categoryId: "", slug: "", description: "",
-    brandId: "", unitId: "", baseUnitId: "", status: "draft", tagIds: [], supplierId: "",
-    supplierPrice: "", branchId: "", channelIds: [], vatId: "", factor: "1",
+    brandId: "", unitId: "", status: "draft", tagIds: [], supplierId: "",
+    supplierPrice: "", factor: "1",
     markup: "", purchaseDate: "", purchaseOrderReturnable: false, includeStock: true,
-    sizeChart: null, sizeChartUrl: null, careGuide: null, careGuideUrl: null,
+    careGuide: null, careGuideUrl: null,
     productType: "simple", sku: "", unitPrice: "", retailPrice: "", stockQuantity: "0",
     defaultVariantId: "",
   });
 
   const categoryOptions = useMemo(() => flattenCategories(categories), [categories]);
   const selectedUnit = units.find((u) => u.id === form.unitId);
+  // Show how the chosen unit converts, so stock figures are unambiguous at the
+  // point of entry rather than something to look up on /admin/units.
+  const unitHint = selectedUnit ? unitConversionLabel(selectedUnit) : null;
 
   const selectedVariantGroups = useMemo(() => {
     return variantSelections
@@ -266,12 +261,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             apiRequest<Product>(`/products/${id}`),
           ]);
 
-        const [supplierList, branchList, channelList, vatList] = await Promise.all([
-          safeFetch<{ id: string; name: string }>("/suppliers"),
-          safeFetch<{ id: string; name: string }>("/branches"),
-          safeFetch<{ id: string; name: string }>("/channels"),
-          safeFetch<{ id: string; name: string; rate: number }>("/vat"),
-        ]);
+        const supplierList = await safeFetch<{ id: string; name: string }>("/suppliers");
 
         const activeUnits = unitList.filter((u) => u.isActive);
         const activeTags = tagList.filter((t) => t.isActive);
@@ -282,9 +272,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setTags(activeTags);
         setVariantOptions(attributeList);
         setSuppliers(supplierList);
-        setBranches(branchList);
-        setChannels(channelList);
-        setVats(vatList);
         setVariantSelections((current) =>
           current.map((sel, i) =>
             i === 0 && !sel.optionId
@@ -307,20 +294,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           brandId: product.brand?.id ?? product.brandId ?? "",
           categoryId: product.category?.id ?? product.categoryId ?? "",
           unitId: product.unit?.id ?? product.unitId ?? "",
-          baseUnitId: "",
           tagIds: product.tags?.map((t) => t.id) ?? [],
           supplierId: (product as any).supplierId ?? "",
           supplierPrice: (product as any).supplierPrice ? String((product as any).supplierPrice) : "",
-          branchId: (product as any).branchId ?? "",
-          channelIds: [],
-          vatId: "",
           factor: "1",
           markup: "",
           purchaseDate: "",
           purchaseOrderReturnable: false,
           includeStock: true,
-          sizeChart: null,
-          sizeChartUrl: (product as any).sizeChartUrl ?? null,
           careGuide: null,
           careGuideUrl: (product as any).careGuideUrl ?? null,
           productType: isVariantProduct ? "variant" : "simple",
@@ -582,16 +563,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     }));
   }
 
-  function toggleChannel(channelId: string) {
-    setIsDirty(true);
-    setForm((current) => ({
-      ...current,
-      channelIds: current.channelIds.includes(channelId)
-        ? current.channelIds.filter((id) => id !== channelId)
-        : [...current.channelIds, channelId],
-    }));
-  }
-
   function addVariantSelection() {
     setIsDirty(true);
     setVariantSelections((current) => [
@@ -825,12 +796,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         );
       }
 
-      if (form.sizeChart) {
-        const body = new FormData();
-        body.append("file", form.sizeChart);
-        body.append("type", "image");
-        await apiRequest(`/products/${savedProduct.id}/size-chart`, { method: "POST", body });
-      }
       if (form.careGuide) {
         const body = new FormData();
         body.append("file", form.careGuide);
@@ -1024,22 +989,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 </div>
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-slate-700">Base unit</span>
-                <select
-                  className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm bg-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  onChange={(e) => {
-                    setIsDirty(true);
-                    setForm((current) => ({ ...current, baseUnitId: e.target.value }));
-                  }}
-                  value={form.baseUnitId}
-                >
-                  <option value="">Select unit</option>
-                  {units.map((unit) => (
-                    <option key={unit.id} value={unit.id}>{unit.name} ({unit.code})</option>
-                  ))}
-                </select>
-              </label>
-              <label className="block">
                 <span className="mb-2 block text-xs font-semibold text-slate-700">Unit</span>
                 <select
                   className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm bg-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -1054,6 +1003,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <option key={unit.id} value={unit.id}>{unit.name} ({unit.code})</option>
                   ))}
                 </select>
+                {unitHint && (
+                  <span className="mt-1.5 block text-xs font-medium text-slate-500">
+                    {unitHint}
+                  </span>
+                )}
               </label>
               <div className="flex items-center gap-6 py-2 md:col-span-2">
                 <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
@@ -1188,35 +1142,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
-                  <p className="text-xs font-semibold text-slate-700">Upload Size Chart</p>
-                  <p className="text-xs text-slate-500">Add size matrix image</p>
-                  <label className="mt-3 inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
-                    Select File
-                    <input
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        setIsDirty(true);
-                        setForm((current) => ({
-                          ...current,
-                          sizeChart: e.target.files?.[0] ?? null,
-                        }));
-                      }}
-                      type="file"
-                    />
-                  </label>
-                  {form.sizeChart && (
-                    <p className="mt-2 text-[11px] text-slate-600 font-semibold truncate">{form.sizeChart.name}</p>
-                  )}
-                  {!form.sizeChart && form.sizeChartUrl && (
-                    <div className="mt-2 flex items-center gap-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img alt="" className="h-8 w-8 rounded object-cover" src={resolveImageUrl(form.sizeChartUrl)} />
-                      <span className="text-[10px] text-slate-500">Current size chart</span>
-                    </div>
-                  )}
-                </div>
-                <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
                   <p className="text-xs font-semibold text-slate-700">Upload Care Guide</p>
                   <p className="text-xs text-slate-500">Add care guidelines image</p>
                   <label className="mt-3 inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
@@ -1249,55 +1174,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
           </section>
 
-          {/* Section 3: Channel & Branch */}
-          <section className="rounded-xl border border-slate-200 bg-white p-5">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-slate-900">Channel &amp; Branch</h2>
-              <p className="text-xs text-slate-500">Set where the product is available</p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-slate-700">Channel</span>
-                <div className="flex flex-wrap gap-2">
-                  {channels.map((channel) => {
-                    const selected = form.channelIds.includes(channel.id);
-                    return (
-                      <button
-                        key={channel.id}
-                        type="button"
-                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
-                          selected
-                            ? "border-blue-500 bg-blue-50 text-blue-700"
-                            : "border-slate-300 bg-white text-slate-600 hover:border-slate-400"
-                        }`}
-                        onClick={() => toggleChannel(channel.id)}
-                      >
-                        {channel.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold text-slate-700">Branch</span>
-                <select
-                  className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm bg-white outline-none focus:border-blue-500"
-                  onChange={(e) => {
-                    setIsDirty(true);
-                    setForm((current) => ({ ...current, branchId: e.target.value }));
-                  }}
-                  value={form.branchId}
-                >
-                  <option value="">Select branch</option>
-                  {branches.map((branch) => (
-                    <option key={branch.id} value={branch.id}>{branch.name}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </section>
-
-          {/* Section 4: Inventory */}
+          {/* Section 3: Inventory */}
           <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
             <div>
               <h2 className="text-sm font-semibold text-slate-900">Inventory</h2>
@@ -1359,32 +1236,38 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               </button>
             </div>
 
-            {form.productType === "simple" && (
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <label className="block">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="block text-xs font-semibold text-slate-700">
-                      SKU <span className="text-red-500">*</span>
-                    </span>
-                    <button
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
-                      onClick={generateSku}
-                      type="button"
-                    >
-                      <AdminIcon className="h-3 w-3" name="refresh" />
-                      Generate SKU
-                    </button>
-                  </div>
-                  <input
-                    className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    onChange={(e) => {
-                      setIsDirty(true);
-                      setForm((current) => ({ ...current, sku: e.target.value }));
-                    }}
-                    placeholder="PRODUCT-SKU"
-                    value={form.sku}
-                  />
-                </label>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="block text-xs font-semibold text-slate-700">
+                    {form.productType === "variant" ? "Base SKU" : "SKU"}{" "}
+                    <span className="text-red-500">*</span>
+                  </span>
+                  <button
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+                    onClick={generateSku}
+                    type="button"
+                  >
+                    <AdminIcon className="h-3 w-3" name="refresh" />
+                    Generate SKU
+                  </button>
+                </div>
+                <input
+                  className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  onChange={(e) => {
+                    setIsDirty(true);
+                    setForm((current) => ({ ...current, sku: e.target.value }));
+                  }}
+                  placeholder="PRODUCT-SKU"
+                  value={form.sku}
+                />
+                {form.productType === "variant" && (
+                  <p className="mt-2 text-[11px] text-slate-500">
+                    Prefixes every generated variant SKU, e.g. {form.sku || "PRODUCT-SKU"}-500G
+                  </p>
+                )}
+              </label>
+              {form.productType === "simple" && (
                 <label className="block">
                   <span className="mb-2 block text-xs font-semibold text-slate-700">Stock Quantity</span>
                   <input
@@ -1400,8 +1283,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     value={form.stockQuantity}
                   />
                 </label>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="mt-6 border-t border-slate-100 pt-6">
               <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -1459,33 +1342,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
           </section>
 
-          {/* Section 5: VAT */}
-          <section className="rounded-xl border border-slate-200 bg-white p-5">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-slate-900">VAT</h2>
-              <p className="text-xs text-slate-500">Set the VAT configuration for this product</p>
-            </div>
-            <div>
-              <span className="mb-2 block text-xs font-semibold text-slate-700">VAT</span>
-              <select
-                className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm bg-white outline-none focus:border-blue-500"
-                value={form.vatId}
-                onChange={(e) => {
-                  setIsDirty(true);
-                  setForm((current) => ({ ...current, vatId: e.target.value }));
-                }}
-              >
-                <option value="">Select VAT</option>
-                {vats.map((vat) => (
-                  <option key={vat.id} value={vat.id}>
-                    {vat.name} ({vat.rate}%)
-                  </option>
-                ))}
-              </select>
-            </div>
-          </section>
-
-          {/* Section 6: Price */}
+          {/* Section 4: Price */}
           <section className="rounded-xl border border-slate-200 bg-white p-5">
             <div className="mb-4">
               <h2 className="text-sm font-semibold text-slate-900">Price</h2>
@@ -1583,7 +1440,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             </div>
           </section>
 
-          {/* Section 7: Variant Options */}
+          {/* Section 5: Variant Options */}
           {form.productType === "variant" && (
             <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
               <div>
