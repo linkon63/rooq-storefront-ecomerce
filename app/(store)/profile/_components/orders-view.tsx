@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { FiShoppingBag, FiLoader, FiX, FiPackage, FiMapPin, FiChevronRight } from "react-icons/fi";
 import { getCustomerToken } from "@/lib/storefront-api";
+import ModalPortal from "@/components/storefront/shared/modal-portal";
 import ResolvedImage from "./image-resolver";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
@@ -193,137 +194,139 @@ export default function OrdersView() {
 
       {/* ── Detail Modal ─────────────────────────────────────────────────────── */}
       {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4"
-          onClick={() => setSelected(null)}
-          role="presentation"
-        >
-          {/*
-            The panel is bounded by the viewport and lays itself out as
-            header / scrolling body / totals footer. A long order therefore
-            scrolls inside the body instead of pushing the header and the
-            total off the screen.
-          */}
+        <ModalPortal>
           <div
-            aria-modal="true"
-            role="dialog"
-            onClick={(event) => event.stopPropagation()}
-            className="flex w-full max-w-lg max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
+            className="fixed inset-0 z-100 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4"
+            onClick={() => setSelected(null)}
+            role="presentation"
           >
+            {/*
+              The panel is bounded by the viewport and lays itself out as
+              header / scrolling body / totals footer. A long order therefore
+              scrolls inside the body instead of pushing the header and the
+              total off the screen.
+            */}
+            <div
+              aria-modal="true"
+              role="dialog"
+              onClick={(event) => event.stopPropagation()}
+              className="flex w-full max-w-lg max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
+            >
 
-            {/* Modal header */}
-            <div className="flex shrink-0 items-start justify-between gap-3 px-5 py-4 border-b border-stone-100 sm:px-7 sm:py-5">
-              <div>
-                <p className={SECTION_LABEL}>Order Details</p>
-                <h3 className="font-['Bembo_Std'] text-xl text-zinc-850 mt-0.5">{selected.orderNumber}</h3>
-                <p className="font-sans text-[10px] text-zinc-400 mt-0.5">
-                  Placed{" "}
-                  {new Date(selected.placedAt || selected.createdAt).toLocaleDateString("en-US", {
-                    day: "numeric", month: "long", year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-3">
-                <span className={`border font-sans text-[9px] font-bold tracking-wider uppercase px-3 py-1 rounded-full ${statusStyle(selected.status)}`}>
-                  {selected.status}
-                </span>
-                <button
-                  onClick={() => setSelected(null)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 text-zinc-400 hover:text-zinc-700 transition cursor-pointer"
-                  aria-label="Close"
-                >
-                  <FiX className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Modal body — the only part that scrolls */}
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 space-y-6 sm:px-7 sm:py-6">
-
-              {/* Items */}
-              {selected.items && selected.items.length > 0 && (
+              {/* Modal header */}
+              <div className="flex shrink-0 items-start justify-between gap-3 px-5 py-4 border-b border-stone-100 sm:px-7 sm:py-5">
                 <div>
-                  <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400 mb-3">
-                    Items ({selected.items.length})
-                  </p>
-                  <div className="space-y-3">
-                    {selected.items.map((item) => {
-                      const name  = item.variant?.product?.name ?? item.product?.name ?? "Product";
-                      const price = Number(item.totalPrice ?? item.unitPrice ?? item.price ?? 0);
-                      return (
-                        <div key={item.id} className="flex items-center gap-3 pb-3 border-b border-stone-100 last:border-0 last:pb-0">
-                          <div className="w-11 h-11 bg-stone-50 border border-stone-100 rounded-lg overflow-hidden shrink-0 relative">
-                            <ResolvedImage src={resolveItemImage(item)} alt={name} className="object-contain p-1" />
-                          </div>
-                          <div className="flex-grow min-w-0">
-                            <p className="font-sans font-bold text-xs text-zinc-800 truncate">{name}</p>
-                            <p className="font-sans text-[10px] text-zinc-400 mt-0.5">Qty: {item.quantity}</p>
-                          </div>
-                          <p className="font-sans font-bold text-xs text-zinc-800 shrink-0">
-                            ৳{Number(price || 0).toLocaleString()}
-                          </p>
-                        </div>
-                      );
+                  <p className={SECTION_LABEL}>Order Details</p>
+                  <h3 className="font-['Bembo_Std'] text-xl text-zinc-850 mt-0.5">{selected.orderNumber}</h3>
+                  <p className="font-sans text-[10px] text-zinc-400 mt-0.5">
+                    Placed{" "}
+                    {new Date(selected.placedAt || selected.createdAt).toLocaleDateString("en-US", {
+                      day: "numeric", month: "long", year: "numeric",
                     })}
-                  </div>
-                </div>
-              )}
-
-              {/* Shipping address */}
-              {shippingAddr && (
-                <div>
-                  <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
-                    <FiMapPin className="text-xs" /> Delivery Address
-                  </p>
-                  <div className="bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 space-y-0.5">
-                    <p className="font-sans font-bold text-xs text-zinc-800">{shippingAddr.fullName}</p>
-                    <p className="font-sans text-xs text-zinc-500">{shippingAddr.addressLine1}</p>
-                    <p className="font-sans text-xs text-zinc-500">{shippingAddr.city}, {shippingAddr.country}</p>
-                    <p className="font-sans text-xs text-zinc-500">{shippingAddr.phone}</p>
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            {/* Totals stay pinned below the scroll area — the delivery charge
-                is set in Admin → Settings */}
-            <div className="shrink-0 border-t border-stone-100 bg-white px-5 py-4 sm:px-7 sm:py-5">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <p className="font-sans text-xs text-zinc-500">Subtotal</p>
-                  <p className="font-sans text-xs text-zinc-700">
-                    ৳{itemsSubtotal.toLocaleString()}
                   </p>
                 </div>
-                {orderDiscount > 0 && (
-                  <div className="flex items-center justify-between">
-                    <p className="font-sans text-xs text-zinc-500">Discount</p>
-                    <p className="font-sans text-xs text-zinc-700">
-                      -৳{orderDiscount.toLocaleString()}
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className={`border font-sans text-[9px] font-bold tracking-wider uppercase px-3 py-1 rounded-full ${statusStyle(selected.status)}`}>
+                    {selected.status}
+                  </span>
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 text-zinc-400 hover:text-zinc-700 transition cursor-pointer"
+                    aria-label="Close"
+                  >
+                    <FiX className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal body — the only part that scrolls */}
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 space-y-6 sm:px-7 sm:py-6">
+
+                {/* Items */}
+                {selected.items && selected.items.length > 0 && (
+                  <div>
+                    <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400 mb-3">
+                      Items ({selected.items.length})
                     </p>
+                    <div className="space-y-3">
+                      {selected.items.map((item) => {
+                        const name  = item.variant?.product?.name ?? item.product?.name ?? "Product";
+                        const price = Number(item.totalPrice ?? item.unitPrice ?? item.price ?? 0);
+                        return (
+                          <div key={item.id} className="flex items-center gap-3 pb-3 border-b border-stone-100 last:border-0 last:pb-0">
+                            <div className="w-11 h-11 bg-stone-50 border border-stone-100 rounded-lg overflow-hidden shrink-0 relative">
+                              <ResolvedImage src={resolveItemImage(item)} alt={name} className="object-contain p-1" />
+                            </div>
+                            <div className="flex-grow min-w-0">
+                              <p className="font-sans font-bold text-xs text-zinc-800 truncate">{name}</p>
+                              <p className="font-sans text-[10px] text-zinc-400 mt-0.5">Qty: {item.quantity}</p>
+                            </div>
+                            <p className="font-sans font-bold text-xs text-zinc-800 shrink-0">
+                              ৳{Number(price || 0).toLocaleString()}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <p className="font-sans text-xs text-zinc-500">Delivery Charge</p>
-                  <p className="font-sans text-xs text-zinc-700">
-                    {deliveryCharge > 0 ? `৳${deliveryCharge.toLocaleString()}` : "Free"}
-                  </p>
-                </div>
+
+                {/* Shipping address */}
+                {shippingAddr && (
+                  <div>
+                    <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400 mb-3 flex items-center gap-1.5">
+                      <FiMapPin className="text-xs" /> Delivery Address
+                    </p>
+                    <div className="bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 space-y-0.5">
+                      <p className="font-sans font-bold text-xs text-zinc-800">{shippingAddr.fullName}</p>
+                      <p className="font-sans text-xs text-zinc-500">{shippingAddr.addressLine1}</p>
+                      <p className="font-sans text-xs text-zinc-500">{shippingAddr.city}, {shippingAddr.country}</p>
+                      <p className="font-sans text-xs text-zinc-500">{shippingAddr.phone}</p>
+                    </div>
+                  </div>
+                )}
+
               </div>
 
-              {/* Total */}
-              <div className="mt-2 flex items-center justify-between border-t border-stone-100 pt-2">
-                <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400">
-                  Total Paid
-                </p>
-                <p className="font-['Bembo_Std'] text-xl text-zinc-850">
-                  ৳{Number(selected.total).toLocaleString()}
-                </p>
+              {/* Totals stay pinned below the scroll area — the delivery charge
+                  is set in Admin → Settings */}
+              <div className="shrink-0 border-t border-stone-100 bg-white px-5 py-4 sm:px-7 sm:py-5">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <p className="font-sans text-xs text-zinc-500">Subtotal</p>
+                    <p className="font-sans text-xs text-zinc-700">
+                      ৳{itemsSubtotal.toLocaleString()}
+                    </p>
+                  </div>
+                  {orderDiscount > 0 && (
+                    <div className="flex items-center justify-between">
+                      <p className="font-sans text-xs text-zinc-500">Discount</p>
+                      <p className="font-sans text-xs text-zinc-700">
+                        -৳{orderDiscount.toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <p className="font-sans text-xs text-zinc-500">Delivery Charge</p>
+                    <p className="font-sans text-xs text-zinc-700">
+                      {deliveryCharge > 0 ? `৳${deliveryCharge.toLocaleString()}` : "Free"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="mt-2 flex items-center justify-between border-t border-stone-100 pt-2">
+                  <p className="font-sans text-[10px] font-bold tracking-[0.16em] uppercase text-zinc-400">
+                    Total Paid
+                  </p>
+                  <p className="font-['Bembo_Std'] text-xl text-zinc-850">
+                    ৳{Number(selected.total).toLocaleString()}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

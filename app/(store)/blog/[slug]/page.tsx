@@ -6,13 +6,15 @@ import { PiArrowLeft, PiArrowRight } from "react-icons/pi";
 
 import PostMeta from "@/components/storefront/blog/PostMeta";
 import { BLOG_POSTS, getPost, sortedPosts } from "@/data/blog-posts";
+import { BLOG_ENABLED } from "@/lib/feature-flags";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({ slug: post.slug }));
+  // Nothing to prerender while the section is hidden — see BLOG_ENABLED.
+  return BLOG_ENABLED ? BLOG_POSTS.map((post) => ({ slug: post.slug })) : [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -37,7 +39,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   const post = getPost(slug);
 
-  if (!post) notFound();
+  if (!BLOG_ENABLED || !post) notFound();
 
   const more = sortedPosts()
     .filter((entry) => entry.slug !== post.slug)

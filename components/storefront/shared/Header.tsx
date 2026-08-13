@@ -10,6 +10,7 @@ import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
 import Logo from "./Logo";
 import SearchField from "./SearchField";
 import type { ShopCategory, ShopSettings } from "@/lib/shop-api";
+import { BLOG_ENABLED } from "@/lib/feature-flags";
 import { resolveShopContact, telHref } from "@/lib/shop-contact";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCart } from "@/app/_providers/cart-provider";
@@ -23,7 +24,7 @@ interface HeaderProps {
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
-  { label: "Blog", href: "/blog" },
+  ...(BLOG_ENABLED ? [{ label: "Blog", href: "/blog" }] : []),
   { label: "Combo", href: "/shop?tag=combo" },
   { label: "Offers", href: "/shop?discounted=1" },
   { label: "Contact", href: "/contact" },

@@ -2,18 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaLinkedinIn,
-  FaTiktok,
-  FaXTwitter,
-  FaYoutube,
-} from "react-icons/fa6";
 import { HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineMapPin } from "react-icons/hi2";
 
 import Logo from "./Logo";
+import { activeSocialLinks } from "./social-platforms";
+import { BLOG_ENABLED } from "@/lib/feature-flags";
 import type { Policy } from "@/types/policies";
 import type { ShopSettings } from "@/lib/shop-api";
 import { resolveShopContact, telHref } from "@/lib/shop-contact";
@@ -28,7 +22,7 @@ interface FooterProps {
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
-  { label: "Our Blog", href: "/blog" },
+  ...(BLOG_ENABLED ? [{ label: "Our Blog", href: "/blog" }] : []),
   { label: "Contact Us", href: "/contact" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/terms-and-conditions" },
@@ -45,22 +39,13 @@ const FALLBACK_PRODUCTS = [
 
 const PAYMENTS = ["Cash on Delivery", "bKash", "Nagad", "Rocket", "VISA", "Mastercard"];
 
-/** Rendered in this order, skipping any platform the admin left blank. */
-const SOCIAL_PLATFORMS = [
-  { key: "facebook", label: "Facebook", Icon: FaFacebookF },
-  { key: "instagram", label: "Instagram", Icon: FaInstagram },
-  { key: "youtube", label: "YouTube", Icon: FaYoutube },
-  { key: "tiktok", label: "TikTok", Icon: FaTiktok },
-  { key: "twitter", label: "X", Icon: FaXTwitter },
-  { key: "linkedin", label: "LinkedIn", Icon: FaLinkedinIn },
-] as const;
-
 export default function Footer({ settings, productLinks }: FooterProps) {
   // Everything in the brand blurb and the Contact Us column is admin-managed;
   // `resolveShopContact` falls back to the shop defaults until it is filled in.
   const { phones, emails, address, hours, footerDescription } = resolveShopContact(settings);
   const products = productLinks?.length ? productLinks : FALLBACK_PRODUCTS;
-  const social = settings?.socialContact ?? {};
+  // Only the platforms the admin actually filled in are linked.
+  const socials = activeSocialLinks(settings?.socialContact);
 
   return (
     <footer className="bg-[#f4f7ee] text-[#1f2a17]">
@@ -171,8 +156,8 @@ export default function Footer({ settings, productLinks }: FooterProps) {
       <div className="border-t border-[#4a9e2f]/15">
         <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-4 px-4 py-5 md:flex-row md:justify-between md:px-8">
           <div className="flex items-center gap-2.5">
-            {SOCIAL_PLATFORMS.map(({ key, label, Icon }) => (
-              <SocialLink key={key} href={social[key]} label={label}>
+            {socials.map(({ key, label, Icon, href }) => (
+              <SocialLink key={key} href={href} label={label}>
                 <Icon size={14} />
               </SocialLink>
             ))}
@@ -230,11 +215,10 @@ function SocialLink({
   label,
   children,
 }: {
-  href?: string | null;
+  href: string;
   label: string;
   children: React.ReactNode;
 }) {
-  if (!href?.trim()) return null;
   return (
     <a
       href={href}

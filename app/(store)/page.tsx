@@ -86,7 +86,7 @@ export default async function Home() {
       <LatestArrivals products={products} />
       <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
       <FeatureStrip />
-      <CustomerVoices social={(settings?.socialContact ?? {}) as Record<string, string | undefined>} />
+      <CustomerVoices social={settings?.socialContact} />
       <OrganicShowcase />
       <NewsletterCta />
     </main>

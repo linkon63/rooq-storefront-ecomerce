@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { PiArrowRight } from "react-icons/pi";
 
 import NewsletterCta from "@/components/storefront/home/NewsletterCta";
 import PostMeta from "@/components/storefront/blog/PostMeta";
 import { sortedPosts } from "@/data/blog-posts";
+import { BLOG_ENABLED } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Blog | Organishi",
@@ -14,6 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
+  // The section is written but not launched yet — see BLOG_ENABLED.
+  if (!BLOG_ENABLED) notFound();
+
   const posts = sortedPosts();
   const [featured, ...rest] = posts;
 

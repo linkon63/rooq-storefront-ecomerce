@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { FiMapPin, FiPlus, FiTrash2, FiEdit2, FiX, FiLoader, FiChevronDown } from "react-icons/fi";
 import { toast } from "sonner";
+import ModalPortal from "@/components/storefront/shared/modal-portal";
 import {
   createAddress,
   deleteAddress,
@@ -175,118 +176,120 @@ export default function AddressBookView() {
 
       {/* ── Modal ───────────────────────────────────────────────────────────── */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <ModalPortal>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100 flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
 
-            {/* Modal header */}
-            <div className="flex items-start justify-between px-7 py-5 border-b border-stone-100">
-              <div>
-                <p className={SECTION_LABEL}>{editing ? "Edit Address" : "New Address"}</p>
-                <h3 className="font-['Bembo_Std'] text-xl text-zinc-850 mt-0.5">
-                  {editing ? "Update shipping address" : "Add a new address"}
-                </h3>
-              </div>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 text-zinc-400 hover:text-zinc-700 transition cursor-pointer"
-                aria-label="Close"
-              >
-                <FiX className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal body */}
-            <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Modal header */}
+              <div className="flex items-start justify-between px-7 py-5 border-b border-stone-100">
                 <div>
-                  <label className={FIELD_LABEL}>Full Name *</label>
-                  <input type="text" value={form.fullName} onChange={(e) => patch("fullName", e.target.value)} className={INPUT_BASE} placeholder="John Doe" required />
+                  <p className={SECTION_LABEL}>{editing ? "Edit Address" : "New Address"}</p>
+                  <h3 className="font-['Bembo_Std'] text-xl text-zinc-850 mt-0.5">
+                    {editing ? "Update shipping address" : "Add a new address"}
+                  </h3>
                 </div>
-                <div>
-                  <label className={FIELD_LABEL}>Phone *</label>
-                  <input type="tel" value={form.phone} onChange={(e) => patch("phone", e.target.value)} className={INPUT_BASE} placeholder="+880 1xxx" required />
-                </div>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 text-zinc-400 hover:text-zinc-700 transition cursor-pointer"
+                  aria-label="Close"
+                >
+                  <FiX className="w-4 h-4" />
+                </button>
               </div>
 
-              <div>
-                <label className={FIELD_LABEL}>Address Line 1 *</label>
-                <input type="text" value={form.addressLine1} onChange={(e) => patch("addressLine1", e.target.value)} className={INPUT_BASE} placeholder="House / Road / Area" required />
-              </div>
-
-              <div>
-                <label className={FIELD_LABEL}>
-                  Address Line 2 <span className="normal-case font-normal text-zinc-300 tracking-normal">(optional)</span>
-                </label>
-                <input type="text" value={form.addressLine2} onChange={(e) => patch("addressLine2", e.target.value)} className={INPUT_BASE} placeholder="Apartment, suite, floor…" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={FIELD_LABEL}>City *</label>
-                  <input type="text" value={form.city} onChange={(e) => patch("city", e.target.value)} className={INPUT_BASE} placeholder="Dhaka" required />
-                </div>
-                <div>
-                  <label className={FIELD_LABEL}>State / District *</label>
-                  <input type="text" value={form.state} onChange={(e) => patch("state", e.target.value)} className={INPUT_BASE} placeholder="Dhaka" required />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={FIELD_LABEL}>Postal Code *</label>
-                  <input type="text" value={form.postalCode} onChange={(e) => patch("postalCode", e.target.value)} className={INPUT_BASE} placeholder="1207" required />
-                </div>
-                <div>
-                  <label className={FIELD_LABEL}>Country *</label>
-                  <div className="relative">
-                    <select
-                      value={form.country}
-                      onChange={(e) => patch("country", e.target.value)}
-                      className={`${INPUT_BASE} appearance-none pr-8 cursor-pointer`}
-                    >
-                      <option>Bangladesh</option>
-                      <option>India</option>
-                      <option>United Kingdom</option>
-                      <option>United States</option>
-                      <option>Other</option>
-                    </select>
-                    <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-xs pointer-events-none" />
+              {/* Modal body */}
+              <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={FIELD_LABEL}>Full Name *</label>
+                    <input type="text" value={form.fullName} onChange={(e) => patch("fullName", e.target.value)} className={INPUT_BASE} placeholder="John Doe" required />
+                  </div>
+                  <div>
+                    <label className={FIELD_LABEL}>Phone *</label>
+                    <input type="tel" value={form.phone} onChange={(e) => patch("phone", e.target.value)} className={INPUT_BASE} placeholder="+880 1xxx" required />
                   </div>
                 </div>
-              </div>
 
-              <label className="flex items-center gap-3 cursor-pointer pt-1 group select-none">
-                <div
-                  className={`w-4 h-4 rounded border-2 flex items-center justify-center transition shrink-0 ${
-                    form.isDefault ? "bg-[#1A1A1A] border-[#1A1A1A]" : "border-stone-300 group-hover:border-stone-400"
-                  }`}
-                >
-                  {form.isDefault && (
-                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
+                <div>
+                  <label className={FIELD_LABEL}>Address Line 1 *</label>
+                  <input type="text" value={form.addressLine1} onChange={(e) => patch("addressLine1", e.target.value)} className={INPUT_BASE} placeholder="House / Road / Area" required />
                 </div>
-                <input
-                  type="checkbox"
-                  checked={form.isDefault}
-                  onChange={(e) => patch("isDefault", e.target.checked)}
-                  className="sr-only"
-                />
-                <span className="font-sans text-xs text-zinc-600">Set as default address</span>
-              </label>
 
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setModalOpen(false)} className={`flex-1 ${BTN_GHOST}`}>
-                  Cancel
-                </button>
-                <button type="submit" disabled={submitting} className={`flex-1 ${BTN_PRIMARY}`}>
-                  {submitting ? <FiLoader className="animate-spin w-3.5 h-3.5" /> : editing ? "Update" : "Save Address"}
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className={FIELD_LABEL}>
+                    Address Line 2 <span className="normal-case font-normal text-zinc-300 tracking-normal">(optional)</span>
+                  </label>
+                  <input type="text" value={form.addressLine2} onChange={(e) => patch("addressLine2", e.target.value)} className={INPUT_BASE} placeholder="Apartment, suite, floor…" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={FIELD_LABEL}>City *</label>
+                    <input type="text" value={form.city} onChange={(e) => patch("city", e.target.value)} className={INPUT_BASE} placeholder="Dhaka" required />
+                  </div>
+                  <div>
+                    <label className={FIELD_LABEL}>State / District *</label>
+                    <input type="text" value={form.state} onChange={(e) => patch("state", e.target.value)} className={INPUT_BASE} placeholder="Dhaka" required />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={FIELD_LABEL}>Postal Code *</label>
+                    <input type="text" value={form.postalCode} onChange={(e) => patch("postalCode", e.target.value)} className={INPUT_BASE} placeholder="1207" required />
+                  </div>
+                  <div>
+                    <label className={FIELD_LABEL}>Country *</label>
+                    <div className="relative">
+                      <select
+                        value={form.country}
+                        onChange={(e) => patch("country", e.target.value)}
+                        className={`${INPUT_BASE} appearance-none pr-8 cursor-pointer`}
+                      >
+                        <option>Bangladesh</option>
+                        <option>India</option>
+                        <option>United Kingdom</option>
+                        <option>United States</option>
+                        <option>Other</option>
+                      </select>
+                      <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-xs pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer pt-1 group select-none">
+                  <div
+                    className={`w-4 h-4 rounded border-2 flex items-center justify-center transition shrink-0 ${
+                      form.isDefault ? "bg-[#1A1A1A] border-[#1A1A1A]" : "border-stone-300 group-hover:border-stone-400"
+                    }`}
+                  >
+                    {form.isDefault && (
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={form.isDefault}
+                    onChange={(e) => patch("isDefault", e.target.checked)}
+                    className="sr-only"
+                  />
+                  <span className="font-sans text-xs text-zinc-600">Set as default address</span>
+                </label>
+
+                <div className="flex gap-3 pt-4">
+                  <button type="button" onClick={() => setModalOpen(false)} className={`flex-1 ${BTN_GHOST}`}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={submitting} className={`flex-1 ${BTN_PRIMARY}`}>
+                    {submitting ? <FiLoader className="animate-spin w-3.5 h-3.5" /> : editing ? "Update" : "Save Address"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

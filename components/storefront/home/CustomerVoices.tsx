@@ -5,7 +5,9 @@ import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import type { Swiper as SwiperClass } from "swiper";
-import { FaFacebookF, FaInstagram, FaXTwitter, FaYoutube } from "react-icons/fa6";
+
+import { activeSocialLinks } from "@/components/storefront/shared/social-platforms";
+import type { ShopSocialContact } from "@/lib/shop-api";
 
 import "swiper/css";
 
@@ -60,27 +62,28 @@ const TESTIMONIALS = [
 ];
 
 interface CustomerVoicesProps {
-  /** Social profile URLs from shop settings; tiles stay visible without them. */
-  social?: Record<string, string | undefined>;
+  /** Social profile URLs from Admin → Settings → Contact & Social Media. */
+  social?: ShopSocialContact | null;
 }
 
-export default function CustomerVoices({ social = {} }: CustomerVoicesProps) {
+export default function CustomerVoices({ social }: CustomerVoicesProps) {
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const socials = [
-    { label: "Facebook", href: social.facebook, icon: <FaFacebookF size={13} /> },
-    { label: "Instagram", href: social.instagram, icon: <FaInstagram size={13} /> },
-    { label: "Youtube", href: social.youtube, icon: <FaYoutube size={13} /> },
-    { label: "X-Twitter", href: social.twitter, icon: <FaXTwitter size={13} /> },
-  ];
+  // Only the platforms the admin filled in get a card — a blank field means
+  // the shop has no such profile, so there is nothing to link to.
+  const socials = activeSocialLinks(social);
 
   // Two cards per view on desktop, so the dots step in pairs.
   const pageCount = Math.max(1, Math.ceil(TESTIMONIALS.length / 2));
 
   return (
     <section className="bg-[#f4f7ee] py-14 lg:py-16">
-      <div className="mx-auto grid max-w-[1600px] gap-10 px-4 md:px-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:gap-12">
+      <div
+        className={`mx-auto grid max-w-[1600px] gap-10 px-4 md:px-8 lg:gap-12 ${
+          socials.length ? "lg:grid-cols-[minmax(0,1fr)_460px]" : ""
+        }`}
+      >
         {/* ── Testimonials ────────────────────────────────────────────── */}
         <div>
           <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
@@ -147,43 +150,30 @@ export default function CustomerVoices({ social = {} }: CustomerVoicesProps) {
         </div>
 
         {/* ── Social ──────────────────────────────────────────────────── */}
-        <div>
-          <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
-            Follow Us On
-          </h2>
+        {socials.length > 0 && (
+          <div>
+            <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
+              Follow Us On
+            </h2>
 
-          <div className="mt-7 grid grid-cols-2 gap-5">
-            {socials.map((item) => {
-              const content = (
-                <>
-                  <span className="flex h-7 w-7 items-center justify-center rounded border border-[#4a9e2f]/30 text-[#4a9e2f]">
-                    {item.icon}
-                  </span>
-                  <span className="font-display text-[16px] text-[#4a9e2f]">{item.label}</span>
-                </>
-              );
-
-              const className =
-                "flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow";
-
-              return item.href ? (
+            <div className="mt-7 grid grid-cols-2 gap-5">
+              {socials.map(({ key, label, Icon, href }) => (
                 <a
-                  key={item.label}
-                  href={item.href}
+                  key={key}
+                  href={href}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className={`${className} hover:shadow-md`}
+                  className="flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow hover:shadow-md"
                 >
-                  {content}
+                  <span className="flex h-7 w-7 items-center justify-center rounded border border-[#4a9e2f]/30 text-[#4a9e2f]">
+                    <Icon size={13} />
+                  </span>
+                  <span className="font-display text-[16px] text-[#4a9e2f]">{label}</span>
                 </a>
-              ) : (
-                <div key={item.label} className={className}>
-                  {content}
-                </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
