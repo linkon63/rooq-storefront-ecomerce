@@ -21,16 +21,21 @@ interface HeaderProps {
   categories?: ShopCategory[];
 }
 
-const NAV_LINKS = [
+/** How many top-level categories get their own slot in the nav. */
+const NAV_CATEGORY_COUNT = 2;
+
+const LEADING_LINKS = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   ...(BLOG_ENABLED ? [{ label: "Blog", href: "/blog" }] : []),
-  { label: "Combo", href: "/shop?tag=combo" },
+];
+
+const TRAILING_LINKS = [
   { label: "Offers", href: "/shop?discounted=1" },
   { label: "Contact", href: "/contact" },
 ];
 
-export default function Header({ settings }: HeaderProps) {
+export default function Header({ settings, categories = [] }: HeaderProps) {
   const { user } = useAuth();
   const { itemCount: cartCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
@@ -38,6 +43,21 @@ export default function Header({ settings }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { phone, email, hours } = resolveShopContact(settings);
+
+  // The first few top-level categories, in the order Admin → Categories sets.
+  // Each lands on the shop pre-filtered to that category and everything nested
+  // under it, so reordering in the admin reorders the nav — no code change.
+  const navLinks = [
+    ...LEADING_LINKS,
+    ...categories
+      .filter((category) => !category.parentId)
+      .slice(0, NAV_CATEGORY_COUNT)
+      .map((category) => ({
+        label: category.name,
+        href: `/shop?category=${encodeURIComponent(category.name)}`,
+      })),
+    ...TRAILING_LINKS,
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
@@ -88,19 +108,19 @@ export default function Header({ settings }: HeaderProps) {
               )}
             </Link>
 
-            <nav className="hidden items-center gap-8 xl:flex">
-              {NAV_LINKS.map((link) => (
+            <nav className="hidden items-center gap-5 xl:flex">
+              {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="font-display text-[17px] text-[#1f2a17] transition-colors first:text-[#4a9e2f] hover:text-[#4a9e2f]"
+                  className="font-display whitespace-nowrap text-[17px] text-[#1f2a17] transition-colors first:text-[#4a9e2f] hover:text-[#4a9e2f]"
                 >
                   {link.label}
                 </Link>
               ))}
             </nav>
 
-            <SearchField className="hidden max-w-[430px] flex-1 lg:block" />
+            <SearchField className="hidden min-w-[180px] max-w-[430px] flex-1 lg:block" />
 
             <div className="flex items-center gap-4 md:gap-5">
               <Link href="/cart" aria-label="Cart" className="relative text-[#1f2a17] hover:text-[#4a9e2f]">
@@ -144,7 +164,7 @@ export default function Header({ settings }: HeaderProps) {
         {mobileOpen && (
           <nav className="border-t border-gray-100 bg-white xl:hidden">
             <div className="mx-auto flex max-w-[1600px] flex-col px-4 py-2 md:px-8">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}

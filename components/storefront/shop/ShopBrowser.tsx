@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FiChevronDown, FiChevronUp, FiGrid, FiList, FiX } from "react-icons/fi";
 
 import ProductCard from "./ProductCard";
-import type { ShopCategory, ShopProduct } from "@/lib/shop-api";
+import { categoryWithDescendants, type ShopCategory, type ShopProduct } from "@/lib/shop-api";
 
 type Facet = "categories" | "price" | "discount";
 
@@ -62,10 +62,17 @@ export default function ShopBrowser({
   const [sort, setSort] = useState("popularity");
   const [layout, setLayout] = useState<"grid" | "list">("grid");
 
-  // A category can arrive from the header menu or a footer link.
+  // A category can arrive from the header nav or a footer link. Those links may
+  // name a parent, so the whole subtree is ticked — see categoryWithDescendants.
+  // The effect keys off a joined string rather than the array so a re-render
+  // never clobbers checkboxes the shopper has since toggled by hand.
+  const linkedCategories = categoryParam
+    ? categoryWithDescendants(categories, categoryParam).join("|")
+    : "";
+
   useEffect(() => {
-    setSelectedCategories(categoryParam ? [categoryParam] : []);
-  }, [categoryParam]);
+    setSelectedCategories(linkedCategories ? linkedCategories.split("|") : []);
+  }, [linkedCategories]);
 
   /** Category names with how many products each holds, biggest first. */
   const categoryFacets = useMemo(() => {

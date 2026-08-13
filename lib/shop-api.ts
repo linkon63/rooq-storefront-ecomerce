@@ -312,6 +312,34 @@ function normaliseCategoryImages(category: ShopCategory): ShopCategory {
   };
 }
 
+/**
+ * A category name plus every name nested under it.
+ *
+ * Products are filed against a single leaf category, so filtering on a parent's
+ * name alone ("Organic Edible Oils") would match nothing even though its
+ * children hold the stock. Linking to a parent — the header nav does — has to
+ * select the whole subtree. An unknown name falls back to itself so a stale
+ * link still filters on something rather than clearing the shop.
+ */
+export function categoryWithDescendants(categories: ShopCategory[], name: string): string[] {
+  const find = (nodes: ShopCategory[]): ShopCategory | null => {
+    for (const node of nodes) {
+      if (node.name === name) return node;
+      const nested = node.children ? find(node.children) : null;
+      if (nested) return nested;
+    }
+    return null;
+  };
+
+  const flatten = (node: ShopCategory): string[] => [
+    node.name,
+    ...(node.children ?? []).flatMap(flatten),
+  ];
+
+  const match = find(categories);
+  return match ? flatten(match) : [name];
+}
+
 export async function fetchShopCategories(): Promise<ShopCategory[]> {
   const categories = await safeFetchJson<ShopCategory[]>(`${API_BASE_URL}/category`, []);
   return categories.map(normaliseCategoryImages);
