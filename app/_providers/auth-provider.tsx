@@ -21,8 +21,8 @@ interface AuthContextValue {
   loading: boolean;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
+  register: (name: string, email: string, phone: string, password: string) => Promise<void>;
   loginWithGoogle: (googleAccessToken: string) => Promise<void>;
   logout: () => void;
   updateProfile: (name: string, email: string, phone?: string) => Promise<void>;
@@ -52,15 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { accessToken, user: loggedInUser } = await apiLogin(email, password);
+  const login = useCallback(async (identifier: string, password: string) => {
+    const { accessToken, user: loggedInUser } = await apiLogin(identifier, password);
     setCustomerSession(accessToken, loggedInUser);
     setUser(loggedInUser);
     setShowAuthModal(false);
   }, []);
 
-  const register = useCallback(async (name: string, email: string, password: string) => {
-    const { accessToken, user: registeredUser } = await apiRegister(name, email, password);
+  const register = useCallback(async (name: string, email: string, phone: string, password: string) => {
+    const { accessToken, user: registeredUser } = await apiRegister(name, email, phone, password);
     setCustomerSession(accessToken, registeredUser);
     setUser(registeredUser);
     setShowAuthModal(false);

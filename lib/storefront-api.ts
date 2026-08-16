@@ -98,27 +98,32 @@ async function customerRequest<T>(
   }
 }
 
-export async function login(email: string, password: string) {
+export async function login(identifier: string, password: string) {
+  const isEmail = identifier.includes("@");
   const data = await customerRequest<{ accessToken: string; user: CustomerUser }>(
     "/auth/login",
     {
       auth: false,
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        identifier,
+        email: isEmail ? identifier : undefined,
+        password,
+      }),
     },
   );
   return data;
 }
 
-export async function register(name: string, email: string, password: string) {
+export async function register(name: string, email: string, phone: string, password: string) {
   const data = await customerRequest<{ accessToken: string; user: CustomerUser }>(
     "/auth/register",
     {
       auth: false,
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, phone, password }),
     },
   );
   return data;

@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   type ReactNode,
 } from "react";
@@ -22,6 +23,27 @@ import {
 import type { CartItem, CartContextValue } from "@/lib/types";
 
 const STORAGE_KEY = "humana-cart";
+const SELECTED_STORAGE_KEY = "organishi_selected_cart_keys";
+
+export function getItemKey(item: CartItem): string {
+  return item.id || item.variantId || item.slug || item.name;
+}
+
+function loadSelectedKeys(): string[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(SELECTED_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as string[];
+  } catch {
+    return null;
+  }
+}
+
+function saveSelectedKeys(keys: string[]) {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(SELECTED_STORAGE_KEY, JSON.stringify(keys));
+}
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -235,11 +257,72 @@ export function CartProvider({ children }: { children: ReactNode }) {
     toast.success("Cart cleared");
   }, [isAuthenticated]);
 
+  const [selectedKeys, setSelectedKeysState] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setSelectedKeysState([]);
+      return;
+    }
+    const allKeys = items.map(getItemKey);
+    const stored = loadSelectedKeys();
+    if (stored !== null) {
+      const validStored = stored.filter((k) => allKeys.includes(k));
+      if (validStored.length > 0) {
+        setSelectedKeysState(validStored);
+      } else {
+        setSelectedKeysState(allKeys);
+      }
+    } else {
+      setSelectedKeysState(allKeys);
+    }
+  }, [items]);
+
+  const setSelectedKeys = useCallback((keys: string[]) => {
+    setSelectedKeysState(keys);
+    saveSelectedKeys(keys);
+  }, []);
+
+  const toggleSelectItem = useCallback((key: string) => {
+    setSelectedKeysState((prev) => {
+      const next = prev.includes(key)
+        ? prev.filter((k) => k !== key)
+        : [...prev, key];
+      saveSelectedKeys(next);
+      return next;
+    });
+  }, []);
+
+  const selectAllItems = useCallback((select: boolean) => {
+    setSelectedKeysState((prev) => {
+      const next = select ? items.map(getItemKey) : [];
+      saveSelectedKeys(next);
+      return next;
+    });
+  }, [items]);
+
+  const selectedItems = useMemo(() => {
+    if (selectedKeys.length === 0) return [];
+    return items.filter((item) => selectedKeys.includes(getItemKey(item)));
+  }, [items, selectedKeys]);
+
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, itemCount, addItem, removeItem, updateQuantity, clearCart }}
+      value={{
+        items,
+        selectedItems,
+        selectedKeys,
+        itemCount,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        toggleSelectItem,
+        selectAllItems,
+        setSelectedKeys,
+      }}
     >
       {children}
     </CartContext.Provider>

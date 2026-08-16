@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FiLoader, FiEye, FiEyeOff } from "react-icons/fi";
 import { toast } from "sonner";
 import { useAuth } from "@/app/_providers/auth-provider";
+import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 
 export default function AuthView() {
   const { login, register } = useAuth();
@@ -11,7 +12,9 @@ export default function AuthView() {
   // Authentication UI view toggling (login / register)
   const [authView, setAuthView] = useState<"login" | "register">("login");
   const [authName, setAuthName] = useState("");
+  const [authIdentifier, setAuthIdentifier] = useState("");
   const [authEmail, setAuthEmail] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authConfirmPassword, setAuthConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,28 +22,62 @@ export default function AuthView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authEmail || !authPassword) {
-      toast.error("Please fill in email and password.");
-      return;
-    }
 
-    setAuthSubmitting(true);
-    try {
-      if (authView === "login") {
-        await login(authEmail, authPassword);
-        toast.success("Welcome back!");
-      } else {
-        if (authPassword !== authConfirmPassword) {
-          toast.error("Passwords do not match.");
-          return;
-        }
-        await register(authName, authEmail, authPassword);
-        toast.success("Account created successfully!");
+    if (authView === "login") {
+      const trimmed = authIdentifier.trim();
+      if (!trimmed || !authPassword) {
+        toast.error("Please fill in email/phone and password.");
+        return;
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed.");
-    } finally {
-      setAuthSubmitting(false);
+
+      const isEmail = trimmed.includes("@");
+      const isPhone = isValidBdPhone(trimmed);
+      if (!isEmail && !isPhone) {
+        toast.error("Please enter a valid email address or Bangladeshi phone number (e.g. 017XXXXXXXX or +88017XXXXXXXX).");
+        return;
+      }
+
+      const finalIdentifier = isPhone ? normalizeBdPhone(trimmed) : trimmed;
+
+      setAuthSubmitting(true);
+      try {
+        await login(finalIdentifier, authPassword);
+        toast.success("Welcome back!");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Authentication failed.");
+      } finally {
+        setAuthSubmitting(false);
+      }
+    } else {
+      if (!authName.trim() || !authEmail.trim() || !authPhone.trim() || !authPassword) {
+        toast.error("Please fill in all fields (Name, Email, Phone, Password).");
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail.trim())) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
+
+      if (!isValidBdPhone(authPhone.trim())) {
+        toast.error("Please enter a valid 11-digit Bangladeshi phone number (e.g. 017XXXXXXXX or +88017XXXXXXXX).");
+        return;
+      }
+
+      if (authPassword !== authConfirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+
+      setAuthSubmitting(true);
+      try {
+        await register(authName.trim(), authEmail.trim(), normalizeBdPhone(authPhone.trim()), authPassword);
+        toast.success("Account created successfully!");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Authentication failed.");
+      } finally {
+        setAuthSubmitting(false);
+      }
     }
   };
 
@@ -75,35 +112,63 @@ export default function AuthView() {
         </div>
 
         <form onSubmit={handleSubmit} className="w-full space-y-4">
-          {authView === "register" && (
+          {authView === "login" ? (
             <div>
               <label className="block text-[10px] font-bold tracking-wider uppercase text-zinc-500 mb-1">
-                Full Name
+                Email or Phone Number *
               </label>
               <input
                 type="text"
-                value={authName}
-                onChange={(e) => setAuthName(e.target.value)}
+                value={authIdentifier}
+                onChange={(e) => setAuthIdentifier(e.target.value)}
                 className="w-full border border-stone-200 px-4 py-3 text-sm focus:border-stone-400 outline-none"
                 required
-                placeholder="Full Name"
+                placeholder="Email address or Phone number"
               />
             </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-[10px] font-bold tracking-wider uppercase text-zinc-500 mb-1">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                  className="w-full border border-stone-200 px-4 py-3 text-sm focus:border-stone-400 outline-none"
+                  required
+                  placeholder="Full Name"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold tracking-wider uppercase text-zinc-500 mb-1">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  className="w-full border border-stone-200 px-4 py-3 text-sm focus:border-stone-400 outline-none"
+                  required
+                  placeholder="Email Address"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold tracking-wider uppercase text-zinc-500 mb-1">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  value={authPhone}
+                  onChange={(e) => setAuthPhone(e.target.value)}
+                  className="w-full border border-stone-200 px-4 py-3 text-sm focus:border-stone-400 outline-none"
+                  required
+                  placeholder="017XXXXXXXX"
+                />
+              </div>
+            </>
           )}
-
-          <div>
-            <label className="block text-[10px] font-bold tracking-wider uppercase text-zinc-500 mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={authEmail}
-              onChange={(e) => setAuthEmail(e.target.value)}
-              className="w-full border border-stone-200 px-4 py-3 text-sm focus:border-stone-400 outline-none"
-              required
-              placeholder="Email Address"
-            />
-          </div>
 
           <div>
             <label className="block text-[10px] font-bold tracking-wider uppercase text-zinc-500 mb-1">

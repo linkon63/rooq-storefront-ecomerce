@@ -377,7 +377,10 @@ export function orderCustomer(order: Order): OrderCustomer {
   const guest = order.shippingAddress ?? null;
   const isGuest = !order.user;
 
-  const address = order.address
+  const phone = order.address?.phone ?? guest?.phone ?? order.user?.phone ?? null;
+  const name = order.address?.fullName ?? order.user?.name ?? guest?.fullName ?? "Guest customer";
+
+  const addressParts = order.address
     ? [
         order.address.addressLine1,
         order.address.addressLine2,
@@ -396,10 +399,10 @@ export function orderCustomer(order: Order): OrderCustomer {
       ];
 
   return {
-    name: order.user?.name ?? guest?.fullName ?? "Guest customer",
+    name,
     email: order.user?.email ?? guest?.email ?? null,
-    phone: order.user?.phone ?? order.address?.phone ?? guest?.phone ?? null,
-    address: address.filter(Boolean).join(", ") || null,
+    phone,
+    address: addressParts.filter(Boolean).join(", ") || null,
     isGuest,
   };
 }

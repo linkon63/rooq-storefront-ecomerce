@@ -244,10 +244,11 @@ export function OrderDetailPanel({
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400" />
             Shipping Address
           </h3>
-          <p className="text-xs font-semibold text-slate-700 leading-relaxed">
-            {[customer.name, customer.phone, customer.address].filter(Boolean).join(", ") ||
-              "No address details available"}
-          </p>
+          <div className="space-y-1 text-xs text-slate-700 font-medium">
+            <p className="font-bold text-slate-900 text-sm">{customer.name}</p>
+            {customer.phone && <p className="text-slate-600 font-semibold">Phone: {customer.phone}</p>}
+            <p className="leading-relaxed text-slate-600 pt-0.5">{customer.address || "No address details available"}</p>
+          </div>
         </div>
       </div>
 

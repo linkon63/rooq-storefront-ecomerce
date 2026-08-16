@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, useMemo, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -9,13 +9,14 @@ import { useCart } from "@/app/_providers/cart-provider";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrency } from "@/lib/currency-context";
 import { usePlaceOrder } from "@/app/_hooks/use-place-order";
-import { LuLoader, LuArrowLeft, LuLock, LuPlus, LuFileText } from "react-icons/lu";
+import { LuLoader, LuArrowLeft, LuLock, LuPlus, LuFileText, LuEye, LuMapPin, LuX, LuCircleCheck, LuPencil } from "react-icons/lu";
 import type { AddressForm } from "@/lib/types";
 import { fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
 import { COUPONS_ENABLED } from "@/components/storefront/checkout/OrderSummary";
 import DeliveryZonePicker from "@/components/storefront/checkout/DeliveryZonePicker";
 import { useDeliveryZone } from "@/app/_hooks/use-delivery-zone";
-import { fetchMyAddresses, formatAddress, type CustomerAddress } from "@/lib/address-api";
+import { fetchMyAddresses, formatAddress, updateAddress, type CustomerAddress } from "@/lib/address-api";
+import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 import PolicyModal from "@/components/storefront/shared/policy-modal";
 
 /** Organishi ships within Bangladesh only, so the country is not a choice. */
@@ -52,7 +53,7 @@ const INPUT_CLASS =
   "w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500";
 
 export default function CheckoutPage() {
-  const { items } = useCart();
+  const { items, selectedItems } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { formatCurrency } = useCurrency();
   const router = useRouter();
@@ -84,6 +85,69 @@ export default function CheckoutPage() {
 
   const [policies, setPolicies] = useState<ShopPolicy[]>([]);
   const [openPolicy, setOpenPolicy] = useState<ShopPolicy | null>(null);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+
+  // Edit Address Modal State & Handlers
+  const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
+  const [editFullName, setEditFullName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editDistrict, setEditDistrict] = useState("Dhaka");
+  const [editCity, setEditCity] = useState("");
+  const [editPostalCode, setEditPostalCode] = useState("");
+  const [editAddressLine1, setEditAddressLine1] = useState("");
+  const [editIsDefault, setEditIsDefault] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+
+  function handleOpenEditModal(entry: CustomerAddress) {
+    setEditingAddress(entry);
+    setEditFullName(entry.fullName);
+    setEditPhone(entry.phone);
+    setEditDistrict(entry.state || entry.city || "Dhaka");
+    setEditCity(entry.city || "");
+    setEditPostalCode(entry.postalCode || "");
+    setEditAddressLine1(entry.addressLine1 || "");
+    setEditIsDefault(entry.isDefault);
+  }
+
+  async function handleSaveEditedAddress(e: FormEvent) {
+    e.preventDefault();
+    if (!editingAddress) return;
+
+    if (!editFullName.trim() || !editPhone.trim() || !editAddressLine1.trim()) {
+      toast.error("Full Name, Phone, and Full Address are required.");
+      return;
+    }
+
+    if (!isValidBdPhone(editPhone.trim())) {
+      toast.error("Please enter a valid Bangladeshi phone number (e.g. 017XXXXXXXX).");
+      return;
+    }
+
+    setEditSaving(true);
+    try {
+      await updateAddress(editingAddress.id, {
+        fullName: editFullName.trim(),
+        phone: normalizeBdPhone(editPhone.trim()),
+        state: editDistrict,
+        city: editCity.trim() || editDistrict,
+        postalCode: editPostalCode.trim(),
+        addressLine1: editAddressLine1.trim(),
+        country: COUNTRY,
+        isDefault: editIsDefault,
+      });
+
+      toast.success("Address updated successfully!");
+      setEditingAddress(null);
+
+      // Refresh saved addresses from DB
+      const refreshed = await fetchMyAddresses();
+      setSavedAddresses(refreshed);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update address.");
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   useEffect(() => {
     if (user) {
@@ -137,7 +201,27 @@ export default function CheckoutPage() {
   const selectedAddress = savedAddresses.find((entry) => entry.id === selectedAddressId) ?? null;
   const usingSavedAddress = Boolean(selectedAddress) && !enteringNewAddress;
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  // Sync delivery zone (inside vs outside Dhaka shipping charge) based on current address district
+  useEffect(() => {
+    let currentDistrict = "";
+    if (usingSavedAddress && selectedAddress) {
+      currentDistrict = selectedAddress.state || selectedAddress.city || "";
+    } else {
+      currentDistrict = address.state || address.city || "";
+    }
+
+    if (currentDistrict) {
+      if (currentDistrict.trim().toLowerCase() === "dhaka") {
+        setDeliveryZone("inside");
+      } else {
+        setDeliveryZone("outside");
+      }
+    }
+  }, [usingSavedAddress, selectedAddress, enteringNewAddress, address.state, address.city, setDeliveryZone]);
+
+  const checkoutItems = selectedItems;
+
+  const subtotal = checkoutItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const total = subtotal + shipping;
 
   /**
@@ -146,8 +230,8 @@ export default function CheckoutPage() {
    * spelled out under the button instead of leaving a dead grey button.
    */
   const blockingReason =
-    items.length === 0
-      ? "Your cart is empty — add a product before placing the order."
+    checkoutItems.length === 0
+      ? "Your cart has no selected products — add a product before placing the order."
       : !agreeToTerms
         ? "Please tick the box to accept the terms, return and refund policies."
         : null;
@@ -210,6 +294,7 @@ export default function CheckoutPage() {
         paymentMethod,
         deliveryZone,
         addressId: usingSavedAddress ? selectedAddress?.id : undefined,
+        selectedItems: checkoutItems,
       });
       sessionStorage.setItem("orderResult", JSON.stringify(result));
       router.push("/confirmation");
@@ -217,6 +302,26 @@ export default function CheckoutPage() {
       // error toast handled inside the hook
     }
   }
+
+  const activeName = usingSavedAddress && selectedAddress
+    ? selectedAddress.fullName
+    : address.fullName || user?.name || "Guest";
+
+  const activePhone = usingSavedAddress && selectedAddress
+    ? selectedAddress.phone
+    : address.phone || "";
+
+  const activeEmail = usingSavedAddress && selectedAddress
+    ? (user?.email || address.email || "")
+    : (address.email || user?.email || "");
+
+  const activeDistrict = usingSavedAddress && selectedAddress
+    ? (selectedAddress.state || selectedAddress.city || "Dhaka")
+    : (address.state || address.city || "Dhaka");
+
+  const activeFullAddressFormatted = usingSavedAddress && selectedAddress
+    ? formatAddress(selectedAddress)
+    : [address.addressLine1, address.city, address.state, COUNTRY].filter(Boolean).join(", ");
 
   return (
     // min-height, not a fixed height: at a fixed 70vh the site footer paints
@@ -236,6 +341,39 @@ export default function CheckoutPage() {
                 <h1 className="font-bembo text-3xl sm:text-4xl leading-9 sm:leading-10 text-[#4A4A4A] font-normal">
                   Delivery Details
                 </h1>
+              </div>
+
+              {/* ── Active Delivery Address Preview & View Option ── */}
+              <div className="mb-6 rounded-xl border border-[#4a9e2f]/30 bg-[#f4f7ee]/70 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs font-gotham">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/15 flex items-center justify-center text-[#4a9e2f] shrink-0 mt-0.5">
+                    <LuMapPin className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-gotham text-xs font-bold uppercase tracking-wider text-stone-600">
+                        Active Delivery Address
+                      </span>
+                      <span className="rounded bg-[#4a9e2f]/15 px-2 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-[#4a9e2f]">
+                        {deliveryZone === "inside" ? `Inside Dhaka (৳${deliveryRates.inside})` : `Outside Dhaka (৳${deliveryRates.outside})`}
+                      </span>
+                    </div>
+                    <p className="font-gotham text-xs font-semibold text-[#222222] mt-1 truncate">
+                      {activeName} {activePhone ? `• ${activePhone}` : ""}
+                    </p>
+                    <p className="font-gotham text-xs text-zinc-600 truncate mt-0.5">
+                      {activeFullAddressFormatted || "Fill in your delivery address details below"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAddressModal(true)}
+                  className="inline-flex cursor-pointer items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-[#4a9e2f] text-[#4a9e2f] font-gotham text-xs font-bold hover:bg-[#4a9e2f] hover:text-white transition-all shadow-xs shrink-0"
+                >
+                  <LuEye className="w-4 h-4" />
+                  View Address Details
+                </button>
               </div>
 
               {/* ── Saved addresses ── */}
@@ -288,6 +426,21 @@ export default function CheckoutPage() {
                           {formatAddress(entry)}
                         </span>
                       </span>
+
+                      {/* Right-side Edit Icon Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleOpenEditModal(entry);
+                        }}
+                        className="p-2 rounded-lg text-stone-400 hover:text-[#4a9e2f] hover:bg-[#4a9e2f]/10 transition-colors cursor-pointer shrink-0"
+                        title="Edit Address"
+                        aria-label="Edit Address"
+                      >
+                        <LuPencil className="w-4 h-4" />
+                      </button>
                     </label>
                   ))}
 
@@ -442,12 +595,12 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Product Items List */}
-              {items.length > 0 && (
+              {checkoutItems.length > 0 && (
                 <div className="mb-6 border border-zinc-200 rounded-lg p-3 bg-stone-50/50 space-y-3 max-h-64 overflow-y-auto">
                   <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] font-semibold border-b border-zinc-200 pb-2">
-                    Items in Order ({items.reduce((acc, i) => acc + i.quantity, 0)})
+                    Selected Items ({checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})
                   </p>
-                  {items.map((item) => (
+                  {checkoutItems.map((item) => (
                     <div key={item.slug ?? item.productId} className="flex items-center gap-3 py-1.5 border-b border-zinc-100 last:border-b-0">
                       <div className="relative w-12 h-12 shrink-0 rounded bg-white overflow-hidden border border-zinc-200">
                         {item.image ? (
@@ -668,6 +821,272 @@ export default function CheckoutPage() {
       </div>
 
       <PolicyModal policy={openPolicy} onClose={() => setOpenPolicy(null)} />
+
+      {/* ── Address View Modal ── */}
+      {showAddressModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn font-gotham">
+          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden border border-stone-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-stone-150 px-6 py-4 bg-[#f4f7ee]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#4a9e2f]/15 flex items-center justify-center text-[#4a9e2f]">
+                  <LuMapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-gotham text-base font-bold text-[#1f2a17]">
+                    Delivery Address Details
+                  </h3>
+                  <p className="font-gotham text-[11px] text-stone-500">
+                    {usingSavedAddress ? "Selected Saved Address" : "Current Form Address"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddressModal(false)}
+                className="p-1.5 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <LuX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+              <div className="flex items-center justify-between bg-stone-50 p-3.5 rounded-lg border border-stone-200">
+                <span className="font-gotham text-xs font-semibold text-stone-600">
+                  Delivery Zone & Rate:
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] font-gotham text-xs font-bold">
+                  <LuCircleCheck className="w-3.5 h-3.5" />
+                  {deliveryZone === "inside" ? `Inside Dhaka (৳${deliveryRates.inside})` : `Outside Dhaka (৳${deliveryRates.outside})`}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                <div className="bg-stone-50/70 p-3 rounded-lg border border-stone-150">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                    Recipient Name
+                  </span>
+                  <span className="font-semibold text-stone-800 text-sm">{activeName || "N/A"}</span>
+                </div>
+                <div className="bg-stone-50/70 p-3 rounded-lg border border-stone-150">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                    Phone Number
+                  </span>
+                  <span className="font-semibold text-stone-800 text-sm">{activePhone || "N/A"}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                <div className="bg-stone-50/70 p-3 rounded-lg border border-stone-150">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                    District
+                  </span>
+                  <span className="font-semibold text-stone-800">{activeDistrict || "Dhaka"}</span>
+                </div>
+                <div className="bg-stone-50/70 p-3 rounded-lg border border-stone-150">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                    Email Address
+                  </span>
+                  <span className="font-semibold text-stone-800 truncate block">{activeEmail || "N/A"}</span>
+                </div>
+              </div>
+
+              <div className="bg-stone-50/70 p-3.5 rounded-lg border border-stone-150 text-xs">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                  Full Street Address
+                </span>
+                <p className="text-stone-800 leading-relaxed font-medium">
+                  {activeFullAddressFormatted || "No street address entered yet."}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between gap-3 px-6 py-3.5 bg-stone-50 border-t border-stone-200">
+              {usingSavedAddress && selectedAddress ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddressModal(false);
+                    handleOpenEditModal(selectedAddress);
+                  }}
+                  className="px-3.5 py-2 rounded-lg bg-white border border-[#4a9e2f] text-[#4a9e2f] font-gotham text-xs font-bold hover:bg-[#4a9e2f] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <LuPencil className="w-3.5 h-3.5" />
+                  Edit This Address
+                </button>
+              ) : <div />}
+              <button
+                type="button"
+                onClick={() => setShowAddressModal(false)}
+                className="px-4 py-2 rounded-lg bg-[#4a9e2f] text-white font-gotham text-xs font-bold hover:bg-[#3d8626] transition-colors cursor-pointer"
+              >
+                Close View
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Address Modal ── */}
+      {editingAddress && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn font-gotham">
+          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden border border-stone-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-stone-150 px-6 py-4 bg-[#f4f7ee]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#4a9e2f]/15 flex items-center justify-center text-[#4a9e2f]">
+                  <LuPencil className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-gotham text-base font-bold text-[#1f2a17]">
+                    Edit Delivery Address
+                  </h3>
+                  <p className="font-gotham text-[11px] text-stone-500">
+                    Changes will be saved to your address book
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingAddress(null)}
+                className="p-1.5 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <LuX className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSaveEditedAddress}>
+              <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto font-gotham">
+                <div>
+                  <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editFullName}
+                    onChange={(e) => setEditFullName(e.target.value)}
+                    placeholder="Enter full name"
+                    className={INPUT_CLASS}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="017XXXXXXXX"
+                    className={INPUT_CLASS}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                      District *
+                    </label>
+                    <select
+                      required
+                      value={editDistrict}
+                      onChange={(e) => {
+                        setEditDistrict(e.target.value);
+                        if (!editCity) setEditCity(e.target.value);
+                      }}
+                      className={`${INPUT_CLASS} bg-white cursor-pointer`}
+                    >
+                      {BANGLADESH_DISTRICTS.map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                      City <span className="text-stone-400 font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editCity}
+                      onChange={(e) => setEditCity(e.target.value)}
+                      placeholder="City name"
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Area / Postal Code <span className="text-stone-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editPostalCode}
+                    onChange={(e) => setEditPostalCode(e.target.value)}
+                    placeholder="e.g. Uttara / 1230"
+                    className={INPUT_CLASS}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Full Street Address *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editAddressLine1}
+                    onChange={(e) => setEditAddressLine1(e.target.value)}
+                    placeholder="House, road, block details"
+                    className={INPUT_CLASS}
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={editIsDefault}
+                    onChange={(e) => setEditIsDefault(e.target.checked)}
+                    className="h-4 w-4 rounded border-stone-300 text-[#4a9e2f] focus:ring-[#4a9e2f]"
+                  />
+                  <span className="text-xs text-stone-700 font-medium">
+                    Set as default delivery address
+                  </span>
+                </label>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 px-6 py-3.5 bg-stone-50 border-t border-stone-200">
+                <button
+                  type="button"
+                  onClick={() => setEditingAddress(null)}
+                  className="px-4 py-2 rounded-lg bg-white border border-stone-300 text-stone-700 font-gotham text-xs font-semibold hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  className="px-5 py-2 rounded-lg bg-[#4a9e2f] text-white font-gotham text-xs font-bold hover:bg-[#3d8626] transition-colors disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  {editSaving && <LuLoader className="w-3.5 h-3.5 animate-spin" />}
+                  {editSaving ? "Saving Changes..." : "Save Address Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

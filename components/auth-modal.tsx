@@ -6,6 +6,7 @@ import { useAuth } from "@/app/_providers/auth-provider";
 import { useGoogleLogin } from "@react-oauth/google";
 import { LuX, LuEye, LuEyeOff, LuLoader } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
+import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 
 type AuthView = "login" | "register";
 
@@ -14,7 +15,9 @@ export default function AuthModal() {
 
   const [view, setView] = useState<AuthView>("login");
   const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +49,9 @@ export default function AuthModal() {
 
   const resetForm = () => {
     setName("");
+    setIdentifier("");
     setEmail("");
+    setPhone("");
     setPassword("");
     setConfirmPassword("");
     setError("");
@@ -69,42 +74,64 @@ export default function AuthModal() {
     e.preventDefault();
     setError("");
 
-    if (!email.trim() || !password.trim()) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    if (view === "register") {
-      if (!name.trim()) {
-        setError("Please enter your name.");
+    if (view === "login") {
+      if (!identifier.trim() || !password.trim()) {
+        setError("Please enter your email/phone and password.");
         return;
       }
+
+      const trimmed = identifier.trim();
+      const isEmail = trimmed.includes("@");
+      const isPhone = isValidBdPhone(trimmed);
+      if (!isEmail && !isPhone) {
+        setError("Please enter a valid email address or Bangladeshi phone number (e.g. 017XXXXXXXX or +88017XXXXXXXX).");
+        return;
+      }
+
+      const finalIdentifier = isPhone ? normalizeBdPhone(trimmed) : trimmed;
+
+      setSubmitting(true);
+      try {
+        await login(finalIdentifier, password);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Invalid credentials.");
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      if (!name.trim() || !email.trim() || !phone.trim() || !password.trim()) {
+        setError("All fields (Name, Email, Phone, Password) are required for registration.");
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+
+      if (!isValidBdPhone(phone.trim())) {
+        setError("Please enter a valid 11-digit Bangladeshi phone number (e.g. 017XXXXXXXX or +88017XXXXXXXX).");
+        return;
+      }
+
       if (password.length < 6) {
         setError("Password must be at least 6 characters.");
         return;
       }
+
       if (password !== confirmPassword) {
         setError("Passwords do not match.");
         return;
       }
-    }
 
-    setSubmitting(true);
-    try {
-      if (view === "login") {
-        await login(email.trim(), password);
-      } else {
-        await register(name.trim(), email.trim(), password);
+      setSubmitting(true);
+      try {
+        await register(name.trim(), email.trim(), normalizeBdPhone(phone.trim()), password);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      } finally {
+        setSubmitting(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -171,35 +198,67 @@ export default function AuthModal() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-3.5 font-gotham">
-            {view === "register" && (
+            {view === "login" ? (
               <div>
-                <label htmlFor="auth-name" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                  Full Name
+                <label htmlFor="auth-identifier" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                  Email or Phone Number *
                 </label>
                 <input
-                  id="auth-name"
+                  id="auth-identifier"
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your full name"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="Enter email or phone number (e.g. 017XXXXXXXX)"
                   className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                  required
                 />
               </div>
+            ) : (
+              <>
+                <div>
+                  <label htmlFor="auth-name" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    id="auth-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="auth-email" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Email Address *
+                  </label>
+                  <input
+                    id="auth-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="auth-phone" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                    Phone Number *
+                  </label>
+                  <input
+                    id="auth-phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="017XXXXXXXX"
+                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    required
+                  />
+                </div>
+              </>
             )}
-
-            <div>
-              <label htmlFor="auth-email" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                Email Address
-              </label>
-              <input
-                id="auth-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
-              />
-            </div>
 
             <div className={`grid items-center justify-between gap-3 w-full ${view === "login" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
               <div className="w-full">
@@ -283,31 +342,6 @@ export default function AuthModal() {
                   : "SIGN UP"}
             </button>
           </form>
-
-          {/* Social login */}
-          <div className="mt-5">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-stone-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-white text-stone-400 font-inter">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="mt-3">
-              <button
-                type="button"
-                onClick={() => signInWithGoogle()}
-                disabled={googleLoading || submitting}
-                className="w-full flex items-center justify-center gap-2 border border-stone-200 py-2.5 rounded-full hover:bg-stone-50 transition-colors font-gotham text-xs font-semibold text-stone-700 cursor-pointer shadow-xs disabled:opacity-60"
-              >
-                {googleLoading ? <LuLoader className="w-4 h-4 animate-spin" /> : <FcGoogle className="w-4 h-4" />}
-                {googleLoading ? "Connecting..." : "Google"}
-              </button>
-            </div>
-          </div>
-
         </div>
 
         {/* Right Decorative Section with Organic Food Image */}

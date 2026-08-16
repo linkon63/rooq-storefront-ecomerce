@@ -15,3 +15,27 @@ export function formatDateTime(value?: string) {
     minute: "2-digit",
   }).format(new Date(value));
 }
+
+/**
+ * Validates a Bangladeshi phone number.
+ * Accepts formats: 01XXXXXXXXX (11 digits, operator 013-019), +8801XXXXXXXXX, or 8801XXXXXXXXX.
+ */
+export function isValidBdPhone(phone: string): boolean {
+  if (!phone) return false;
+  const clean = phone.replace(/[\s\-()]/g, "");
+  return /^(?:\+?88)?01[3-9]\d{8}$/.test(clean);
+}
+
+/**
+ * Normalizes a Bangladeshi phone number to standard 11-digit format (e.g. 017XXXXXXXX).
+ */
+export function normalizeBdPhone(phone: string): string {
+  const clean = phone.replace(/[\s\-()]/g, "");
+  if (clean.startsWith("+88")) {
+    return clean.slice(3);
+  }
+  if (clean.startsWith("88")) {
+    return clean.slice(2);
+  }
+  return clean;
+}

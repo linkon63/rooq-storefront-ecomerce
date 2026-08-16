@@ -9,32 +9,31 @@ import { toast } from "sonner";
 
 import CheckoutSteps from "./CheckoutSteps";
 import OrderSummary, { money } from "./OrderSummary";
-import { useCart } from "@/app/_providers/cart-provider";
+import { useCart, getItemKey } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
 
 export default function CartView() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem } = useCart();
+  const {
+    items,
+    selectedItems,
+    selectedKeys,
+    updateQuantity,
+    removeItem,
+    toggleSelectItem,
+    selectAllItems,
+  } = useCart();
   const { toggleWishlist } = useWishlist();
 
-  const [selected, setSelected] = useState<string[] | null>(null);
   const [discount, setDiscount] = useState(0);
 
-  // Everything is selected until the shopper deselects something.
-  const selectedKeys = selected ?? items.map((item) => item.slug);
-  const isSelected = (slug: string) => selectedKeys.includes(slug);
+  const isSelected = (item: Parameters<typeof getItemKey>[0]) =>
+    selectedKeys.includes(getItemKey(item));
+
   const allSelected = items.length > 0 && selectedKeys.length === items.length;
 
-  const toggleOne = (slug: string) =>
-    setSelected(
-      isSelected(slug)
-        ? selectedKeys.filter((key) => key !== slug)
-        : [...selectedKeys, slug],
-    );
+  const toggleAll = () => selectAllItems(!allSelected);
 
-  const toggleAll = () => setSelected(allSelected ? [] : items.map((item) => item.slug));
-
-  const selectedItems = items.filter((item) => isSelected(item.slug));
   const subtotal = useMemo(
     () => selectedItems.reduce((total, item) => total + item.price * item.quantity, 0),
     [selectedItems],
@@ -123,8 +122,8 @@ export default function CartView() {
                 <li key={item.slug} className="flex gap-4 py-6">
                   <input
                     type="checkbox"
-                    checked={isSelected(item.slug)}
-                    onChange={() => toggleOne(item.slug)}
+                    checked={isSelected(item)}
+                    onChange={() => toggleSelectItem(getItemKey(item))}
                     aria-label={`Select ${item.name}`}
                     className="mt-1 h-5 w-5 shrink-0 accent-[#1f2a17]"
                   />
@@ -226,7 +225,12 @@ export default function CartView() {
             action={
               <button
                 type="button"
-                onClick={() => router.push("/checkout")}
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    sessionStorage.setItem("selectedCartSlugs", JSON.stringify(selectedKeys));
+                  }
+                  router.push("/checkout");
+                }}
                 disabled={!selectedItems.length}
                 className="mt-6 w-full rounded-full bg-[#4a9e2f] py-3.5 text-sm font-medium text-white transition-colors hover:bg-[#3d8626] disabled:cursor-not-allowed disabled:bg-gray-300"
               >

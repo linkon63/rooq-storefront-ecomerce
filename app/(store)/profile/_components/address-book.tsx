@@ -20,9 +20,21 @@ const BTN_GHOST     = "inline-flex items-center justify-center gap-2 bg-white ho
 
 type Address = CustomerAddress;
 
+const BANGLADESH_DISTRICTS = [
+  "Dhaka", "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria",
+  "Chandpur", "Chapainawabganj", "Chittagong", "Chuadanga", "Comilla", "Cox's Bazar",
+  "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj",
+  "Jamalpur", "Jessore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna",
+  "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura",
+  "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail",
+  "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna",
+  "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur",
+  "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"
+];
+
 const EMPTY_FORM = {
   fullName: "", phone: "", addressLine1: "", addressLine2: "",
-  city: "", state: "", postalCode: "", country: "Bangladesh", isDefault: false,
+  city: "", state: "Dhaka", postalCode: "", country: "Bangladesh", isDefault: false,
 };
 
 export default function AddressBookView() {
@@ -224,35 +236,43 @@ export default function AddressBookView() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={FIELD_LABEL}>City *</label>
-                    <input type="text" value={form.city} onChange={(e) => patch("city", e.target.value)} className={INPUT_BASE} placeholder="Dhaka" required />
+                    <label className={FIELD_LABEL}>District *</label>
+                    <div className="relative">
+                      <select
+                        required
+                        value={form.state || "Dhaka"}
+                        onChange={(e) => patch("state", e.target.value)}
+                        className={`${INPUT_BASE} bg-white appearance-none pr-8 cursor-pointer`}
+                      >
+                        <option value="" disabled>Select District</option>
+                        {BANGLADESH_DISTRICTS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                      <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-xs pointer-events-none" />
+                    </div>
                   </div>
                   <div>
-                    <label className={FIELD_LABEL}>State / District *</label>
-                    <input type="text" value={form.state} onChange={(e) => patch("state", e.target.value)} className={INPUT_BASE} placeholder="Dhaka" required />
+                    <label className={FIELD_LABEL}>
+                      City <span className="normal-case font-normal text-zinc-300 tracking-normal">(optional)</span>
+                    </label>
+                    <input type="text" value={form.city} onChange={(e) => patch("city", e.target.value)} className={INPUT_BASE} placeholder="City name" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={FIELD_LABEL}>Postal Code *</label>
-                    <input type="text" value={form.postalCode} onChange={(e) => patch("postalCode", e.target.value)} className={INPUT_BASE} placeholder="1207" required />
+                    <label className={FIELD_LABEL}>
+                      Postal Code <span className="normal-case font-normal text-zinc-300 tracking-normal">(optional)</span>
+                    </label>
+                    <input type="text" value={form.postalCode} onChange={(e) => patch("postalCode", e.target.value)} className={INPUT_BASE} placeholder="1207" />
                   </div>
                   <div>
-                    <label className={FIELD_LABEL}>Country *</label>
-                    <div className="relative">
-                      <select
-                        value={form.country}
-                        onChange={(e) => patch("country", e.target.value)}
-                        className={`${INPUT_BASE} appearance-none pr-8 cursor-pointer`}
-                      >
-                        <option>Bangladesh</option>
-                        <option>India</option>
-                        <option>United Kingdom</option>
-                        <option>United States</option>
-                        <option>Other</option>
-                      </select>
-                      <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-xs pointer-events-none" />
+                    <label className={FIELD_LABEL}>Country</label>
+                    <div className={INPUT_BASE + " bg-stone-50 text-zinc-500 cursor-not-allowed flex items-center"}>
+                      Bangladesh
                     </div>
                   </div>
                 </div>

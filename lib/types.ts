@@ -64,6 +64,8 @@ export interface BackendCartResponse {
 
 export interface CartContextValue {
   items: CartItem[];
+  selectedItems: CartItem[];
+  selectedKeys: string[];
   itemCount: number;
   addItem: (
     item: Omit<CartItem, "quantity"> & { quantity?: number },
@@ -72,6 +74,9 @@ export interface CartContextValue {
   removeItem: (slug: string) => void;
   updateQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
+  toggleSelectItem: (key: string) => void;
+  selectAllItems: (select: boolean) => void;
+  setSelectedKeys: (keys: string[]) => void;
 }
 
 export interface BackendWishlistItem {
