@@ -22,6 +22,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    email: '',
     countryCode: '+880',
     phoneNumber: '',
     message: '',
@@ -30,22 +31,36 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
-    setTimeout(() => {
-      console.log('Contact Form Submitted:', formData);
-      toast.success('Thank you for contacting Organishi! Your inquiry has been submitted.');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to send message');
+      }
+
+      toast.success('Thank you for contacting Organishi! Your message has been sent successfully.');
       setFormData({
         firstName: '',
         lastName: '',
+        email: '',
         countryCode: '+880',
         phoneNumber: '',
         message: '',
       });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit message. Please try again.');
+    } finally {
       setSubmitting(false);
-    }, 600);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -239,6 +254,21 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                           placeholder="Phone Number"
                           className="w-full bg-transparent border-0 p-0 text-stone-800 text-sm font-inter placeholder:text-stone-400 focus:outline-none"
                           required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email field */}
+                    <div className="w-full">
+                      <label className="block text-[#1f2a17] text-xs font-semibold uppercase tracking-wider font-gotham mb-1.5">Email Address</label>
+                      <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-[#4a9e2f] focus-within:ring-1 focus-within:ring-[#4a9e2f] transition-all">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="Enter your email (optional)"
+                          className="w-full bg-transparent border-0 p-0 text-stone-800 text-sm font-inter placeholder:text-stone-400 focus:outline-none"
                         />
                       </div>
                     </div>
