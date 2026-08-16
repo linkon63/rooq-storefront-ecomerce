@@ -21,6 +21,18 @@ import PolicyModal from "@/components/storefront/shared/policy-modal";
 /** Organishi ships within Bangladesh only, so the country is not a choice. */
 const COUNTRY = "Bangladesh";
 
+const BANGLADESH_DISTRICTS = [
+  "Dhaka", "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria",
+  "Chandpur", "Chapainawabganj", "Chittagong", "Chuadanga", "Comilla", "Cox's Bazar",
+  "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj",
+  "Jamalpur", "Jessore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna",
+  "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura",
+  "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail",
+  "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna",
+  "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur",
+  "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"
+];
+
 /** The two policies a shopper is asked to accept before paying. */
 const CHECKOUT_POLICY_IDS = ["return", "refund"] as const;
 
@@ -31,7 +43,7 @@ const emptyAddress: AddressForm = {
   addressLine1: "",
   addressLine2: "",
   city: "",
-  state: "",
+  state: "Dhaka",
   postalCode: "",
   country: COUNTRY,
 };
@@ -139,6 +151,19 @@ export default function CheckoutPage() {
       : !agreeToTerms
         ? "Please tick the box to accept the terms, return and refund policies."
         : null;
+
+  function handleDistrictChange(newDistrict: string) {
+    setAddress((prev) => ({
+      ...prev,
+      state: newDistrict,
+      city: prev.city ? prev.city : newDistrict,
+    }));
+    if (newDistrict === "Dhaka") {
+      setDeliveryZone("inside");
+    } else {
+      setDeliveryZone("outside");
+    }
+  }
 
   function startNewAddress() {
     setEnteringNewAddress(true);
@@ -311,19 +336,6 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                        Email *
-                      </label>
-                      <input
-                        required
-                        type="email"
-                        value={address.email}
-                        onChange={(e) => setAddress({ ...address, email: e.target.value })}
-                        placeholder="Enter email address"
-                        className={INPUT_CLASS}
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
                         Phone *
                       </label>
                       <input
@@ -331,6 +343,18 @@ export default function CheckoutPage() {
                         value={address.phone}
                         onChange={(e) => setAddress({ ...address, phone: e.target.value })}
                         placeholder="01XXXXXXXXX"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
+                        Email <span className="text-xs text-zinc-400 font-normal">(Optional)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={address.email}
+                        onChange={(e) => setAddress({ ...address, email: e.target.value })}
+                        placeholder="Enter email address"
                         className={INPUT_CLASS}
                       />
                     </div>
@@ -342,20 +366,24 @@ export default function CheckoutPage() {
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
                         District *
                       </label>
-                      <input
+                      <select
                         required
-                        value={address.state}
-                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                        placeholder="e.g. Dhaka"
-                        className={INPUT_CLASS}
-                      />
+                        value={address.state || "Dhaka"}
+                        onChange={(e) => handleDistrictChange(e.target.value)}
+                        className={`${INPUT_CLASS} bg-white cursor-pointer`}
+                      >
+                        {BANGLADESH_DISTRICTS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                        City *
+                        City <span className="text-xs text-zinc-400 font-normal">(Optional)</span>
                       </label>
                       <input
-                        required
                         value={address.city}
                         onChange={(e) => setAddress({ ...address, city: e.target.value })}
                         placeholder="Enter city name"
@@ -364,10 +392,9 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                        Area / Post Code *
+                        Area / Post Code <span className="text-xs text-zinc-400 font-normal">(Optional)</span>
                       </label>
                       <input
-                        required
                         value={address.postalCode}
                         onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
                         placeholder="e.g. Uttara / 1230"
