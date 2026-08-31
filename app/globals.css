@@ -15,11 +15,13 @@
   --color-primary-600: #155DFC;
 
   /* Global site typography — Poppins across the whole site */
-  --font-inter: var(--font-poppins), sans-serif;
-  --font-poppins: var(--font-poppins), sans-serif;
-  --font-display: var(--font-poppins), sans-serif;
-  --font-bembo: var(--font-poppins), sans-serif;
-  --font-gotham: var(--font-poppins), sans-serif;
+  /* Bengali sits after Poppins in every stack: Latin glyphs resolve in Poppins,
+     and only the Bangla ones fall through to the Bengali face. */
+  --font-inter: var(--font-poppins), var(--font-bengali), sans-serif;
+  --font-poppins: var(--font-poppins), var(--font-bengali), sans-serif;
+  --font-display: var(--font-poppins), var(--font-bengali), sans-serif;
+  --font-bembo: var(--font-poppins), var(--font-bengali), sans-serif;
+  --font-gotham: var(--font-poppins), var(--font-bengali), sans-serif;
 
   /* Organishi brand green, taken from the approved mockups. */
   --color-brand: #4a9e2f;
@@ -48,7 +50,7 @@ body {
 /* Global site body font */
 body,
 .storefront-root {
-  font-family: var(--font-poppins), sans-serif;
+  font-family: var(--font-poppins), var(--font-bengali), sans-serif;
 }
 
 /* ── Interactive affordances ──────────────────────────────────────────────

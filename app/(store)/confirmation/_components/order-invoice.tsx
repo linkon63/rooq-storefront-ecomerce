@@ -41,8 +41,14 @@ export default function OrderInvoice({
   const shopName = settings?.shopName ?? "Organishi";
   const subtotal =
     order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ?? order.total;
-  // Prefer the charge the API applied; older stored orders only have the gap.
-  const deliveryCharge = order.shippingCost ?? (order.total > subtotal ? order.total - subtotal : 0);
+  const discount = Math.max(0, order.discount ?? 0);
+  // Prefer the charge the API applied; older stored orders only have the gap,
+  // which is only a safe guess when nothing was discounted.
+  const deliveryCharge =
+    order.shippingCost ?? (!discount && order.total > subtotal ? order.total - subtotal : 0);
+  // What the customer actually owes. Falls back to the arithmetic when an older
+  // stored order has no total of its own.
+  const payable = order.total ?? subtotal - discount + deliveryCharge;
   const isCod = (order.paymentMethod ?? "cod") === "cod";
 
   return (
@@ -177,6 +183,12 @@ export default function OrderInvoice({
             <span>Subtotal</span>
             <span className="font-semibold text-stone-900">{money(subtotal)}</span>
           </div>
+          {discount > 0 && (
+            <div className="flex justify-between text-[#2f7d1f]">
+              <span>Discount</span>
+              <span className="font-semibold">-{money(discount)}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>Delivery Charge</span>
             <span className="font-semibold text-stone-900">
@@ -184,13 +196,13 @@ export default function OrderInvoice({
             </span>
           </div>
           <div className="flex justify-between border-t-2 border-[#1f2a17] pt-2 text-sm font-bold text-[#1f2a17]">
-            <span>Grand Total</span>
-            <span>{money(order.total)}</span>
+            <span>Payable Amount</span>
+            <span>{money(payable)}</span>
           </div>
           {isCod && (
             <div className="flex justify-between rounded bg-[#f4f7ee] px-3 py-2 text-xs font-bold text-[#1f2a17]">
               <span>Payable on delivery</span>
-              <span>{money(order.total)}</span>
+              <span>{money(payable)}</span>
             </div>
           )}
         </div>

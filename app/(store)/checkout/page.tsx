@@ -9,30 +9,22 @@ import { useCart } from "@/app/_providers/cart-provider";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrency } from "@/lib/currency-context";
 import { usePlaceOrder } from "@/app/_hooks/use-place-order";
-import { LuLoader, LuArrowLeft, LuLock, LuPlus, LuFileText, LuEye, LuMapPin, LuX, LuCircleCheck, LuPencil } from "react-icons/lu";
+import { LuLoader, LuArrowLeft, LuLock, LuPlus, LuFileText, LuEye, LuMapPin, LuX, LuCircleCheck, LuPencil, LuTruck } from "react-icons/lu";
 import type { AddressForm } from "@/lib/types";
 import { fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
 import { COUPONS_ENABLED } from "@/components/storefront/checkout/OrderSummary";
-import DeliveryZonePicker from "@/components/storefront/checkout/DeliveryZonePicker";
 import { useDeliveryZone } from "@/app/_hooks/use-delivery-zone";
+import {
+  BANGLADESH_DISTRICTS,
+  COUNTRY,
+  DHAKA_AREAS,
+  ZONE_LABELS,
+  isDhakaDistrict,
+  resolveDeliveryZone,
+} from "@/lib/delivery-zone";
 import { fetchMyAddresses, formatAddress, updateAddress, type CustomerAddress } from "@/lib/address-api";
 import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 import PolicyModal from "@/components/storefront/shared/policy-modal";
-
-/** Organishi ships within Bangladesh only, so the country is not a choice. */
-const COUNTRY = "Bangladesh";
-
-const BANGLADESH_DISTRICTS = [
-  "Dhaka", "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria",
-  "Chandpur", "Chapainawabganj", "Chittagong", "Chuadanga", "Comilla", "Cox's Bazar",
-  "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur", "Gopalganj", "Habiganj",
-  "Jamalpur", "Jessore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachhari", "Khulna",
-  "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura",
-  "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail",
-  "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna",
-  "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi", "Rangamati", "Rangpur",
-  "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"
-];
 
 /** The two policies a shopper is asked to accept before paying. */
 const CHECKOUT_POLICY_IDS = ["return", "refund"] as const;
@@ -118,6 +110,13 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!editCity.trim()) {
+      toast.error(
+        isDhakaDistrict(editDistrict) ? "Please select your area in Dhaka." : "City is required.",
+      );
+      return;
+    }
+
     if (!isValidBdPhone(editPhone.trim())) {
       toast.error("Please enter a valid Bangladeshi phone number (e.g. 017XXXXXXXX).");
       return;
@@ -129,7 +128,7 @@ export default function CheckoutPage() {
         fullName: editFullName.trim(),
         phone: normalizeBdPhone(editPhone.trim()),
         state: editDistrict,
-        city: editCity.trim() || editDistrict,
+        city: editCity.trim(),
         postalCode: editPostalCode.trim(),
         addressLine1: editAddressLine1.trim(),
         country: COUNTRY,
@@ -201,21 +200,17 @@ export default function CheckoutPage() {
   const selectedAddress = savedAddresses.find((entry) => entry.id === selectedAddressId) ?? null;
   const usingSavedAddress = Boolean(selectedAddress) && !enteringNewAddress;
 
-  // Sync delivery zone (inside vs outside Dhaka shipping charge) based on current address district
+  // The delivery charge follows the address and nothing else — the shopper can
+  // see it but never picks it, so this is the only thing that sets the zone.
+  // The area counts too: Savar and Keraniganj are Dhaka district but not Dhaka
+  // city, so they are delivered at the Near Dhaka rate.
   useEffect(() => {
-    let currentDistrict = "";
-    if (usingSavedAddress && selectedAddress) {
-      currentDistrict = selectedAddress.state || selectedAddress.city || "";
-    } else {
-      currentDistrict = address.state || address.city || "";
-    }
+    const [currentDistrict, currentArea] = usingSavedAddress && selectedAddress
+      ? [selectedAddress.state || "", selectedAddress.city || ""]
+      : [address.state || "", address.city || ""];
 
-    if (currentDistrict) {
-      if (currentDistrict.trim().toLowerCase() === "dhaka") {
-        setDeliveryZone("inside");
-      } else {
-        setDeliveryZone("outside");
-      }
+    if (currentDistrict || currentArea) {
+      setDeliveryZone(resolveDeliveryZone(currentDistrict, currentArea));
     }
   }, [usingSavedAddress, selectedAddress, enteringNewAddress, address.state, address.city, setDeliveryZone]);
 
@@ -237,16 +232,14 @@ export default function CheckoutPage() {
         : null;
 
   function handleDistrictChange(newDistrict: string) {
-    setAddress((prev) => ({
-      ...prev,
-      state: newDistrict,
-      city: prev.city ? prev.city : newDistrict,
-    }));
-    if (newDistrict === "Dhaka") {
-      setDeliveryZone("inside");
-    } else {
-      setDeliveryZone("outside");
-    }
+    setAddress((prev) => {
+      // A Dhaka area is not a valid city for Barisal, and a typed city is not in
+      // the Dhaka list — so the field starts empty whenever the kind changes.
+      const kindChanged = isDhakaDistrict(prev.state) !== isDhakaDistrict(newDistrict);
+      return { ...prev, state: newDistrict, city: kindChanged ? "" : prev.city };
+    });
+    // The zone is not set here: the effect above recomputes it from the address,
+    // which keeps one rule for the saved-address and typed-address paths alike.
   }
 
   function startNewAddress() {
@@ -319,6 +312,17 @@ export default function CheckoutPage() {
     ? (selectedAddress.state || selectedAddress.city || "Dhaka")
     : (address.state || address.city || "Dhaka");
 
+  const activeArea = usingSavedAddress && selectedAddress
+    ? (selectedAddress.city || "")
+    : (address.city || "");
+
+  // Naming just the district would be misleading for Savar or Keraniganj, where
+  // the area is the reason the rate is what it is.
+  const zoneSourceLabel =
+    activeArea && activeArea !== activeDistrict
+      ? `${activeArea}, ${activeDistrict}`
+      : activeDistrict;
+
   const activeFullAddressFormatted = usingSavedAddress && selectedAddress
     ? formatAddress(selectedAddress)
     : [address.addressLine1, address.city, address.state, COUNTRY].filter(Boolean).join(", ");
@@ -355,7 +359,7 @@ export default function CheckoutPage() {
                         Active Delivery Address
                       </span>
                       <span className="rounded bg-[#4a9e2f]/15 px-2 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-[#4a9e2f]">
-                        {deliveryZone === "inside" ? `Inside Dhaka (৳${deliveryRates.inside})` : `Outside Dhaka (৳${deliveryRates.outside})`}
+                        {`${ZONE_LABELS[deliveryZone]} (৳${deliveryRates[deliveryZone]})`}
                       </span>
                     </div>
                     <p className="font-gotham text-xs font-semibold text-[#222222] mt-1 truncate">
@@ -534,14 +538,33 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
-                        City <span className="text-xs text-zinc-400 font-normal">(Optional)</span>
+                        {isDhakaDistrict(address.state) ? "City / Area *" : "City *"}
                       </label>
-                      <input
-                        value={address.city}
-                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                        placeholder="Enter city name"
-                        className={INPUT_CLASS}
-                      />
+                      {/* Inside Dhaka the area is picked from the known list; every
+                          other district is typed, because there is no list to offer. */}
+                      {isDhakaDistrict(address.state) ? (
+                        <select
+                          required
+                          value={address.city}
+                          onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                          className={`${INPUT_CLASS} bg-white cursor-pointer`}
+                        >
+                          <option value="">Select your area</option>
+                          {DHAKA_AREAS.map((area) => (
+                            <option key={area} value={area}>
+                              {area}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          required
+                          value={address.city}
+                          onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                          placeholder="Enter city name"
+                          className={INPUT_CLASS}
+                        />
+                      )}
                     </div>
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
@@ -624,14 +647,30 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Delivery Area — same picker (and same rates) as the cart */}
+              {/* Delivery Area — read-only. The rate follows the district chosen
+                  above, so there is nothing here for the shopper to change. */}
               <div className="mb-6">
-                <DeliveryZonePicker
-                  value={deliveryZone}
-                  onChange={setDeliveryZone}
-                  rates={deliveryRates}
-                  format={formatCurrency}
-                />
+                <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] mb-2 flex items-center gap-1.5">
+                  <LuTruck className="w-3.5 h-3.5" />
+                  Delivery Area
+                </p>
+                <div
+                  aria-live="polite"
+                  className="flex w-full items-center justify-between gap-3 rounded-md border border-zinc-200 bg-stone-50 px-3 py-3"
+                >
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5 font-gotham text-sm font-medium text-[#222222]">
+                      {ZONE_LABELS[deliveryZone]}
+                      <LuLock className="w-3 h-3 text-zinc-400" aria-hidden />
+                    </span>
+                    <span className="block font-gotham text-[11px] text-zinc-500">
+                      Set by your delivery address — {zoneSourceLabel}
+                    </span>
+                  </span>
+                  <span className="shrink-0 font-gotham text-sm font-semibold text-[#222222]">
+                    {shipping > 0 ? formatCurrency(shipping) : "Free"}
+                  </span>
+                </div>
               </div>
 
               {/* Pricing Rows */}
@@ -859,7 +898,7 @@ export default function CheckoutPage() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] font-gotham text-xs font-bold">
                   <LuCircleCheck className="w-3.5 h-3.5" />
-                  {deliveryZone === "inside" ? `Inside Dhaka (৳${deliveryRates.inside})` : `Outside Dhaka (৳${deliveryRates.outside})`}
+                  {`${ZONE_LABELS[deliveryZone]} (৳${deliveryRates[deliveryZone]})`}
                 </span>
               </div>
 
@@ -999,8 +1038,11 @@ export default function CheckoutPage() {
                       required
                       value={editDistrict}
                       onChange={(e) => {
-                        setEditDistrict(e.target.value);
-                        if (!editCity) setEditCity(e.target.value);
+                        const next = e.target.value;
+                        // Same rule as the main form: a Dhaka area means nothing
+                        // outside Dhaka, so the field clears when the kind changes.
+                        if (isDhakaDistrict(editDistrict) !== isDhakaDistrict(next)) setEditCity("");
+                        setEditDistrict(next);
                       }}
                       className={`${INPUT_CLASS} bg-white cursor-pointer`}
                     >
@@ -1013,15 +1055,32 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                      City <span className="text-stone-400 font-normal">(Optional)</span>
+                      {isDhakaDistrict(editDistrict) ? "City / Area *" : "City *"}
                     </label>
-                    <input
-                      type="text"
-                      value={editCity}
-                      onChange={(e) => setEditCity(e.target.value)}
-                      placeholder="City name"
-                      className={INPUT_CLASS}
-                    />
+                    {isDhakaDistrict(editDistrict) ? (
+                      <select
+                        required
+                        value={editCity}
+                        onChange={(e) => setEditCity(e.target.value)}
+                        className={`${INPUT_CLASS} bg-white cursor-pointer`}
+                      >
+                        <option value="">Select your area</option>
+                        {DHAKA_AREAS.map((area) => (
+                          <option key={area} value={area}>
+                            {area}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        required
+                        value={editCity}
+                        onChange={(e) => setEditCity(e.target.value)}
+                        placeholder="City name"
+                        className={INPUT_CLASS}
+                      />
+                    )}
                   </div>
                 </div>
 

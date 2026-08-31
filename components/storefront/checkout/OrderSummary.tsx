@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { FiRefreshCw, FiShield } from "react-icons/fi";
+import { useState } from "react";
+import { FiShield } from "react-icons/fi";
 
-import DeliveryZonePicker from "./DeliveryZonePicker";
-import PolicyModal from "@/components/storefront/shared/policy-modal";
 import { useDeliveryZone } from "@/app/_hooks/use-delivery-zone";
-import { fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
 
 export const money = (value: number) =>
   `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
@@ -17,9 +14,6 @@ export const money = (value: number) =>
  * than none. Flip this to bring the row (and the checkout discount line) back.
  */
 export const COUPONS_ENABLED = false;
-
-/** The policies the cart offers to read, in the order they are shown. */
-const CART_POLICY_IDS = ["return", "refund"] as const;
 
 /**
  * Right-hand money panel on the cart: subtotal, total and the assurance strip.
@@ -44,26 +38,10 @@ export default function OrderSummary({
   const [couponOpen, setCouponOpen] = useState(false);
   const [code, setCode] = useState("");
 
-  // The same zone the checkout will use — the choice carries over.
-  const { zone, setZone, rates, charge } = useDeliveryZone();
-
-  // Return and refund text is written by the shop in Admin → Settings → Policy.
-  const [policies, setPolicies] = useState<ShopPolicy[]>([]);
-  const [openPolicy, setOpenPolicy] = useState<ShopPolicy | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    fetchShopPolicies().then((all) => {
-      if (active) setPolicies(all);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const readablePolicies = CART_POLICY_IDS.map((id) =>
-    policies.find((policy) => policy.id === id),
-  ).filter((policy): policy is ShopPolicy => Boolean(policy));
+  // The cart has no address yet, so it can only quote the standard inside-Dhaka
+  // rate. The real charge is set from the delivery district at checkout.
+  const { rates } = useDeliveryZone();
+  const charge = rates.inside;
 
   const total = Math.max(0, subtotal - discount) + charge;
 
@@ -127,13 +105,14 @@ export default function OrderSummary({
         </div>
         )}
 
-        <div className="py-4">
-          <DeliveryZonePicker value={zone} onChange={setZone} rates={rates} format={money} />
-        </div>
-
-        <div className="flex items-center justify-between py-4">
-          <dt className="font-semibold text-[#1f2a17]">Delivery Charge</dt>
-          <dd className="font-display font-semibold text-[#1f2a17]">
+        <div className="flex items-start justify-between gap-3 py-4">
+          <dt className="font-semibold text-[#1f2a17]">
+            Delivery Charge
+            <span className="mt-0.5 block text-xs font-normal text-gray-500">
+              Estimated at the Dhaka rate — set by your district at checkout.
+            </span>
+          </dt>
+          <dd className="shrink-0 font-display font-semibold text-[#1f2a17]">
             {charge > 0 ? money(charge) : "Free"}
           </dd>
         </div>
@@ -149,28 +128,6 @@ export default function OrderSummary({
 
       <div className="mt-6 space-y-4 text-sm">
         <div className="flex gap-3">
-          <FiRefreshCw className="mt-0.5 shrink-0 text-gray-500" size={16} />
-          <div>
-            <p className="font-semibold text-[#1f2a17]">Return &amp; Refund Policy</p>
-            {readablePolicies.length > 0 ? (
-              <div className="mt-0.5 flex flex-wrap gap-x-4 gap-y-1">
-                {readablePolicies.map((policy) => (
-                  <button
-                    key={policy.id}
-                    type="button"
-                    onClick={() => setOpenPolicy(policy)}
-                    className="cursor-pointer text-sm font-medium text-[#4a9e2f] underline underline-offset-2 hover:text-[#3d8626]"
-                  >
-                    Read {policy.title}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">Contact us within 48 hours of delivery.</p>
-            )}
-          </div>
-        </div>
-        <div className="flex gap-3">
           <FiShield className="mt-0.5 shrink-0 text-gray-500" size={16} />
           <div>
             <p className="font-semibold text-[#1f2a17]">Security &amp; Privacy</p>
@@ -180,8 +137,6 @@ export default function OrderSummary({
           </div>
         </div>
       </div>
-
-      <PolicyModal policy={openPolicy} onClose={() => setOpenPolicy(null)} />
     </aside>
   );
 }

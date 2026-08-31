@@ -135,6 +135,8 @@ export type OrderResult = {
   total: number;
   /** Delivery charge the API applied, from Admin → Settings → General. */
   shippingCost?: number;
+  /** Discount the API applied (coupon or product rule), in shop currency. */
+  discount?: number;
   items: OrderResultItem[];
   address: AddressForm;
   paymentMethod?: string;

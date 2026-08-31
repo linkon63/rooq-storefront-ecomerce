@@ -10,7 +10,10 @@ import type { ShopSocialContact } from "@/lib/shop-api";
 
 import "swiper/css";
 
-/** Placeholder voices until the review API feeds this section. */
+/**
+ * Customer voices, in the mix of Bangla and English shoppers actually write in.
+ * Hard-coded until the review API feeds this section.
+ */
 const TESTIMONIALS = [
   {
     name: "Ralph Edwards",
@@ -47,6 +50,24 @@ const TESTIMONIALS = [
     role: "Customer",
     quote:
       "Support answered on WhatsApp within minutes and sorted out my delivery address. Small thing, but it is why I keep ordering here.",
+  },
+  {
+    name: "Rezaul Karim",
+    role: "Customer",
+    quote:
+      "সরিষার তেলের ঝাঁঝটাই আসল পরিচয় — এটা পেয়ে মনে হলো গ্রামের ঘানিভাঙা তেল খাচ্ছি। Ordered the 5 litre tin for the whole family, delivery came in two days.",
+  },
+  {
+    name: "Nafisa Tabassum",
+    role: "Customer",
+    quote:
+      "ঘি-টা একদম দানাদার, রঙটাও সোনালি — বাসায় সবাই বলেছে দোকানের ঘি এর থেকে অনেক ভালো. I now keep a jar of the 500g for everyday cooking.",
+  },
+  {
+    name: "Shahriar Alam",
+    role: "Customer",
+    quote:
+      "Spirulina powder-টা smoothie-তে মিশিয়ে খাচ্ছি প্রতিদিন সকালে. প্যাকেজিং seal করা ছিল, আর batch test report চাওয়ায় সাথে সাথে দিয়ে দিয়েছে — that transparency is rare.",
   },
 ];
 

@@ -144,6 +144,8 @@ export function usePlaceOrder() {
         orderNumber: (data.orderNumber ?? data.id ?? "N/A") as string,
         total: Number(data.total ?? orderSubtotal),
         shippingCost: Number(data.shippingCost ?? 0),
+        // The invoice prints what the API actually charged, not a local guess.
+        discount: Number(data.discount ?? 0),
         items: targetItems.map((i) => ({
           name: i.name,
           quantity: i.quantity,

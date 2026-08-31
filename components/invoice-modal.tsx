@@ -51,7 +51,10 @@ export default function InvoiceModal({
   const subtotal = order.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const shipping = order.shippingCost ?? 0;
   const tax = 0;
-  const discount = subtotal + shipping + tax - order.total;
+  // Prefer the discount the API recorded; fall back to the gap only for older
+  // stored orders that predate the field.
+  const discount = order.discount ?? Math.max(0, subtotal + shipping + tax - order.total);
+  const payable = order.total ?? subtotal - discount + shipping + tax;
   const issuedOn = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -250,9 +253,9 @@ export default function InvoiceModal({
                   </div>
                 )}
                 <div className="flex justify-between font-serif text-lg text-stone-900 pt-2 mt-2 border-t border-stone-300">
-                  <span>Total</span>
+                  <span>Payable Amount</span>
                   <span className="text-[#D31F3A] font-semibold">
-                    {currency(order.total)}
+                    {currency(payable)}
                   </span>
                 </div>
               </div>

@@ -35,6 +35,10 @@ const TRAILING_LINKS = [
   { label: "Contact", href: "/contact" },
 ];
 
+/** Shared look for the ™ beside the header logo; each branch adds its own offsets. */
+const TRADEMARK_CLASS =
+  "select-none font-gotham text-[9px] font-semibold leading-none text-[#1f2a17] md:text-[11px]";
+
 export default function Header({ settings, categories = [] }: HeaderProps) {
   const { user } = useAuth();
   const { itemCount: cartCount } = useCart();
@@ -92,22 +96,41 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
       {/* ── Main bar ────────────────────────────────────────────────────── */}
       <div className="border-b border-gray-100 bg-white">
         <div className="mx-auto max-w-[1600px] px-4 md:px-8">
-          <div className="flex h-[72px] items-center justify-between gap-4 md:h-[86px]">
+          <div className="flex h-[80px] items-center justify-between gap-4 md:h-[96px]">
+            {/* aria-hidden on the ™: the logo's alt text already names the brand,
+                so announcing "trademark" again would only add noise. The offsets
+                differ per branch because they cancel the artwork's own padding,
+                and an admin-uploaded logo has padding of its own (usually none). */}
             <Link href="/" className="flex shrink-0 items-center" aria-label="Organishi home">
               {settings?.logo ? (
-                /* `aspect-auto` drops the ratio the width/height props imply, so an
-                   admin-uploaded logo of any shape sizes from its own artwork
-                   instead of being letterboxed inside a fixed box. */
-                <Image
-                  src={settings.logo}
-                  alt={settings.shopName ?? "Organishi"}
-                  width={150}
-                  height={48}
-                  className="aspect-auto h-14 w-auto object-contain md:h-18"
-                  priority
-                />
+                <>
+                  {/* `aspect-auto` drops the ratio the width/height props imply, so an
+                     admin-uploaded logo of any shape sizes from its own artwork
+                     instead of being letterboxed inside a fixed box. */}
+                  <Image
+                    src={settings.logo}
+                    alt={settings.shopName ?? "Organishi"}
+                    width={150}
+                    height={48}
+                    className="aspect-auto h-16 w-auto object-contain md:h-20"
+                    priority
+                  />
+                  <span aria-hidden className={`${TRADEMARK_CLASS} ml-0.5 -mt-4 md:-mt-5`}>
+                    ™
+                  </span>
+                </>
               ) : (
-                <Logo className="h-14 md:h-18" />
+                <>
+                  <Logo className="h-16 md:h-20" />
+                  {/* Logo-English.png is 746×612 with the mark occupying only the
+                      middle 338×206 — a third of the box is transparent on every
+                      side. These offsets cancel that padding (0.333 × rendered
+                      height to the right, 0.332 above) so the ™ lands on the mark
+                      instead of floating in the empty margin. */}
+                  <span aria-hidden className={`${TRADEMARK_CLASS} -ml-[19px] -mt-[9px] md:-ml-[25px] md:-mt-[12px]`}>
+                    ™
+                  </span>
+                </>
               )}
             </Link>
 
