@@ -3,33 +3,31 @@ import Link from "next/link";
 import { PiLeaf, PiPlant, PiDrop, PiArrowRight } from "react-icons/pi";
 
 /**
- * Sits where the video gallery used to. A collage of organic produce beside the
- * promise copy — photography is served from Unsplash, whose host is already
- * allow-listed in next.config.ts.
+ * Sits where the video gallery used to. A collage of the Organishi range beside
+ * the promise copy — the packshots are served from `public/images/organishi`,
+ * so no remote host has to be allow-listed in next.config.ts.
  */
-const shot = (id: string, w: number, h: number) =>
-  `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&auto=format&q=80`;
-
 const COLLAGE = [
   {
-    src: shot("1542838132-92c53300491e", 800, 1000),
-    alt: "Fresh organic vegetables on a market table",
-    // Tall hero tile on the left of the collage.
+    src: "/images/organishi/d4e07d8f-adb2-4b8a-9ea9-492b6799a6f4.jpeg",
+    alt: "Organishi cold pressed mustard oil tin",
+    // Tall hero tile on the left of the collage — the tin is the tallest pack,
+    // so it is the one that fills a two-row box without stranding whitespace.
     className: "col-span-2 row-span-2",
   },
   {
-    src: shot("1447175008436-054170c2e979", 600, 500),
-    alt: "Baskets of freshly harvested produce",
+    src: "/images/organishi/23ef436d-29b8-4dfa-8bcb-c796589c012f.jpeg",
+    alt: "Organishi chia seed jar",
     className: "col-span-2",
   },
   {
-    src: shot("1512621776951-a57141f2eefd", 400, 400),
-    alt: "A bowl of crisp seasonal salad",
+    src: "/images/organishi/8d239828-cd39-44eb-a5cf-073a8d2e5d9d.jpeg",
+    alt: "Organishi pure cow ghee jar",
     className: "",
   },
   {
-    src: shot("1466637574441-749b8f19452f", 400, 400),
-    alt: "Green leafy vegetables straight from the field",
+    src: "/images/organishi/a9ffc05e-18bc-447c-afea-971125766938.jpeg",
+    alt: "Organishi almond nut jar",
     className: "",
   },
 ];
@@ -64,14 +62,17 @@ export default function OrganicShowcase() {
               {COLLAGE.map((image) => (
                 <div
                   key={image.src}
-                  className={`group relative overflow-hidden rounded-2xl ${image.className}`}
+                  className={`group relative overflow-hidden rounded-2xl bg-white ${image.className}`}
                 >
+                  {/* `object-contain` on a white tile, not `object-cover`: these are
+                      studio packshots that already sit centred on white, so cropping
+                      to fill would slice the lid or the label off the pack. */}
                   <Image
                     src={image.src}
                     alt={image.alt}
                     fill
                     sizes="(max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-contain p-2 transition-transform duration-700 group-hover:scale-105 sm:p-3"
                   />
                 </div>
               ))}

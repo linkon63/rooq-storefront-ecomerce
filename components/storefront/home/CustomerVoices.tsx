@@ -176,7 +176,12 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
             </h2>
 
             <div className="mt-7 grid grid-cols-2 gap-5">
-              {socials.map(({ key, label, Icon, href }) => (
+              {/* Each mark carries its own logo colour rather than the shop green.
+                  Inline styles, not classes: Tailwind cannot generate a class it
+                  never sees written out, and these colours come from data. The
+                  border is the same hex at 30% alpha — `4D` — to match the tint
+                  the outlined chips elsewhere on the page use. */}
+              {socials.map(({ key, label, Icon, color, href }) => (
                 <a
                   key={key}
                   href={href}
@@ -184,10 +189,15 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                   rel="noreferrer noopener"
                   className="flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow hover:shadow-md"
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded border border-[#4a9e2f]/30 text-[#4a9e2f]">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded border"
+                    style={{ color, borderColor: `${color}4D` }}
+                  >
                     <Icon size={13} />
                   </span>
-                  <span className="font-display text-[16px] text-[#4a9e2f]">{label}</span>
+                  <span className="font-display text-[16px]" style={{ color }}>
+                    {label}
+                  </span>
                 </a>
               ))}
             </div>

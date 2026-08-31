@@ -53,17 +53,24 @@ export default function Footer({ settings, productLinks }: FooterProps) {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Brand */}
           <div className="max-w-sm">
+            {/* h-80 is 5x the old h-16. `max-w-full` is what keeps that from
+                bursting the brand column on narrower grids: paired with
+                object-contain the artwork just fits itself into whatever width
+                the column has, instead of overflowing into the next one. The
+                width/height props are only srcset hints, so they have to be big
+                enough for a 320px-tall render or the optimiser serves a blurry
+                source. */}
             <Link href="/" aria-label="Organishi home" className="inline-flex">
               {settings?.logo ? (
                 <Image
                   src={settings.logo}
                   alt={settings.shopName ?? "Organishi"}
-                  width={160}
-                  height={52}
-                  className="aspect-auto h-16 w-auto object-contain"
+                  width={400}
+                  height={200}
+                  className="aspect-auto h-80 w-auto max-w-full object-contain"
                 />
               ) : (
-                <Logo className="h-16" />
+                <Logo className="h-40 max-w-full" />
               )}
             </Link>
 
