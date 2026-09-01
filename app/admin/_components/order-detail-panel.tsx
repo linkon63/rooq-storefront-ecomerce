@@ -93,6 +93,13 @@ export function OrderDetailPanel({
   // Orders screen, which otherwise keeps them out of the way.
   const isDelivered = order.status === "delivered";
   const canSettlePayment = showPaymentStatus || isDelivered;
+
+  // What the order took off the catalogue price, from both kinds of discount.
+  const totalSaving = (totals?.productDiscount ?? 0) + (totals?.discount ?? 0);
+  const savedPercent =
+    totals && totals.subtotal > 0 && totalSaving > 0
+      ? Math.round((totalSaving / totals.subtotal) * 100)
+      : 0;
   const awaitingCod = isDelivered && payment.isCod && order.paymentStatus === "unpaid";
 
   return (
@@ -272,6 +279,15 @@ export function OrderDetailPanel({
                   || null;
                 const resolvedUrl = mediaUrl ? resolveImageUrl(mediaUrl) : null;
 
+                // The offer is read off the order, not the catalogue, so this
+                // is what the customer was charged even if the discount has
+                // since changed or ended. Orders placed before offers were
+                // recorded carry no listPrice and simply show one price.
+                const unitPrice = Number(item.unitPrice ?? 0);
+                const listPrice = Number(item.listPrice ?? unitPrice);
+                const lineSaving = Number(item.discountAmount ?? 0);
+                const wasDiscounted = listPrice > unitPrice;
+
                 return (
                   <div className="flex gap-4 items-center border-b border-slate-50 pb-4 last:border-0 last:pb-0" key={item.id}>
                     {resolvedUrl ? (
@@ -295,14 +311,37 @@ export function OrderDetailPanel({
                           <span className="text-[10px] text-slate-300">|</span>
                         )}
                         <span className="text-[11px] font-medium text-slate-500">
-                          {item.quantity} &#x2715; {formatMoney(item.unitPrice, symbol)}
+                          {item.quantity} &#x2715;{" "}
+                          {wasDiscounted && (
+                            <span className="text-slate-400 line-through">
+                              {formatMoney(listPrice, symbol)}
+                            </span>
+                          )}{" "}
+                          <span className={wasDiscounted ? "font-semibold text-slate-700" : undefined}>
+                            {formatMoney(unitPrice, symbol)}
+                          </span>
                         </span>
+                        {wasDiscounted && (
+                          <span className="rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+                            Offer
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
+                      {wasDiscounted && (
+                        <p className="text-[11px] text-slate-400 line-through">
+                          {formatMoney(listPrice * item.quantity, symbol)}
+                        </p>
+                      )}
                       <p className="text-xs font-semibold text-slate-800">
                         {formatMoney(item.totalPrice, symbol)}
                       </p>
+                      {lineSaving > 0 && (
+                        <p className="text-[10px] font-semibold text-emerald-600">
+                          saved {formatMoney(lineSaving, symbol)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );
@@ -323,9 +362,16 @@ export function OrderDetailPanel({
                     <span className="font-semibold text-slate-800">{formatMoney(totals.subtotal, symbol)}</span>
                   </div>
 
+                  {totals.productDiscount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-medium">Product Discount</span>
+                      <span className="font-semibold text-emerald-600">- {formatMoney(totals.productDiscount, symbol)}</span>
+                    </div>
+                  )}
+
                   {totals.discount > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-medium">Discount</span>
+                      <span className="text-slate-500 font-medium">Coupon Discount</span>
                       <span className="font-semibold text-rose-600">- {formatMoney(totals.discount, symbol)}</span>
                     </div>
                   )}
@@ -339,6 +385,16 @@ export function OrderDetailPanel({
                     <span className="font-semibold text-slate-800 text-[13px]">Total</span>
                     <span className="font-semibold text-slate-900 text-[15px]">{formatMoney(totals.grand, symbol)}</span>
                   </div>
+
+                  {totalSaving > 0 && (
+                    <div className="flex justify-between items-center rounded-md border border-emerald-100/50 bg-emerald-50/50 px-2 py-1.5 text-emerald-700">
+                      <span className="font-semibold text-[11px]">Customer Saved</span>
+                      <span className="font-semibold text-xs">
+                        {formatMoney(totalSaving, symbol)}
+                        {savedPercent > 0 && ` (${savedPercent}%)`}
+                      </span>
+                    </div>
+                  )}
 
                   {canSettlePayment && (
                     <>

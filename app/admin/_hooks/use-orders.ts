@@ -144,14 +144,33 @@ export function useOrders({ fixedStatus, defaultStatus = "" }: UseOrdersOptions 
 
   const totals = useMemo(() => {
     if (!selected) return null;
-    const subtotal = (selected.items ?? []).reduce((sum, it) => sum + num(it.totalPrice), 0);
+    const items = selected.items ?? [];
+
+    // `totalPrice` is what the line was charged; the list subtotal adds back
+    // whatever the offer took off. Orders placed before offers were recorded
+    // have no `discountAmount`, so the two subtotals collapse into one and the
+    // panel renders exactly as it always did.
+    const chargedSubtotal = items.reduce((sum, it) => sum + num(it.totalPrice), 0);
+    const productDiscount = num(selected.productDiscount)
+      || items.reduce((sum, it) => sum + num(it.discountAmount), 0);
+    const subtotal = chargedSubtotal + productDiscount;
+
     const shipping = num(selected.shippingCost);
     const discount = num(selected.discount);
     const grand = num(selected.total);
     const paid = (selected.payments ?? [])
       .filter((p) => p.status === "success")
       .reduce((sum, p) => sum + num(p.amount), 0);
-    return { subtotal, shipping, discount, grand, paid, due: Math.max(0, grand - paid) };
+    return {
+      subtotal,
+      chargedSubtotal,
+      productDiscount,
+      shipping,
+      discount,
+      grand,
+      paid,
+      due: Math.max(0, grand - paid),
+    };
   }, [selected]);
 
   return {

@@ -142,23 +142,21 @@ export function usePlaceOrder() {
       }
 
       const shippingCost = Number(data.shippingCost ?? 0);
-      // The API's own `discount` covers coupons only.
+      // The API splits the two: `discount` is the coupon, `productDiscount` is
+      // what the catalogue offers took off. Both are recorded on the order, so
+      // the invoice prints what was actually charged rather than a local guess;
+      // the locally computed totals are only a fallback for an older API.
       const couponDiscount = Number(data.discount ?? 0);
+      const productDiscount =
+        data.productDiscount != null ? Number(data.productDiscount) : totals.productDiscount;
       const quoted = totals.subtotal - couponDiscount + shippingCost;
 
       const result: OrderResult = {
         orderNumber: (data.orderNumber ?? data.id ?? "N/A") as string,
-        /**
-         * The API totals an order from the raw variant price — it does not
-         * apply the catalogue offers the shopper was quoted at checkout. So
-         * when a line carried an offer the invoice bills the quoted amount;
-         * with no offer in play the API's own total stays authoritative, and
-         * takes back over automatically once the API applies offers itself.
-         */
-        total: totals.productDiscount > 0 ? quoted : Number(data.total ?? quoted),
+        total: Number(data.total ?? quoted),
         shippingCost,
         subtotal: totals.listSubtotal,
-        productDiscount: totals.productDiscount,
+        productDiscount,
         discount: couponDiscount,
         items: targetItems.map((i) => ({
           name: i.name,

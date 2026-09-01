@@ -345,7 +345,17 @@ export type TopProduct = {
 export type OrderItem = {
   id: string;
   quantity: number;
+  /** Charged per unit — the offer price when one applied. */
   unitPrice: string | number;
+  /**
+   * Catalogue price per unit before any offer, frozen when the order was
+   * placed. Equal to `unitPrice` on an undiscounted line; absent only on
+   * orders placed before the column existed.
+   */
+  listPrice?: string | number;
+  /** `(listPrice − unitPrice) × quantity` — what the offer saved on this line. */
+  discountAmount?: string | number;
+  /** `unitPrice × quantity` — what the line was actually charged. */
   totalPrice: string | number;
   product?: Product | null;
   variant?: ProductVariant | null;
@@ -424,7 +434,10 @@ export type Order = {
   status: OrderStatus;
   paymentStatus: OrderPaymentStatus;
   total: string | number;
+  /** Coupon discount only — product offers are in `productDiscount`. */
   discount?: string | number;
+  /** What the active product offers took off this order's list subtotal. */
+  productDiscount?: string | number;
   shippingCost?: string | number;
   tax?: string | number;
   orderType?: "retail" | "wholesale";
@@ -446,8 +459,14 @@ export type PaginatedOrders = {
 };
 
 export type OrderTotals = {
+  /** Sum of the lines at list price, before any offer. */
   subtotal: number;
+  /** Sum of the lines at the price actually charged. */
+  chargedSubtotal: number;
+  /** What the product offers took off the list subtotal. */
+  productDiscount: number;
   shipping: number;
+  /** Coupon discount, applied after the product offers. */
   discount: number;
   grand: number;
   paid: number;
