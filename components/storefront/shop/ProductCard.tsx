@@ -33,6 +33,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
       variantId: product.variantId,
       name: product.name,
       price: product.price,
+      originalPrice: hasDiscount ? product.originalPrice : undefined,
       image: product.image,
       color: "",
       size: "",

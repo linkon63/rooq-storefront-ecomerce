@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiShield } from "react-icons/fi";
+import { FiShield, FiTag } from "react-icons/fi";
 
 import { useDeliveryZone } from "@/app/_hooks/use-delivery-zone";
 
@@ -16,20 +16,30 @@ export const money = (value: number) =>
 export const COUPONS_ENABLED = false;
 
 /**
- * Right-hand money panel on the cart: subtotal, total and the assurance strip.
- * The delivery charge is deliberately not decided here — the zone is picked at
- * checkout, where the address that determines it is being entered.
+ * Right-hand money panel on the cart: subtotal, what the offers took off, total
+ * and the assurance strip. The delivery charge is deliberately not decided
+ * here — the zone is picked at checkout, where the address that determines it
+ * is being entered.
+ *
+ * `subtotal` is the list-price total so the column reads as arithmetic the
+ * shopper can follow: subtotal, minus each discount, plus delivery, equals
+ * total. `productDiscount` is what the catalogue offers knocked off it.
  */
 export default function OrderSummary({
   subtotal,
   itemCount,
+  productDiscount = 0,
   discount = 0,
   onApplyCoupon,
   action,
   children,
 }: {
+  /** List-price subtotal — before any discount. */
   subtotal: number;
   itemCount?: number;
+  /** Saving from product offers, already reflected in the line prices. */
+  productDiscount?: number;
+  /** Saving from a coupon code. */
   discount?: number;
   onApplyCoupon?: (code: string) => void;
   action?: React.ReactNode;
@@ -43,7 +53,9 @@ export default function OrderSummary({
   const { rates } = useDeliveryZone();
   const charge = rates.inside;
 
-  const total = Math.max(0, subtotal - discount) + charge;
+  const totalSaving = productDiscount + discount;
+  const total = Math.max(0, subtotal - totalSaving) + charge;
+  const savedPercent = subtotal > 0 ? Math.round((totalSaving / subtotal) * 100) : 0;
 
   return (
     <aside className="lg:sticky lg:top-6">
@@ -59,6 +71,20 @@ export default function OrderSummary({
           <dt className="font-semibold text-[#1f2a17]">Subtotal</dt>
           <dd className="font-display font-semibold text-[#1f2a17]">{money(subtotal)}</dd>
         </div>
+
+        {productDiscount > 0 && (
+          <div className="flex items-start justify-between gap-3 py-4">
+            <dt className="font-semibold text-[#1f2a17]">
+              Product Discount
+              <span className="mt-0.5 block text-xs font-normal text-gray-500">
+                Offers already applied to the items above.
+              </span>
+            </dt>
+            <dd className="shrink-0 font-display font-semibold text-[#4a9e2f]">
+              −{money(productDiscount)}
+            </dd>
+          </div>
+        )}
 
         {COUPONS_ENABLED && (
         <div className="py-4">
@@ -122,6 +148,14 @@ export default function OrderSummary({
           <dd className="font-display text-lg font-semibold text-[#1f2a17]">{money(total)}</dd>
         </div>
       </dl>
+
+      {totalSaving > 0 && (
+        <p className="flex items-center gap-2 rounded-md bg-[#f4f7ee] px-3 py-2.5 text-sm font-semibold text-[#2f7d1f]">
+          <FiTag className="shrink-0" size={15} aria-hidden />
+          You save {money(totalSaving)}
+          {savedPercent > 0 && ` (${savedPercent}%)`} on this order
+        </p>
+      )}
 
       {children}
       {action}

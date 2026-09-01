@@ -5,6 +5,7 @@ import type { OrderResult } from "@/lib/types";
 import type { ShopSettings } from "@/lib/shop-api";
 import { getCurrencySymbol } from "@/lib/currency";
 import { resolveShopContact } from "@/lib/shop-contact";
+import { cartTotals, isDiscounted, unitListPrice } from "@/lib/cart-pricing";
 
 /** Delivery zone → what the customer should see it called. */
 const ZONE_LABELS: Record<string, string> = {
@@ -39,16 +40,32 @@ export default function OrderInvoice({
     `${symbol}${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const shopName = settings?.shopName ?? "Organishi";
-  const subtotal =
-    order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ?? order.total;
-  const discount = Math.max(0, order.discount ?? 0);
+
+  // Older stored orders carry no `subtotal`/`productDiscount`, so both are
+  // recomputed from the lines — which is the same arithmetic that produced
+  // them, and correctly yields a zero discount for a line with no offer.
+  const lineTotals = cartTotals(
+    (order.items ?? []).map((item) => ({
+      price: item.price,
+      originalPrice: item.originalPrice,
+      quantity: item.quantity,
+    })),
+  );
+  const subtotal = order.subtotal ?? lineTotals.listSubtotal;
+  /** What the catalogue offers took off — shown per line and as its own row. */
+  const productDiscount = Math.max(0, order.productDiscount ?? lineTotals.productDiscount);
+  /** What a coupon took off, on top of the product offers. */
+  const couponDiscount = Math.max(0, order.discount ?? 0);
+  const totalDiscount = productDiscount + couponDiscount;
   // Prefer the charge the API applied; older stored orders only have the gap,
   // which is only a safe guess when nothing was discounted.
   const deliveryCharge =
-    order.shippingCost ?? (!discount && order.total > subtotal ? order.total - subtotal : 0);
+    order.shippingCost ?? (!totalDiscount && order.total > subtotal ? order.total - subtotal : 0);
   // What the customer actually owes. Falls back to the arithmetic when an older
   // stored order has no total of its own.
-  const payable = order.total ?? subtotal - discount + deliveryCharge;
+  const payable = order.total ?? subtotal - totalDiscount + deliveryCharge;
+  const savedPercent =
+    subtotal > 0 && totalDiscount > 0 ? Math.round((totalDiscount / subtotal) * 100) : 0;
   const isCod = (order.paymentMethod ?? "cod") === "cod";
 
   return (
@@ -166,9 +183,16 @@ export default function OrderInvoice({
                 <td className="py-3 px-3 text-center text-stone-400">{index + 1}</td>
                 <td className="py-3 px-3 font-semibold text-stone-900">{item.name}</td>
                 <td className="py-3 px-3 text-center">{item.quantity}</td>
-                <td className="py-3 px-3 text-right">{money(item.price)}</td>
+                <td className="py-3 px-3 text-right">
+                  {isDiscounted(item) && (
+                    <span className="mr-1.5 text-stone-400 line-through">
+                      {money(unitListPrice(item))}
+                    </span>
+                  )}
+                  {money(item.price)}
+                </td>
                 <td className="py-3 px-3 text-right font-semibold text-[#1f2a17]">
-                  {money(item.price * item.quantity)}
+                  {money(unitListPrice(item) * item.quantity)}
                 </td>
               </tr>
             ))}
@@ -183,10 +207,16 @@ export default function OrderInvoice({
             <span>Subtotal</span>
             <span className="font-semibold text-stone-900">{money(subtotal)}</span>
           </div>
-          {discount > 0 && (
+          {productDiscount > 0 && (
             <div className="flex justify-between text-[#2f7d1f]">
-              <span>Discount</span>
-              <span className="font-semibold">-{money(discount)}</span>
+              <span>Product Discount</span>
+              <span className="font-semibold">-{money(productDiscount)}</span>
+            </div>
+          )}
+          {couponDiscount > 0 && (
+            <div className="flex justify-between text-[#2f7d1f]">
+              <span>Coupon Discount</span>
+              <span className="font-semibold">-{money(couponDiscount)}</span>
             </div>
           )}
           <div className="flex justify-between">
@@ -199,6 +229,15 @@ export default function OrderInvoice({
             <span>Payable Amount</span>
             <span>{money(payable)}</span>
           </div>
+          {totalDiscount > 0 && (
+            <div className="flex justify-between rounded bg-[#f4f7ee] px-3 py-2 font-semibold text-[#2f7d1f]">
+              <span>You saved</span>
+              <span>
+                {money(totalDiscount)}
+                {savedPercent > 0 && ` (${savedPercent}%)`}
+              </span>
+            </div>
+          )}
           {isCod && (
             <div className="flex justify-between rounded bg-[#f4f7ee] px-3 py-2 text-xs font-bold text-[#1f2a17]">
               <span>Payable on delivery</span>

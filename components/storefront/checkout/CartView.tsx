@@ -11,6 +11,7 @@ import CheckoutSteps from "./CheckoutSteps";
 import OrderSummary, { money } from "./OrderSummary";
 import { useCart, getItemKey } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
+import { cartTotals, isDiscounted, lineSaving, unitListPrice } from "@/lib/cart-pricing";
 
 export default function CartView() {
   const router = useRouter();
@@ -34,16 +35,13 @@ export default function CartView() {
 
   const toggleAll = () => selectAllItems(!allSelected);
 
-  const subtotal = useMemo(
-    () => selectedItems.reduce((total, item) => total + item.price * item.quantity, 0),
-    [selectedItems],
-  );
-  const totalUnits = selectedItems.reduce((count, item) => count + item.quantity, 0);
+  // Only the ticked lines are being bought, so only they are priced.
+  const totals = useMemo(() => cartTotals(selectedItems), [selectedItems]);
 
   const applyCoupon = (code: string) => {
     // Coupon validation lives on the backend; until it is wired up the two
     // seeded codes are honoured locally so the flow can be exercised.
-    const codes: Record<string, number> = { ORGANIC10: subtotal * 0.1, FRESH100: 100 };
+    const codes: Record<string, number> = { ORGANIC10: totals.subtotal * 0.1, FRESH100: 100 };
     const value = codes[code.toUpperCase()];
     if (!value) {
       toast.error("That coupon code is not valid");
@@ -151,6 +149,15 @@ export default function CartView() {
                             <span className="font-medium text-[#1f2a17]">Size:</span> {item.size}
                           </p>
                         )}
+                        <p className="mt-1 flex flex-wrap items-baseline gap-1.5 text-xs">
+                          {isDiscounted(item) && (
+                            <span className="text-gray-400 line-through">
+                              {money(unitListPrice(item))}
+                            </span>
+                          )}
+                          <span className="font-semibold text-[#1f2a17]">{money(item.price)}</span>
+                          <span className="text-gray-400">each</span>
+                        </p>
                       </div>
 
                       <div className="flex items-center border border-gray-200">
@@ -206,9 +213,21 @@ export default function CartView() {
                         </button>
                       </div>
 
-                      <span className="font-display text-lg font-semibold text-[#1f2a17]">
-                        {money(item.price * item.quantity)}
-                      </span>
+                      <div className="text-right">
+                        {isDiscounted(item) && (
+                          <span className="mr-2 font-display text-sm text-gray-400 line-through">
+                            {money(unitListPrice(item) * item.quantity)}
+                          </span>
+                        )}
+                        <span className="font-display text-lg font-semibold text-[#1f2a17]">
+                          {money(item.price * item.quantity)}
+                        </span>
+                        {isDiscounted(item) && (
+                          <span className="mt-0.5 block text-xs font-semibold text-[#2f7d1f]">
+                            You save {money(lineSaving(item))}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </li>
@@ -218,8 +237,9 @@ export default function CartView() {
 
           {/* ── Summary ───────────────────────────────────────────────── */}
           <OrderSummary
-            subtotal={subtotal}
-            itemCount={totalUnits}
+            subtotal={totals.listSubtotal}
+            itemCount={totals.itemCount}
+            productDiscount={totals.productDiscount}
             discount={discount}
             onApplyCoupon={applyCoupon}
             action={

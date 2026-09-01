@@ -1,7 +1,13 @@
 export type CartItem = {
   slug: string;
   name: string;
+  /** What the shopper pays per unit — the discounted price when one applies. */
   price: number;
+  /**
+   * The list price `price` was discounted from. Absent when the line carries no
+   * offer, so `originalPrice > price` is the test for "this line is discounted".
+   */
+  originalPrice?: number;
   image: string;
   color: string;
   size: string;
@@ -38,6 +44,8 @@ export interface BackendCartItem {
     sku: string;
     price: string;
     cost: string | null;
+    /** Only present if the API starts enriching the cart the way it does products. */
+    discountedPrice?: number | string | null;
     stockQuantity: number;
     stockAlertThreshold: number;
     isDefault: boolean;
@@ -126,7 +134,10 @@ export type DeliveryZone = "inside" | "near_city" | "outside";
 export type OrderResultItem = {
   name: string;
   quantity: number;
+  /** Unit price charged — discounted where an offer applied. */
   price: number;
+  /** Unit list price, present only when this line was discounted. */
+  originalPrice?: number;
   image: string;
 };
 
@@ -137,6 +148,10 @@ export type OrderResult = {
   shippingCost?: number;
   /** Discount the API applied (coupon or product rule), in shop currency. */
   discount?: number;
+  /** Sum of the line list prices, before any discount or delivery charge. */
+  subtotal?: number;
+  /** What the product offers took off the list subtotal. */
+  productDiscount?: number;
   items: OrderResultItem[];
   address: AddressForm;
   paymentMethod?: string;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/app/_providers/cart-provider";
 import { getCustomerToken } from "@/lib/storefront-api";
+import { cartTotals } from "@/lib/cart-pricing";
 import type { AddressForm, DeliveryZone, OrderResult } from "@/lib/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
@@ -29,7 +30,7 @@ export function usePlaceOrder() {
     const deliveryZone = extra?.deliveryZone ?? "inside";
 
     const targetItems = extra?.selectedItems && extra.selectedItems.length > 0 ? extra.selectedItems : items;
-    const orderSubtotal = targetItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const totals = cartTotals(targetItems);
 
     try {
       let data: Record<string, unknown>;
@@ -140,16 +141,30 @@ export function usePlaceOrder() {
         data = await res.json();
       }
 
+      const shippingCost = Number(data.shippingCost ?? 0);
+      // The API's own `discount` covers coupons only.
+      const couponDiscount = Number(data.discount ?? 0);
+      const quoted = totals.subtotal - couponDiscount + shippingCost;
+
       const result: OrderResult = {
         orderNumber: (data.orderNumber ?? data.id ?? "N/A") as string,
-        total: Number(data.total ?? orderSubtotal),
-        shippingCost: Number(data.shippingCost ?? 0),
-        // The invoice prints what the API actually charged, not a local guess.
-        discount: Number(data.discount ?? 0),
+        /**
+         * The API totals an order from the raw variant price — it does not
+         * apply the catalogue offers the shopper was quoted at checkout. So
+         * when a line carried an offer the invoice bills the quoted amount;
+         * with no offer in play the API's own total stays authoritative, and
+         * takes back over automatically once the API applies offers itself.
+         */
+        total: totals.productDiscount > 0 ? quoted : Number(data.total ?? quoted),
+        shippingCost,
+        subtotal: totals.listSubtotal,
+        productDiscount: totals.productDiscount,
+        discount: couponDiscount,
         items: targetItems.map((i) => ({
           name: i.name,
           quantity: i.quantity,
           price: i.price,
+          originalPrice: i.originalPrice,
           image: i.image,
         })),
         address: { ...address },

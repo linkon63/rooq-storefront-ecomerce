@@ -13,6 +13,7 @@ import { LuLoader, LuArrowLeft, LuLock, LuPlus, LuFileText, LuEye, LuMapPin, LuX
 import type { AddressForm } from "@/lib/types";
 import { fetchShopPolicies, type ShopPolicy } from "@/lib/shop-api";
 import { COUPONS_ENABLED } from "@/components/storefront/checkout/OrderSummary";
+import { cartTotals, isDiscounted, lineSaving, unitListPrice } from "@/lib/cart-pricing";
 import { useDeliveryZone } from "@/app/_hooks/use-delivery-zone";
 import {
   BANGLADESH_DISTRICTS,
@@ -216,8 +217,15 @@ export default function CheckoutPage() {
 
   const checkoutItems = selectedItems;
 
-  const subtotal = checkoutItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  // `listSubtotal` is what the items cost before offers, `subtotal` what they
+  // cost after — the summary shows both so the saving is spelled out rather
+  // than silently baked into one number.
+  const { listSubtotal, subtotal, productDiscount } = cartTotals(checkoutItems);
   const total = subtotal + shipping;
+  const savedPercent =
+    listSubtotal > 0 && productDiscount > 0
+      ? Math.round((productDiscount / listSubtotal) * 100)
+      : 0;
 
   /**
    * Why the order cannot go through yet. The button stays clickable so the
@@ -637,10 +645,25 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-gotham text-xs font-semibold text-[#222222] truncate">{item.name}</p>
-                        <p className="font-gotham text-[11px] text-zinc-500">Qty: {item.quantity} × {formatCurrency(item.price)}</p>
+                        <p className="font-gotham text-[11px] text-zinc-500">
+                          Qty: {item.quantity} ×{" "}
+                          {isDiscounted(item) && (
+                            <span className="text-zinc-400 line-through">
+                              {formatCurrency(unitListPrice(item))}
+                            </span>
+                          )}{" "}
+                          {formatCurrency(item.price)}
+                        </p>
                       </div>
-                      <div className="font-gotham text-xs font-bold text-[#222222] shrink-0">
-                        {formatCurrency(item.price * item.quantity)}
+                      <div className="shrink-0 text-right">
+                        <div className="font-gotham text-xs font-bold text-[#222222]">
+                          {formatCurrency(item.price * item.quantity)}
+                        </div>
+                        {isDiscounted(item) && (
+                          <div className="font-gotham text-[10px] font-semibold text-[#2f7d1f]">
+                            −{formatCurrency(lineSaving(item))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -678,9 +701,20 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-center">
                   <span className="font-bembo text-base text-[#555555]">Subtotal</span>
                   <span className="font-gotham text-base font-medium text-[#222222]">
-                    {formatCurrency(subtotal)}
+                    {formatCurrency(listSubtotal)}
                   </span>
                 </div>
+                {productDiscount > 0 && (
+                  <>
+                    <div className="h-px bg-zinc-200" />
+                    <div className="flex justify-between items-center">
+                      <span className="font-bembo text-base text-[#555555]">Product Discount</span>
+                      <span className="font-gotham text-base font-medium text-[#2f7d1f]">
+                        −{formatCurrency(productDiscount)}
+                      </span>
+                    </div>
+                  </>
+                )}
                 <div className="h-px bg-zinc-200" />
                 <div className="flex justify-between items-center">
                   <span className="font-bembo text-base text-[#555555]">Delivery Charge</span>
@@ -704,6 +738,12 @@ export default function CheckoutPage() {
                     {formatCurrency(total)}
                   </span>
                 </div>
+                {productDiscount > 0 && (
+                  <p className="rounded-md bg-[#f4f7ee] px-3 py-2.5 font-gotham text-sm font-semibold text-[#2f7d1f]">
+                    You save {formatCurrency(productDiscount)}
+                    {savedPercent > 0 && ` (${savedPercent}%)`} on this order
+                  </p>
+                )}
                 <div className="border-b border-solid border-zinc-300" />
               </div>
 

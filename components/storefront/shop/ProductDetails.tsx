@@ -88,6 +88,9 @@ export default function ProductDetails({ product }: { product: Product }) {
     variantId: selectedVariant?.id,
     name: product.name,
     price: payable,
+    // Carried so the cart can strike the list price out without waiting for
+    // its own catalogue lookup.
+    originalPrice: hasDiscount ? price : undefined,
     image: gallery[0] ?? "",
     color: "",
     size: Object.values(selection).join(" / "),

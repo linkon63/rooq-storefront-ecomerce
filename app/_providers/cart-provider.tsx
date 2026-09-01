@@ -19,6 +19,7 @@ import {
   updateCartItemQuantity,
   removeCartItem,
   mapBackendCart,
+  repriceCartItems,
 } from "@/lib/cart-api";
 import type { CartItem, CartContextValue } from "@/lib/types";
 
@@ -132,6 +133,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setItems(loadLocalCart());
     }
   }, [isAuthenticated, initialised, items, mergeLocalCartToServer]);
+
+  /**
+   * Keep every line at today's price.
+   *
+   * Neither source of a cart knows about product offers: a guest cart is
+   * whatever localStorage kept from the moment the line was added, and GET
+   * /cart returns the plain variant price. So the catalogue is asked, and the
+   * lines are patched with what the shopper actually pays plus the list price
+   * to strike through. `repriceCartItems` returns null when nothing moved,
+   * which is what keeps this from re-triggering itself.
+   */
+  useEffect(() => {
+    if (!initialised || items.length === 0) return;
+
+    let cancelled = false;
+    void repriceCartItems(items)
+      .then((repriced) => {
+        if (cancelled || !repriced) return;
+        setItems(repriced);
+        if (!isAuthenticated) saveLocalCart(repriced);
+      })
+      .catch(() => {
+        /* Offers are a nicety — a failed lookup leaves the cart as it was. */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items, initialised, isAuthenticated]);
 
   const addItem = useCallback(
     (input: Omit<CartItem, "quantity"> & { quantity?: number }, options?: { silent?: boolean }) => {
