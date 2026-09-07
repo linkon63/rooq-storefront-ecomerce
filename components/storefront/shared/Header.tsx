@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { FiClock, FiUser, FiMenu, FiX } from "react-icons/fi";
 import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
@@ -34,6 +35,47 @@ const TRAILING_LINKS = [
   { label: "Offers", href: "/shop?discounted=1" },
   { label: "Contact", href: "/contact" },
 ];
+
+interface NavLink {
+  label: string;
+  href: string;
+}
+
+/**
+ * How well a nav link describes the current URL, or 0 when it does not describe
+ * it at all. The nav mixes plain paths ("/shop") with filtered ones
+ * ("/shop?category=Honey"), and on `/shop?category=Honey` both of those match —
+ * the score breaks the tie so the more specific link is the one that lights up.
+ */
+function matchScore(href: string, pathname: string, params: URLSearchParams | null): number {
+  const [path, query = ""] = href.split("?");
+
+  // Home has to match exactly; every other path also owns its sub-pages, so
+  // /blog stays lit on /blog/some-post.
+  const pathMatches = path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
+  if (!pathMatches) return 0;
+
+  const required = [...new URLSearchParams(query)];
+  if (required.some(([key, value]) => params?.get(key) !== value)) return 0;
+
+  return required.length + 1;
+}
+
+/** The href of the single link that owns the current URL, or "" for none. */
+function activeHrefFor(links: NavLink[], pathname: string, params: URLSearchParams | null): string {
+  let best = "";
+  let bestScore = 0;
+
+  for (const link of links) {
+    const score = matchScore(link.href, pathname, params);
+    if (score > bestScore) {
+      best = link.href;
+      bestScore = score;
+    }
+  }
+
+  return best;
+}
 
 /** Shared look for the ™ beside the header logo; each branch adds its own offsets. */
 const TRADEMARK_CLASS =
@@ -138,15 +180,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
             {/* min-w-0 + overflow-hidden: category names come from the admin, so a
                 long one must clip rather than widen the row past the viewport. */}
             <nav className="hidden min-w-0 items-center gap-5 overflow-hidden xl:flex">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="font-display whitespace-nowrap text-[17px] text-[#1f2a17] transition-colors first:text-[#4a9e2f] hover:text-[#4a9e2f]"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <NavLinksWithParams links={navLinks} variant="desktop" />
             </nav>
 
 
@@ -193,22 +227,80 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
         {mobileOpen && (
           <nav className="border-t border-gray-100 bg-white xl:hidden">
             <div className="mx-auto flex max-w-[1600px] flex-col px-4 py-2 md:px-5">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="font-display border-b border-gray-50 py-3 text-[17px] text-[#1f2a17] last:border-b-0"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <NavLinksWithParams
+                links={navLinks}
+                variant="mobile"
+                onNavigate={() => setMobileOpen(false)}
+              />
             </div>
           </nav>
         )}
       </div>
     </header>
   );
+}
+
+interface NavLinksProps {
+  links: NavLink[];
+  variant: "desktop" | "mobile";
+  onNavigate?: () => void;
+  /** Null while the static shell renders — the path still decides on its own. */
+  params?: URLSearchParams | null;
+}
+
+function NavLinks({ links, variant, onNavigate, params = null }: NavLinksProps) {
+  const pathname = usePathname();
+  const activeHref = activeHrefFor(links, pathname, params);
+
+  return (
+    <>
+      {links.map((link) => {
+        const isActive = link.href === activeHref;
+
+        return (
+          <Link
+            key={link.label}
+            href={link.href}
+            onClick={onNavigate}
+            aria-current={isActive ? "page" : undefined}
+            className={
+              variant === "desktop"
+                ? `font-display relative whitespace-nowrap py-1 text-[17px] transition-colors hover:text-[#4a9e2f] ${
+                    isActive
+                      ? "font-semibold text-[#4a9e2f] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-[2px] after:rounded-full after:bg-[#4a9e2f] after:content-['']"
+                      : "text-[#1f2a17]"
+                  }`
+                : `font-display border-b border-gray-50 py-3 text-[17px] transition-colors last:border-b-0 ${
+                    isActive ? "font-semibold text-[#4a9e2f]" : "text-[#1f2a17]"
+                  }`
+            }
+          >
+            {link.label}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
+/**
+ * The category and Offers links are told apart by their query string, so the
+ * active one can only be known once `useSearchParams` has run. That hook opts a
+ * statically rendered page out of the prerender unless it sits behind a
+ * Suspense boundary, hence the split: the shell ships the path-only highlight
+ * and the query-aware one takes over on hydration.
+ */
+function NavLinksWithParams(props: Omit<NavLinksProps, "params">) {
+  return (
+    <Suspense fallback={<NavLinks {...props} />}>
+      <NavLinksReadingParams {...props} />
+    </Suspense>
+  );
+}
+
+function NavLinksReadingParams(props: Omit<NavLinksProps, "params">) {
+  const params = useSearchParams();
+  return <NavLinks {...props} params={params} />;
 }
 
 function Badge({ count }: { count: number }) {

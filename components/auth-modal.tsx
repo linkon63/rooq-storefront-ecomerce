@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Image from "next/image";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useGoogleLogin } from "@react-oauth/google";
 import { LuX, LuEye, LuEyeOff, LuLoader } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
+import Logo from "@/components/storefront/shared/Logo";
+import { AuthBrandPanel, AuthTabs, INPUT_CLASS, LABEL_CLASS } from "@/components/auth-ui";
 import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 
 type AuthView = "login" | "register";
@@ -59,8 +60,7 @@ export default function AuthModal() {
     setShowConfirmPassword(false);
   };
 
-  const switchView = () => {
-    const next = view === "login" ? "register" : "login";
+  const switchView = (next: AuthView) => {
     setView(next);
     resetForm();
   };
@@ -136,71 +136,50 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs px-4">
-      <div className="relative w-full max-w-3xl bg-[#f4f7ee] shadow-2xl rounded-2xl overflow-hidden flex p-2.5 gap-2.5 border border-[#4a9e2f]/30">
-        
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-xs">
+      {/* Same two-column design as the /login page, sized to sit inside the
+          viewport: the form column scrolls when the register fields outgrow it. */}
+      <div className="relative grid max-h-[92vh] w-full max-w-4xl grid-cols-1 overflow-hidden rounded-3xl border border-[#4a9e2f]/15 bg-white shadow-[0_30px_80px_-30px_rgba(31,42,23,0.65)] md:grid-cols-2">
+
         {/* Close Button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute bg-white p-2 rounded-full top-5 right-5 z-20 text-stone-500 hover:text-[#4a9e2f] transition-colors shadow-sm cursor-pointer"
+          className="absolute right-4 top-4 z-20 cursor-pointer rounded-full bg-white/90 p-2 text-stone-500 shadow-sm transition-colors hover:text-[#4a9e2f] md:right-[calc(50%+1rem)]"
           aria-label="Close"
         >
-          <LuX className="w-5 h-5" />
+          <LuX className="h-5 w-5" />
         </button>
 
         {/* Left Form Section */}
-        <div className="w-full md:w-3/5 px-6 py-8 sm:p-10 bg-white rounded-xl flex flex-col justify-center">
-          
-          <div className="text-center mb-6">
-            <Image
-              src="/assets/Logo-English.png"
-              alt="Organishi Logo"
-              width={140}
-              height={44}
-              className="h-10 w-auto object-contain mx-auto mb-2"
-              priority
-            />
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-[#1f2a17] tracking-tight">
-              {view === "login" ? "Welcome Back" : "Create Account"}
+        <div className="flex max-h-[92vh] flex-col justify-center overflow-y-auto px-6 py-9 sm:px-9 sm:py-10">
+
+          {/* Brand mark for the small screens where the right panel is hidden. */}
+          <Logo className="mb-4 h-14 md:hidden" />
+
+          <div className="mb-5">
+            <h2 className="font-display text-2xl font-bold tracking-tight text-[#1f2a17] sm:text-3xl">
+              {view === "login" ? "Welcome back" : "Create your account"}
             </h2>
-            <p className="mt-1 text-xs text-stone-500 font-inter">
-              {view === "login" ? (
-                <>
-                  Don&apos;t have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={switchView}
-                    className="font-bold text-[#4a9e2f] hover:text-[#3d8626] transition-colors cursor-pointer"
-                  >
-                    SIGN UP
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already a member?{" "}
-                  <button
-                    type="button"
-                    onClick={switchView}
-                    className="font-bold text-[#4a9e2f] hover:text-[#3d8626] transition-colors cursor-pointer"
-                  >
-                    LOG IN
-                  </button>
-                </>
-              )}
+            <p className="font-inter mt-2 text-sm text-stone-500">
+              {view === "login"
+                ? "Log in to track your orders and pick up where you left off."
+                : "Join Organishi for farm-fresh organic deliveries."}
             </p>
           </div>
 
+          <AuthTabs value={view} onChange={switchView} className="mb-5" />
+
           {error && (
-            <div className="mb-4 rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-xs text-rose-700 font-inter">
+            <div className="font-inter mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-700">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3.5 font-gotham">
+          <form onSubmit={handleSubmit} className="space-y-4 font-gotham">
             {view === "login" ? (
               <div>
-                <label htmlFor="auth-identifier" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                <label htmlFor="auth-identifier" className={LABEL_CLASS}>
                   Email or Phone Number *
                 </label>
                 <input
@@ -209,14 +188,14 @@ export default function AuthModal() {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="Enter email or phone number (e.g. 017XXXXXXXX)"
-                  className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                  className={INPUT_CLASS}
                   required
                 />
               </div>
             ) : (
               <>
                 <div>
-                  <label htmlFor="auth-name" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                  <label htmlFor="auth-name" className={LABEL_CLASS}>
                     Full Name *
                   </label>
                   <input
@@ -225,45 +204,47 @@ export default function AuthModal() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    className={INPUT_CLASS}
                     required
                   />
                 </div>
-                <div>
-                  <label htmlFor="auth-email" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                    Email Address *
-                  </label>
-                  <input
-                    id="auth-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter email address"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="auth-phone" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                    Phone Number *
-                  </label>
-                  <input
-                    id="auth-phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="017XXXXXXXX"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
-                    required
-                  />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="auth-email" className={LABEL_CLASS}>
+                      Email Address *
+                    </label>
+                    <input
+                      id="auth-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter email address"
+                      className={INPUT_CLASS}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="auth-phone" className={LABEL_CLASS}>
+                      Phone Number *
+                    </label>
+                    <input
+                      id="auth-phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="017XXXXXXXX"
+                      className={INPUT_CLASS}
+                      required
+                    />
+                  </div>
                 </div>
               </>
             )}
 
-            <div className={`grid items-center justify-between gap-3 w-full ${view === "login" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
+            <div className={`grid w-full items-start gap-4 ${view === "login" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
               <div className="w-full">
-                <label htmlFor="auth-password" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                  {view === "login" ? "Password" : "Password"}
+                <label htmlFor="auth-password" className={LABEL_CLASS}>
+                  Password
                 </label>
                 <div className="relative">
                   <input
@@ -272,22 +253,23 @@ export default function AuthModal() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={view === "login" ? "Enter password" : "New password"}
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 pr-9 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    className={`${INPUT_CLASS} pr-11`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-stone-400 hover:text-stone-700"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     tabIndex={-1}
                   >
-                    {showPassword ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                    {showPassword ? <LuEyeOff className="h-4 w-4" /> : <LuEye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
               {view === "register" && (
                 <div>
-                  <label htmlFor="auth-confirm-password" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                  <label htmlFor="auth-confirm-password" className={LABEL_CLASS}>
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -297,15 +279,16 @@ export default function AuthModal() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Re-type password"
-                      className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 pr-9 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                      className={`${INPUT_CLASS} pr-11`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-stone-400 hover:text-stone-700"
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       tabIndex={-1}
                     >
-                      {showConfirmPassword ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                      {showConfirmPassword ? <LuEyeOff className="h-4 w-4" /> : <LuEye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -319,9 +302,9 @@ export default function AuthModal() {
                   id="remember-login"
                   checked={rememberLogin}
                   onChange={(e) => setRememberLogin(e.target.checked)}
-                  className="w-4 h-4 accent-[#4a9e2f] cursor-pointer rounded"
+                  className="h-4 w-4 cursor-pointer rounded accent-[#4a9e2f]"
                 />
-                <label htmlFor="remember-login" className="text-xs text-stone-600 font-inter cursor-pointer">
+                <label htmlFor="remember-login" className="font-inter cursor-pointer text-xs text-stone-600">
                   Remember login
                 </label>
               </div>
@@ -330,9 +313,9 @@ export default function AuthModal() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#4a9e2f] hover:bg-[#3d8626] text-white py-3.5 rounded-full font-gotham font-bold text-xs tracking-wider uppercase transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer mt-1"
+              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#4a9e2f] py-3.5 font-gotham text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#4a9e2f]/25 transition-all hover:bg-[#3d8626] hover:shadow-xl hover:shadow-[#4a9e2f]/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
-              {submitting && <LuLoader className="w-4 h-4 animate-spin" />}
+              {submitting && <LuLoader className="h-4 w-4 animate-spin" />}
               {submitting
                 ? view === "login"
                   ? "LOGGING IN..."
@@ -344,22 +327,7 @@ export default function AuthModal() {
           </form>
         </div>
 
-        {/* Right Decorative Section with Organic Food Image */}
-        <div className="hidden md:flex md:w-2/5 relative rounded-xl overflow-hidden flex-col justify-end p-6 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=80')" }}>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1f2a17]/90 via-[#1f2a17]/40 to-transparent" />
-          
-          <div className="relative z-10 text-white">
-            <span className="inline-block px-3 py-1 bg-[#4a9e2f] text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-2">
-              100% Pure & Organic
-            </span>
-            <h3 className="font-display text-xl font-bold leading-tight">
-              Fresh Organic Produce Delivered To Your Doorstep
-            </h3>
-            <p className="font-inter text-xs text-stone-200 mt-1 leading-relaxed">
-              Join Organishi for exclusive organic collections, farm-fresh offers, and quick tracking.
-            </p>
-          </div>
-        </div>
+        <AuthBrandPanel mode={view} compact />
 
       </div>
     </div>

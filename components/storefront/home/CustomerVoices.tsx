@@ -22,34 +22,10 @@ const TESTIMONIALS = [
       "As a foodie, I really appreciate authenticity in my platter. So far Organishi has always delivered up to my expectation on that particular note. And having it homemade also adds a cherry on top.",
   },
   {
-    name: "Nusrat Jahan",
-    role: "Customer",
-    quote:
-      "The mustard oil smells exactly like the one my grandmother used to press at home. Delivery was quick and the bottle arrived sealed and clean.",
-  },
-  {
-    name: "Tanvir Hasan",
-    role: "Customer",
-    quote:
-      "I switched our whole kitchen over to their ghee and cold pressed oils. You can taste the difference, and the pricing is fair for this quality.",
-  },
-  {
     name: "Farhana Akter",
     role: "Customer",
     quote:
       "Ordered the organic chips for my kids and they finished the pack in a day. Good to finally find snacks without artificial colours.",
-  },
-  {
-    name: "Imran Chowdhury",
-    role: "Customer",
-    quote:
-      "Packaging is neat and nothing leaked in transit. The honey is thick and raw — exactly what was described on the product page.",
-  },
-  {
-    name: "Sabrina Rahman",
-    role: "Customer",
-    quote:
-      "Support answered on WhatsApp within minutes and sorted out my delivery address. Small thing, but it is why I keep ordering here.",
   },
   {
     name: "Rezaul Karim",
@@ -68,6 +44,24 @@ const TESTIMONIALS = [
     role: "Customer",
     quote:
       "Spirulina powder-টা smoothie-তে মিশিয়ে খাচ্ছি প্রতিদিন সকালে. প্যাকেজিং seal করা ছিল, আর batch test report চাওয়ায় সাথে সাথে দিয়ে দিয়েছে — that transparency is rare.",
+  },
+  {
+    name: "Sadia Islam",
+    role: "Customer",
+    quote:
+      "Steel cut oats-টা সকালের নাস্তায় দারুণ — দুধ আর কলা দিয়ে খেলে অনেকক্ষণ পেট ভরা থাকে। My husband is diabetic, so a breakfast with no added sugar was exactly what we needed.",
+  },
+  {
+    name: "Mahmudul Hasan",
+    role: "Customer",
+    quote:
+      "প্রথম order টা একটু দ্বিধা নিয়েই দিয়েছিলাম, তবে cash on delivery থাকায় risk কম মনে হয়েছে। Chattogram-এ তিন দিনে পৌঁছেছে and the ghee jar was packed well enough that nothing moved inside the box.",
+  },
+  {
+    name: "Siddika",
+    role: "Customer",
+    quote:
+      "রান্নায় cold pressed তেল ব্যবহার শুরু করার পর ভাজাপোড়ার গন্ধটাই বদলে গেছে, অনেক হালকা লাগে। Already reordered twice, আর delivery-র আগে সবসময় ফোন দিয়ে জানিয়ে দেয়।",
   },
 ];
 

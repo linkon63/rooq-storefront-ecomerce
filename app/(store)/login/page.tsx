@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useGoogleLogin } from "@react-oauth/google";
 import { LuEye, LuEyeOff, LuLoader } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
+import Logo from "@/components/storefront/shared/Logo";
+import { AuthBrandPanel, AuthTabs, INPUT_CLASS, LABEL_CLASS } from "@/components/auth-ui";
 import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 
 type AuthTab = "login" | "register";
@@ -141,63 +142,49 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="grow bg-[#f4f7ee] w-full min-h-screen py-10 px-4 sm:px-6 flex items-center justify-center">
-      <div className="relative w-full max-w-3xl bg-[#f4f7ee] shadow-2xl rounded-2xl overflow-hidden flex p-2.5 gap-2.5 border border-[#4a9e2f]/30">
-        
+    // 128px is the sticky header above (40px top bar + 88px main bar): subtracting
+    // it is what makes the panel fill the screen the visitor can actually see.
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#f4f7ee] px-4 py-8 sm:px-6 sm:py-10 md:min-h-[calc(100vh-128px)]">
+      {/* Soft brand glows so the full-height background never reads as flat paper. */}
+      <div aria-hidden className="pointer-events-none absolute -left-24 -top-32 h-80 w-80 rounded-full bg-[#4a9e2f]/15 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-[#4a9e2f]/10 blur-3xl" />
+
+      {/* The card tracks the viewport height so the page fills the screen on a
+          desktop (128px header + 80px of page padding removed), and falls back
+          to its natural height wherever the form needs more room. */}
+      <div className="relative grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-[#4a9e2f]/15 bg-white shadow-[0_30px_80px_-30px_rgba(31,42,23,0.45)] md:min-h-[calc(100vh-208px)] md:grid-cols-2">
+
         {/* Left Form Section */}
-        <div className="w-full md:w-3/5 px-6 py-8 sm:p-10 bg-white rounded-xl flex flex-col justify-center">
-          
-          <div className="text-center mb-6">
-            <Link href="/" aria-label="Organishi home" className="inline-block mb-2">
-              <Image
-                src="/assets/Logo-English.png"
-                alt="Organishi Logo"
-                width={140}
-                height={44}
-                className="h-10 w-auto object-contain mx-auto"
-                priority
-              />
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#1f2a17] tracking-tight">
-              {tab === "login" ? "Welcome Back" : "Create Account"}
+        <div className="flex flex-col justify-center px-6 py-9 sm:px-10 sm:py-12">
+
+          {/* Brand mark for the small screens where the right panel is hidden. */}
+          <Link href="/" aria-label="Organishi home" className="mb-4 inline-block md:hidden">
+            <Logo className="h-16" />
+          </Link>
+
+          <div className="mb-6">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-[#1f2a17]">
+              {tab === "login" ? "Welcome back" : "Create your account"}
             </h1>
-            <p className="mt-1 text-xs text-stone-500 font-inter">
-              {tab === "login" ? (
-                <>
-                  Don&apos;t have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => switchTab("register")}
-                    className="font-bold text-[#4a9e2f] hover:text-[#3d8626] transition-colors cursor-pointer"
-                  >
-                    SIGN UP
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already a member?{" "}
-                  <button
-                    type="button"
-                    onClick={() => switchTab("login")}
-                    className="font-bold text-[#4a9e2f] hover:text-[#3d8626] transition-colors cursor-pointer"
-                  >
-                    LOG IN
-                  </button>
-                </>
-              )}
+            <p className="font-inter mt-2 text-sm text-stone-500">
+              {tab === "login"
+                ? "Log in to track your orders and pick up where you left off."
+                : "Join Organishi for farm-fresh organic deliveries."}
             </p>
           </div>
 
+          <AuthTabs value={tab} onChange={switchTab} className="mb-6" />
+
           {error && (
-            <div className="mb-4 rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-xs text-rose-700 font-inter">
+            <div className="font-inter mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-700">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3.5 font-gotham">
+          <form onSubmit={handleSubmit} className="space-y-4 font-gotham">
             {tab === "login" ? (
               <div>
-                <label htmlFor="page-auth-identifier" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                <label htmlFor="page-auth-identifier" className={LABEL_CLASS}>
                   Email or Phone Number *
                 </label>
                 <input
@@ -206,14 +193,14 @@ export default function LoginPage() {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="Enter email or phone number (e.g. 017XXXXXXXX)"
-                  className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                  className={INPUT_CLASS}
                   required
                 />
               </div>
             ) : (
               <>
                 <div>
-                  <label htmlFor="page-auth-name" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                  <label htmlFor="page-auth-name" className={LABEL_CLASS}>
                     Full Name *
                   </label>
                   <input
@@ -222,44 +209,46 @@ export default function LoginPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    className={INPUT_CLASS}
                     required
                   />
                 </div>
-                <div>
-                  <label htmlFor="page-auth-email" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                    Email Address *
-                  </label>
-                  <input
-                    id="page-auth-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter email address"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="page-auth-phone" className="block text-xs font-semibold text-[#1f2a17] mb-1">
-                    Phone Number *
-                  </label>
-                  <input
-                    id="page-auth-phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="017XXXXXXXX"
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
-                    required
-                  />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="page-auth-email" className={LABEL_CLASS}>
+                      Email Address *
+                    </label>
+                    <input
+                      id="page-auth-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter email address"
+                      className={INPUT_CLASS}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="page-auth-phone" className={LABEL_CLASS}>
+                      Phone Number *
+                    </label>
+                    <input
+                      id="page-auth-phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="017XXXXXXXX"
+                      className={INPUT_CLASS}
+                      required
+                    />
+                  </div>
                 </div>
               </>
             )}
 
-            <div className={`grid items-center justify-between gap-3 w-full ${tab === "login" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
+            <div className={`grid w-full items-start gap-4 ${tab === "login" ? "grid-cols-1" : "sm:grid-cols-2"}`}>
               <div className="w-full">
-                <label htmlFor="page-auth-password" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                <label htmlFor="page-auth-password" className={LABEL_CLASS}>
                   Password
                 </label>
                 <div className="relative">
@@ -269,23 +258,24 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={tab === "login" ? "Enter password" : "New password"}
-                    className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 pr-9 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                    className={`${INPUT_CLASS} pr-11`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-stone-400 hover:text-stone-700"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     tabIndex={-1}
                   >
-                    {showPassword ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                    {showPassword ? <LuEyeOff className="h-4 w-4" /> : <LuEye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
               {tab === "register" && (
                 <div>
-                  <label htmlFor="page-auth-confirm-password" className="block text-xs font-semibold text-[#1f2a17] mb-1">
+                  <label htmlFor="page-auth-confirm-password" className={LABEL_CLASS}>
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -295,16 +285,17 @@ export default function LoginPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Re-type password"
-                      className="w-full border border-stone-200 rounded-lg px-3.5 py-2.5 pr-9 text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition-all font-inter"
+                      className={`${INPUT_CLASS} pr-11`}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-stone-400 hover:text-stone-700"
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       tabIndex={-1}
                     >
-                      {showConfirmPassword ? <LuEyeOff className="w-4 h-4" /> : <LuEye className="w-4 h-4" />}
+                      {showConfirmPassword ? <LuEyeOff className="h-4 w-4" /> : <LuEye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -318,9 +309,9 @@ export default function LoginPage() {
                   id="page-remember-login"
                   checked={rememberLogin}
                   onChange={(e) => setRememberLogin(e.target.checked)}
-                  className="w-4 h-4 accent-[#4a9e2f] cursor-pointer rounded"
+                  className="h-4 w-4 cursor-pointer rounded accent-[#4a9e2f]"
                 />
-                <label htmlFor="page-remember-login" className="text-xs text-stone-600 font-inter cursor-pointer">
+                <label htmlFor="page-remember-login" className="font-inter cursor-pointer text-xs text-stone-600">
                   Remember login
                 </label>
               </div>
@@ -329,9 +320,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#4a9e2f] hover:bg-[#3d8626] text-white py-3.5 rounded-full font-gotham font-bold text-xs tracking-wider uppercase transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer mt-1"
+              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#4a9e2f] py-3.5 font-gotham text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#4a9e2f]/25 transition-all hover:bg-[#3d8626] hover:shadow-xl hover:shadow-[#4a9e2f]/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
-              {submitting && <LuLoader className="w-4 h-4 animate-spin" />}
+              {submitting && <LuLoader className="h-4 w-4 animate-spin" />}
               {submitting
                 ? tab === "login"
                   ? "LOGGING IN..."
@@ -341,24 +332,15 @@ export default function LoginPage() {
                   : "SIGN UP"}
             </button>
           </form>
+
+          <p className="font-inter mt-6 text-center text-xs text-stone-400">
+            <Link href="/" className="transition-colors hover:text-[#4a9e2f]">
+              ← Back to shop
+            </Link>
+          </p>
         </div>
 
-        {/* Right Decorative Section with Organic Food Image */}
-        <div className="hidden md:flex md:w-2/5 relative rounded-xl overflow-hidden flex-col justify-end p-6 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1000&q=80')" }}>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1f2a17]/90 via-[#1f2a17]/40 to-transparent" />
-          
-          <div className="relative z-10 text-white">
-            <span className="inline-block px-3 py-1 bg-[#4a9e2f] text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-2">
-              100% Pure & Organic
-            </span>
-            <h2 className="font-display text-xl font-bold leading-tight">
-              Fresh Organic Produce Delivered To Your Doorstep
-            </h2>
-            <p className="font-inter text-xs text-stone-200 mt-1 leading-relaxed">
-              Join Organishi for exclusive organic collections, farm-fresh offers, and quick tracking.
-            </p>
-          </div>
-        </div>
+        <AuthBrandPanel mode={tab} />
 
       </div>
     </main>
