@@ -75,10 +75,16 @@ export interface CartContextValue {
   selectedItems: CartItem[];
   selectedKeys: string[];
   itemCount: number;
+  /** Resolves with the resulting cart line, so callers can address it. */
   addItem: (
     item: Omit<CartItem, "quantity"> & { quantity?: number },
     options?: { silent?: boolean }
-  ) => void | Promise<void>;
+  ) => Promise<CartItem>;
+  /**
+   * Add a line and make it the only selected one — Buy Now checks out that
+   * product alone and leaves the rest of the cart for later.
+   */
+  buyNow: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => Promise<void>;
   removeItem: (slug: string) => void;
   updateQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;

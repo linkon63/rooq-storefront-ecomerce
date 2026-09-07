@@ -175,7 +175,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
         return addCartItem(vId, qty)
           .then((data) => {
-            setItems(sortItems(mapBackendCart(data)));
+            const next = sortItems(mapBackendCart(data));
+            setItems(next);
             if (!isSilent) {
               toast.success("Added to cart");
             }
@@ -187,12 +188,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
             if (wishlistMatch) {
               toggleWishlist(wishlistMatch);
             }
+
+            // The server owns the cart-item id that keys the selection, so the
+            // line can only be read back off the refreshed cart.
+            return next.find((i) => i.variantId === vId) ?? ({ ...input, quantity: qty } as CartItem);
           })
           .catch((err: Error) => {
             toast.error(err.message);
             throw err;
           });
       } else {
+        // Mirrors the merge the updater performs below, so the caller learns
+        // which line it ended up with.
+        const existing = items.find((i) => i.slug === input.slug);
+        const merged = {
+          ...(existing ?? input),
+          quantity: (existing?.quantity ?? 0) + (input.quantity ?? 1),
+        } as CartItem;
+
         setItems((prev) => {
           const existing = prev.find((i) => i.slug === input.slug);
           const next = existing
@@ -218,10 +231,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (wishlistMatch) {
           toggleWishlist(wishlistMatch);
         }
-        return Promise.resolve();
+        return Promise.resolve(merged);
       }
     },
-    [isAuthenticated, wishlistItems, toggleWishlist],
+    [isAuthenticated, items, wishlistItems, toggleWishlist],
   );
 
   const removeItem = useCallback(
@@ -331,6 +344,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, [items]);
 
+  /**
+   * Buy Now is a single-product checkout: the line is added silently — a toast
+   * is pointless when the shopper is already on their way — and then pinned as
+   * the only selected line, so checkout bills just this product while the rest
+   * of the cart stays put.
+   */
+  const buyNow = useCallback(
+    async (input: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+      const line = await addItem(input, { silent: true });
+      setSelectedKeys([getItemKey(line)]);
+    },
+    [addItem, setSelectedKeys],
+  );
+
   const selectedItems = useMemo(() => {
     if (selectedKeys.length === 0) return [];
     return items.filter((item) => selectedKeys.includes(getItemKey(item)));
@@ -346,6 +373,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         selectedKeys,
         itemCount,
         addItem,
+        buyNow,
         removeItem,
         updateQuantity,
         clearCart,

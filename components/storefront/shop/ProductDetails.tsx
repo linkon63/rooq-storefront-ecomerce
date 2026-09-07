@@ -45,7 +45,7 @@ function variantValues(variant: Variant) {
 }
 
 export default function ProductDetails({ product }: { product: Product }) {
-  const { addItem } = useCart();
+  const { addItem, buyNow } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const router = useRouter();
   const [buyingNow, setBuyingNow] = useState(false);
@@ -105,16 +105,15 @@ export default function ProductDetails({ product }: { product: Product }) {
   };
 
   /**
-   * Buy Now is Add to Cart without the detour: the line is added silently — a
-   * toast would be pointless when the shopper is already on the way — and the
-   * push waits for the add so an authenticated cart is on the server before
-   * checkout reads it.
+   * Buy Now is Add to Cart without the detour: the line is added silently and
+   * selected on its own, so checkout bills this product alone and anything
+   * already in the cart is left for later. The push waits for both.
    */
   const onBuyNow = async () => {
     if (!inStock || buyingNow) return;
     setBuyingNow(true);
     try {
-      await addItem(cartLine(), { silent: true });
+      await buyNow(cartLine());
       router.push("/checkout");
     } catch {
       // The cart provider already reports why the line could not be added.

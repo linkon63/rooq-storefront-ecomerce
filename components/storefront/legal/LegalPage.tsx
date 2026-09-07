@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -15,7 +14,6 @@ interface LegalPageProps {
   intro: string;
   /** Human-readable date, e.g. "10 August 2026". */
   lastUpdated: string;
-  heroImage?: string;
   sections: LegalSection[];
   /** Closing block — usually the "how to reach us" contact card. */
   footer?: ReactNode;
@@ -30,24 +28,13 @@ export default function LegalPage({
   title,
   intro,
   lastUpdated,
-  heroImage = "/images/hero/shop-hero.jpg",
   sections,
   footer,
 }: LegalPageProps) {
   return (
     <main className="w-full bg-[#f4f7ee] pb-16 md:pb-24">
       {/* ── Page banner ─────────────────────────────────────────────────── */}
-      <section className="relative isolate overflow-hidden">
-        <Image
-          src={heroImage}
-          alt={title}
-          fill
-          sizes="100vw"
-          priority
-          className="-z-10 object-cover"
-        />
-        <div className="absolute inset-0 -z-10 bg-[#1f2a17]/70" />
-
+      <section className="bg-[#1f2a17]">
         <div className="mx-auto max-w-[1600px] px-4 py-16 text-center md:px-8 lg:py-20">
           <h1 className="font-display text-[30px] leading-tight text-white md:text-[44px]">
             {title}

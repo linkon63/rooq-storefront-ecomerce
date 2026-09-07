@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FiEye, FiHeart, FiShoppingCart } from "react-icons/fi";
+import { FiEye, FiHeart, FiShoppingCart, FiZap } from "react-icons/fi";
 import { toast } from "sonner";
 
 import type { ShopProduct } from "@/lib/shop-api";
@@ -15,30 +16,52 @@ const money = (value: number) =>
 
 export default function ProductCard({ product }: { product: ShopProduct }) {
   const router = useRouter();
-  const { addItem } = useCart();
+  const { addItem, buyNow } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const [buyingNow, setBuyingNow] = useState(false);
 
   // Product pages are addressed by id, per the catalogue routing.
   const href = `/product/${product.id}`;
   const wishlisted = isInWishlist(product.id);
   const hasDiscount = !!product.originalPrice && product.originalPrice > product.price;
 
+  // The card sells the default variant — there is no picker here, so both the
+  // cart and the Buy Now shortcut send exactly the same line.
+  const cartLine = () => ({
+    slug: product.slug,
+    productId: product.id,
+    variantId: product.variantId,
+    name: product.name,
+    price: product.price,
+    originalPrice: hasDiscount ? product.originalPrice : undefined,
+    image: product.image,
+    color: "",
+    size: "",
+    quantity: 1,
+  });
+
   const onAddToCart = () => {
     // Belt and braces — the button is not rendered for unreleased products,
     // but nothing should be able to push one into the cart.
     if (product.comingSoon) return;
-    void addItem({
-      slug: product.slug,
-      productId: product.id,
-      variantId: product.variantId,
-      name: product.name,
-      price: product.price,
-      originalPrice: hasDiscount ? product.originalPrice : undefined,
-      image: product.image,
-      color: "",
-      size: "",
-      quantity: 1,
-    });
+    void addItem(cartLine());
+  };
+
+  /**
+   * One tap from the grid to checkout. `buyNow` selects this line alone, so
+   * checkout bills only this product; the push waits for it so both the cart
+   * and the selection are settled before checkout reads them.
+   */
+  const onBuyNow = async () => {
+    if (product.comingSoon || buyingNow) return;
+    setBuyingNow(true);
+    try {
+      await buyNow(cartLine());
+      router.push("/checkout");
+    } catch {
+      // The cart provider already reports why the line could not be added.
+      setBuyingNow(false);
+    }
   };
 
   const onToggleWishlist = () => {
@@ -148,6 +171,21 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
             {money(product.price)}
           </span>
         </p>
+
+        {/* Buy Now sits outside the hover overlay on purpose — it has to be
+            tappable on a phone, where there is no hover. */}
+        {!product.comingSoon && (
+          <button
+            type="button"
+            onClick={onBuyNow}
+            disabled={buyingNow}
+            aria-label={`Buy ${product.name} now`}
+            className="mt-3 flex h-10 w-full cursor-pointer items-center justify-center gap-2 bg-[#4a9e2f] px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-md disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
+          >
+            <FiZap size={15} />
+            {buyingNow ? "Please wait…" : "Buy Now"}
+          </button>
+        )}
       </div>
     </div>
   );

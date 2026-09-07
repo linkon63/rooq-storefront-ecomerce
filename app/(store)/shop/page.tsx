@@ -50,7 +50,7 @@ export default async function ShopPage({
   return (
     <main>
       {/* ── Page banner ─────────────────────────────────────────────────── */}
-      <section className="relative isolate overflow-hidden">
+      {/* <section className="relative isolate overflow-hidden">
         <Image
           src="/images/hero/shop-hero.jpg"
           alt="Our Shop"
@@ -73,7 +73,7 @@ export default async function ShopPage({
             <span className="text-[#8fd06b]">Shop</span>
           </p>
         </div>
-      </section>
+      </section> */}
 
       <Suspense fallback={<div className="py-32 text-center text-gray-400">Loading shop…</div>}>
         <ShopBrowser
