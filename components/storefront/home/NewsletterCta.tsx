@@ -12,10 +12,8 @@ import { validateNewsletterForm } from "@/utils/validateNewsletterForm";
  * whose host is already allow-listed in next.config.ts.
  */
 const BACKGROUNDS = [
-  "/images/home/newsletter-bg.png",
   "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1920&h=900&fit=crop&auto=format&q=80",
-  "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1920&h=900&fit=crop&auto=format&q=80",
-  "https://images.unsplash.com/photo-1447175008436-054170c2e979?w=1920&h=900&fit=crop&auto=format&q=80",
+  "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1920&h=900&fit=crop&auto=format&q=80"
 ];
 
 /** How long each backdrop holds before the next one fades in. */

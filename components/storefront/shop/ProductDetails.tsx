@@ -121,8 +121,58 @@ export default function ProductDetails({ product }: { product: Product }) {
     }
   };
 
+  // Quantity, Add to Cart and Buy Now are rendered twice — inline on desktop and
+  // in the docked bar on phones — so they are defined once here. Each copy is
+  // shown at its own breakpoint, which is why both sets of sizes are present:
+  // the mobile bar is tight, so it drops the icons and narrows the stepper.
+  const quantityStepper = (
+    <div className="flex shrink-0 items-center border border-gray-200">
+      <button
+        type="button"
+        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+        aria-label="Decrease quantity"
+        className="flex h-11 w-9 items-center justify-center text-gray-600 hover:text-[#4a9e2f] md:w-11"
+      >
+        <FiMinus size={15} />
+      </button>
+      <span className="w-8 text-center text-sm font-medium md:w-12">{quantity}</span>
+      <button
+        type="button"
+        onClick={() => setQuantity((q) => q + 1)}
+        aria-label="Increase quantity"
+        className="flex h-11 w-9 items-center justify-center text-gray-600 hover:text-[#4a9e2f] md:w-11"
+      >
+        <FiPlus size={15} />
+      </button>
+    </div>
+  );
+
+  const addToCartButton = (
+    <button
+      type="button"
+      onClick={onAddToCart}
+      disabled={!inStock}
+      className="flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-[#4a9e2f] bg-white px-3 text-[13px] font-medium text-[#4a9e2f] transition-all duration-200 hover:bg-[#f4f7ee] disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 md:min-w-[170px] md:gap-2 md:px-6 md:text-sm"
+    >
+      <FiShoppingCart size={16} className="hidden md:block" />
+      Add to Cart
+    </button>
+  );
+
+  const buyNowButton = (
+    <button
+      type="button"
+      onClick={onBuyNow}
+      disabled={!inStock || buyingNow}
+      className="flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap bg-[#4a9e2f] px-3 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none md:min-w-[170px] md:gap-2 md:px-6 md:text-sm"
+    >
+      <FiZap size={16} className="hidden md:block" />
+      {buyingNow ? "Please wait…" : "Buy Now"}
+    </button>
+  );
+
   return (
-    <div className="mx-auto max-w-[1600px] px-4 py-10 md:px-8 md:py-14">
+    <div className="mx-auto max-w-[1600px] px-4 py-10 pb-28 md:px-8 md:py-14">
       <nav className="mb-8 text-sm text-gray-500">
         <Link href="/" className="hover:text-[#4a9e2f]">Home</Link>
         <span>/ </span>
@@ -199,77 +249,53 @@ export default function ProductDetails({ product }: { product: Product }) {
             )}
           </p>
 
-          {product.description && (
-            <p className="mt-5 text-sm leading-relaxed text-gray-600">{product.description}</p>
-          )}
+          {/* On a phone the description pushes the size choice below the fold,
+              so below md the two are swapped and the pickers follow the name
+              directly. `flex-col-reverse` does it without rendering either
+              block twice; desktop keeps the original order. */}
+          <div className="flex flex-col-reverse md:flex-col">
+            {product.description && (
+              <p className="mt-5 text-sm leading-relaxed text-gray-600">{product.description}</p>
+            )}
 
-          {/* Variant pickers, one row per attribute */}
-          {attributeGroups.map((group) => (
-            <div key={group.name} className="mt-6">
-              <p className="mb-2 text-sm font-semibold text-[#1f2a17]">
-                {group.name}:{" "}
-                <span className="font-normal text-gray-500">{selection[group.name]}</span>
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {group.values.map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setSelection((prev) => ({ ...prev, [group.name]: value }))}
-                    className={`border px-4 py-2 text-sm transition-colors ${
-                      selection[group.name] === value
-                        ? "border-[#4a9e2f] bg-[#4a9e2f] text-white"
-                        : "border-gray-200 text-gray-700 hover:border-[#4a9e2f]"
-                    }`}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
+            {/* Variant pickers, one row per attribute. Wrapped so the swap
+                moves them as a block instead of reversing the rows. */}
+            <div>
+              {attributeGroups.map((group) => (
+                <div key={group.name} className="mt-6">
+                  <p className="mb-2 text-sm font-semibold text-[#1f2a17]">
+                    {group.name}:{" "}
+                    <span className="font-normal text-gray-500">{selection[group.name]}</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {group.values.map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setSelection((prev) => ({ ...prev, [group.name]: value }))}
+                        className={`border px-4 py-2 text-sm transition-colors ${
+                          selection[group.name] === value
+                            ? "border-[#4a9e2f] bg-[#4a9e2f] text-white"
+                            : "border-gray-200 text-gray-700 hover:border-[#4a9e2f]"
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
 
-          {/* Quantity + actions */}
+          {/* Quantity + actions. Below md the first three move to the docked bar
+              at the bottom of the screen, leaving wishlist here on its own. */}
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <div className="flex items-center border border-gray-200">
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                aria-label="Decrease quantity"
-                className="flex h-11 w-11 items-center justify-center text-gray-600 hover:text-[#4a9e2f]"
-              >
-                <FiMinus size={15} />
-              </button>
-              <span className="w-12 text-center text-sm font-medium">{quantity}</span>
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => q + 1)}
-                aria-label="Increase quantity"
-                className="flex h-11 w-11 items-center justify-center text-gray-600 hover:text-[#4a9e2f]"
-              >
-                <FiPlus size={15} />
-              </button>
+            <div className="hidden md:contents">
+              {quantityStepper}
+              {addToCartButton}
+              {buyNowButton}
             </div>
-
-            <button
-              type="button"
-              onClick={onAddToCart}
-              disabled={!inStock}
-              className="flex h-11 flex-1 min-w-[170px] cursor-pointer items-center justify-center gap-2 border border-[#4a9e2f] bg-white px-6 text-sm font-medium text-[#4a9e2f] transition-all duration-200 hover:bg-[#f4f7ee] disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-            >
-              <FiShoppingCart size={16} />
-              Add to Cart
-            </button>
-
-            <button
-              type="button"
-              onClick={onBuyNow}
-              disabled={!inStock || buyingNow}
-              className="flex h-11 flex-1 min-w-[170px] cursor-pointer items-center justify-center gap-2 bg-[#4a9e2f] px-6 text-sm font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
-            >
-              <FiZap size={16} />
-              {buyingNow ? "Please wait…" : "Buy Now"}
-            </button>
 
             <button
               type="button"
@@ -283,20 +309,25 @@ export default function ProductDetails({ product }: { product: Product }) {
                 } as Parameters<typeof toggleWishlist>[0])
               }
               aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              className={`flex h-11 w-11 items-center justify-center border transition-colors ${
+              className={`flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium transition-colors md:w-11 md:px-0 ${
                 wishlisted
                   ? "border-[#4a9e2f] bg-[#4a9e2f] text-white"
                   : "border-gray-200 text-gray-600 hover:border-[#4a9e2f] hover:text-[#4a9e2f]"
               }`}
             >
               <FiHeart size={17} fill={wishlisted ? "currentColor" : "none"} />
+              {/* The icon alone reads as an orphan once the buttons beside it
+                  have moved to the bar, so on phones it gets its label back. */}
+              <span className="md:hidden">
+                {wishlisted ? "Saved to wishlist" : "Add to wishlist"}
+              </span>
             </button>
           </div>
 
           {/* Reassurance strip */}
           <div className="mt-8 grid grid-cols-1 gap-4 border-t border-gray-100 pt-6 sm:grid-cols-3">
-            <Assurance icon={<FiTruck size={18} />} title="Free delivery" text="On orders over ৳2,000" />
-            <Assurance icon={<FiRefreshCw size={18} />} title="Easy returns" text="Sealed items, 7 days" />
+            <Assurance icon={<FiTruck size={18} />} title="Free delivery" text="See the delivery Policy" />
+            <Assurance icon={<FiRefreshCw size={18} />} title="Easy returns" text="Based on return policy" />
             <Assurance icon={<FiShield size={18} />} title="100% organic" text="Chemical free, certified" />
           </div>
 
@@ -310,6 +341,15 @@ export default function ProductDetails({ product }: { product: Product }) {
             </div>
           ) : null}
         </div>
+      </div>
+
+      {/* Docked purchase bar — on a phone the actions scroll out of reach long
+          before the shopper has finished reading, so they stay pinned to the
+          bottom. The safe-area inset keeps them clear of the iOS home bar. */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-gray-200 bg-white px-3 py-2.5 pb-[calc(0.625rem_+_env(safe-area-inset-bottom))] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] md:hidden">
+        {quantityStepper}
+        {addToCartButton}
+        {buyNowButton}
       </div>
     </div>
   );
