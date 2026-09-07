@@ -158,9 +158,17 @@ export function useOrders({ fixedStatus, defaultStatus = "" }: UseOrdersOptions 
     const shipping = num(selected.shippingCost);
     const discount = num(selected.discount);
     const grand = num(selected.total);
-    const paid = (selected.payments ?? [])
+    const recorded = (selected.payments ?? [])
       .filter((p) => p.status === "success")
       .reduce((sum, p) => sum + num(p.amount), 0);
+
+    // `paymentStatus` is what the rest of the system settles on — every report
+    // and dashboard figure keys off it — and a COD order is settled by the
+    // admin here rather than by a gateway, so it never gets a payment row.
+    // Marking one paid therefore has to clear the due on its own; the recorded
+    // total still wins when a gateway did write rows.
+    const paid = selected.paymentStatus === "paid" ? Math.max(recorded, grand) : recorded;
+
     return {
       subtotal,
       chargedSubtotal,
@@ -169,7 +177,9 @@ export function useOrders({ fixedStatus, defaultStatus = "" }: UseOrdersOptions 
       discount,
       grand,
       paid,
-      due: Math.max(0, grand - paid),
+      // A refunded order has been settled and reversed — nothing is owed, so it
+      // must not read back as a full outstanding balance.
+      due: selected.paymentStatus === "refunded" ? 0 : Math.max(0, grand - paid),
     };
   }, [selected]);
 
