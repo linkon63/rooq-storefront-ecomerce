@@ -24,20 +24,20 @@ export const revalidate = 60;
 
 /** The hero falls back to the artwork shipped with the design. */
 const FALLBACK_SLIDE: HeroSlide = {
-  image: "/images/home/hero-ghee.png",
-  href: "/shop?category=Ghee",
-  alt: "খাঁটি ঘি — pure hand-churned ghee",
+    image: "/images/home/moil.jpeg",
+    href: "/shop?category=Mustard%20Oil",
+    alt: "খাঁটি সরিষার তেল — cold pressed mustard oil",
 };
 
 /** Shown until Admin → Settings → Hero Banner has artwork of its own. */
 const FALLBACK_BANNERS: HeroSlide[] = [
   {
-    image: "/images/home/banner-coconut.png",
+    image: "/images/home/seed.jpeg",
     href: "/shop?category=Coconut%20Oil",
-    alt: "নারিকেল তেল — cold pressed virgin coconut oil",
+    alt: "seed",
   },
   {
-    image: "/images/home/banner-mustard.png",
+    image: "/images/home/ghee.jpeg",
     href: "/shop?category=Mustard%20Oil",
     alt: "খাঁটি সরিষার তেল — cold pressed mustard oil",
   },
