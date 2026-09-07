@@ -93,13 +93,17 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
 
   return (
     <section className="bg-[#f4f7ee] py-14 lg:py-16">
+      {/* `grid-cols-1` is not decoration: without an explicit track the columns
+          below `lg` are implicit and content-sized, so the swiper's unbounded
+          intrinsic width stretches the whole grid to the layout maximum and the
+          page's `overflow-x: clip` hides both blocks off-screen. */}
       <div
-        className={`mx-auto grid max-w-[1600px] gap-10 px-4 md:px-8 lg:gap-12 ${
+        className={`mx-auto grid max-w-[1600px] grid-cols-1 gap-10 px-4 md:px-8 lg:gap-12 ${
           socials.length ? "lg:grid-cols-[minmax(0,1fr)_460px]" : ""
         }`}
       >
         {/* ── Testimonials ────────────────────────────────────────────── */}
-        <div>
+        <div className="min-w-0">
           <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
             What Customer Say About Us
           </h2>
@@ -164,7 +168,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
 
         {/* ── Social ──────────────────────────────────────────────────── */}
         {socials.length > 0 && (
-          <div>
+          <div className="min-w-0">
             <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
               Follow Us On
             </h2>
