@@ -160,7 +160,9 @@ export default function ProductCard({ product, viewLayout = 'grid' }: ProductCar
         </div>
 
         <div className="mt-4">
-          <h3 className="text-sm font-bold text-gray-900">{displayName}</h3>
+          <div className="flex h-10 items-center">
+            <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">{displayName}</h3>
+          </div>
 
           <div className="flex flex-wrap items-baseline space-x-2 mt-1">
             <p className="text-base font-bold text-gray-900">৳{price}</p>

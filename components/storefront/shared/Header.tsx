@@ -7,12 +7,13 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { FiClock, FiUser, FiMenu, FiX } from "react-icons/fi";
 import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
+import { FaWhatsapp } from "react-icons/fa";
 
 import Logo from "./Logo";
 import SearchField from "./SearchField";
 import type { ShopCategory, ShopSettings } from "@/lib/shop-api";
 import { BLOG_ENABLED } from "@/lib/feature-flags";
-import { resolveShopContact, telHref } from "@/lib/shop-contact";
+import { resolveShopContact, telHref, whatsappHref } from "@/lib/shop-contact";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
@@ -108,17 +109,13 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
       {/* ── Top utility bar ─────────────────────────────────────────────── */}
-      <div className="bg-[#4a9e2f] text-white text-[13px]">
-        <div className="mx-auto max-w-[1600px] px-4 md:px-5">
-          <div className="flex h-10 items-center justify-between gap-4">
-            <div className="flex items-center gap-5 overflow-hidden whitespace-nowrap">
-              <a href={`mailto:${email}`} className="flex items-center gap-1.5 hover:underline">
+      <div className="bg-[#4a9e2f] text-white text-[11px] sm:text-[13px]">
+        <div className="mx-auto max-w-[1600px] px-3 sm:px-4 md:px-5">
+          <div className="flex h-10 items-center justify-between gap-2 sm:gap-4">
+            <div className="flex items-center gap-2.5 sm:gap-5 overflow-hidden whitespace-nowrap">
+              <a href={`mailto:${email}`} className="flex items-center gap-1 sm:gap-1.5 hover:underline">
                 <HiOutlineMail className="shrink-0" size={15} />
                 <span>{email}</span>
-              </a>
-              <a href={telHref(phone)} className="hidden items-center gap-1.5 hover:underline sm:flex">
-                <HiOutlinePhone className="shrink-0" size={15} />
-                <span>{phone}</span>
               </a>
               <span className="hidden items-center gap-1.5 lg:flex">
                 <FiClock className="shrink-0" size={15} />
@@ -126,11 +123,24 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
               </span>
             </div>
 
-            <nav className="hidden items-center gap-3 md:flex">
-              <Link href="/order-tracking" className="hover:underline">Order Tracking</Link>
-              <span className="text-white/50">|</span>
-              <Link href="/contact" className="hover:underline">Contact</Link>
-            </nav>
+            <div className="flex items-center gap-3 sm:gap-4 whitespace-nowrap">
+              <nav className="hidden items-center gap-3 md:flex">
+                <Link href="/order-tracking" className="hover:underline">Order Tracking</Link>
+                <span className="text-white/50">|</span>
+                <Link href="/contact" className="hover:underline">Contact</Link>
+                <span className="text-white/50">|</span>
+              </nav>
+
+              <a
+                href={whatsappHref(phone)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 sm:gap-1.5 font-medium hover:underline"
+              >
+                <FaWhatsapp className="shrink-0 text-white" size={15} />
+                <span>{phone}</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

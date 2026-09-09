@@ -97,7 +97,7 @@ export default function ProductCard({
 
           <div className="w-full flex justify-between items-start gap-4 mt-12">
             <div className="flex-1">
-              <h3 className="text-stone-855 hover:text-brand-3 transition-colors duration-200 text-sm sm:text-base md:text-[17px] font-normal font-gotham line-clamp-2 leading-snug">
+              <h3 className="text-stone-855 hover:text-brand-3 transition-colors duration-200 text-sm sm:text-base md:text-[17px] font-normal font-gotham line-clamp-1 sm:line-clamp-2 leading-snug">
                 {name}
               </h3>
             </div>
