@@ -55,7 +55,7 @@ export default async function DeliveryPage() {
                   <FiMapPin className="w-8 h-8" />
                 </div>
                 <h3 className="font-['Bembo_Std'] text-2xl text-neutral-800 font-medium mb-3">Within Dhaka</h3>
-                <p className="font-['Gotham'] text-[#C6B485] text-lg font-semibold mb-4">2 – 4 Business Days</p>
+                <p className="font-['Gotham'] text-[#C6B485] text-lg font-semibold mb-4">2 – 3 Working Days</p>
                 <p className="font-['Gotham'] text-neutral-800 text-base font-semibold mb-4">
                   Delivery Charge: {formatCurrency(rates.inside, symbol)}
                 </p>
@@ -70,7 +70,7 @@ export default async function DeliveryPage() {
                   <FiTruck className="w-8 h-8" />
                 </div>
                 <h3 className="font-['Bembo_Std'] text-2xl text-neutral-800 font-medium mb-3">Outside Dhaka</h3>
-                <p className="font-['Gotham'] text-[#C6B485] text-lg font-semibold mb-4">3 – 7 Business Days</p>
+                <p className="font-['Gotham'] text-[#C6B485] text-lg font-semibold mb-4">3 – 5 Working Days</p>
                 <p className="font-['Gotham'] text-neutral-800 text-base font-semibold mb-4">
                   Delivery Charge: {formatCurrency(rates.outside, symbol)}
                 </p>
