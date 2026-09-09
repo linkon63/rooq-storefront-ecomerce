@@ -14,7 +14,7 @@ type LoginResponse = {
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
         auth: false,
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier: identifier.trim(), password }),
       });
 
       if (response.user.role?.name !== "admin") {
@@ -77,14 +77,15 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="w-full space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Email Address
+              Email or Phone Number
             </label>
             <div className="relative">
               <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
               <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                type="text"
+                value={identifier}
+                onChange={(event) => setIdentifier(event.target.value)}
+                placeholder="Email or phone number"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-800 focus:bg-white focus:border-[#4a9e2f] focus:ring-2 focus:ring-[#4a9e2f]/20 outline-none transition-all"
                 required
               />
