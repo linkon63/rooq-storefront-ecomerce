@@ -5,6 +5,7 @@ import { FiLoader, FiCamera, FiTrash2, FiChevronDown, FiUser, FiLock } from "rea
 import { toast } from "sonner";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { uploadAvatar, deleteAvatar, changePassword } from "@/lib/storefront-api";
+import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 import ResolvedImage from "./image-resolver";
 
 // ─── Shared design tokens ────────────────────────────────────────────────────
@@ -57,7 +58,18 @@ export default function AccountDetailsView() {
     setUpdatingProfile(true);
     try {
       const name  = `${firstName.trim()} ${lastName.trim()}`.trim();
-      const phone = `${countryCode}${phoneNumber.trim()}`;
+      // A BD number is stored as 01XXXXXXXXX — the same form sign-up saves and
+      // login looks up. Prefixing "+880" to "017..." would store "+880017...",
+      // which phone login can never match.
+      const rawPhone = phoneNumber.trim();
+      let phone = `${countryCode}${rawPhone}`;
+      if (countryCode === "+880") {
+        if (!isValidBdPhone(phone) && !isValidBdPhone(rawPhone)) {
+          toast.error("Please enter a valid 11-digit Bangladeshi phone number (e.g. 017XXXXXXXX).");
+          return;
+        }
+        phone = normalizeBdPhone(isValidBdPhone(rawPhone) ? rawPhone : phone);
+      }
       await updateProfile(name, user?.email || "", phone);
       await refreshUser();
       toast.success("Profile updated successfully.");
