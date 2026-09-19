@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useMemo, type FormEvent } from "react";
+import { useEffect, useRef, useState, useMemo, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { getItemKey, useCart } from "@/app/_providers/cart-provider";
+import { variantText } from "@/lib/cart-variant";
 import { useAuth } from "@/app/_providers/auth-provider";
 import { useCurrency } from "@/lib/currency-context";
 import { usePlaceOrder } from "@/app/_hooks/use-place-order";
@@ -46,7 +47,19 @@ const INPUT_CLASS =
   "w-full p-3 rounded-md outline outline-1 outline-offset-[-1px] outline-zinc-300 font-gotham text-sm text-[#222222] placeholder:text-zinc-300 placeholder:text-xs placeholder:font-medium placeholder:font-['Gotham'] leading-4 focus:outline-stone-500";
 
 export default function CheckoutPage() {
-  const { items, selectedItems, selectedKeys, toggleSelectItem } = useCart();
+  const { items, selectedItems, selectedKeys, toggleSelectItem, setSelectedKeys } = useCart();
+
+  // Below lg the whole cart is listed with checkboxes, so it arrives with every
+  // line ticked — once, when the cart first has lines — and the shopper unticks
+  // what they skip. Desktop keeps whatever the cart page or Buy Now selected.
+  const autoSelected = useRef(false);
+  useEffect(() => {
+    if (autoSelected.current || items.length === 0) return;
+    autoSelected.current = true;
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      setSelectedKeys(items.map(getItemKey));
+    }
+  }, [items, setSelectedKeys]);
   const { user, isAuthenticated } = useAuth();
   const { formatCurrency } = useCurrency();
   const router = useRouter();
@@ -336,110 +349,147 @@ export default function CheckoutPage() {
     ? formatAddress(selectedAddress)
     : [address.addressLine1, address.city, address.state, COUNTRY].filter(Boolean).join(", ");
 
-  // The order's lines. Rendered in the summary column on desktop and at the
-  // top of the page on phones and tablets, where the columns stack.
-  const itemsList =
-    checkoutItems.length > 0 && (
-      <div className="mb-6 border border-zinc-200 rounded-lg p-3 bg-stone-50/50 space-y-3 max-h-64 overflow-y-auto">
-        <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] font-semibold border-b border-zinc-200 pb-2">
-          Selected Items ({checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})
-        </p>
-        {checkoutItems.map((item) => (
-          <div key={item.slug ?? item.productId} className="flex items-center gap-3 py-1.5 border-b border-zinc-100 last:border-b-0">
-            <div className="relative w-12 h-12 shrink-0 rounded bg-white overflow-hidden border border-zinc-200">
-              {item.image ? (
-                <Image src={item.image} alt={item.name} fill className="object-cover" />
-              ) : (
-                <div className="flex h-full items-center justify-center text-[9px] text-stone-400">No img</div>
+  /**
+   * The order's lines. On desktop the summary column lists just the selected
+   * lines, as before. Below lg the list sits at the top of the page and shows
+   * the whole cart, each line with a checkbox: everything arrives ticked and
+   * the shopper unticks what they want to leave out. The last ticked line
+   * cannot be unticked — checkout always needs something to bill.
+   */
+  const renderItemsList = (selectable: boolean) => {
+    const lines = selectable ? items : checkoutItems;
+    if (lines.length === 0) return null;
+
+    return (
+      <div className="mb-6 border border-zinc-200 rounded-lg p-3 bg-stone-50/50 space-y-3 max-h-80 overflow-y-auto">
+        <div className="flex items-baseline justify-between gap-3 border-b border-zinc-200 pb-2">
+          <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] font-semibold">
+            Selected Items ({checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})
+          </p>
+          {selectable && items.length > 1 && (
+            <p className="font-gotham text-[11px] text-zinc-500">Untick to leave out</p>
+          )}
+        </div>
+        {lines.map((item) => {
+          const key = getItemKey(item);
+          const checked = selectedKeys.includes(key);
+          const locked = checked && selectedKeys.length === 1;
+
+          const row = (
+            <>
+              {selectable && (
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
+                    checked ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white"
+                  } ${locked ? "opacity-60" : ""}`}
+                >
+                  {checked && <LuCheck className="h-3.5 w-3.5" />}
+                </span>
               )}
-              <span className="absolute top-0 right-0 bg-brand text-white text-[9px] font-bold w-4 h-4 rounded-bl flex items-center justify-center">
-                {item.quantity}
+              <span className="relative w-12 h-12 shrink-0 rounded bg-white overflow-hidden border border-zinc-200">
+                {item.image ? (
+                  <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-[9px] text-stone-400">No img</span>
+                )}
+                <span className="absolute top-0 right-0 bg-brand text-white text-[9px] font-bold w-4 h-4 rounded-bl flex items-center justify-center">
+                  {item.quantity}
+                </span>
               </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-gotham text-xs font-semibold text-[#222222] truncate">{item.name}</p>
-              <p className="font-gotham text-[11px] text-zinc-500">
-                Qty: {item.quantity} ×{" "}
-                {isDiscounted(item) && (
-                  <span className="text-zinc-400 line-through">
-                    {formatCurrency(unitListPrice(item))}
+              <span className="flex-1 min-w-0">
+                <span className="block font-gotham text-xs font-semibold text-[#222222] truncate">{item.name}</span>
+                {variantText(item) && (
+                  <span className="block font-gotham text-[11px] font-medium text-brand truncate">
+                    {variantText(item)}
                   </span>
-                )}{" "}
-                {formatCurrency(item.price)}
-              </p>
+                )}
+                <span className="block font-gotham text-[11px] text-zinc-500">
+                  Qty: {item.quantity} ×{" "}
+                  {isDiscounted(item) && (
+                    <span className="text-zinc-400 line-through">{formatCurrency(unitListPrice(item))}</span>
+                  )}{" "}
+                  {formatCurrency(item.price)}
+                </span>
+              </span>
+              <span className="shrink-0 text-right">
+                <span className="block font-gotham text-xs font-bold text-[#222222]">
+                  {formatCurrency(item.price * item.quantity)}
+                </span>
+                {isDiscounted(item) && (
+                  <span className="block font-gotham text-[10px] font-semibold text-[#2f7d1f]">
+                    −{formatCurrency(lineSaving(item))}
+                  </span>
+                )}
+              </span>
+            </>
+          );
+
+          return selectable ? (
+            <button
+              key={key}
+              type="button"
+              role="checkbox"
+              aria-checked={checked}
+              aria-disabled={locked}
+              onClick={() => !locked && toggleSelectItem(key)}
+              className={`flex w-full items-center gap-3 py-1.5 border-b border-zinc-100 last:border-b-0 text-left transition-opacity ${
+                checked ? "" : "opacity-50"
+              }`}
+            >
+              {row}
+            </button>
+          ) : (
+            <div key={key} className="flex items-center gap-3 py-1.5 border-b border-zinc-100 last:border-b-0">
+              {row}
             </div>
-            <div className="shrink-0 text-right">
-              <div className="font-gotham text-xs font-bold text-[#222222]">
-                {formatCurrency(item.price * item.quantity)}
-              </div>
-              {isDiscounted(item) && (
-                <div className="font-gotham text-[10px] font-semibold text-[#2f7d1f]">
-                  −{formatCurrency(lineSaving(item))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
+  };
 
   /**
-   * Phones list the whole cart here. Buy Now from the phone sheet arrives with
-   * every line ticked, so the shopper unticks what they do not want rather than
-   * hunting for what to add. The last ticked line cannot be unticked — checkout
-   * always needs something to bill.
+   * Phones and tablets: the money side of the order squeezed into a few lines
+   * under the item list in "Your Order", instead of the full summary column.
    */
-  const moreFromCart =
-    items.length > 1 && (
-      <div className="mb-6 rounded-lg border border-zinc-200 p-3">
-        <p className="border-b border-zinc-200 pb-2 font-gotham text-xs font-semibold uppercase tracking-wider text-[#999999]">
-          Items in your cart — untick any you don&apos;t want
-        </p>
-        <ul className="mt-1">
-          {items.map((item) => {
-            const key = getItemKey(item);
-            const checked = selectedKeys.includes(key);
-            const locked = checked && selectedKeys.length === 1;
-            return (
-              <li key={key}>
-                <button
-                  type="button"
-                  role="checkbox"
-                  aria-checked={checked}
-                  aria-disabled={locked}
-                  onClick={() => !locked && toggleSelectItem(key)}
-                  className="flex w-full items-center gap-3 border-b border-zinc-100 py-2.5 text-left last:border-b-0"
-                >
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
-                      checked ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white"
-                    } ${locked ? "opacity-60" : ""}`}
-                  >
-                    {checked && <LuCheck className="h-3.5 w-3.5" />}
-                  </span>
-                  <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded border border-zinc-200 bg-white">
-                    {item.image ? (
-                      <Image src={item.image} alt={item.name} fill sizes="44px" className="object-cover" />
-                    ) : null}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-gotham text-[13px] font-semibold text-[#222222]">
-                      {item.name}
-                    </span>
-                    <span className="block font-gotham text-[11px] text-zinc-500">
-                      {item.size ? `${item.size} · ` : ""}Qty {item.quantity}
-                    </span>
-                  </span>
-                  <span className="shrink-0 font-gotham text-[13px] font-bold text-[#222222]">
-                    {formatCurrency(item.price * item.quantity)}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+  const compactSummary = (
+    <div className="rounded-lg border border-zinc-200 bg-white p-3 font-gotham text-[13px]">
+      <div className="space-y-1.5">
+        <div className="flex justify-between text-[#555555]">
+          <span>Subtotal</span>
+          <span className="font-medium text-[#222222]">{formatCurrency(listSubtotal)}</span>
+        </div>
+        {productDiscount > 0 && (
+          <div className="flex justify-between text-[#555555]">
+            <span>Product Discount</span>
+            <span className="font-medium text-[#2f7d1f]">−{formatCurrency(productDiscount)}</span>
+          </div>
+        )}
+        <div className="flex justify-between gap-3 text-[#555555]">
+          <span className="min-w-0 truncate">
+            Delivery <span className="text-[11px] text-zinc-400">({ZONE_LABELS[deliveryZone]})</span>
+          </span>
+          <span className="shrink-0 font-medium text-[#222222]">
+            {shipping > 0 ? formatCurrency(shipping) : "Free"}
+          </span>
+        </div>
       </div>
-    );
+      <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-zinc-200 pt-2.5">
+        <span className="text-[15px] font-bold text-[#222222]">Total</span>
+        <span className="text-[16px] font-bold text-[#222222]">{formatCurrency(total)}</span>
+      </div>
+      {productDiscount > 0 && (
+        <p className="mt-2 rounded bg-brand-mist px-2.5 py-1.5 text-[12px] font-semibold text-[#2f7d1f]">
+          You save {formatCurrency(productDiscount)}
+          {savedPercent > 0 && ` (${savedPercent}%)`}
+        </p>
+      )}
+      <p className="mt-2 flex items-center gap-1.5 text-[12px] text-zinc-500">
+        <LuCircleCheck className="h-3.5 w-3.5 text-brand" aria-hidden />
+        Payment: <span className="font-semibold text-[#222222]">Cash on delivery</span>
+      </p>
+    </div>
+  );
 
   return (
     // min-height, not a fixed height: at a fixed 70vh the site footer paints
@@ -461,8 +511,8 @@ export default function CheckoutPage() {
                     Your Order
                   </h2>
                 </div>
-                {itemsList}
-                <div className="md:hidden">{moreFromCart}</div>
+                {renderItemsList(true)}
+                {compactSummary}
               </div>
 
               {/* Back Arrow & Title — the arrow moves up to "Your Order" below lg. */}
@@ -475,8 +525,9 @@ export default function CheckoutPage() {
                 </h1>
               </div>
 
-              {/* ── Active Delivery Address Preview & View Option ── */}
-              <div className="mb-6 rounded-xl border border-brand/30 bg-brand-mist/70 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs font-gotham">
+              {/* ── Active Delivery Address Preview & View Option ──
+                  Hidden on phones: the form right below already shows the address. */}
+              <div className="mb-6 rounded-xl border border-brand/30 bg-brand-mist/70 p-4 hidden md:flex flex-wrap items-center justify-between gap-3 shadow-xs font-gotham">
                 <div className="flex items-start gap-3 min-w-0 flex-1">
                   <div className="w-9 h-9 rounded-full bg-brand/15 flex items-center justify-center text-brand shrink-0 mt-0.5">
                     <LuMapPin className="w-5 h-5" />
@@ -741,13 +792,16 @@ export default function CheckoutPage() {
                 The total and Place Order live in the bar fixed to the bottom of
                 the viewport, so this column is free to scroll with the page. */}
             <aside className="w-full lg:w-96">
+              {/* Heading, delivery area, pricing and payment are desktop-only —
+                  below lg the compact summary in "Your Order" covers them. */}
+              <div className="hidden lg:block">
               <h2 className="font-bembo text-3xl sm:text-4xl text-[#4A4A4A] font-normal mb-4">
                 Summary
               </h2>
 
               {/* Desktop keeps the item list in the summary; phones and tablets
                   see it at the top of the page instead. */}
-              <div className="hidden lg:block">{itemsList}</div>
+              <div className="hidden lg:block">{renderItemsList(false)}</div>
 
               {/* Delivery Area — read-only. The rate follows the district chosen
                   above, so there is nothing here for the shopper to change. */}
@@ -862,6 +916,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="border-b border-solid border-zinc-300 mb-6" />
+              </div>
 
               {/* Return & refund policies — written by the shop, read here */}
               {checkoutPolicies.length > 0 && (

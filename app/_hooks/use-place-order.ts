@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCart } from "@/app/_providers/cart-provider";
+import { getItemKey, useCart } from "@/app/_providers/cart-provider";
 import { getCustomerToken } from "@/lib/storefront-api";
 import { cartTotals } from "@/lib/cart-pricing";
 import type { AddressForm, DeliveryZone, OrderResult } from "@/lib/types";
@@ -176,7 +176,7 @@ export function usePlaceOrder() {
         clearCart();
       } else {
         for (const i of targetItems) {
-          removeItem(i.slug);
+          removeItem(getItemKey(i));
         }
       }
 

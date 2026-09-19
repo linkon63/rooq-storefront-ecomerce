@@ -22,11 +22,24 @@ async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T>
   return res.json() as Promise<T>;
 }
 
+/** The variant's attributes as { "Weight": "500 g" }, whichever shape the API sent. */
+function variantAttributes(raw: BackendCartItem['variant']['attributes']): Record<string, string> {
+  if (!raw) return {};
+  if (!Array.isArray(raw)) return raw;
+  const map: Record<string, string> = {};
+  for (const row of raw) {
+    const name = row.attributeValue?.attribute?.name;
+    const value = row.attributeValue?.value;
+    if (name && value) map[name] = value;
+  }
+  return map;
+}
+
 export function mapBackendCartItem(item: BackendCartItem): CartItem {
   const p = item.variant.product;
   const featured = p.media?.find((m) => m.isFeatured);
   const first = p.media?.[0];
-  const attributes = item.variant.attributes ?? {};
+  const attributes = variantAttributes(item.variant.attributes);
 
   // GET /cart hands back the raw variant price — it does not apply the product
   // offers that GET /products does. `repriceCartItems` fills the gap from the
@@ -43,7 +56,7 @@ export function mapBackendCartItem(item: BackendCartItem): CartItem {
     originalPrice: hasOffer ? listPrice : undefined,
     image: resolveImageUrl(featured?.media.url ?? first?.media.url ?? ""),
     color: attributes.Color ?? attributes.Colour ?? attributes.color ?? '',
-    size: attributes.Size ?? attributes.size ?? '',
+    size: attributes.Size ?? attributes.size ?? Object.values(attributes).join(' / '),
     quantity: item.quantity,
     productId: p.id,
     variantId: item.variantId,

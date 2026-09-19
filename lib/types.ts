@@ -50,7 +50,10 @@ export interface BackendCartItem {
     stockAlertThreshold: number;
     isDefault: boolean;
     productId: string;
-    attributes?: Record<string, string>;
+    /** Prisma's join rows; older responses may send a flat name → value map. */
+    attributes?:
+      | Record<string, string>
+      | { attributeValue?: { value?: string; attribute?: { name?: string } } }[];
     product: {
       id: string;
       name: string;
@@ -89,8 +92,9 @@ export interface CartContextValue {
     item: Omit<CartItem, "quantity"> & { quantity?: number },
     options?: { includeCart?: boolean },
   ) => Promise<void>;
-  removeItem: (slug: string) => void;
-  updateQuantity: (slug: string, quantity: number) => void;
+  /** `key` is the line's `getItemKey` — two variants of one product are two lines. */
+  removeItem: (key: string) => void;
+  updateQuantity: (key: string, quantity: number) => void;
   clearCart: () => void;
   toggleSelectItem: (key: string) => void;
   selectAllItems: (select: boolean) => void;

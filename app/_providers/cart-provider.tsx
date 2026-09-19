@@ -200,18 +200,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       } else {
         // Mirrors the merge the updater performs below, so the caller learns
         // which line it ended up with.
-        const existing = items.find((i) => i.slug === input.slug);
+        // Same variant → same line; a different variant of the product is a new line.
+        const sameLine = (i: CartItem) =>
+          input.variantId ? i.variantId === input.variantId : i.slug === input.slug;
+        const existing = items.find(sameLine);
         const merged = {
           ...(existing ?? input),
           quantity: (existing?.quantity ?? 0) + (input.quantity ?? 1),
         } as CartItem;
 
         setItems((prev) => {
-          const existing = prev.find((i) => i.slug === input.slug);
+          const existing = prev.find(sameLine);
           const next = existing
             ? sortItems(
                 prev.map((i) =>
-                  i.slug === input.slug
+                  sameLine(i)
                     ? { ...i, quantity: i.quantity + (input.quantity ?? 1) }
                     : i,
                 ),
@@ -238,9 +241,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const removeItem = useCallback(
-    (slug: string) => {
+    (key: string) => {
       if (isAuthenticated) {
-        const target = items.find((i) => i.slug === slug);
+        const target = items.find((i) => getItemKey(i) === key);
         const cartItemId = target?.id;
         if (!cartItemId) return;
         removeCartItem(cartItemId)
@@ -251,7 +254,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           .catch((err: Error) => toast.error(err.message));
       } else {
         setItems((prev) => {
-          const next = prev.filter((i) => i.slug !== slug);
+          const next = prev.filter((i) => getItemKey(i) !== key);
           saveLocalCart(next);
           return next;
         });
@@ -262,13 +265,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const updateQuantity = useCallback(
-    (slug: string, quantity: number) => {
+    (key: string, quantity: number) => {
       if (isAuthenticated) {
         if (quantity <= 0) {
-          removeItem(slug);
+          removeItem(key);
           return;
         }
-        const target = items.find((i) => i.slug === slug);
+        const target = items.find((i) => getItemKey(i) === key);
         const cartItemId = target?.id;
         if (!cartItemId) return;
         updateCartItemQuantity(cartItemId, quantity)
@@ -277,12 +280,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       } else {
         setItems((prev) => {
           if (quantity <= 0) {
-            const next = prev.filter((i) => i.slug !== slug);
+            const next = prev.filter((i) => getItemKey(i) !== key);
             saveLocalCart(next);
             return next;
           }
           const next = prev.map((i) =>
-            i.slug === slug ? { ...i, quantity } : i,
+            getItemKey(i) === key ? { ...i, quantity } : i,
           );
           saveLocalCart(next);
           return next;

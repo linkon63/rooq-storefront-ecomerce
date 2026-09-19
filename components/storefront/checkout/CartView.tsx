@@ -12,6 +12,7 @@ import OrderSummary, { money } from "./OrderSummary";
 import { useCart, getItemKey } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
 import { cartTotals, isDiscounted, lineSaving, unitListPrice } from "@/lib/cart-pricing";
+import { variantParts } from "@/lib/cart-variant";
 
 export default function CartView() {
   const router = useRouter();
@@ -117,7 +118,7 @@ export default function CartView() {
 
             <ul className="divide-y divide-gray-100">
               {items.map((item) => (
-                <li key={item.slug} className="flex gap-4 py-6">
+                <li key={getItemKey(item)} className="flex gap-4 py-6">
                   <input
                     type="checkbox"
                     checked={isSelected(item)}
@@ -144,9 +145,17 @@ export default function CartView() {
                         >
                           {item.name}
                         </Link>
-                        {item.size && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            <span className="font-medium text-[#1f2a17]">Size:</span> {item.size}
+                        {/* The variant picked — "Weight: 500 g" — as small tags. */}
+                        {variantParts(item).length > 0 && (
+                          <p className="mt-1.5 flex flex-wrap gap-1.5">
+                            {variantParts(item).map(({ label, value }) => (
+                              <span
+                                key={label}
+                                className="rounded-full bg-brand-mist px-2.5 py-0.5 text-[11px] text-gray-600"
+                              >
+                                {label}: <span className="font-semibold text-brand">{value}</span>
+                              </span>
+                            ))}
                           </p>
                         )}
                         <p className="mt-1 flex flex-wrap items-baseline gap-1.5 text-xs">
@@ -163,7 +172,7 @@ export default function CartView() {
                       <div className="flex items-center border border-gray-200">
                         <button
                           type="button"
-                          onClick={() => updateQuantity(item.slug, item.quantity + 1)}
+                          onClick={() => updateQuantity(getItemKey(item), item.quantity + 1)}
                           aria-label={`Increase quantity of ${item.name}`}
                           className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-brand"
                         >
@@ -174,8 +183,8 @@ export default function CartView() {
                           type="button"
                           onClick={() =>
                             item.quantity > 1
-                              ? updateQuantity(item.slug, item.quantity - 1)
-                              : removeItem(item.slug)
+                              ? updateQuantity(getItemKey(item), item.quantity - 1)
+                              : removeItem(getItemKey(item))
                           }
                           aria-label={`Decrease quantity of ${item.name}`}
                           className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-brand"
@@ -205,7 +214,7 @@ export default function CartView() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => removeItem(item.slug)}
+                          onClick={() => removeItem(getItemKey(item))}
                           aria-label={`Remove ${item.name}`}
                           className="hover:text-red-500"
                         >
