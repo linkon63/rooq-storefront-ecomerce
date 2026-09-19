@@ -48,12 +48,20 @@ export function mapBackendCartItem(item: BackendCartItem): CartItem {
   const discounted = item.variant.discountedPrice != null ? Number(item.variant.discountedPrice) : 0;
   const hasOffer = discounted > 0 && discounted < listPrice;
 
+  // Once the catalogue has priced this variant, use that straight away. Without
+  // it every quantity change repainted the line at the raw price and then back
+  // at the offer price a moment later — rows blinking in and out, which read
+  // as the whole cart page shaking.
+  const known = variantPricing.get(item.variantId);
+  const knownOriginal =
+    known?.originalPrice && known.originalPrice > known.price ? known.originalPrice : undefined;
+
   return {
     id: item.id,
     slug: p.slug,
     name: p.name,
-    price: hasOffer ? discounted : listPrice,
-    originalPrice: hasOffer ? listPrice : undefined,
+    price: known ? known.price : hasOffer ? discounted : listPrice,
+    originalPrice: known ? knownOriginal : hasOffer ? listPrice : undefined,
     image: resolveImageUrl(featured?.media.url ?? first?.media.url ?? ""),
     color: attributes.Color ?? attributes.Colour ?? attributes.color ?? '',
     size: attributes.Size ?? attributes.size ?? Object.values(attributes).join(' / '),

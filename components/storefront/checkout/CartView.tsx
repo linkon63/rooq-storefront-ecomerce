@@ -189,13 +189,14 @@ export default function CartView() {
                         <span className="w-9 text-center text-sm">{item.quantity}</span>
                         <button
                           type="button"
-                          onClick={() =>
-                            item.quantity > 1
-                              ? updateQuantity(getItemKey(item), item.quantity - 1)
-                              : removeItem(getItemKey(item))
-                          }
+                          // Stops at 1 — taking a line out is the delete icon's job,
+                          // so a stray tap on minus never empties the cart.
+                          onClick={() => {
+                            if (item.quantity > 1) updateQuantity(getItemKey(item), item.quantity - 1);
+                          }}
+                          disabled={item.quantity <= 1}
                           aria-label={`Decrease quantity of ${item.name}`}
-                          className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-brand"
+                          className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-brand disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:text-gray-300"
                         >
                           <FiMinus size={13} />
                         </button>

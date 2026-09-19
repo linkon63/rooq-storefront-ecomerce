@@ -72,6 +72,13 @@ body {
   overflow-x: clip;
 }
 
+/* Always reserve the scrollbar's lane. Otherwise a page whose height briefly
+   changes (the cart repricing, a toast) makes the desktop scrollbar come and
+   go, and everything jumps sideways by its width. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Global site body font */
 body,
 .storefront-root {
