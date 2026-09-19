@@ -12,7 +12,7 @@ import { resolveShopContact, telHref, whatsappChatHref } from "@/lib/shop-contac
 const EMAIL_SUBJECT = "Organishi — Product enquiry";
 
 /** These pages pin their own action bar to the bottom on phones; sit above it. */
-const RAISED_ON = ["/product/", "/checkout"];
+const RAISED_ON = ["/product/", "/checkout", "/cart"];
 
 /**
  * Phones only: a contact button in the bottom-right corner that fans out into

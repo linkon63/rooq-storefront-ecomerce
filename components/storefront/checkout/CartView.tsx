@@ -39,6 +39,13 @@ export default function CartView() {
   // Only the ticked lines are being bought, so only they are priced.
   const totals = useMemo(() => cartTotals(selectedItems), [selectedItems]);
 
+  const proceedToCheckout = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("selectedCartSlugs", JSON.stringify(selectedKeys));
+    }
+    router.push("/checkout");
+  };
+
   const applyCoupon = (code: string) => {
     // Coupon validation lives on the backend; until it is wired up the two
     // seeded codes are honoured locally so the flow can be exercised.
@@ -89,7 +96,8 @@ export default function CartView() {
     <>
       <CheckoutSteps current="cart" />
 
-      <div className="mx-auto max-w-[1400px] px-4 py-12 md:px-8">
+      {/* Extra bottom padding on phones clears the docked checkout bar. */}
+      <div className="mx-auto max-w-[1400px] px-4 py-12 pb-32 md:px-8 md:pb-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px] lg:gap-16">
           {/* ── Items ─────────────────────────────────────────────────── */}
           <div>
@@ -252,23 +260,62 @@ export default function CartView() {
             discount={discount}
             onApplyCoupon={applyCoupon}
             action={
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    sessionStorage.setItem("selectedCartSlugs", JSON.stringify(selectedKeys));
-                  }
-                  router.push("/checkout");
-                }}
-                disabled={!selectedItems.length}
-                className="mt-6 w-full rounded-full bg-brand py-3.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-gray-300"
-              >
-                Proceed To Checkout
-              </button>
+              // Phones get this button in the bar docked to the bottom instead.
+              <div className="relative mt-6 hidden md:block">
+                {selectedItems.length > 0 && <PulseRings />}
+                <button
+                  type="button"
+                  onClick={proceedToCheckout}
+                  disabled={!selectedItems.length}
+                  className="relative w-full rounded-full bg-brand py-3.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-gray-300"
+                >
+                  Proceed To Checkout
+                </button>
+              </div>
             }
           />
         </div>
       </div>
+
+      {/* ── Docked checkout bar (phones) ─────────────────────────────────
+          Stays on screen however long the cart is. The price is before
+          delivery — the charge is settled at checkout. The safe-area inset
+          keeps the button clear of the iOS home bar. */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-gray-200 bg-white px-4 py-3 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] md:hidden">
+        <div className="min-w-0">
+          <p className="text-[11px] text-gray-500">
+            {totals.itemCount} item{totals.itemCount === 1 ? "" : "s"} · excl. delivery
+          </p>
+          <p className="font-display text-[18px] font-bold leading-tight text-[#1f2a17]">
+            {money(Math.max(0, totals.listSubtotal - totals.productDiscount - discount))}
+          </p>
+        </div>
+        <div className="relative flex-1">
+          {selectedItems.length > 0 && <PulseRings />}
+          <button
+            type="button"
+            onClick={proceedToCheckout}
+            disabled={!selectedItems.length}
+            className="relative h-12 w-full rounded-full bg-brand text-[15px] font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-gray-300"
+          >
+            Proceed To Checkout
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * The checkout nudge shared with Place Order: two soft rings pulse out from
+ * behind the button, staggered so the beat never pauses. Hidden for anyone
+ * who has asked for reduced motion.
+ */
+function PulseRings() {
+  return (
+    <>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-brand animate-cta-pulse motion-reduce:hidden" />
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-brand animate-cta-pulse [animation-delay:0.9s] motion-reduce:hidden" />
     </>
   );
 }
