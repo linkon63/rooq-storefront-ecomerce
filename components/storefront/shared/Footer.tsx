@@ -25,6 +25,7 @@ const QUICK_LINKS = [
   { label: "Shop", href: "/shop" },
   ...(BLOG_ENABLED ? [{ label: "Our Blog", href: "/blog" }] : []),
   { label: "Contact Us", href: "/contact" },
+  { label: "FAQ", href: "/faq" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/terms-and-conditions" },
 ];

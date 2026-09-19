@@ -49,6 +49,33 @@ export function whatsappHref(number: string): string {
   return `https://wa.me/${international}`;
 }
 
+/** Pre-filled WhatsApp text so a shopper only has to hit send to ask their question. */
+export const WHATSAPP_ENQUIRY_MESSAGE =
+  "আসসালামু আলাইকুম, আমি Organishi-এর পণ্য সম্পর্কে জানতে চাই।";
+
+/** WhatsApp chat link with the enquiry message already typed in. */
+export function whatsappChatHref(number: string): string {
+  return `${whatsappHref(number)}?text=${encodeURIComponent(WHATSAPP_ENQUIRY_MESSAGE)}`;
+}
+
+/**
+ * Messenger chat link for the shop's Facebook page, or null when the admin
+ * has not set one. m.me takes the page's username, or its numeric id for
+ * pages still on `profile.php?id=…`.
+ */
+export function messengerHref(facebookUrl?: string | null): string | null {
+  if (!facebookUrl?.trim()) return null;
+  try {
+    const url = new URL(facebookUrl.trim().replace(/^(?!https?:\/\/)/, "https://"));
+    const id = url.searchParams.get("id");
+    const slug = url.pathname.split("/").filter(Boolean)[0];
+    const handle = slug === "profile.php" ? id : slug;
+    return handle ? `https://m.me/${handle}` : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Delivery charges per zone — Admin → Settings → General. */
 export const FALLBACK_DELIVERY_RATES = { inside: 80, nearCity: 120, outside: 150 };
 

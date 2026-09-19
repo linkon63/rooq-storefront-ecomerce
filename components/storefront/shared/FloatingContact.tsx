@@ -7,10 +7,8 @@ import { FiX } from "react-icons/fi";
 import { HiOutlineChatBubbleLeftRight, HiOutlineEnvelope, HiOutlinePhone } from "react-icons/hi2";
 
 import type { ShopSettings } from "@/lib/shop-api";
-import { resolveShopContact, telHref, whatsappHref } from "@/lib/shop-contact";
+import { resolveShopContact, telHref, whatsappChatHref } from "@/lib/shop-contact";
 
-/** Pre-filled so a shopper only has to hit send to start the conversation. */
-const WHATSAPP_MESSAGE = "আসসালামু আলাইকুম, আমি Organishi-এর পণ্য সম্পর্কে জানতে চাই।";
 const EMAIL_SUBJECT = "Organishi — Product enquiry";
 
 /** These pages pin their own action bar to the bottom on phones; sit above it. */
@@ -52,7 +50,7 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
     },
     {
       label: "WhatsApp us",
-      href: `${whatsappHref(whatsappNumber)}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`,
+      href: whatsappChatHref(whatsappNumber),
       Icon: FaWhatsapp,
       className: "bg-[#25D366]",
       external: true,
