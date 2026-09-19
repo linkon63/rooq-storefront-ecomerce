@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
-import { FiX } from "react-icons/fi";
+import { FiArrowUp, FiX } from "react-icons/fi";
 import { HiOutlineChatBubbleLeftRight, HiOutlineEnvelope, HiOutlinePhone } from "react-icons/hi2";
 
 import type { ShopSettings } from "@/lib/shop-api";
@@ -13,16 +13,30 @@ const EMAIL_SUBJECT = "Organishi — Product enquiry";
 
 /** These pages pin their own action bar to the bottom on phones; sit above it. */
 const RAISED_ON = ["/product/", "/checkout", "/cart"];
+/** Checkout keeps its order bar on every screen size, so it lifts on desktop too. */
+const RAISED_ON_DESKTOP = ["/checkout"];
+
+/** How far down the page before "back to top" appears. */
+const SHOW_TOP_AFTER = 400;
 
 /**
- * Phones only: a contact button in the bottom-right corner that fans out into
+ * Bottom-right corner, every screen size: a contact button that fans out into
  * call, WhatsApp and e-mail. Numbers follow the footer CTA — the first phone
  * takes calls, the second WhatsApp (or the first again when there is only one).
+ * From md up a "back to top" arrow sits above it once the page is scrolled.
  */
 export default function FloatingContact({ settings }: { settings?: ShopSettings | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > SHOW_TOP_AFTER);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const { phones, email } = resolveShopContact(settings);
   const callNumber = phones[0].value;
@@ -40,6 +54,7 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
   }, [open]);
 
   const raised = RAISED_ON.some((path) => pathname.startsWith(path));
+  const raisedOnDesktop = RAISED_ON_DESKTOP.some((path) => pathname.startsWith(path));
 
   const actions = [
     {
@@ -64,16 +79,18 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
   ];
 
   return (
+    // The column itself ignores the pointer — only the buttons in it catch
+    // clicks — so the empty space above the closed menu never blocks the page.
     <div
       ref={rootRef}
-      className={`fixed right-4 z-40 flex flex-col items-center gap-3 md:hidden ${
+      className={`pointer-events-none fixed right-4 z-40 flex flex-col items-center gap-3 md:right-6 ${
         raised ? "bottom-24" : "bottom-5"
-      }`}
+      } ${raisedOnDesktop ? "md:bottom-36" : "md:bottom-6"}`}
     >
       <div
         id="floating-contact-actions"
         className={`flex flex-col items-center gap-3 transition-all duration-200 ${
-          open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
+          open ? "pointer-events-auto translate-y-0 opacity-100" : "translate-y-3 opacity-0"
         }`}
       >
         {actions.map(({ label, href, Icon, className, external }) => (
@@ -91,13 +108,26 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
         ))}
       </div>
 
+      {/* Back to top — PC only, once scrolled, and out of the way while the
+          contact menu is open. */}
+      {scrolled && !open && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+          className="pointer-events-auto hidden h-12 w-12 items-center justify-center rounded-full border border-brand/30 bg-white text-brand shadow-lg transition-colors hover:bg-brand hover:text-white md:flex"
+        >
+          <FiArrowUp size={22} />
+        </button>
+      )}
+
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label={open ? "Close contact options" : "Contact us"}
         aria-expanded={open}
         aria-controls="floating-contact-actions"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-xl"
+        className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-xl transition-colors hover:bg-brand-dark"
       >
         {open ? <FiX size={24} /> : <HiOutlineChatBubbleLeftRight size={26} />}
       </button>

@@ -24,6 +24,13 @@ export default function StoreToaster() {
   );
 
   return (
-    <Toaster position={isPhone ? "top-center" : "bottom-right"} richColors closeButton />
+    <Toaster
+      position={isPhone ? "top-center" : "bottom-right"}
+      // On larger screens the floating contact / back-to-top buttons own the
+      // bottom-right corner, so toasts stack just above them.
+      offset={isPhone ? undefined : { bottom: 150, right: 24 }}
+      richColors
+      closeButton
+    />
   );
 }
