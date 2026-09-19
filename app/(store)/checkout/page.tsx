@@ -73,6 +73,7 @@ export default function CheckoutPage() {
   const [paymentMethod] = useState<"online" | "cod">("cod");
   // Ticked by default; unticking it disables Place Order until it is ticked again.
   const [agreeToTerms, setAgreeToTerms] = useState(true);
+  const [showFieldErrors, setShowFieldErrors] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Zone and rates are shared with the cart, so whatever was picked there is
@@ -81,8 +82,19 @@ export default function CheckoutPage() {
     zone: deliveryZone,
     setZone: setDeliveryZone,
     rates: deliveryRates,
-    charge: shipping,
+    charge: zoneCharge,
   } = useDeliveryZone();
+
+  // Guests pick Inside / Outside Dhaka themselves, and must: until they do, no
+  // delivery charge is shown or added, and Place Order points them at the choice.
+  const [guestZoneChosen, setGuestZoneChosen] = useState(false);
+  const zoneUnset = !isAuthenticated && !guestZoneChosen;
+  const shipping = zoneUnset ? 0 : zoneCharge;
+  const shippingLabel = zoneUnset
+    ? "Select area"
+    : shipping > 0
+      ? formatCurrency(shipping)
+      : "Free";
 
   // Saved addresses (signed-in shoppers only). `null` selection means the
   // shopper chose "use a different address" and is typing a new one.
@@ -215,11 +227,12 @@ export default function CheckoutPage() {
   const selectedAddress = savedAddresses.find((entry) => entry.id === selectedAddressId) ?? null;
   const usingSavedAddress = Boolean(selectedAddress) && !enteringNewAddress;
 
-  // The delivery charge follows the address and nothing else — the shopper can
-  // see it but never picks it, so this is the only thing that sets the zone.
-  // The area counts too: Savar and Keraniganj are Dhaka district but not Dhaka
-  // city, so they are delivered at the Near Dhaka rate.
+  // Signed-in shoppers: the delivery charge follows the address and nothing
+  // else, so this is the only thing that sets their zone. The area counts too:
+  // Savar and Keraniganj are Dhaka district but not Dhaka city, so they are
+  // delivered at the Near Dhaka rate. Guests pick their zone in the form.
   useEffect(() => {
+    if (!isAuthenticated) return;
     const [currentDistrict, currentArea] = usingSavedAddress && selectedAddress
       ? [selectedAddress.state || "", selectedAddress.city || ""]
       : [address.state || "", address.city || ""];
@@ -227,7 +240,7 @@ export default function CheckoutPage() {
     if (currentDistrict || currentArea) {
       setDeliveryZone(resolveDeliveryZone(currentDistrict, currentArea));
     }
-  }, [usingSavedAddress, selectedAddress, enteringNewAddress, address.state, address.city, setDeliveryZone]);
+  }, [isAuthenticated, usingSavedAddress, selectedAddress, enteringNewAddress, address.state, address.city, setDeliveryZone]);
 
   const checkoutItems = selectedItems;
 
@@ -279,8 +292,32 @@ export default function CheckoutPage() {
     setSelectedAddressId(savedAddresses[0]?.id ?? null);
   }
 
-  async function handlePlaceOrder(e: FormEvent) {
+  async function handlePlaceOrder(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // The form is `noValidate`, so missing details are caught here: bring the
+    // first empty field to the middle of the screen — clear of the sticky
+    // header and the fixed order bar — put the cursor in it and name it.
+    const firstInvalid = e.currentTarget.querySelector<HTMLInputElement | HTMLSelectElement>(
+      "input:invalid, select:invalid, textarea:invalid",
+    );
+    if (firstInvalid) {
+      setShowFieldErrors(true);
+      firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+      firstInvalid.focus({ preventScroll: true });
+      const label =
+        firstInvalid.dataset.fieldLabel ??
+        firstInvalid
+        .closest("div")
+        ?.querySelector("label")
+        ?.textContent?.replace("*", "")
+        .trim();
+      const message = label ? `Please fill in your ${label}.` : "Please fill in your delivery details.";
+      setSubmitError(message);
+      toast.error(message);
+      return;
+    }
+
     if (blockingReason) {
       setSubmitError(blockingReason);
       toast.error(blockingReason);
@@ -302,7 +339,18 @@ export default function CheckoutPage() {
           postalCode: selectedAddress.postalCode,
           country: selectedAddress.country || COUNTRY,
         }
-      : { ...address, country: COUNTRY };
+      : isAuthenticated
+        ? { ...address, country: COUNTRY }
+        : // Guests give name, phone and address only. The order still needs a
+          // city and district, so they carry the area the guest picked —
+          // otherwise the API would file an Outside Dhaka order under "Dhaka".
+          {
+            ...address,
+            state: ZONE_LABELS[deliveryZone],
+            city: ZONE_LABELS[deliveryZone],
+            postalCode: "",
+            country: COUNTRY,
+          };
 
     try {
       const result = await placeOrder(payload, {
@@ -347,7 +395,9 @@ export default function CheckoutPage() {
 
   const activeFullAddressFormatted = usingSavedAddress && selectedAddress
     ? formatAddress(selectedAddress)
-    : [address.addressLine1, address.city, address.state, COUNTRY].filter(Boolean).join(", ");
+    : isAuthenticated
+      ? [address.addressLine1, address.city, address.state, COUNTRY].filter(Boolean).join(", ")
+      : [address.addressLine1, COUNTRY].filter(Boolean).join(", ");
 
   /**
    * The order's lines. On desktop the summary column lists just the selected
@@ -470,7 +520,7 @@ export default function CheckoutPage() {
             Delivery <span className="text-[11px] text-zinc-400">({ZONE_LABELS[deliveryZone]})</span>
           </span>
           <span className="shrink-0 font-medium text-[#222222]">
-            {shipping > 0 ? formatCurrency(shipping) : "Free"}
+            {shippingLabel}
           </span>
         </div>
       </div>
@@ -497,7 +547,17 @@ export default function CheckoutPage() {
     <main className="grow bg-white w-full min-h-[70vh]">
       {/* Bottom padding clears the fixed action bar. */}
       <div className="max-w-[1200px] mx-auto px-4 sm:px-5 py-8 sm:py-12 pb-48 sm:pb-40">
-        <form onSubmit={handlePlaceOrder}>
+        {/* Empty required fields turn red once Place Order has been tried. */}
+        <form
+          onSubmit={handlePlaceOrder}
+          onInput={() => submitError && setSubmitError(null)}
+          noValidate
+          className={
+            showFieldErrors
+              ? "[&_input:invalid]:outline-red-500 [&_input:invalid]:bg-red-50/40 [&_select:invalid]:outline-red-500 [&_select:invalid]:bg-red-50/40"
+              : undefined
+          }
+        >
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_384px] gap-8 lg:gap-16 lg:items-start">
             {/* ── Left Column: Billing Details ── */}
             <div>
@@ -538,7 +598,9 @@ export default function CheckoutPage() {
                         Active Delivery Address
                       </span>
                       <span className="rounded bg-brand/15 px-2 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-brand">
-                        {`${ZONE_LABELS[deliveryZone]} (৳${deliveryRates[deliveryZone]})`}
+                        {zoneUnset
+                          ? "Area not selected"
+                          : `${ZONE_LABELS[deliveryZone]} (৳${deliveryRates[deliveryZone]})`}
                       </span>
                     </div>
                     <p className="font-gotham text-xs font-semibold text-[#222222] mt-1 truncate">
@@ -656,7 +718,7 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
-                  {/* User Info */}
+                  {/* User Info — name and phone required, email optional for everyone. */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
@@ -696,7 +758,9 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* District, City, Area Row */}
+                  {/* District, City, Area Row — signed-in shoppers only; it feeds
+                      their address book and sets their delivery zone. */}
+                  {isAuthenticated && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">
@@ -757,6 +821,7 @@ export default function CheckoutPage() {
                       />
                     </div>
                   </div>
+                  )}
 
                   {/* Full Address */}
                   <div>
@@ -771,6 +836,54 @@ export default function CheckoutPage() {
                       className={INPUT_CLASS}
                     />
                   </div>
+
+                  {/* Delivery area — guests choose it themselves. The radios are
+                      real (visually hidden) inputs marked required, so Place
+                      Order's empty-field check lands here too. */}
+                  {!isAuthenticated && (
+                    <fieldset>
+                      <legend className="block font-gotham text-sm font-medium text-[#222222] mb-2">
+                        Delivery Area *
+                      </legend>
+                      <div className="grid grid-cols-2 gap-3">
+                        {(["inside", "outside"] as const).map((zone) => {
+                          const active = guestZoneChosen && deliveryZone === zone;
+                          return (
+                            <label
+                              key={zone}
+                              className={`relative flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border-2 px-3 py-3 text-center transition-colors ${
+                                active
+                                  ? "border-brand bg-brand-mist"
+                                  : showFieldErrors && !guestZoneChosen
+                                    ? "border-red-400 bg-red-50/40"
+                                    : "border-zinc-200 bg-white hover:border-zinc-300"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="guestDeliveryZone"
+                                value={zone}
+                                required
+                                data-field-label="Delivery Area (Inside or Outside Dhaka)"
+                                checked={active}
+                                onChange={() => {
+                                  setDeliveryZone(zone);
+                                  setGuestZoneChosen(true);
+                                }}
+                                className="sr-only"
+                              />
+                              <span className={`font-gotham text-sm font-semibold ${active ? "text-brand" : "text-[#222222]"}`}>
+                                {ZONE_LABELS[zone]}
+                              </span>
+                              <span className="font-gotham text-xs text-zinc-500">
+                                {deliveryRates[zone] > 0 ? formatCurrency(deliveryRates[zone]) : "Free"}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  )}
 
                   {/* Country — Organishi delivers inside Bangladesh only */}
                   <div>
@@ -820,11 +933,15 @@ export default function CheckoutPage() {
                       <LuLock className="w-3 h-3 text-zinc-400" aria-hidden />
                     </span>
                     <span className="block font-gotham text-[11px] text-zinc-500">
-                      Set by your delivery address — {zoneSourceLabel}
+                      {isAuthenticated
+                        ? `Set by your delivery address — ${zoneSourceLabel}`
+                        : zoneUnset
+                          ? "Choose Inside or Outside Dhaka in your delivery details"
+                          : "Chosen in your delivery details"}
                     </span>
                   </span>
                   <span className="shrink-0 font-gotham text-sm font-semibold text-[#222222]">
-                    {shipping > 0 ? formatCurrency(shipping) : "Free"}
+                    {shippingLabel}
                   </span>
                 </div>
               </div>
@@ -852,7 +969,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-center">
                   <span className="font-bembo text-base text-[#555555]">Delivery Charge</span>
                   <span className="font-gotham text-base font-medium text-[#222222]">
-                    {shipping > 0 ? formatCurrency(shipping) : "Free"}
+                    {shippingLabel}
                   </span>
                 </div>
                 {COUPONS_ENABLED && (
@@ -1019,16 +1136,27 @@ export default function CheckoutPage() {
                     {formatCurrency(total)}
                   </p>
                 </div>
-                <button
-                  type="submit"
-                  disabled={submitting || !agreeToTerms}
-                  className={`flex-1 sm:flex-none sm:min-w-[280px] sm:ml-auto py-3.5 px-8 bg-brand text-white font-gotham text-sm font-bold uppercase tracking-wider rounded-full hover:bg-brand-dark transition-colors disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-                    submitting ? "disabled:opacity-50" : "disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300"
-                  }`}
-                >
-                  {submitting && <LuLoader className="w-4 h-4 animate-spin" />}
-                  {submitting ? "PLACING ORDER..." : "PLACE ORDER"}
-                </button>
+                {/* A soft ring pulses out of Place Order while it can be pressed,
+                    nudging the shopper to finish. Off while disabled or sending,
+                    and for anyone who has asked for reduced motion. */}
+                <div className="relative flex-1 sm:flex-none sm:min-w-[280px] sm:ml-auto">
+                  {agreeToTerms && !submitting && (
+                    <>
+                      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-brand animate-cta-pulse motion-reduce:hidden" />
+                      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-brand animate-cta-pulse [animation-delay:0.9s] motion-reduce:hidden" />
+                    </>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={submitting || !agreeToTerms}
+                    className={`relative w-full py-3.5 px-8 bg-brand text-white font-gotham text-sm font-bold uppercase tracking-wider rounded-full hover:bg-brand-dark transition-colors disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2 cursor-pointer shadow-md ${
+                      submitting ? "disabled:opacity-50" : "disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300"
+                    }`}
+                  >
+                    {submitting && <LuLoader className="w-4 h-4 animate-spin" />}
+                    {submitting ? "PLACING ORDER..." : "PLACE ORDER"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
