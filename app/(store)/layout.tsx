@@ -1,9 +1,9 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { Toaster } from "sonner";
 
 import Header from "@/components/storefront/shared/Header";
 import Footer from "@/components/storefront/shared/Footer";
 import FloatingContact from "@/components/storefront/shared/FloatingContact";
+import StoreToaster from "@/components/storefront/shared/StoreToaster";
 import { AuthProvider } from "../_providers/auth-provider";
 import { CartProvider } from "../_providers/cart-provider";
 import { WishlistProvider } from "../_providers/wishlist-provider";
@@ -73,7 +73,7 @@ export default async function StoreLayout({
                 </div>
                 <FloatingContact settings={settings} />
                 <AuthModal />
-                <Toaster position="bottom-right" richColors closeButton />
+                <StoreToaster />
               </CartProvider>
             </CompareProvider>
           </WishlistProvider>
