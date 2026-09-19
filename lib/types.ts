@@ -96,6 +96,8 @@ export interface CartContextValue {
   removeItem: (key: string) => void;
   updateQuantity: (key: string, quantity: number) => void;
   clearCart: () => void;
+  /** Re-read a signed-in cart from the server (no-op for guests). */
+  refreshCart: () => Promise<void>;
   toggleSelectItem: (key: string) => void;
   selectAllItems: (select: boolean) => void;
   setSelectedKeys: (keys: string[]) => void;

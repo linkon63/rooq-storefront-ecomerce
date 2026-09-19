@@ -295,6 +295,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [isAuthenticated, items, removeItem],
   );
 
+  /**
+   * Re-read a signed-in shopper's cart from the server. Placing an order
+   * removes the ordered lines server-side, so this — not a DELETE per line,
+   * which would 404 on lines already gone — is how the cart catches up.
+   */
+  const refreshCart = useCallback(async () => {
+    if (isAuthenticated) await fetchServerCart();
+  }, [isAuthenticated, fetchServerCart]);
+
   const clearCart = useCallback(() => {
     setItems([]);
     if (!isAuthenticated) {
@@ -388,6 +397,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
+        refreshCart,
         toggleSelectItem,
         selectAllItems,
         setSelectedKeys,

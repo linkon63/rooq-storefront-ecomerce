@@ -65,10 +65,12 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { placeOrder, submitting } = usePlaceOrder();
 
+  // Signed-in shoppers start with the name, email and phone from their account.
   const [address, setAddress] = useState<AddressForm>(() => ({
     ...emptyAddress,
     email: user?.email || "",
     fullName: user?.name || "",
+    phone: user?.phone || "",
   }));
   const [paymentMethod] = useState<"online" | "cod">("cod");
   // Ticked by default; unticking it disables Place Order until it is ticked again.
@@ -181,6 +183,8 @@ export default function CheckoutPage() {
         ...prev,
         email: user.email || prev.email,
         fullName: user.name || prev.fullName,
+        // Only fills an empty field — never overwrites a number being typed.
+        phone: prev.phone || user.phone || "",
       }));
     }
   }, [user]);
@@ -284,6 +288,7 @@ export default function CheckoutPage() {
       ...emptyAddress,
       email: user?.email || "",
       fullName: user?.name || "",
+      phone: user?.phone || "",
     });
   }
 
@@ -400,15 +405,15 @@ export default function CheckoutPage() {
       : [address.addressLine1, COUNTRY].filter(Boolean).join(", ");
 
   /**
-   * The order's lines. On desktop the summary column lists just the selected
-   * lines, as before. Below lg the list sits at the top of the page and shows
-   * the whole cart, each line with a checkbox: everything arrives ticked and
-   * the shopper unticks what they want to leave out. The last ticked line
-   * cannot be unticked — checkout always needs something to bill.
+   * The order's lines: the whole cart, each line with a checkbox, and only the
+   * ticked lines are billed. Below lg the list sits at the top of the page and
+   * everything arrives ticked; on desktop it sits in the summary column and
+   * keeps what the cart page or Buy Now selected, so the shopper ticks extra
+   * cart items in. The last ticked line cannot be unticked — checkout always
+   * needs something to bill.
    */
-  const renderItemsList = (selectable: boolean) => {
-    const lines = selectable ? items : checkoutItems;
-    if (lines.length === 0) return null;
+  const renderItemsList = () => {
+    if (items.length === 0) return null;
 
     return (
       <div className="mb-6 border border-zinc-200 rounded-lg p-3 bg-stone-50/50 space-y-3 max-h-80 overflow-y-auto">
@@ -416,26 +421,24 @@ export default function CheckoutPage() {
           <p className="font-gotham text-xs uppercase tracking-wider text-[#999999] font-semibold">
             Selected Items ({checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})
           </p>
-          {selectable && items.length > 1 && (
-            <p className="font-gotham text-[11px] text-zinc-500">Untick to leave out</p>
+          {items.length > 1 && (
+            <p className="font-gotham text-[11px] text-zinc-500">Tick the items to order</p>
           )}
         </div>
-        {lines.map((item) => {
+        {items.map((item) => {
           const key = getItemKey(item);
           const checked = selectedKeys.includes(key);
           const locked = checked && selectedKeys.length === 1;
 
           const row = (
             <>
-              {selectable && (
-                <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
-                    checked ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white"
-                  } ${locked ? "opacity-60" : ""}`}
-                >
-                  {checked && <LuCheck className="h-3.5 w-3.5" />}
-                </span>
-              )}
+              <span
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 ${
+                  checked ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white"
+                } ${locked ? "opacity-60" : ""}`}
+              >
+                {checked && <LuCheck className="h-3.5 w-3.5" />}
+              </span>
               <span className="relative w-12 h-12 shrink-0 rounded bg-white overflow-hidden border border-zinc-200">
                 {item.image ? (
                   <Image src={item.image} alt={item.name} fill sizes="48px" className="object-cover" />
@@ -474,7 +477,7 @@ export default function CheckoutPage() {
             </>
           );
 
-          return selectable ? (
+          return (
             <button
               key={key}
               type="button"
@@ -488,10 +491,6 @@ export default function CheckoutPage() {
             >
               {row}
             </button>
-          ) : (
-            <div key={key} className="flex items-center gap-3 py-1.5 border-b border-zinc-100 last:border-b-0">
-              {row}
-            </div>
           );
         })}
       </div>
@@ -571,7 +570,7 @@ export default function CheckoutPage() {
                     Your Order
                   </h2>
                 </div>
-                {renderItemsList(true)}
+                {renderItemsList()}
                 {compactSummary}
               </div>
 
@@ -912,9 +911,9 @@ export default function CheckoutPage() {
                 Summary
               </h2>
 
-              {/* Desktop keeps the item list in the summary; phones and tablets
+              {/* Desktop shows the item list in the summary; phones and tablets
                   see it at the top of the page instead. */}
-              <div className="hidden lg:block">{renderItemsList(false)}</div>
+              <div className="hidden lg:block">{renderItemsList()}</div>
 
               {/* Delivery Area — read-only. The rate follows the district chosen
                   above, so there is nothing here for the shopper to change. */}

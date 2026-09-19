@@ -10,7 +10,7 @@ import type { AddressForm, DeliveryZone, OrderResult } from "@/lib/types";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
 export function usePlaceOrder() {
-  const { items, removeItem, clearCart } = useCart();
+  const { items, removeItem, clearCart, refreshCart } = useCart();
   const [submitting, setSubmitting] = useState(false);
 
   const placeOrder = async (
@@ -172,7 +172,12 @@ export function usePlaceOrder() {
         deliveryZone,
       };
 
-      if (targetItems.length >= items.length) {
+      if (token) {
+        // The API has already taken the ordered lines out of the server cart;
+        // deleting them again from here would 404 ("Cart item … not found")
+        // and leave them showing, so the cart is simply re-read instead.
+        await refreshCart();
+      } else if (targetItems.length >= items.length) {
         clearCart();
       } else {
         for (const i of targetItems) {
