@@ -356,9 +356,9 @@ export default function CheckoutPage() {
               </div>
 
               {/* ── Active Delivery Address Preview & View Option ── */}
-              <div className="mb-6 rounded-xl border border-[#4a9e2f]/30 bg-[#f4f7ee]/70 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs font-gotham">
+              <div className="mb-6 rounded-xl border border-brand/30 bg-brand-mist/70 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs font-gotham">
                 <div className="flex items-start gap-3 min-w-0 flex-1">
-                  <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/15 flex items-center justify-center text-[#4a9e2f] shrink-0 mt-0.5">
+                  <div className="w-9 h-9 rounded-full bg-brand/15 flex items-center justify-center text-brand shrink-0 mt-0.5">
                     <LuMapPin className="w-5 h-5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -366,7 +366,7 @@ export default function CheckoutPage() {
                       <span className="font-gotham text-xs font-bold uppercase tracking-wider text-stone-600">
                         Active Delivery Address
                       </span>
-                      <span className="rounded bg-[#4a9e2f]/15 px-2 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-[#4a9e2f]">
+                      <span className="rounded bg-brand/15 px-2 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-brand">
                         {`${ZONE_LABELS[deliveryZone]} (৳${deliveryRates[deliveryZone]})`}
                       </span>
                     </div>
@@ -381,7 +381,7 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddressModal(true)}
-                  className="inline-flex cursor-pointer items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-[#4a9e2f] text-[#4a9e2f] font-gotham text-xs font-bold hover:bg-[#4a9e2f] hover:text-white transition-all shadow-xs shrink-0"
+                  className="inline-flex cursor-pointer items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white border border-brand text-brand font-gotham text-xs font-bold hover:bg-brand hover:text-white transition-all shadow-xs shrink-0"
                 >
                   <LuEye className="w-4 h-4" />
                   View Address Details
@@ -399,7 +399,7 @@ export default function CheckoutPage() {
                       key={entry.id}
                       className={`flex cursor-pointer items-start gap-3 rounded-md border p-4 transition-colors ${
                         selectedAddressId === entry.id
-                          ? "border-[#4a9e2f] bg-[#f4f7ee]/40"
+                          ? "border-brand bg-brand-mist/40"
                           : "border-zinc-200 hover:border-zinc-300"
                       }`}
                     >
@@ -413,11 +413,11 @@ export default function CheckoutPage() {
                       />
                       <span
                         className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                          selectedAddressId === entry.id ? "border-[#4a9e2f]" : "border-zinc-300"
+                          selectedAddressId === entry.id ? "border-brand" : "border-zinc-300"
                         }`}
                       >
                         {selectedAddressId === entry.id && (
-                          <span className="h-2 w-2 rounded-full bg-[#4a9e2f]" />
+                          <span className="h-2 w-2 rounded-full bg-brand" />
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
@@ -426,7 +426,7 @@ export default function CheckoutPage() {
                             {entry.fullName}
                           </span>
                           {entry.isDefault && (
-                            <span className="rounded bg-[#4a9e2f]/10 px-1.5 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-[#4a9e2f]">
+                            <span className="rounded bg-brand/10 px-1.5 py-0.5 font-gotham text-[10px] font-bold uppercase tracking-wide text-brand">
                               Default
                             </span>
                           )}
@@ -447,7 +447,7 @@ export default function CheckoutPage() {
                           e.stopPropagation();
                           handleOpenEditModal(entry);
                         }}
-                        className="p-2 rounded-lg text-stone-400 hover:text-[#4a9e2f] hover:bg-[#4a9e2f]/10 transition-colors cursor-pointer shrink-0"
+                        className="p-2 rounded-lg text-stone-400 hover:text-brand hover:bg-brand/10 transition-colors cursor-pointer shrink-0"
                         title="Edit Address"
                         aria-label="Edit Address"
                       >
@@ -459,7 +459,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={startNewAddress}
-                    className="inline-flex cursor-pointer items-center gap-2 font-gotham text-xs font-bold uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                    className="inline-flex cursor-pointer items-center gap-2 font-gotham text-xs font-bold uppercase tracking-wider text-brand hover:underline"
                   >
                     <LuPlus className="h-4 w-4" />
                     Use a different address
@@ -478,7 +478,7 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={useSavedAddresses}
-                        className="cursor-pointer font-gotham text-xs font-bold uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                        className="cursor-pointer font-gotham text-xs font-bold uppercase tracking-wider text-brand hover:underline"
                       >
                         Use a saved address
                       </button>
@@ -639,7 +639,7 @@ export default function CheckoutPage() {
                         ) : (
                           <div className="flex h-full items-center justify-center text-[9px] text-stone-400">No img</div>
                         )}
-                        <span className="absolute top-0 right-0 bg-[#4a9e2f] text-white text-[9px] font-bold w-4 h-4 rounded-bl flex items-center justify-center">
+                        <span className="absolute top-0 right-0 bg-brand text-white text-[9px] font-bold w-4 h-4 rounded-bl flex items-center justify-center">
                           {item.quantity}
                         </span>
                       </div>
@@ -739,7 +739,7 @@ export default function CheckoutPage() {
                   </span>
                 </div>
                 {productDiscount > 0 && (
-                  <p className="rounded-md bg-[#f4f7ee] px-3 py-2.5 font-gotham text-sm font-semibold text-[#2f7d1f]">
+                  <p className="rounded-md bg-brand-mist px-3 py-2.5 font-gotham text-sm font-semibold text-[#2f7d1f]">
                     You save {formatCurrency(productDiscount)}
                     {savedPercent > 0 && ` (${savedPercent}%)`} on this order
                   </p>
@@ -758,9 +758,9 @@ export default function CheckoutPage() {
 
                 <div className="space-y-3">
                   {/* Cash on Delivery */}
-                  <label className="flex items-start gap-3 p-4 border rounded-md cursor-pointer transition-colors border-[#4a9e2f] bg-[#f4f7ee]/30">
+                  <label className="flex items-start gap-3 p-4 border rounded-md cursor-pointer transition-colors border-brand bg-brand-mist/30">
                     <div className="mt-0.5 shrink-0">
-                      <div className="w-5 h-5 rounded-full bg-[#4a9e2f] flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
                         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
@@ -797,7 +797,7 @@ export default function CheckoutPage() {
                         key={policy.id}
                         type="button"
                         onClick={() => setOpenPolicy(policy)}
-                        className="cursor-pointer font-gotham text-sm font-semibold text-[#4a9e2f] underline underline-offset-2 hover:text-[#3d8626]"
+                        className="cursor-pointer font-gotham text-sm font-semibold text-brand underline underline-offset-2 hover:text-brand-dark"
                       >
                         Read {policy.title}
                       </button>
@@ -848,7 +848,7 @@ export default function CheckoutPage() {
                   <span
                     className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       agreeToTerms
-                        ? "border-[#4a9e2f] bg-[#4a9e2f]"
+                        ? "border-brand bg-brand"
                         : submitError
                           ? "border-red-500 bg-white"
                           : "border-zinc-400 bg-white"
@@ -862,7 +862,7 @@ export default function CheckoutPage() {
                   </span>
                   <span className="font-gotham text-xs sm:text-sm text-[#222222]">
                     I have read and agree to the terms, return and refund policies
-                    <span className="text-[#4a9e2f]"> *</span>
+                    <span className="text-brand"> *</span>
                   </span>
                 </label>
 
@@ -888,7 +888,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 sm:flex-none sm:min-w-[280px] sm:ml-auto py-3.5 px-8 bg-[#4a9e2f] text-white font-gotham text-sm font-bold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="flex-1 sm:flex-none sm:min-w-[280px] sm:ml-auto py-3.5 px-8 bg-brand text-white font-gotham text-sm font-bold uppercase tracking-wider rounded-full hover:bg-brand-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
                   {submitting && <LuLoader className="w-4 h-4 animate-spin" />}
                   {submitting ? "PLACING ORDER..." : "PLACE ORDER"}
@@ -906,9 +906,9 @@ export default function CheckoutPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn font-gotham">
           <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden border border-stone-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-stone-150 px-6 py-4 bg-[#f4f7ee]">
+            <div className="flex items-center justify-between border-b border-stone-150 px-6 py-4 bg-brand-mist">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#4a9e2f]/15 flex items-center justify-center text-[#4a9e2f]">
+                <div className="w-8 h-8 rounded-full bg-brand/15 flex items-center justify-center text-brand">
                   <LuMapPin className="w-4 h-4" />
                 </div>
                 <div>
@@ -936,7 +936,7 @@ export default function CheckoutPage() {
                 <span className="font-gotham text-xs font-semibold text-stone-600">
                   Delivery Zone & Rate:
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] font-gotham text-xs font-bold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand/10 text-brand font-gotham text-xs font-bold">
                   <LuCircleCheck className="w-3.5 h-3.5" />
                   {`${ZONE_LABELS[deliveryZone]} (৳${deliveryRates[deliveryZone]})`}
                 </span>
@@ -991,7 +991,7 @@ export default function CheckoutPage() {
                     setShowAddressModal(false);
                     handleOpenEditModal(selectedAddress);
                   }}
-                  className="px-3.5 py-2 rounded-lg bg-white border border-[#4a9e2f] text-[#4a9e2f] font-gotham text-xs font-bold hover:bg-[#4a9e2f] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-lg bg-white border border-brand text-brand font-gotham text-xs font-bold hover:bg-brand hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <LuPencil className="w-3.5 h-3.5" />
                   Edit This Address
@@ -1000,7 +1000,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setShowAddressModal(false)}
-                className="px-4 py-2 rounded-lg bg-[#4a9e2f] text-white font-gotham text-xs font-bold hover:bg-[#3d8626] transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-brand text-white font-gotham text-xs font-bold hover:bg-brand-dark transition-colors cursor-pointer"
               >
                 Close View
               </button>
@@ -1014,9 +1014,9 @@ export default function CheckoutPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn font-gotham">
           <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden border border-stone-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-stone-150 px-6 py-4 bg-[#f4f7ee]">
+            <div className="flex items-center justify-between border-b border-stone-150 px-6 py-4 bg-brand-mist">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#4a9e2f]/15 flex items-center justify-center text-[#4a9e2f]">
+                <div className="w-8 h-8 rounded-full bg-brand/15 flex items-center justify-center text-brand">
                   <LuPencil className="w-4 h-4" />
                 </div>
                 <div>
@@ -1156,7 +1156,7 @@ export default function CheckoutPage() {
                     type="checkbox"
                     checked={editIsDefault}
                     onChange={(e) => setEditIsDefault(e.target.checked)}
-                    className="h-4 w-4 rounded border-stone-300 text-[#4a9e2f] focus:ring-[#4a9e2f]"
+                    className="h-4 w-4 rounded border-stone-300 text-brand focus:ring-brand"
                   />
                   <span className="text-xs text-stone-700 font-medium">
                     Set as default delivery address
@@ -1176,7 +1176,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={editSaving}
-                  className="px-5 py-2 rounded-lg bg-[#4a9e2f] text-white font-gotham text-xs font-bold hover:bg-[#3d8626] transition-colors disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-5 py-2 rounded-lg bg-brand text-white font-gotham text-xs font-bold hover:bg-brand-dark transition-colors disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   {editSaving && <LuLoader className="w-3.5 h-3.5 animate-spin" />}
                   {editSaving ? "Saving Changes..." : "Save Address Changes"}

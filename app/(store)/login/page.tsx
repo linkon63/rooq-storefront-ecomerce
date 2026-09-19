@@ -144,15 +144,15 @@ export default function LoginPage() {
   return (
     // 128px is the sticky header above (40px top bar + 88px main bar): subtracting
     // it is what makes the panel fill the screen the visitor can actually see.
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#f4f7ee] px-4 py-8 sm:px-6 sm:py-10 md:min-h-[calc(100vh-128px)]">
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-brand-mist px-4 py-8 sm:px-6 sm:py-10 md:min-h-[calc(100vh-128px)]">
       {/* Soft brand glows so the full-height background never reads as flat paper. */}
-      <div aria-hidden className="pointer-events-none absolute -left-24 -top-32 h-80 w-80 rounded-full bg-[#4a9e2f]/15 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-[#4a9e2f]/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -left-24 -top-32 h-80 w-80 rounded-full bg-brand/15 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-brand/10 blur-3xl" />
 
       {/* The card tracks the viewport height so the page fills the screen on a
           desktop (128px header + 80px of page padding removed), and falls back
           to its natural height wherever the form needs more room. */}
-      <div className="relative grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-[#4a9e2f]/15 bg-white shadow-[0_30px_80px_-30px_rgba(31,42,23,0.45)] md:min-h-[calc(100vh-208px)] md:grid-cols-2">
+      <div className="relative grid w-full max-w-5xl grid-cols-1 overflow-hidden rounded-3xl border border-brand/15 bg-white shadow-[0_30px_80px_-30px_rgba(31,42,23,0.45)] md:min-h-[calc(100vh-208px)] md:grid-cols-2">
 
         {/* Left Form Section */}
         <div className="flex flex-col justify-center px-6 py-9 sm:px-10 sm:py-12">
@@ -309,7 +309,7 @@ export default function LoginPage() {
                   id="page-remember-login"
                   checked={rememberLogin}
                   onChange={(e) => setRememberLogin(e.target.checked)}
-                  className="h-4 w-4 cursor-pointer rounded accent-[#4a9e2f]"
+                  className="h-4 w-4 cursor-pointer rounded accent-brand"
                 />
                 <label htmlFor="page-remember-login" className="font-inter cursor-pointer text-xs text-stone-600">
                   Remember login
@@ -320,7 +320,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#4a9e2f] py-3.5 font-gotham text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#4a9e2f]/25 transition-all hover:bg-[#3d8626] hover:shadow-xl hover:shadow-[#4a9e2f]/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand py-3.5 font-gotham text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-dark hover:shadow-xl hover:shadow-brand/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
               {submitting && <LuLoader className="h-4 w-4 animate-spin" />}
               {submitting
@@ -334,7 +334,7 @@ export default function LoginPage() {
           </form>
 
           <p className="font-inter mt-6 text-center text-xs text-stone-400">
-            <Link href="/" className="transition-colors hover:text-[#4a9e2f]">
+            <Link href="/" className="transition-colors hover:text-brand">
               ← Back to shop
             </Link>
           </p>

@@ -80,7 +80,7 @@ export default function OrderSummary({
                 Offers already applied to the items above.
               </span>
             </dt>
-            <dd className="shrink-0 font-display font-semibold text-[#4a9e2f]">
+            <dd className="shrink-0 font-display font-semibold text-brand">
               −{money(productDiscount)}
             </dd>
           </div>
@@ -92,12 +92,12 @@ export default function OrderSummary({
             <dt className="font-semibold text-[#1f2a17]">Coupon Discount</dt>
             <dd>
               {discount > 0 ? (
-                <span className="font-display font-semibold text-[#4a9e2f]">−{money(discount)}</span>
+                <span className="font-display font-semibold text-brand">−{money(discount)}</span>
               ) : (
                 <button
                   type="button"
                   onClick={() => setCouponOpen((open) => !open)}
-                  className="text-sm font-medium text-[#1f2a17] underline hover:text-[#4a9e2f]"
+                  className="text-sm font-medium text-[#1f2a17] underline hover:text-brand"
                 >
                   Apply Coupon
                 </button>
@@ -118,7 +118,7 @@ export default function OrderSummary({
                 onChange={(event) => setCode(event.target.value)}
                 placeholder="Coupon code"
                 aria-label="Coupon code"
-                className="h-10 flex-1 border border-gray-200 px-3 text-sm outline-none focus:border-[#4a9e2f]"
+                className="h-10 flex-1 border border-gray-200 px-3 text-sm outline-none focus:border-brand"
               />
               <button
                 type="submit"
@@ -150,7 +150,7 @@ export default function OrderSummary({
       </dl>
 
       {totalSaving > 0 && (
-        <p className="flex items-center gap-2 rounded-md bg-[#f4f7ee] px-3 py-2.5 text-sm font-semibold text-[#2f7d1f]">
+        <p className="flex items-center gap-2 rounded-md bg-brand-mist px-3 py-2.5 text-sm font-semibold text-[#2f7d1f]">
           <FiTag className="shrink-0" size={15} aria-hidden />
           You save {money(totalSaving)}
           {savedPercent > 0 && ` (${savedPercent}%)`} on this order

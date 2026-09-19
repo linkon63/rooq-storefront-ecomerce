@@ -65,7 +65,7 @@ export default function MostLovedFoods({ products }: MostLovedFoodsProps) {
       <div className="mt-8 flex justify-center">
         <div className="relative h-[3px] w-[130px] overflow-hidden rounded-full bg-gray-200">
           <span
-            className="absolute inset-y-0 rounded-full bg-[#4a9e2f] transition-[left] duration-300"
+            className="absolute inset-y-0 rounded-full bg-brand transition-[left] duration-300"
             style={{
               width: `${span * 100}%`,
               left: `${progress * (100 - span * 100)}%`,
@@ -83,7 +83,7 @@ function CarouselArrow({ side, onClick }: { side: "left" | "right"; onClick: () 
       type="button"
       onClick={onClick}
       aria-label={side === "left" ? "Previous products" : "Next products"}
-      className={`absolute top-[38%] z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#1f2a17] shadow-md transition-colors hover:bg-[#4a9e2f] hover:text-white lg:flex ${
+      className={`absolute top-[38%] z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#1f2a17] shadow-md transition-colors hover:bg-brand hover:text-white lg:flex ${
         side === "left" ? "-left-4" : "-right-4"
       }`}
     >

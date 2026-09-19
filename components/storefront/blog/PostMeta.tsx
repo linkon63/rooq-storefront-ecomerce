@@ -11,7 +11,7 @@ interface PostMetaProps {
 
 export default function PostMeta({ post, tone = "default", className = "" }: PostMetaProps) {
   const text = tone === "light" ? "text-white/80" : "text-gray-500";
-  const icon = tone === "light" ? "text-[#8fd06b]" : "text-[#4a9e2f]";
+  const icon = tone === "light" ? "text-[#8fd06b]" : "text-brand";
 
   return (
     <p className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] ${text} ${className}`}>

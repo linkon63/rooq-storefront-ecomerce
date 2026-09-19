@@ -243,7 +243,7 @@ export default function ShopBrowser({
                 key={chip.key}
                 type="button"
                 onClick={chip.clear}
-                className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-[#4a9e2f] hover:text-[#4a9e2f]"
+                className="flex items-center gap-2 border border-gray-200 px-3 py-1.5 text-xs text-gray-600 transition-colors hover:border-brand hover:text-brand"
               >
                 <FiX size={12} />
                 {chip.label}
@@ -253,7 +253,7 @@ export default function ShopBrowser({
               <button
                 type="button"
                 onClick={clearAll}
-                className="text-xs text-gray-500 underline hover:text-[#4a9e2f]"
+                className="text-xs text-gray-500 underline hover:text-brand"
               >
                 Clear Filters
               </button>
@@ -270,8 +270,8 @@ export default function ShopBrowser({
                     onClick={() => setPageSize(size)}
                     className={
                       pageSize === size
-                        ? "font-semibold text-[#4a9e2f]"
-                        : "hover:text-[#4a9e2f]"
+                        ? "font-semibold text-brand"
+                        : "hover:text-brand"
                     }
                   >
                     {size}
@@ -288,7 +288,7 @@ export default function ShopBrowser({
                 aria-label="Grid view"
                 aria-pressed={layout === "grid"}
                 className={`flex h-8 w-8 items-center justify-center ${
-                  layout === "grid" ? "bg-[#1f2a17] text-white" : "text-gray-500 hover:text-[#4a9e2f]"
+                  layout === "grid" ? "bg-[#1f2a17] text-white" : "text-gray-500 hover:text-brand"
                 }`}
               >
                 <FiGrid size={15} />
@@ -299,7 +299,7 @@ export default function ShopBrowser({
                 aria-label="List view"
                 aria-pressed={layout === "list"}
                 className={`flex h-8 w-8 items-center justify-center ${
-                  layout === "list" ? "bg-[#1f2a17] text-white" : "text-gray-500 hover:text-[#4a9e2f]"
+                  layout === "list" ? "bg-[#1f2a17] text-white" : "text-gray-500 hover:text-brand"
                 }`}
               >
                 <FiList size={15} />
@@ -345,7 +345,7 @@ export default function ShopBrowser({
             <button
               type="button"
               onClick={clearAll}
-              className="mt-4 bg-[#4a9e2f] px-6 py-2.5 text-sm text-white transition-colors hover:bg-[#3d8626]"
+              className="mt-4 bg-brand px-6 py-2.5 text-sm text-white transition-colors hover:bg-brand-dark"
             >
               Clear Filters
             </button>
@@ -357,7 +357,7 @@ export default function ShopBrowser({
             <button
               type="button"
               onClick={() => setPageSize((size) => size + 12)}
-              className="border border-[#4a9e2f] px-8 py-2.5 text-sm text-[#4a9e2f] transition-colors hover:bg-[#4a9e2f] hover:text-white"
+              className="border border-brand px-8 py-2.5 text-sm text-brand transition-colors hover:bg-brand hover:text-white"
             >
               Load more
             </button>
@@ -385,7 +385,7 @@ function FacetToggle({
       className={`flex items-center gap-1.5 pb-1 text-sm transition-colors ${
         open
           ? "border-b-2 border-[#1f2a17] font-semibold text-[#1f2a17]"
-          : "text-gray-600 hover:text-[#4a9e2f]"
+          : "text-gray-600 hover:text-brand"
       }`}
     >
       {label}

@@ -108,12 +108,12 @@ export default function SearchField({
             aria-controls="search-suggestions"
             role="combobox"
             autoComplete="off"
-            className="h-11 w-full rounded-full border border-gray-200 bg-white pl-5 pr-14 text-sm text-gray-700 outline-none transition-colors placeholder:text-gray-400 focus:border-[#4a9e2f]"
+            className="h-11 w-full rounded-full border border-gray-200 bg-white pl-5 pr-14 text-sm text-gray-700 outline-none transition-colors placeholder:text-gray-400 focus:border-brand"
           />
           <button
             type="submit"
             aria-label="Search"
-            className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#4a9e2f] text-white transition-colors hover:bg-[#3d8626]"
+            className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-dark"
           >
             <FiSearch size={16} />
           </button>
@@ -162,7 +162,7 @@ export default function SearchField({
                       onMouseEnter={() => setHighlighted(index)}
                       onClick={() => goToProduct(product)}
                       className={`flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
-                        index === highlighted ? "bg-[#f4f7ee]" : "hover:bg-[#f4f7ee]"
+                        index === highlighted ? "bg-brand-mist" : "hover:bg-brand-mist"
                       }`}
                     >
                       <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded bg-gray-50">
@@ -202,7 +202,7 @@ export default function SearchField({
               <button
                 type="button"
                 onClick={goToResults}
-                className="block w-full border-t border-gray-100 px-4 py-3 text-center text-sm text-[#4a9e2f] transition-colors hover:bg-[#f4f7ee]"
+                className="block w-full border-t border-gray-100 px-4 py-3 text-center text-sm text-brand transition-colors hover:bg-brand-mist"
               >
                 See all results for “{term}”
               </button>

@@ -131,7 +131,7 @@ export default function ProductDetails({ product }: { product: Product }) {
         type="button"
         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
         aria-label="Decrease quantity"
-        className="flex h-11 w-9 items-center justify-center text-gray-600 hover:text-[#4a9e2f] md:w-11"
+        className="flex h-11 w-9 items-center justify-center text-gray-600 hover:text-brand md:w-11"
       >
         <FiMinus size={15} />
       </button>
@@ -140,7 +140,7 @@ export default function ProductDetails({ product }: { product: Product }) {
         type="button"
         onClick={() => setQuantity((q) => q + 1)}
         aria-label="Increase quantity"
-        className="flex h-11 w-9 items-center justify-center text-gray-600 hover:text-[#4a9e2f] md:w-11"
+        className="flex h-11 w-9 items-center justify-center text-gray-600 hover:text-brand md:w-11"
       >
         <FiPlus size={15} />
       </button>
@@ -152,7 +152,7 @@ export default function ProductDetails({ product }: { product: Product }) {
       type="button"
       onClick={onAddToCart}
       disabled={!inStock}
-      className="flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-[#4a9e2f] bg-white px-3 text-[13px] font-medium text-[#4a9e2f] transition-all duration-200 hover:bg-[#f4f7ee] disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 md:min-w-[170px] md:gap-2 md:px-6 md:text-sm"
+      className="flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border border-brand bg-white px-3 text-[13px] font-medium text-brand transition-all duration-200 hover:bg-brand-mist disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 md:min-w-[170px] md:gap-2 md:px-6 md:text-sm"
     >
       <FiShoppingCart size={16} className="hidden md:block" />
       Add to Cart
@@ -164,7 +164,7 @@ export default function ProductDetails({ product }: { product: Product }) {
       type="button"
       onClick={onBuyNow}
       disabled={!inStock || buyingNow}
-      className="flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap bg-[#4a9e2f] px-3 text-[13px] font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none md:min-w-[170px] md:gap-2 md:px-6 md:text-sm"
+      className="flex h-11 min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap bg-brand px-3 text-[13px] font-medium text-white transition-all duration-200 hover:bg-brand-dark hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none md:min-w-[170px] md:gap-2 md:px-6 md:text-sm"
     >
       <FiZap size={16} className="hidden md:block" />
       {buyingNow ? "Please wait…" : "Buy Now"}
@@ -174,9 +174,9 @@ export default function ProductDetails({ product }: { product: Product }) {
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-10 pb-28 md:px-8 md:py-14">
       <nav className="mb-8 text-sm text-gray-500">
-        <Link href="/" className="hover:text-[#4a9e2f]">Home</Link>
+        <Link href="/" className="hover:text-brand">Home</Link>
         <span>/ </span>
-        <Link href="/shop" className="hover:text-[#4a9e2f]">Shop</Link>
+        <Link href="/shop" className="hover:text-brand">Shop</Link>
         <span>/ {product.name}</span>
       </nav>
 
@@ -207,7 +207,7 @@ export default function ProductDetails({ product }: { product: Product }) {
                   onClick={() => setActiveImage(index)}
                   aria-label={`View image ${index + 1}`}
                   className={`relative aspect-square overflow-hidden border transition-colors ${
-                    index === activeImage ? "border-[#4a9e2f]" : "border-transparent hover:border-gray-200"
+                    index === activeImage ? "border-brand" : "border-transparent hover:border-gray-200"
                   }`}
                 >
                   <Image src={url} alt="" fill sizes="20vw" className="object-cover" />
@@ -220,7 +220,7 @@ export default function ProductDetails({ product }: { product: Product }) {
         {/* ── Buy box ───────────────────────────────────────────────────── */}
         <div>
           {product.brand?.name && (
-            <p className="text-sm uppercase tracking-wide text-[#4a9e2f]">{product.brand.name}</p>
+            <p className="text-sm uppercase tracking-wide text-brand">{product.brand.name}</p>
           )}
           <h1 className="font-display mt-2 text-3xl font-semibold text-[#1f2a17] md:text-4xl">
             {product.name}
@@ -240,7 +240,7 @@ export default function ProductDetails({ product }: { product: Product }) {
 
           <p className="mt-2 text-sm">
             {inStock ? (
-              <span className="text-[#4a9e2f]">In stock — {selectedVariant?.stockQuantity} available</span>
+              <span className="text-brand">In stock — {selectedVariant?.stockQuantity} available</span>
             ) : (
               <span className="text-red-500">Out of stock</span>
             )}
@@ -275,8 +275,8 @@ export default function ProductDetails({ product }: { product: Product }) {
                         onClick={() => setSelection((prev) => ({ ...prev, [group.name]: value }))}
                         className={`border px-4 py-2 text-sm transition-colors ${
                           selection[group.name] === value
-                            ? "border-[#4a9e2f] bg-[#4a9e2f] text-white"
-                            : "border-gray-200 text-gray-700 hover:border-[#4a9e2f]"
+                            ? "border-brand bg-brand text-white"
+                            : "border-gray-200 text-gray-700 hover:border-brand"
                         }`}
                       >
                         {value}
@@ -311,8 +311,8 @@ export default function ProductDetails({ product }: { product: Product }) {
               aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
               className={`flex h-11 w-full items-center justify-center gap-2 border px-4 text-sm font-medium transition-colors md:w-11 md:px-0 ${
                 wishlisted
-                  ? "border-[#4a9e2f] bg-[#4a9e2f] text-white"
-                  : "border-gray-200 text-gray-600 hover:border-[#4a9e2f] hover:text-[#4a9e2f]"
+                  ? "border-brand bg-brand text-white"
+                  : "border-gray-200 text-gray-600 hover:border-brand hover:text-brand"
               }`}
             >
               <FiHeart size={17} fill={wishlisted ? "currentColor" : "none"} />
@@ -334,7 +334,7 @@ export default function ProductDetails({ product }: { product: Product }) {
           {product.tags?.length ? (
             <div className="mt-6 flex flex-wrap gap-2">
               {product.tags.map((tag) => (
-                <span key={tag.id} className="bg-[#f4f7ee] px-3 py-1 text-xs text-[#4a9e2f]">
+                <span key={tag.id} className="bg-brand-mist px-3 py-1 text-xs text-brand">
                   {tag.name}
                 </span>
               ))}
@@ -366,7 +366,7 @@ function Assurance({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 text-[#4a9e2f]">{icon}</span>
+      <span className="mt-0.5 text-brand">{icon}</span>
       <div>
         <p className="text-sm font-semibold text-[#1f2a17]">{title}</p>
         <p className="text-xs text-gray-500">{text}</p>

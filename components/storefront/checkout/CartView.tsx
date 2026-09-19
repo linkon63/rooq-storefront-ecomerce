@@ -75,7 +75,7 @@ export default function CartView() {
           </p>
           <Link
             href="/shop"
-            className="mt-6 inline-block bg-[#4a9e2f] px-8 py-3 text-sm text-white transition-colors hover:bg-[#3d8626]"
+            className="mt-6 inline-block bg-brand px-8 py-3 text-sm text-white transition-colors hover:bg-brand-dark"
           >
             Continue Shopping
           </Link>
@@ -109,7 +109,7 @@ export default function CartView() {
                 type="button"
                 onClick={moveSelectedToWishlist}
                 disabled={!selectedItems.length}
-                className="font-display text-lg text-[#1f2a17] transition-colors hover:text-[#4a9e2f] disabled:text-gray-300"
+                className="font-display text-lg text-[#1f2a17] transition-colors hover:text-brand disabled:text-gray-300"
               >
                 Add to Wishlist
               </button>
@@ -140,7 +140,7 @@ export default function CartView() {
                       <div>
                         <Link
                           href={item.productId ? `/product/${item.productId}` : "/shop"}
-                          className="text-sm font-semibold text-[#1f2a17] hover:text-[#4a9e2f]"
+                          className="text-sm font-semibold text-[#1f2a17] hover:text-brand"
                         >
                           {item.name}
                         </Link>
@@ -165,7 +165,7 @@ export default function CartView() {
                           type="button"
                           onClick={() => updateQuantity(item.slug, item.quantity + 1)}
                           aria-label={`Increase quantity of ${item.name}`}
-                          className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-[#4a9e2f]"
+                          className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-brand"
                         >
                           <FiPlus size={13} />
                         </button>
@@ -178,7 +178,7 @@ export default function CartView() {
                               : removeItem(item.slug)
                           }
                           aria-label={`Decrease quantity of ${item.name}`}
-                          className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-[#4a9e2f]"
+                          className="flex h-8 w-8 items-center justify-center text-gray-600 hover:text-brand"
                         >
                           <FiMinus size={13} />
                         </button>
@@ -199,7 +199,7 @@ export default function CartView() {
                             } as Parameters<typeof toggleWishlist>[0])
                           }
                           aria-label={`Save ${item.name} for later`}
-                          className="hover:text-[#4a9e2f]"
+                          className="hover:text-brand"
                         >
                           <FiHeart size={17} />
                         </button>
@@ -252,7 +252,7 @@ export default function CartView() {
                   router.push("/checkout");
                 }}
                 disabled={!selectedItems.length}
-                className="mt-6 w-full rounded-full bg-[#4a9e2f] py-3.5 text-sm font-medium text-white transition-colors hover:bg-[#3d8626] disabled:cursor-not-allowed disabled:bg-gray-300"
+                className="mt-6 w-full rounded-full bg-brand py-3.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-gray-300"
               >
                 Proceed To Checkout
               </button>

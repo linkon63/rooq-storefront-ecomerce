@@ -109,7 +109,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
               type="button"
               onClick={() => router.push(href)}
               aria-label={`View ${product.name}`}
-              className="flex h-9 w-9 items-center justify-center bg-white text-[#1f2a17] shadow-sm transition-colors hover:bg-[#4a9e2f] hover:text-white"
+              className="flex h-9 w-9 items-center justify-center bg-white text-[#1f2a17] shadow-sm transition-colors hover:bg-brand hover:text-white"
             >
               <FiEye size={16} />
             </button>
@@ -120,8 +120,8 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
               aria-pressed={wishlisted}
               className={`flex h-9 w-9 items-center justify-center shadow-sm transition-colors ${
                 wishlisted
-                  ? "bg-[#4a9e2f] text-white"
-                  : "bg-white text-[#1f2a17] hover:bg-[#4a9e2f] hover:text-white"
+                  ? "bg-brand text-white"
+                  : "bg-white text-[#1f2a17] hover:bg-brand hover:text-white"
               }`}
             >
               <FiHeart size={16} fill={wishlisted ? "currentColor" : "none"} />
@@ -146,7 +146,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
                   type="button"
                   onClick={onAddToCart}
                   aria-label={`Add ${product.name} to cart`}
-                  className="flex h-9 w-9 cursor-pointer items-center justify-center bg-[#4a9e2f] text-white transition-all duration-200 hover:scale-110 hover:bg-[#3d8626] hover:shadow-md"
+                  className="flex h-9 w-9 cursor-pointer items-center justify-center bg-brand text-white transition-all duration-200 hover:scale-110 hover:bg-brand-dark hover:shadow-md"
                 >
                   <FiShoppingCart size={16} />
                 </button>
@@ -159,7 +159,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
           <div className="flex h-12 w-full items-center justify-center">
             <Link
               href={href}
-              className="font-display text-[15px] sm:text-[17px] text-[#1f2a17] transition-colors hover:text-[#4a9e2f] line-clamp-2 leading-tight"
+              className="font-display text-[15px] sm:text-[17px] text-[#1f2a17] transition-colors hover:text-brand line-clamp-2 leading-tight"
             >
               {product.name}
             </Link>
@@ -185,7 +185,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
           onClick={onBuyNow}
           disabled={buyingNow}
           aria-label={`Buy ${product.name} now`}
-          className="mt-3 flex h-10 w-full cursor-pointer items-center justify-center gap-2 bg-[#4a9e2f] px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-[#3d8626] hover:shadow-md disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
+          className="mt-3 flex h-10 w-full cursor-pointer items-center justify-center gap-2 bg-brand px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-brand-dark hover:shadow-md disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:shadow-none"
         >
           <FiZap size={15} />
           {buyingNow ? "Please wait…" : "Buy Now"}

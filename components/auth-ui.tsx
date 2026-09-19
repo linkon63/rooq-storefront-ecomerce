@@ -14,7 +14,7 @@ export type AuthMode = "login" | "register";
 
 /** Every auth field shares one look, so the classes live here once. */
 export const INPUT_CLASS =
-  "w-full rounded-xl border border-stone-200 bg-[#fbfcf8] px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition-all focus:border-[#4a9e2f] focus:bg-white focus:ring-2 focus:ring-[#4a9e2f]/20 font-inter";
+  "w-full rounded-xl border border-stone-200 bg-[#fbfcf8] px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition-all focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20 font-inter";
 
 export const LABEL_CLASS = "block text-xs font-semibold text-[#1f2a17] mb-1.5 font-gotham";
 
@@ -37,7 +37,7 @@ export function AuthTabs({
 }) {
   return (
     <div
-      className={`grid grid-cols-2 gap-1 rounded-full border border-[#4a9e2f]/15 bg-[#f4f7ee] p-1 ${className}`}
+      className={`grid grid-cols-2 gap-1 rounded-full border border-brand/15 bg-brand-mist p-1 ${className}`}
     >
       {(["login", "register"] as AuthMode[]).map((mode) => (
         <button
@@ -47,7 +47,7 @@ export function AuthTabs({
           onClick={() => mode !== value && onChange(mode)}
           aria-pressed={value === mode}
           className={`cursor-pointer rounded-full py-2.5 font-gotham text-xs font-bold uppercase tracking-wider transition-all ${
-            value === mode ? "bg-[#4a9e2f] text-white shadow-sm" : "text-stone-500 hover:text-[#1f2a17]"
+            value === mode ? "bg-brand text-white shadow-sm" : "text-stone-500 hover:text-[#1f2a17]"
           }`}
         >
           {mode === "login" ? "Log in" : "Sign up"}
@@ -73,7 +73,7 @@ export function AuthBrandPanel({
 }) {
   return (
     <div
-      className={`relative hidden flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#4a9e2f] via-[#3d8626] to-[#1f2a17] text-center text-white md:flex ${
+      className={`relative hidden flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-brand via-brand-dark to-[#1f2a17] text-center text-white md:flex ${
         compact ? "p-8" : "p-10"
       } ${className}`}
     >

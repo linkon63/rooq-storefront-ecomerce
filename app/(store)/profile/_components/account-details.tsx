@@ -9,11 +9,11 @@ import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 import ResolvedImage from "./image-resolver";
 
 // ─── Shared design tokens ────────────────────────────────────────────────────
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-brand";
 const FIELD_LABEL   = "block text-[10px] font-bold tracking-[0.14em] uppercase text-stone-600 mb-1.5";
-const INPUT_BASE    = "w-full border border-stone-200 bg-white px-4 py-3 text-sm font-sans text-zinc-800 outline-none transition focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] rounded-lg placeholder:text-zinc-300";
-const BTN_PRIMARY   = "inline-flex items-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-10 py-3.5 rounded-full transition cursor-pointer shadow-md disabled:opacity-50";
-const BTN_SECONDARY = "inline-flex items-center gap-2 bg-white hover:bg-stone-50 border border-[#4a9e2f] text-[#4a9e2f] font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-10 py-3.5 rounded-full transition cursor-pointer shadow-sm disabled:opacity-50";
+const INPUT_BASE    = "w-full border border-stone-200 bg-white px-4 py-3 text-sm font-sans text-zinc-800 outline-none transition focus:border-brand focus:ring-1 focus:ring-brand rounded-lg placeholder:text-zinc-300";
+const BTN_PRIMARY   = "inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-10 py-3.5 rounded-full transition cursor-pointer shadow-md disabled:opacity-50";
+const BTN_SECONDARY = "inline-flex items-center gap-2 bg-white hover:bg-stone-50 border border-brand text-brand font-gotham text-[10px] font-bold tracking-[0.16em] uppercase px-10 py-3.5 rounded-full transition cursor-pointer shadow-sm disabled:opacity-50";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AccountDetailsView() {
@@ -150,7 +150,7 @@ export default function AccountDetailsView() {
         <div className="relative w-20 h-20 shrink-0">
           <div className="w-full h-full rounded-full overflow-hidden border-2 border-stone-100 bg-stone-50 shadow-sm flex items-center justify-center">
             {uploadingAvatar ? (
-              <FiLoader className="w-6 h-6 text-[#4a9e2f] animate-spin" />
+              <FiLoader className="w-6 h-6 text-brand animate-spin" />
             ) : (
               <ResolvedImage
                 src={avatarUrl}
@@ -162,7 +162,7 @@ export default function AccountDetailsView() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#4a9e2f] text-white rounded-full flex items-center justify-center shadow hover:bg-[#3d8626] transition cursor-pointer"
+            className="absolute -bottom-1 -right-1 w-7 h-7 bg-brand text-white rounded-full flex items-center justify-center shadow hover:bg-brand-dark transition cursor-pointer"
             title="Change photo"
           >
             <FiCamera className="text-[11px]" />
@@ -176,7 +176,7 @@ export default function AccountDetailsView() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="font-sans text-[10px] font-bold tracking-wider uppercase text-[#4a9e2f] hover:text-[#3d8626] transition cursor-pointer"
+              className="font-sans text-[10px] font-bold tracking-wider uppercase text-brand hover:text-brand-dark transition cursor-pointer"
             >
               Change Photo
             </button>

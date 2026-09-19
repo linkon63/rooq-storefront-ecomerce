@@ -92,7 +92,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
   const pageCount = Math.max(1, Math.ceil(TESTIMONIALS.length / 2));
 
   return (
-    <section className="bg-[#f4f7ee] py-14 lg:py-16">
+    <section className="bg-brand-mist py-14 lg:py-16">
       {/* `grid-cols-1` is not decoration: without an explicit track the columns
           below `lg` are implicit and content-sized, so the swiper's unbounded
           intrinsic width stretches the whole grid to the layout maximum and the
@@ -129,7 +129,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                           screen reader announcing "NJ" first is just noise. */}
                       <span
                         aria-hidden="true"
-                        className="font-display flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[#4a9e2f]/10 text-[16px] font-semibold text-[#4a9e2f]"
+                        className="font-display flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-brand-sky-mist text-[16px] font-semibold text-brand-sky-dark"
                       >
                         {initials(testimonial.name)}
                       </span>
@@ -158,7 +158,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                 aria-label={`Go to testimonial page ${page + 1}`}
                 className={`h-[3px] rounded-full transition-all ${
                   Math.floor(activeIndex / 2) === page
-                    ? "w-9 bg-[#4a9e2f]"
+                    ? "w-9 bg-brand"
                     : "w-7 bg-gray-300 hover:bg-gray-400"
                 }`}
               />

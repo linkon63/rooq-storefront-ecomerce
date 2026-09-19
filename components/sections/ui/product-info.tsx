@@ -333,7 +333,7 @@ export default function ProductInfo({
         <button
           type="button"
           onClick={handleBuyNow}
-          className="flex-1 min-w-[140px] px-6 sm:px-8 py-4 bg-[#4a9e2f] text-white hover:bg-[#3d8626] font-gotham text-sm font-semibold uppercase tracking-wider rounded-full flex justify-center items-center shadow-md transition-all cursor-pointer"
+          className="flex-1 min-w-[140px] px-6 sm:px-8 py-4 bg-brand text-white hover:bg-brand-dark font-gotham text-sm font-semibold uppercase tracking-wider rounded-full flex justify-center items-center shadow-md transition-all cursor-pointer"
         >
           Buy Now
         </button>

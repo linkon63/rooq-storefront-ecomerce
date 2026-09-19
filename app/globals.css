@@ -23,13 +23,23 @@
   --font-bembo: var(--font-poppins), var(--font-bengali), sans-serif;
   --font-gotham: var(--font-poppins), var(--font-bengali), sans-serif;
 
-  /* Organishi brand green, taken from the approved mockups. */
-  --color-brand: #4a9e2f;
-  --color-brand-dark: #3d8626;
+  /* Organishi brand palette, taken from the logo (lime leaf #8DC63F, sky ring
+     #3FA9DE). The logo's own lime is too light to carry white text, so buttons,
+     links and active states use a deeper shade of the same hue (4.8:1 on
+     white); the pure logo colours are for decoration only. Change the brand
+     here — the storefront reads every green and blue from these tokens. */
+  --color-brand: #4f7f17;
+  --color-brand-dark: #3f6212;
+  --color-brand-leaf: #8dc63f;
   --color-brand-ink: #1f2a17;
-  --color-brand-mist: #f4f7ee;
-  --color-brand-primary: #4a9e2f;
-  --color-brand-3: #4a9e2f;
+  --color-brand-mist: #f3f8ea;
+  --color-brand-primary: var(--color-brand);
+  --color-brand-3: var(--color-brand);
+  /* Secondary accent from the logo ring: `sky` for decoration, `sky-dark`
+     wherever it carries text (4.9:1 on white). */
+  --color-brand-sky: #3fa9de;
+  --color-brand-sky-dark: #1c78ab;
+  --color-brand-sky-mist: #eaf5fb;
 
   /* Retained because the admin panel still references them */
   --color-stone-850: #1c1917;

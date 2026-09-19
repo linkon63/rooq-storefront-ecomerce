@@ -108,11 +108,11 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#f4f7ee] shadow-sm">
+    <header className="sticky top-0 z-50 w-full bg-brand-mist shadow-sm">
       {/* ── Top utility bar ─────────────────────────────────────────────────
           Hidden on phones — the footer's call/WhatsApp CTA carries the
           numbers there, and the sticky header stays short. */}
-      <div className="hidden bg-[#4a9e2f] text-white text-[11px] sm:text-[13px] md:block">
+      <div className="hidden bg-brand text-white text-[11px] sm:text-[13px] md:block">
         <div className="mx-auto max-w-[1600px] px-3 sm:px-4 md:px-5">
           <div className="flex h-10 items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2.5 sm:gap-5 overflow-hidden whitespace-nowrap">
@@ -149,7 +149,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
       </div>
 
       {/* ── Main bar ────────────────────────────────────────────────────── */}
-      <div className="border-b border-[#4a9e2f]/10 bg-[#f4f7ee]">
+      <div className="border-b border-brand/10 bg-brand-mist">
         <div className="mx-auto max-w-[1600px] px-4 md:px-5">
           <div className="flex h-[88px] items-center justify-between gap-4">
             {/* aria-hidden on the ™: the logo's alt text already names the brand,
@@ -205,12 +205,12 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
                 onClick={() => setSearchOpen((open) => !open)}
                 aria-label={searchOpen ? "Close search" : "Search"}
                 aria-expanded={searchOpen}
-                className="text-[#1f2a17] hover:text-[#4a9e2f] lg:hidden"
+                className="text-[#1f2a17] hover:text-brand lg:hidden"
               >
                 <FiSearch size={21} />
               </button>
 
-              <Link href="/cart" aria-label="Cart" className="relative text-[#1f2a17] hover:text-[#4a9e2f]">
+              <Link href="/cart" aria-label="Cart" className="relative text-[#1f2a17] hover:text-brand">
                 <HiOutlineShoppingCart size={23} />
                 <Badge count={cartCount} />
               </Link>
@@ -218,7 +218,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
               <span className="hidden h-5 w-px bg-gray-200 md:block" />
 
               {/* On phones the wishlist moves into the menu. */}
-              <Link href="/wishlist" aria-label="Wishlist" className="relative hidden text-[#1f2a17] hover:text-[#4a9e2f] md:block">
+              <Link href="/wishlist" aria-label="Wishlist" className="relative hidden text-[#1f2a17] hover:text-brand md:block">
                 <HiOutlineHeart size={23} />
                 <Badge count={wishlistCount} />
               </Link>
@@ -228,7 +228,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
               <Link
                 href={user ? "/profile" : "/login"}
                 aria-label={user ? "My account" : "Sign in"}
-                className="text-[#1f2a17] hover:text-[#4a9e2f]"
+                className="text-[#1f2a17] hover:text-brand"
               >
                 <FiUser size={22} />
               </Link>
@@ -250,7 +250,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
         </div>
 
         {mobileOpen && (
-          <nav className="border-t border-[#4a9e2f]/10 bg-[#f4f7ee] xl:hidden">
+          <nav className="border-t border-brand/10 bg-brand-mist xl:hidden">
             <div className="mx-auto flex max-w-[1600px] flex-col px-4 py-2 md:px-5">
               <NavLinksWithParams
                 links={navLinks}
@@ -264,7 +264,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
               >
                 Wishlist
                 {wishlistCount > 0 && (
-                  <span className="flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[#4a9e2f] px-1.5 text-[11px] font-semibold text-white">
+                  <span className="flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[11px] font-semibold text-white">
                     {wishlistCount > 99 ? "99+" : wishlistCount}
                   </span>
                 )}
@@ -302,13 +302,13 @@ function NavLinks({ links, variant, onNavigate, params = null }: NavLinksProps) 
             aria-current={isActive ? "page" : undefined}
             className={
               variant === "desktop"
-                ? `font-display relative whitespace-nowrap py-1 text-[17px] transition-colors hover:text-[#4a9e2f] ${
+                ? `font-display relative whitespace-nowrap py-1 text-[17px] transition-colors hover:text-brand ${
                     isActive
-                      ? "font-semibold text-[#4a9e2f] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-[2px] after:rounded-full after:bg-[#4a9e2f] after:content-['']"
+                      ? "font-semibold text-brand after:absolute after:inset-x-0 after:-bottom-0.5 after:h-[2px] after:rounded-full after:bg-brand after:content-['']"
                       : "text-[#1f2a17]"
                   }`
-                : `font-display border-b border-[#4a9e2f]/10 py-3 text-[17px] transition-colors last:border-b-0 ${
-                    isActive ? "font-semibold text-[#4a9e2f]" : "text-[#1f2a17]"
+                : `font-display border-b border-brand/10 py-3 text-[17px] transition-colors last:border-b-0 ${
+                    isActive ? "font-semibold text-brand" : "text-[#1f2a17]"
                   }`
             }
           >
@@ -343,7 +343,7 @@ function NavLinksReadingParams(props: Omit<NavLinksProps, "params">) {
 function Badge({ count }: { count: number }) {
   if (!count) return null;
   return (
-    <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#4a9e2f] px-1 text-[10px] font-semibold leading-none text-white">
+    <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-white">
       {count > 99 ? "99+" : count}
     </span>
   );

@@ -137,7 +137,7 @@ export default function OrderInvoice({
       {/* ── Bill to / Ship to ──────────────────────────────────────────── */}
       <div className="my-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
-          <p className="mb-2 font-gotham text-[10px] font-bold uppercase tracking-[0.18em] text-[#4a9e2f]">
+          <p className="mb-2 font-gotham text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
             Billed To
           </p>
           <p className="font-gotham text-sm font-semibold text-stone-800">
@@ -150,7 +150,7 @@ export default function OrderInvoice({
         </div>
 
         <div>
-          <p className="mb-2 font-gotham text-[10px] font-bold uppercase tracking-[0.18em] text-[#4a9e2f]">
+          <p className="mb-2 font-gotham text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
             Delivery Address
           </p>
           <p className="font-gotham text-xs leading-relaxed text-stone-700">
@@ -230,7 +230,7 @@ export default function OrderInvoice({
             <span>{money(payable)}</span>
           </div>
           {totalDiscount > 0 && (
-            <div className="flex justify-between rounded bg-[#f4f7ee] px-3 py-2 font-semibold text-[#2f7d1f]">
+            <div className="flex justify-between rounded bg-brand-mist px-3 py-2 font-semibold text-[#2f7d1f]">
               <span>You saved</span>
               <span>
                 {money(totalDiscount)}
@@ -239,7 +239,7 @@ export default function OrderInvoice({
             </div>
           )}
           {isCod && (
-            <div className="flex justify-between rounded bg-[#f4f7ee] px-3 py-2 text-xs font-bold text-[#1f2a17]">
+            <div className="flex justify-between rounded bg-brand-mist px-3 py-2 text-xs font-bold text-[#1f2a17]">
               <span>Payable on delivery</span>
               <span>{money(payable)}</span>
             </div>

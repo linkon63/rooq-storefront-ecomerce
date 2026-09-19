@@ -64,7 +64,7 @@ export default function DeliveryZonePicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border px-3 py-3 text-left transition-colors ${
-          open ? "border-[#4a9e2f]" : "border-zinc-300 hover:border-zinc-400"
+          open ? "border-brand" : "border-zinc-300 hover:border-zinc-400"
         }`}
       >
         <span className="min-w-0">
@@ -100,7 +100,7 @@ export default function DeliveryZonePicker({
                   setOpen(false);
                 }}
                 className={`flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors ${
-                  value === zone.value ? "bg-[#f4f7ee]" : "hover:bg-stone-50"
+                  value === zone.value ? "bg-brand-mist" : "hover:bg-stone-50"
                 }`}
               >
                 <span className="min-w-0">

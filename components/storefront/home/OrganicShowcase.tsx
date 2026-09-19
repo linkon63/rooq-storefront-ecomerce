@@ -53,7 +53,7 @@ const PROMISES = [
 export default function OrganicShowcase() {
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8">
-      <div className="overflow-hidden rounded-3xl bg-[#f4f7ee]">
+      <div className="overflow-hidden rounded-3xl bg-brand-mist">
         <div className="grid items-center gap-10 p-6 sm:p-10 lg:grid-cols-2 lg:gap-14 lg:p-14">
           {/* ── Collage ───────────────────────────────────────────────── */}
           <div className="relative">
@@ -79,7 +79,7 @@ export default function OrganicShowcase() {
             </div>
 
             {/* Seal floating over the seam of the collage. */}
-            <div className="font-display absolute -bottom-4 left-1/2 flex h-24 w-24 -translate-x-1/2 flex-col items-center justify-center rounded-full bg-[#4a9e2f] text-white shadow-lg ring-8 ring-[#f4f7ee] sm:-bottom-6 sm:h-28 sm:w-28">
+            <div className="font-display absolute -bottom-4 left-1/2 flex h-24 w-24 -translate-x-1/2 flex-col items-center justify-center rounded-full bg-brand text-white shadow-lg ring-8 ring-brand-mist sm:-bottom-6 sm:h-28 sm:w-28">
               <span className="text-[24px] leading-none sm:text-[28px]">100%</span>
               <span className="mt-1 text-[11px] tracking-[0.2em] uppercase">Organic</span>
             </div>
@@ -87,7 +87,7 @@ export default function OrganicShowcase() {
 
           {/* ── Copy ──────────────────────────────────────────────────── */}
           <div className="mt-8 lg:mt-0">
-            <span className="font-display inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-[13px] text-[#4a9e2f]">
+            <span className="font-display inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-[13px] text-brand">
               <PiLeaf size={15} />
               Straight from the farm
             </span>
@@ -104,7 +104,7 @@ export default function OrganicShowcase() {
             <ul className="mt-7 space-y-5">
               {PROMISES.map(({ icon: Icon, title, body }) => (
                 <li key={title} className="flex gap-4">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#4a9e2f]">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-sky-dark">
                     <Icon size={21} />
                   </span>
                   <span>
@@ -121,7 +121,7 @@ export default function OrganicShowcase() {
 
             <Link
               href="/shop"
-              className="font-display mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-[#4a9e2f] px-7 text-[15px] text-white transition-colors hover:bg-[#3d8626]"
+              className="font-display mt-9 inline-flex h-12 items-center gap-2 rounded-full bg-brand px-7 text-[15px] text-white transition-colors hover:bg-brand-dark"
             >
               Shop organic
               <PiArrowRight size={17} />

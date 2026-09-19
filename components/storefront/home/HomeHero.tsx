@@ -32,7 +32,7 @@ export default function HomeHero({ slides, banners }: HomeHeroProps) {
       {/* 32% keeps the two stacked banners exactly as tall as the main stage. */}
       <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_32%] lg:gap-8">
         {/* ── Main stage ──────────────────────────────────────────────── */}
-        <div className="group relative overflow-hidden rounded-lg bg-[#f4f7ee]">
+        <div className="group relative overflow-hidden rounded-lg bg-brand-mist">
           <Swiper
             modules={[Autoplay, EffectFade]}
             effect="fade"
@@ -85,7 +85,7 @@ export default function HomeHero({ slides, banners }: HomeHeroProps) {
                     aria-current={index === activeIndex}
                     className={`h-[3px] rounded-full transition-all ${
                       index === activeIndex
-                        ? "w-9 bg-[#4a9e2f]"
+                        ? "w-9 bg-brand"
                         : "w-7 bg-white/70 hover:bg-white"
                     }`}
                   />
@@ -128,7 +128,7 @@ function MobileHeroSlider({ slides }: { slides: HeroSlide[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div className="relative overflow-hidden rounded-lg bg-[#f4f7ee] lg:hidden">
+    <div className="relative overflow-hidden rounded-lg bg-brand-mist lg:hidden">
       <Swiper
         modules={[Autoplay]}
         loop={slides.length > 1}
@@ -164,7 +164,7 @@ function MobileHeroSlider({ slides }: { slides: HeroSlide[] }) {
               aria-label={`Go to slide ${index + 1}`}
               aria-current={index === activeIndex}
               className={`h-[3px] rounded-full transition-all ${
-                index === activeIndex ? "w-7 bg-[#4a9e2f]" : "w-5 bg-white/70"
+                index === activeIndex ? "w-7 bg-brand" : "w-5 bg-white/70"
               }`}
             />
           ))}
@@ -188,7 +188,7 @@ function HeroArrow({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className={`absolute top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#1f2a17] shadow-md transition-all hover:bg-[#4a9e2f] hover:text-white ${
+      className={`absolute top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#1f2a17] shadow-md transition-all hover:bg-brand hover:text-white ${
         side === "left" ? "left-3" : "right-3"
       }`}
     >

@@ -33,13 +33,13 @@ export async function POST(request: Request) {
       </head>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
-          <div style="background-color: #4a9e2f; color: #ffffff; padding: 20px; text-align: center;">
+          <div style="background-color: #4f7f17; color: #ffffff; padding: 20px; text-align: center;">
             <h1 style="margin: 0; font-size: 22px;">Organishi Store</h1>
             <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">📩 New Contact Us Message Received</p>
           </div>
 
           <div style="padding: 24px;">
-            <div style="background: #f4f7ee; border-left: 4px solid #4a9e2f; padding: 16px; margin-bottom: 20px; border-radius: 4px;">
+            <div style="background: #f3f8ea; border-left: 4px solid #4f7f17; padding: 16px; margin-bottom: 20px; border-radius: 4px;">
               <h2 style="margin: 0 0 10px 0; font-size: 16px; color: #1f2a17;">Sender Details</h2>
               <p style="margin: 4px 0; font-size: 14px;"><strong>Name:</strong> ${fullName}</p>
               <p style="margin: 4px 0; font-size: 14px;"><strong>Phone:</strong> ${phone}</p>

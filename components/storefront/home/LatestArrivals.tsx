@@ -33,7 +33,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2 lg:gap-7 md:mt-10">
-        {latest.map((product, index) => {
+        {latest.map((product) => {
           const hasDiscount = !!product.originalPrice && product.originalPrice > product.price;
           const saving = hasDiscount
             ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
@@ -43,16 +43,12 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
           return (
             <article
               key={product.id}
-              className="group grid grid-cols-2 overflow-hidden rounded-lg bg-[#f4f7ee]"
+              className="group grid grid-cols-2 overflow-hidden rounded-lg bg-brand-mist"
             >
               {/* ── Copy ────────────────────────────────────────────────── */}
               <div className="flex flex-col justify-center px-5 py-6 sm:px-8 lg:px-10">
-                <span className="font-display inline-flex w-fit items-center gap-1.5 rounded-full bg-[#4a9e2f] px-3 py-1 text-[11px] tracking-[0.14em] text-white uppercase">
-                  New #{index + 1}
-                </span>
-
                 {product.category && (
-                  <span className="mt-4 text-[12px] tracking-[0.18em] text-gray-500 uppercase">
+                  <span className="text-[12px] tracking-[0.18em] text-gray-500 uppercase">
                     {product.category}
                   </span>
                 )}
@@ -75,7 +71,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
                         <span className="font-display text-[14px] text-gray-400 line-through">
                           {money(product.originalPrice!)}
                         </span>
-                        <span className="rounded-full bg-[#4a9e2f]/10 px-2.5 py-0.5 text-[12px] text-[#4a9e2f]">
+                        <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-[12px] text-brand">
                           Save {saving}%
                         </span>
                       </>
@@ -86,7 +82,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
                 <div className="mt-5 lg:mt-7">
                   <Link
                     href={href}
-                    className="font-display inline-flex items-center gap-2 rounded-full bg-[#4a9e2f] px-5 py-2 text-[13px] text-white transition-colors hover:bg-[#3d8626] sm:px-6 sm:py-2.5 sm:text-[15px]"
+                    className="font-display inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-[13px] text-white transition-colors hover:bg-brand-dark sm:px-6 sm:py-2.5 sm:text-[15px]"
                   >
                     {product.comingSoon ? "View Details" : "Shop Now"}
                     <PiArrowRight size={16} />

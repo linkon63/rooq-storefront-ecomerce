@@ -49,7 +49,7 @@ export default function PromoBanners() {
               <div className="mt-4 lg:mt-6">
                 <Link
                   href={banner.href}
-                  className="inline-flex rounded-full bg-[#4a9e2f] px-5 py-2 text-[13px] text-white transition-colors hover:bg-[#3d8626]"
+                  className="inline-flex rounded-full bg-brand px-5 py-2 text-[13px] text-white transition-colors hover:bg-brand-dark"
                 >
                   Shop Now
                 </Link>

@@ -40,9 +40,9 @@ export default function LegalContactCard({
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <a
           href={`tel:${SUPPORT_PHONE_TEL}`}
-          className="flex items-start gap-3 rounded-xl border border-[#4a9e2f]/20 bg-[#f4f7ee]/60 p-4 transition-colors hover:border-[#4a9e2f]"
+          className="flex items-start gap-3 rounded-xl border border-brand/20 bg-brand-mist/60 p-4 transition-colors hover:border-brand"
         >
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f]">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
             <HiOutlinePhone size={18} />
           </span>
           <span>
@@ -53,9 +53,9 @@ export default function LegalContactCard({
 
         <a
           href={`mailto:${SUPPORT_EMAIL}`}
-          className="flex items-start gap-3 rounded-xl border border-[#4a9e2f]/20 bg-[#f4f7ee]/60 p-4 transition-colors hover:border-[#4a9e2f]"
+          className="flex items-start gap-3 rounded-xl border border-brand/20 bg-brand-mist/60 p-4 transition-colors hover:border-brand"
         >
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f]">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
             <HiOutlineMail size={18} />
           </span>
           <span>
@@ -64,8 +64,8 @@ export default function LegalContactCard({
           </span>
         </a>
 
-        <div className="flex items-start gap-3 rounded-xl border border-[#4a9e2f]/20 bg-[#f4f7ee]/60 p-4">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f]">
+        <div className="flex items-start gap-3 rounded-xl border border-brand/20 bg-brand-mist/60 p-4">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
             <HiOutlineMapPin size={18} />
           </span>
           <span>

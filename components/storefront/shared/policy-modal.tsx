@@ -65,7 +65,7 @@ export default function PolicyModal({
 
         <div className="border-t border-stone-200 px-6 py-4 text-right">
           <button
-            className="cursor-pointer rounded-full bg-[#4a9e2f] px-8 py-3 font-gotham text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#3d8626]"
+            className="cursor-pointer rounded-full bg-brand px-8 py-3 font-gotham text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-dark"
             onClick={onClose}
             type="button"
           >

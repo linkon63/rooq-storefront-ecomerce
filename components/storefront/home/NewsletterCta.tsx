@@ -105,7 +105,7 @@ export default function NewsletterCta() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="font-display h-11 shrink-0 rounded-full bg-[#4a9e2f] px-6 text-[15px] text-white transition-colors hover:bg-[#3d8626] disabled:opacity-60"
+              className="font-display h-11 shrink-0 rounded-full bg-brand px-6 text-[15px] text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             >
               {isSubmitting ? "Sending…" : "Subscribe Now"}
             </button>

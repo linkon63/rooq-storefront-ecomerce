@@ -331,7 +331,7 @@ Corporate Gifting / Event Inquiry Details:
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-10 py-3.5 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-xs font-semibold uppercase tracking-[0.2em] rounded-full transition-all duration-300 shadow-md disabled:opacity-50 cursor-pointer"
+                    className="px-10 py-3.5 bg-brand hover:bg-brand-dark text-white font-gotham text-xs font-semibold uppercase tracking-[0.2em] rounded-full transition-all duration-300 shadow-md disabled:opacity-50 cursor-pointer"
                   >
                     {submitting ? 'SUBMITTING...' : 'Submit'}
                   </button>

@@ -38,7 +38,7 @@ export default function RelatedProducts({
           type="button"
           onClick={() => scrollBy(-1)}
           aria-label="Previous products"
-          className="absolute -left-2 top-1/3 z-10 hidden h-10 w-10 items-center justify-center border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:text-[#4a9e2f] md:flex"
+          className="absolute -left-2 top-1/3 z-10 hidden h-10 w-10 items-center justify-center border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:text-brand md:flex"
         >
           <FiChevronLeft size={18} />
         </button>
@@ -58,7 +58,7 @@ export default function RelatedProducts({
           type="button"
           onClick={() => scrollBy(1)}
           aria-label="Next products"
-          className="absolute -right-2 top-1/3 z-10 hidden h-10 w-10 items-center justify-center border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:text-[#4a9e2f] md:flex"
+          className="absolute -right-2 top-1/3 z-10 hidden h-10 w-10 items-center justify-center border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:text-brand md:flex"
         >
           <FiChevronRight size={18} />
         </button>

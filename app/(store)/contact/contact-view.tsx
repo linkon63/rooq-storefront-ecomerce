@@ -136,7 +136,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
   ];
 
   return (
-    <main className="relative w-full bg-[#f4f7ee] pb-12 md:pb-20 overflow-hidden">
+    <main className="relative w-full bg-brand-mist pb-12 md:pb-20 overflow-hidden">
       {/* ── Page banner ─────────────────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden mb-12 lg:mb-16">
         <Image
@@ -167,15 +167,15 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
 
         {/* COMBINED CONTAINER: Contact Form, Info & Map */}
         <ScrollAnimate variant="fade-in-up">
-          <div className="bg-white rounded-2xl shadow-lg border border-[#4a9e2f]/20 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-brand/20 overflow-hidden">
 
             {/* Header */}
             <div className="p-8 sm:p-12 pb-0 text-center">
-              <span className="font-gotham text-xs uppercase tracking-[0.25em] text-[#4a9e2f] font-semibold">
+              <span className="font-gotham text-xs uppercase tracking-[0.25em] text-brand font-semibold">
                 Get in Touch
               </span>
               <h1 className="font-display text-4xl sm:text-5xl text-[#1f2a17] font-bold tracking-tight mt-2">
-                Contact <span className="text-[#4a9e2f]">Us</span>
+                Contact <span className="text-brand">Us</span>
               </h1>
               <p className="font-inter text-stone-600 text-sm tracking-wide mt-3 max-w-xl mx-auto">
                 Have a question or looking for wholesale inquiries? Our team is dedicated to providing you with pure organic food and uncompromised quality.
@@ -201,7 +201,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                     <div className="flex flex-col sm:flex-row gap-4 w-full">
                       <div className="flex-1 w-full">
                         <label className="block text-[#1f2a17] text-xs font-semibold uppercase tracking-wider font-gotham mb-1.5">First Name</label>
-                        <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-[#4a9e2f] focus-within:ring-1 focus-within:ring-[#4a9e2f] transition-all">
+                        <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-brand focus-within:ring-1 focus-within:ring-brand transition-all">
                           <input
                             type="text"
                             name="firstName"
@@ -216,7 +216,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
 
                       <div className="flex-1 w-full">
                         <label className="block text-[#1f2a17] text-xs font-semibold uppercase tracking-wider font-gotham mb-1.5">Last Name</label>
-                        <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-[#4a9e2f] focus-within:ring-1 focus-within:ring-[#4a9e2f] transition-all">
+                        <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-brand focus-within:ring-1 focus-within:ring-brand transition-all">
                           <input
                             type="text"
                             name="lastName"
@@ -233,7 +233,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                     {/* Phone field */}
                     <div className="w-full">
                       <label className="block text-[#1f2a17] text-xs font-semibold uppercase tracking-wider font-gotham mb-1.5">Phone Number</label>
-                      <div className="p-3 rounded-lg border border-stone-200 bg-white flex items-center gap-3 focus-within:border-[#4a9e2f] focus-within:ring-1 focus-within:ring-[#4a9e2f] transition-all">
+                      <div className="p-3 rounded-lg border border-stone-200 bg-white flex items-center gap-3 focus-within:border-brand focus-within:ring-1 focus-within:ring-brand transition-all">
                         <select
                           name="countryCode"
                           value={formData.countryCode}
@@ -261,7 +261,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                     {/* Email field */}
                     <div className="w-full">
                       <label className="block text-[#1f2a17] text-xs font-semibold uppercase tracking-wider font-gotham mb-1.5">Email Address</label>
-                      <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-[#4a9e2f] focus-within:ring-1 focus-within:ring-[#4a9e2f] transition-all">
+                      <div className="p-3 rounded-lg border border-stone-200 bg-white focus-within:border-brand focus-within:ring-1 focus-within:ring-brand transition-all">
                         <input
                           type="email"
                           name="email"
@@ -276,7 +276,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                     {/* Message field */}
                     <div className="w-full">
                       <label className="block text-[#1f2a17] text-xs font-semibold uppercase tracking-wider font-gotham mb-1.5">Your Message</label>
-                      <div className="p-3 border border-stone-200 bg-white rounded-lg focus-within:border-[#4a9e2f] focus-within:ring-1 focus-within:ring-[#4a9e2f] transition-all">
+                      <div className="p-3 border border-stone-200 bg-white rounded-lg focus-within:border-brand focus-within:ring-1 focus-within:ring-brand transition-all">
                         <textarea
                           name="message"
                           value={formData.message}
@@ -293,7 +293,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="px-10 py-3.5 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-xs font-bold uppercase tracking-widest rounded-full transition-colors cursor-pointer shadow-md disabled:opacity-50 mt-2 self-start"
+                      className="px-10 py-3.5 bg-brand hover:bg-brand-dark text-white font-gotham text-xs font-bold uppercase tracking-widest rounded-full transition-colors cursor-pointer shadow-md disabled:opacity-50 mt-2 self-start"
                     >
                       {submitting ? 'Submitting...' : 'Submit Message'}
                     </button>
@@ -306,8 +306,8 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                     <h2 className="text-[#1f2a17] text-2xl font-bold font-display">Contact & Location</h2>
 
                     <div className="space-y-4 font-inter text-sm">
-                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#f4f7ee]/60 border border-[#4a9e2f]/20">
-                        <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-brand-mist/60 border border-brand/20">
+                        <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
                           <FiPhone className="w-4 h-4" />
                         </div>
                         <div>
@@ -316,7 +316,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                             <a
                               key={entry.value}
                               href={telHref(entry.value)}
-                              className="text-stone-700 hover:text-[#4a9e2f] transition-colors block mt-0.5 font-mono"
+                              className="text-stone-700 hover:text-brand transition-colors block mt-0.5 font-mono"
                             >
                               {entry.value}
                             </a>
@@ -324,8 +324,8 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#f4f7ee]/60 border border-[#4a9e2f]/20">
-                        <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-brand-mist/60 border border-brand/20">
+                        <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
                           <FiMail className="w-4 h-4" />
                         </div>
                         <div>
@@ -334,7 +334,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                             <a
                               key={entry.value}
                               href={`mailto:${entry.value}`}
-                              className="text-stone-700 hover:text-[#4a9e2f] transition-colors block mt-0.5 break-all"
+                              className="text-stone-700 hover:text-brand transition-colors block mt-0.5 break-all"
                             >
                               {entry.value}
                             </a>
@@ -342,8 +342,8 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#f4f7ee]/60 border border-[#4a9e2f]/20">
-                        <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-brand-mist/60 border border-brand/20">
+                        <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
                           <FiMapPin className="w-4 h-4" />
                         </div>
                         <div>
@@ -354,8 +354,8 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#f4f7ee]/60 border border-[#4a9e2f]/20">
-                        <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-brand-mist/60 border border-brand/20">
+                        <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
                           <FiClock className="w-4 h-4" />
                         </div>
                         <div>
@@ -364,8 +364,8 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-[#f4f7ee]/60 border border-[#4a9e2f]/20">
-                        <div className="w-9 h-9 rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3.5 p-3 rounded-xl bg-brand-mist/60 border border-brand/20">
+                        <div className="w-9 h-9 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
                           <FiTruck className="w-4 h-4" />
                         </div>
                         <div>
@@ -399,9 +399,9 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
 
         {/* CONTAINER 2: FAQ */}
         <ScrollAnimate variant="fade-in-up" delay={150}>
-          <div className="p-8 sm:p-12 bg-white rounded-2xl flex flex-col lg:flex-row justify-start items-start gap-10 mt-10 shadow-lg border border-[#4a9e2f]/20">
+          <div className="p-8 sm:p-12 bg-white rounded-2xl flex flex-col lg:flex-row justify-start items-start gap-10 mt-10 shadow-lg border border-brand/20">
             <div className="flex-1 w-full flex flex-col gap-4 lg:sticky lg:top-28 lg:self-start">
-              <span className="font-gotham text-xs uppercase tracking-wider text-[#4a9e2f] font-semibold">Support</span>
+              <span className="font-gotham text-xs uppercase tracking-wider text-brand font-semibold">Support</span>
               <h2 className="text-[#1f2a17] text-3xl font-bold font-display">Frequently Asked Questions</h2>
               <p className="text-stone-600 text-sm font-inter leading-relaxed">
                 Cash on delivery, courier timelines outside Dhaka, adulteration worries, crystallised
@@ -410,7 +410,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
               </p>
               <p className="text-stone-600 text-sm font-inter leading-relaxed">
                 Still stuck? Call or WhatsApp{' '}
-                <a href={telHref(contact.phone)} className="font-semibold text-[#4a9e2f] hover:underline">
+                <a href={telHref(contact.phone)} className="font-semibold text-brand hover:underline">
                   {contact.phone}
                 </a>{' '}
                 — open daily, {contact.hours}.
@@ -418,19 +418,19 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
               <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
                 <Link
                   href="/shop"
-                  className="inline-flex items-center gap-2 text-xs font-bold font-gotham uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                  className="inline-flex items-center gap-2 text-xs font-bold font-gotham uppercase tracking-wider text-brand hover:underline"
                 >
                   Explore Organishi Shop &rarr;
                 </Link>
                 <Link
                   href="/terms-and-conditions"
-                  className="inline-flex items-center gap-2 text-xs font-bold font-gotham uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                  className="inline-flex items-center gap-2 text-xs font-bold font-gotham uppercase tracking-wider text-brand hover:underline"
                 >
                   Terms &amp; Conditions &rarr;
                 </Link>
                 <Link
                   href="/privacy-policy"
-                  className="inline-flex items-center gap-2 text-xs font-bold font-gotham uppercase tracking-wider text-[#4a9e2f] hover:underline"
+                  className="inline-flex items-center gap-2 text-xs font-bold font-gotham uppercase tracking-wider text-brand hover:underline"
                 >
                   Privacy Policy &rarr;
                 </Link>
@@ -445,16 +445,16 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
                   <div
                     key={index}
                     className={`p-4 rounded-xl border transition-all duration-300 ${
-                      isOpen ? 'border-[#4a9e2f] bg-[#f4f7ee]/50' : 'border-stone-200 bg-white hover:border-stone-300'
+                      isOpen ? 'border-brand bg-brand-mist/50' : 'border-stone-200 bg-white hover:border-stone-300'
                     }`}
                   >
                     <button
                       onClick={() => toggleFaq(index)}
                       className="w-full flex items-center justify-between text-left font-gotham text-stone-900 text-sm font-semibold select-none focus:outline-none cursor-pointer"
                     >
-                      <span className={isOpen ? 'text-[#4a9e2f]' : ''}>{faq.question}</span>
+                      <span className={isOpen ? 'text-brand' : ''}>{faq.question}</span>
                       <div className={`w-7 h-7 rounded-full flex justify-center items-center shrink-0 ml-3 transition-colors ${
-                        isOpen ? 'bg-[#4a9e2f] text-white' : 'bg-stone-100 text-stone-600'
+                        isOpen ? 'bg-brand text-white' : 'bg-stone-100 text-stone-600'
                       }`}>
                         <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.8">
                           <path d="M1 1L5 5L9 1" strokeLinecap="round" strokeLinejoin="round" />

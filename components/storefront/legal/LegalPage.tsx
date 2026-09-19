@@ -32,7 +32,7 @@ export default function LegalPage({
   footer,
 }: LegalPageProps) {
   return (
-    <main className="w-full bg-[#f4f7ee] pb-16 md:pb-24">
+    <main className="w-full bg-brand-mist pb-16 md:pb-24">
       {/* ── Page banner ─────────────────────────────────────────────────── */}
       <section className="bg-[#1f2a17]">
         <div className="mx-auto max-w-[1600px] px-4 py-16 text-center md:px-8 lg:py-20">
@@ -53,8 +53,8 @@ export default function LegalPage({
         <div className="-mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[260px_1fr]">
           {/* Jump list — sticky beside the document on large screens. */}
           <aside className="hidden lg:block">
-            <nav className="sticky top-28 rounded-2xl border border-[#4a9e2f]/20 bg-white p-6 shadow-sm">
-              <p className="font-gotham text-xs font-semibold uppercase tracking-[0.2em] text-[#4a9e2f]">
+            <nav className="sticky top-28 rounded-2xl border border-brand/20 bg-white p-6 shadow-sm">
+              <p className="font-gotham text-xs font-semibold uppercase tracking-[0.2em] text-brand">
                 On this page
               </p>
               <ul className="mt-4 space-y-2.5">
@@ -62,7 +62,7 @@ export default function LegalPage({
                   <li key={section.id}>
                     <a
                       href={`#${section.id}`}
-                      className="block text-sm leading-snug text-gray-600 transition-colors hover:text-[#4a9e2f]"
+                      className="block text-sm leading-snug text-gray-600 transition-colors hover:text-brand"
                     >
                       <span className="mr-1.5 text-gray-400">{index + 1}.</span>
                       {section.heading}
@@ -73,7 +73,7 @@ export default function LegalPage({
             </nav>
           </aside>
 
-          <article className="rounded-2xl border border-[#4a9e2f]/20 bg-white p-6 shadow-lg sm:p-10 md:p-14">
+          <article className="rounded-2xl border border-brand/20 bg-white p-6 shadow-lg sm:p-10 md:p-14">
             <p className="text-sm text-gray-500">
               Last updated:{" "}
               <span className="font-semibold text-[#1f2a17]">{lastUpdated}</span>
@@ -84,7 +84,7 @@ export default function LegalPage({
               {sections.map((section, index) => (
                 <section key={section.id} id={section.id} className="scroll-mt-28">
                   <h2 className="font-display text-[22px] font-semibold text-[#1f2a17] sm:text-[26px]">
-                    <span className="mr-2 text-[#4a9e2f]">{index + 1}.</span>
+                    <span className="mr-2 text-brand">{index + 1}.</span>
                     {section.heading}
                   </h2>
                   <div className="legal-body mt-4 space-y-4 text-[15px] leading-relaxed text-gray-700">
@@ -94,7 +94,7 @@ export default function LegalPage({
               ))}
             </div>
 
-            {footer && <div className="mt-12 border-t border-[#4a9e2f]/15 pt-10">{footer}</div>}
+            {footer && <div className="mt-12 border-t border-brand/15 pt-10">{footer}</div>}
           </article>
         </div>
       </div>
@@ -108,7 +108,7 @@ export function LegalList({ items }: { items: ReactNode[] }) {
     <ul className="space-y-2.5">
       {items.map((item, index) => (
         <li key={index} className="flex gap-3">
-          <span className="mt-[9px] h-[6px] w-[6px] shrink-0 rounded-full bg-[#4a9e2f]" />
+          <span className="mt-[9px] h-[6px] w-[6px] shrink-0 rounded-full bg-brand" />
           <span>{item}</span>
         </li>
       ))}

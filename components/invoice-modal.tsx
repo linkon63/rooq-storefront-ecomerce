@@ -109,7 +109,7 @@ export default function InvoiceModal({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => window.print()}
-                className="px-5 py-2.5 bg-[#4a9e2f] text-white font-sans text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+                className="px-5 py-2.5 bg-brand text-white font-sans text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-brand-dark transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
               >
                 <LuPrinter className="w-4 h-4" />
                 Print

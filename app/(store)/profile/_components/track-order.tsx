@@ -7,7 +7,7 @@ import { getCustomerToken } from "@/lib/storefront-api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
-const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f]";
+const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-brand";
 
 interface Order {
   id: string;
@@ -135,14 +135,14 @@ export default function TrackOrderView() {
             value={invoiceId}
             onChange={(e) => setInvoiceId(e.target.value)}
             placeholder="Enter Order Number (e.g. ORD-1712345678)"
-            className="w-full pl-10 pr-4 py-3 border border-stone-200 bg-white text-sm font-sans text-zinc-800 outline-none focus:border-[#4a9e2f] focus:ring-1 focus:ring-[#4a9e2f] transition rounded-xl placeholder:text-zinc-300"
+            className="w-full pl-10 pr-4 py-3 border border-stone-200 bg-white text-sm font-sans text-zinc-800 outline-none focus:border-brand focus:ring-1 focus:ring-brand transition rounded-xl placeholder:text-zinc-300"
             required
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="shrink-0 inline-flex items-center gap-2 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-7 py-3 rounded-xl transition cursor-pointer shadow-md disabled:opacity-60"
+          className="shrink-0 inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-sans text-[10px] font-bold tracking-[0.16em] uppercase px-7 py-3 rounded-xl transition cursor-pointer shadow-md disabled:opacity-60"
         >
           {loading ? <FiLoader className="animate-spin w-3.5 h-3.5" /> : "Track"}
         </button>
@@ -162,7 +162,7 @@ export default function TrackOrderView() {
                 setInvoiceId(entry.orderNumber);
                 void track(entry.orderNumber);
               }}
-              className="border border-stone-200 bg-white hover:border-[#4a9e2f] hover:text-[#4a9e2f] text-zinc-600 font-sans text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-full transition cursor-pointer"
+              className="border border-stone-200 bg-white hover:border-brand hover:text-brand text-zinc-600 font-sans text-[10px] font-bold tracking-wider uppercase px-3 py-1.5 rounded-full transition cursor-pointer"
             >
               {entry.orderNumber}
             </button>
@@ -202,7 +202,7 @@ export default function TrackOrderView() {
               {/* Progress tracker */}
               {!isCancelled ? (
                 <div>
-                  <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-[#4a9e2f] mb-7">
+                  <p className="font-sans text-[10px] font-bold tracking-[0.18em] uppercase text-brand mb-7">
                     Delivery Progress
                   </p>
 
@@ -224,8 +224,8 @@ export default function TrackOrderView() {
                           <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
                             isActive
                               ? isCurrent
-                                ? "bg-[#4a9e2f] border-[#4a9e2f] text-white shadow-md shadow-[#4a9e2f]/30 scale-110"
-                                : "bg-[#4a9e2f] border-[#4a9e2f] text-white"
+                                ? "bg-brand border-brand text-white shadow-md shadow-brand/30 scale-110"
+                                : "bg-brand border-brand text-white"
                               : "bg-white border-stone-200 text-stone-300"
                           }`}>
                             <Icon className="text-sm" />
@@ -236,7 +236,7 @@ export default function TrackOrderView() {
                             {step.label}
                           </p>
                           {isCurrent && (
-                            <span className="font-sans text-[9px] text-[#4a9e2f] font-bold tracking-wider uppercase">
+                            <span className="font-sans text-[9px] text-brand font-bold tracking-wider uppercase">
                               Current
                             </span>
                           )}

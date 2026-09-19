@@ -31,12 +31,12 @@ export default function ConfirmationPage() {
 
   if (!order) {
     return (
-      <main className="grow bg-[#f4f7ee] w-full min-h-screen flex items-center justify-center p-6">
+      <main className="grow bg-brand-mist w-full min-h-screen flex items-center justify-center p-6">
         <div className="text-center bg-white p-8 rounded-2xl shadow-lg border border-stone-200 max-w-md">
           <p className="text-stone-600 font-gotham text-base mb-6">No recent order details found.</p>
           <Link
             href="/shop"
-            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#4a9e2f] text-white font-gotham text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-[#3d8626] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-brand text-white font-gotham text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-brand-dark transition-colors"
           >
             <LuShoppingBag className="w-4 h-4" />
             Go To Shop
@@ -52,7 +52,7 @@ export default function ConfirmationPage() {
 
         {/* Top Success Card — screen only */}
         <div className="no-print bg-white rounded-2xl p-6 sm:p-8 mb-6 shadow-sm border border-stone-200 text-center">
-          <div className="w-16 h-16 bg-[#4a9e2f]/10 text-[#4a9e2f] rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
             <LuCircleCheck className="w-10 h-10" />
           </div>
           <h1 className="font-display text-3xl sm:text-4xl text-[#1f2a17] font-bold mb-2">
@@ -68,14 +68,14 @@ export default function ConfirmationPage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="px-6 py-3 bg-white border border-[#4a9e2f] text-[#4a9e2f] hover:bg-[#4a9e2f] hover:text-white font-gotham text-xs font-bold uppercase tracking-wider rounded-full transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+              className="px-6 py-3 bg-white border border-brand text-brand hover:bg-brand hover:text-white font-gotham text-xs font-bold uppercase tracking-wider rounded-full transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
             >
               <LuPrinter className="w-4 h-4" />
               Print Invoice
             </button>
             <Link
               href="/shop"
-              className="px-6 py-3 bg-[#4a9e2f] hover:bg-[#3d8626] text-white font-gotham text-xs font-bold uppercase tracking-wider rounded-full transition-colors flex items-center gap-2 cursor-pointer shadow-md"
+              className="px-6 py-3 bg-brand hover:bg-brand-dark text-white font-gotham text-xs font-bold uppercase tracking-wider rounded-full transition-colors flex items-center gap-2 cursor-pointer shadow-md"
             >
               <LuShoppingBag className="w-4 h-4" />
               Continue Shopping

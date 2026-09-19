@@ -139,13 +139,13 @@ export default function AuthModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-xs">
       {/* Same two-column design as the /login page, sized to sit inside the
           viewport: the form column scrolls when the register fields outgrow it. */}
-      <div className="relative grid max-h-[92vh] w-full max-w-4xl grid-cols-1 overflow-hidden rounded-3xl border border-[#4a9e2f]/15 bg-white shadow-[0_30px_80px_-30px_rgba(31,42,23,0.65)] md:grid-cols-2">
+      <div className="relative grid max-h-[92vh] w-full max-w-4xl grid-cols-1 overflow-hidden rounded-3xl border border-brand/15 bg-white shadow-[0_30px_80px_-30px_rgba(31,42,23,0.65)] md:grid-cols-2">
 
         {/* Close Button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-20 cursor-pointer rounded-full bg-white/90 p-2 text-stone-500 shadow-sm transition-colors hover:text-[#4a9e2f] md:right-[calc(50%+1rem)]"
+          className="absolute right-4 top-4 z-20 cursor-pointer rounded-full bg-white/90 p-2 text-stone-500 shadow-sm transition-colors hover:text-brand md:right-[calc(50%+1rem)]"
           aria-label="Close"
         >
           <LuX className="h-5 w-5" />
@@ -302,7 +302,7 @@ export default function AuthModal() {
                   id="remember-login"
                   checked={rememberLogin}
                   onChange={(e) => setRememberLogin(e.target.checked)}
-                  className="h-4 w-4 cursor-pointer rounded accent-[#4a9e2f]"
+                  className="h-4 w-4 cursor-pointer rounded accent-brand"
                 />
                 <label htmlFor="remember-login" className="font-inter cursor-pointer text-xs text-stone-600">
                   Remember login
@@ -313,7 +313,7 @@ export default function AuthModal() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#4a9e2f] py-3.5 font-gotham text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#4a9e2f]/25 transition-all hover:bg-[#3d8626] hover:shadow-xl hover:shadow-[#4a9e2f]/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
+              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand py-3.5 font-gotham text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-dark hover:shadow-xl hover:shadow-brand/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
             >
               {submitting && <LuLoader className="h-4 w-4 animate-spin" />}
               {submitting

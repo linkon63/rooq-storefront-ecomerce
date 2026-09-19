@@ -48,7 +48,7 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
       label: "Call us",
       href: telHref(callNumber),
       Icon: HiOutlinePhone,
-      className: "bg-[#4a9e2f]",
+      className: "bg-brand",
     },
     {
       label: "WhatsApp us",
@@ -99,7 +99,7 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
         aria-label={open ? "Close contact options" : "Contact us"}
         aria-expanded={open}
         aria-controls="floating-contact-actions"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-[#4a9e2f] text-white shadow-xl"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-xl"
       >
         {open ? <FiX size={24} /> : <HiOutlineChatBubbleLeftRight size={26} />}
       </button>

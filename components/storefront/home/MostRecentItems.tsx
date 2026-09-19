@@ -51,7 +51,7 @@ export default function MostRecentItems({ products, categories }: MostRecentItem
               >
                 <span
                   className={`relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border-2 bg-white transition-colors ${
-                    isActive ? "border-[#4a9e2f]" : "border-gray-100 group-hover:border-[#4a9e2f]/40"
+                    isActive ? "border-brand" : "border-gray-100 group-hover:border-brand/40"
                   }`}
                 >
                   {category.imageUrl ? (
@@ -63,14 +63,14 @@ export default function MostRecentItems({ products, categories }: MostRecentItem
                       className="object-cover"
                     />
                   ) : (
-                    <span className="font-display text-lg text-[#4a9e2f]">
+                    <span className="font-display text-lg text-brand">
                       {category.name.charAt(0)}
                     </span>
                   )}
                 </span>
                 <span
                   className={`text-center text-[13px] leading-tight transition-colors ${
-                    isActive ? "text-[#4a9e2f]" : "text-[#1f2a17] group-hover:text-[#4a9e2f]"
+                    isActive ? "text-brand" : "text-[#1f2a17] group-hover:text-brand"
                   }`}
                 >
                   {category.name}
@@ -96,7 +96,7 @@ export default function MostRecentItems({ products, categories }: MostRecentItem
       <div className="mt-10 flex justify-center">
         <Link
           href={activeCategory ? `/shop?category=${encodeURIComponent(activeCategory)}` : "/shop"}
-          className="font-display rounded-full bg-[#4a9e2f] px-7 py-2.5 text-[15px] text-white transition-colors hover:bg-[#3d8626]"
+          className="font-display rounded-full bg-brand px-7 py-2.5 text-[15px] text-white transition-colors hover:bg-brand-dark"
         >
           See All Product
         </Link>
