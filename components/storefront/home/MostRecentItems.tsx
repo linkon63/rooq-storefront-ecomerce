@@ -33,7 +33,7 @@ export default function MostRecentItems({ products, categories }: MostRecentItem
 
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8">
-      <h2 className="font-display text-center text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
+      <h2 className="font-display text-center text-[22px] font-bold leading-tight md:font-semibold text-[#1f2a17] md:text-[38px]">
         Most Recent Item
       </h2>
 

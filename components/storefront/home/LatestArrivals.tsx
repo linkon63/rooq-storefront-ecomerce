@@ -24,7 +24,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8">
       <div className="flex flex-col items-center text-center">
-        <h2 className="font-display text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
+        <h2 className="font-display text-[22px] font-bold leading-tight md:font-semibold text-[#1f2a17] md:text-[38px]">
           Our Latest Arrivals
         </h2>
         <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-gray-600">
