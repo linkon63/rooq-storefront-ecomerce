@@ -10,45 +10,21 @@ import { toast } from "sonner";
 import type { Product } from "@/lib/admin-api";
 import { resolveImageUrl } from "@/lib/admin-api";
 import { resolveVariantPricing } from "@/lib/shop-api";
+import { buildAttributeGroups, variantValues } from "@/lib/product-variants";
+import { isPhoneViewport } from "@/lib/viewport";
+import BuyNowSheet from "./BuyNowSheet";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
 
 const money = (value: number) =>
   `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-type Variant = NonNullable<Product["variants"]>[number];
-
-/** "Weight" → ["200 g", "500 g"], preserving the order variants were created in. */
-function buildAttributeGroups(product: Product) {
-  const groups = new Map<string, string[]>();
-  for (const variant of product.variants ?? []) {
-    for (const attribute of variant.attributes ?? []) {
-      const name = attribute.attributeValue?.attribute?.name;
-      const value = attribute.attributeValue?.value;
-      if (!name || !value) continue;
-      const values = groups.get(name) ?? [];
-      if (!values.includes(value)) values.push(value);
-      groups.set(name, values);
-    }
-  }
-  return [...groups.entries()].map(([name, values]) => ({ name, values }));
-}
-
-function variantValues(variant: Variant) {
-  const map: Record<string, string> = {};
-  for (const attribute of variant.attributes ?? []) {
-    const name = attribute.attributeValue?.attribute?.name;
-    const value = attribute.attributeValue?.value;
-    if (name && value) map[name] = value;
-  }
-  return map;
-}
-
 export default function ProductDetails({ product }: { product: Product }) {
   const { addItem, buyNow } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const router = useRouter();
   const [buyingNow, setBuyingNow] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const gallery = useMemo(() => {
     const media = [...(product.media ?? [])].sort(
@@ -111,6 +87,12 @@ export default function ProductDetails({ product }: { product: Product }) {
    */
   const onBuyNow = async () => {
     if (!inStock || buyingNow) return;
+    // Phones confirm the variant and quantity in a bottom sheet first; it opens
+    // on whatever is already picked on the page.
+    if (isPhoneViewport()) {
+      setSheetOpen(true);
+      return;
+    }
     setBuyingNow(true);
     try {
       await buyNow(cartLine());
@@ -351,6 +333,22 @@ export default function ProductDetails({ product }: { product: Product }) {
         {addToCartButton}
         {buyNowButton}
       </div>
+
+      {sheetOpen && (
+        <BuyNowSheet
+          productId={product.id}
+          product={product}
+          preview={{
+            name: product.name,
+            image: gallery[0] ?? "",
+            price: payable,
+            originalPrice: hasDiscount ? price : undefined,
+          }}
+          initialSelection={selection}
+          initialQuantity={quantity}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
     </div>
   );
 }

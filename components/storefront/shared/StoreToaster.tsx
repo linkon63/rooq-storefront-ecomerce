@@ -3,8 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { Toaster } from "sonner";
 
-/** Tailwind's `md` breakpoint — below it the storefront is in its phone layout. */
-const PHONE_QUERY = "(max-width: 767px)";
+import { PHONE_QUERY } from "@/lib/viewport";
 
 function subscribe(onChange: () => void) {
   const query = window.matchMedia(PHONE_QUERY);

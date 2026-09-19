@@ -348,14 +348,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
    * Buy Now is a single-product checkout: the line is added silently — a toast
    * is pointless when the shopper is already on their way — and then pinned as
    * the only selected line, so checkout bills just this product while the rest
-   * of the cart stays put.
+   * of the cart stays put. With `includeCart` (the phone sheet) everything
+   * already in the cart is selected too, so checkout opens with the whole
+   * cart ticked and the shopper unticks what they do not want.
    */
   const buyNow = useCallback(
-    async (input: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+    async (
+      input: Omit<CartItem, "quantity"> & { quantity?: number },
+      options?: { includeCart?: boolean },
+    ) => {
       const line = await addItem(input, { silent: true });
-      setSelectedKeys([getItemKey(line)]);
+      const key = getItemKey(line);
+      setSelectedKeys(
+        options?.includeCart ? [...new Set([...items.map(getItemKey), key])] : [key],
+      );
     },
-    [addItem, setSelectedKeys],
+    [addItem, items, setSelectedKeys],
   );
 
   const selectedItems = useMemo(() => {

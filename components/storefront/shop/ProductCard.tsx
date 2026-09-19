@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import type { ShopProduct } from "@/lib/shop-api";
 import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
+import { isPhoneViewport } from "@/lib/viewport";
+import BuyNowSheet from "./BuyNowSheet";
 
 const money = (value: number) =>
   `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -19,6 +21,7 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
   const { addItem, buyNow } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [buyingNow, setBuyingNow] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   // Product pages are addressed by id, per the catalogue routing.
   const href = `/product/${product.id}`;
@@ -54,6 +57,11 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
    */
   const onBuyNow = async () => {
     if (product.comingSoon || buyingNow) return;
+    // Phones pick the variant and quantity in a bottom sheet first.
+    if (isPhoneViewport()) {
+      setSheetOpen(true);
+      return;
+    }
     setBuyingNow(true);
     try {
       await buyNow(cartLine());
@@ -190,6 +198,19 @@ export default function ProductCard({ product }: { product: ShopProduct }) {
           <FiZap size={15} />
           {buyingNow ? "Please wait…" : "Buy Now"}
         </button>
+      )}
+
+      {sheetOpen && (
+        <BuyNowSheet
+          productId={product.id}
+          preview={{
+            name: product.name,
+            image: product.image,
+            price: product.price,
+            originalPrice: hasDiscount ? product.originalPrice : undefined,
+          }}
+          onClose={() => setSheetOpen(false)}
+        />
       )}
     </div>
   );

@@ -82,9 +82,13 @@ export interface CartContextValue {
   ) => Promise<CartItem>;
   /**
    * Add a line and make it the only selected one — Buy Now checks out that
-   * product alone and leaves the rest of the cart for later.
+   * product alone and leaves the rest of the cart for later. `includeCart`
+   * selects the rest of the cart as well.
    */
-  buyNow: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => Promise<void>;
+  buyNow: (
+    item: Omit<CartItem, "quantity"> & { quantity?: number },
+    options?: { includeCart?: boolean },
+  ) => Promise<void>;
   removeItem: (slug: string) => void;
   updateQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
