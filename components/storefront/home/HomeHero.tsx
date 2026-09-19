@@ -26,8 +26,11 @@ export default function HomeHero({ slides, banners }: HomeHeroProps) {
 
   return (
     <section className="mx-auto max-w-[1600px] px-4 pt-4 md:px-8 md:pt-6">
+      {/* Below lg the stage and the side banners fold into one swipeable slider. */}
+      <MobileHeroSlider slides={[...slides, ...banners]} />
+
       {/* 32% keeps the two stacked banners exactly as tall as the main stage. */}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_32%] lg:gap-8">
+      <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_32%] lg:gap-8">
         {/* ── Main stage ──────────────────────────────────────────────── */}
         <div className="group relative overflow-hidden rounded-lg bg-[#f4f7ee]">
           <Swiper
@@ -116,6 +119,58 @@ export default function HomeHero({ slides, banners }: HomeHeroProps) {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Phones and tablets: every hero artwork in one slider, swiped or auto-advanced every 3s. */
+function MobileHeroSlider({ slides }: { slides: HeroSlide[] }) {
+  const [swiper, setSwiper] = useState<SwiperClass | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  return (
+    <div className="relative overflow-hidden rounded-lg bg-[#f4f7ee] lg:hidden">
+      <Swiper
+        modules={[Autoplay]}
+        loop={slides.length > 1}
+        autoplay={{ delay: 3000, disableOnInteraction: false }}
+        onSwiper={setSwiper}
+        onSlideChange={(instance) => setActiveIndex(instance.realIndex)}
+      >
+        {slides.map((slide, index) => (
+          <SwiperSlide key={`${slide.image}-${index}`}>
+            <Link href={slide.href} className="block">
+              <div className="relative aspect-[1144/640] w-full">
+                <Image
+                  src={slide.image}
+                  alt={slide.alt}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority={index === 0}
+                />
+              </div>
+            </Link>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+      {slides.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5">
+          {slides.map((slide, index) => (
+            <button
+              key={`dot-${slide.image}-${index}`}
+              type="button"
+              onClick={() => swiper?.slideToLoop(index)}
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={index === activeIndex}
+              className={`h-[3px] rounded-full transition-all ${
+                index === activeIndex ? "w-7 bg-[#4a9e2f]" : "w-5 bg-white/70"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

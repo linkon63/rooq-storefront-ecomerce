@@ -82,7 +82,7 @@ export default function NewsletterCta() {
       <div className="absolute inset-0 -z-10 bg-[#1f2a17]/50" />
 
       <div className="mx-auto max-w-[1600px] px-4 py-20 text-center md:px-8 lg:py-28">
-        <h2 className="font-display text-[28px] leading-tight text-white md:text-[40px]">
+        <h2 className="font-display text-[22px] font-bold leading-tight text-white md:text-[40px] md:font-normal">
           Get Latest Updates & Big Deals
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-[14px] text-white/85">

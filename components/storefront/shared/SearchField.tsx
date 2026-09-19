@@ -15,7 +15,14 @@ const money = (value: number) =>
  * Header search: debounced suggestions as you type, Enter (or the button) hands
  * the term over to the shop page, which owns the full result list.
  */
-export default function SearchField({ className = "" }: { className?: string }) {
+export default function SearchField({
+  className = "",
+  autoFocus = false,
+}: {
+  className?: string;
+  /** Focus the input on mount — used when the mobile search icon reveals it. */
+  autoFocus?: boolean;
+}) {
   const router = useRouter();
   const { searchResults, isLoading, error, search } = useProductSearch();
 
@@ -92,6 +99,7 @@ export default function SearchField({ className = "" }: { className?: string }) 
               setIsOpen(true);
             }}
             onFocus={() => setIsOpen(true)}
+            autoFocus={autoFocus}
             onKeyDown={onKeyDown}
             type="search"
             placeholder="Search for Products"
@@ -100,7 +108,7 @@ export default function SearchField({ className = "" }: { className?: string }) 
             aria-controls="search-suggestions"
             role="combobox"
             autoComplete="off"
-            className="h-11 w-full rounded-full border border-gray-200 pl-5 pr-14 text-sm text-gray-700 outline-none transition-colors placeholder:text-gray-400 focus:border-[#4a9e2f]"
+            className="h-11 w-full rounded-full border border-gray-200 bg-white pl-5 pr-14 text-sm text-gray-700 outline-none transition-colors placeholder:text-gray-400 focus:border-[#4a9e2f]"
           />
           <button
             type="submit"

@@ -77,7 +77,7 @@ export default function FeatureStrip() {
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8 py-6 md:py-10">
       <div className="text-center">
-        <h2 className="font-display text-center text-[28px] leading-tight text-[#1f2a17] md:text-[38px]">
+        <h2 className="font-display text-center text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
           Our Product Quality & Recognition
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-gray-500">

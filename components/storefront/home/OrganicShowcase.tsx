@@ -92,7 +92,7 @@ export default function OrganicShowcase() {
               Straight from the farm
             </span>
 
-            <h2 className="font-display mt-4 text-[28px] leading-tight text-[#1f2a17] md:text-[38px]">
+            <h2 className="font-display mt-4 text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
               Real organic food, the way it used to taste
             </h2>
             <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-gray-600">

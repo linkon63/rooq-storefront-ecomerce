@@ -33,12 +33,12 @@ export default function MostRecentItems({ products, categories }: MostRecentItem
 
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8">
-      <h2 className="font-display text-center text-[28px] leading-tight text-[#1f2a17] md:text-[38px]">
+      <h2 className="font-display text-center text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
         Most Recent Item
       </h2>
 
       {chips.length > 0 && (
-        <div className="mt-8 flex justify-start gap-6 overflow-x-auto pb-2 md:mt-10 md:justify-center md:gap-10 lg:gap-14">
+        <div className="mt-8 flex justify-start gap-6 overflow-x-auto pb-2 [scrollbar-width:none] md:mt-10 [&::-webkit-scrollbar]:hidden md:justify-center md:gap-10 lg:gap-14">
           {chips.map((category) => {
             const isActive = activeCategory === category.name;
             return (

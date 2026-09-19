@@ -24,7 +24,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8">
       <div className="flex flex-col items-center text-center">
-        <h2 className="font-display text-[28px] leading-tight text-[#1f2a17] md:text-[38px]">
+        <h2 className="font-display text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
           Our Latest Arrivals
         </h2>
         <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-gray-600">
@@ -57,7 +57,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
                   </span>
                 )}
 
-                <h3 className="font-display mt-1.5 text-[20px] leading-tight text-[#1f2a17] sm:text-[26px] lg:text-[30px]">
+                <h3 className="font-display mt-1.5 text-[18px] leading-tight text-[#1f2a17] sm:text-[26px] lg:text-[30px]">
                   {product.name}
                 </h3>
 
@@ -67,7 +67,7 @@ export default function LatestArrivals({ products }: LatestArrivalsProps) {
                   </span>
                 ) : (
                   <p className="mt-3 flex flex-wrap items-center gap-2.5">
-                    <span className="font-display text-[20px] font-semibold text-[#1f2a17] sm:text-[24px]">
+                    <span className="font-display text-[18px] font-semibold text-[#1f2a17] sm:text-[24px]">
                       {money(product.price)}
                     </span>
                     {hasDiscount && (

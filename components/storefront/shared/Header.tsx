@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
-import { FiClock, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { FiClock, FiUser, FiMenu, FiX, FiSearch } from "react-icons/fi";
 import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -88,6 +88,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
   const { itemCount: wishlistCount } = useWishlist();
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const { phone, email, hours } = resolveShopContact(settings);
 
@@ -107,9 +108,11 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
-      {/* ── Top utility bar ─────────────────────────────────────────────── */}
-      <div className="bg-[#4a9e2f] text-white text-[11px] sm:text-[13px]">
+    <header className="sticky top-0 z-50 w-full bg-[#f4f7ee] shadow-sm">
+      {/* ── Top utility bar ─────────────────────────────────────────────────
+          Hidden on phones — the footer's call/WhatsApp CTA carries the
+          numbers there, and the sticky header stays short. */}
+      <div className="hidden bg-[#4a9e2f] text-white text-[11px] sm:text-[13px] md:block">
         <div className="mx-auto max-w-[1600px] px-3 sm:px-4 md:px-5">
           <div className="flex h-10 items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2.5 sm:gap-5 overflow-hidden whitespace-nowrap">
@@ -146,7 +149,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
       </div>
 
       {/* ── Main bar ────────────────────────────────────────────────────── */}
-      <div className="border-b border-gray-100 bg-white">
+      <div className="border-b border-[#4a9e2f]/10 bg-[#f4f7ee]">
         <div className="mx-auto max-w-[1600px] px-4 md:px-5">
           <div className="flex h-[88px] items-center justify-between gap-4">
             {/* aria-hidden on the ™: the logo's alt text already names the brand,
@@ -196,6 +199,17 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
 
             <div className="flex items-center gap-4 md:gap-5">
             <SearchField className="hidden min-w-[160px] max-w-[320px] flex-1 lg:block" />
+              {/* Below lg the search bar stays folded away until this is tapped. */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen((open) => !open)}
+                aria-label={searchOpen ? "Close search" : "Search"}
+                aria-expanded={searchOpen}
+                className="text-[#1f2a17] hover:text-[#4a9e2f] lg:hidden"
+              >
+                <FiSearch size={21} />
+              </button>
+
               <Link href="/cart" aria-label="Cart" className="relative text-[#1f2a17] hover:text-[#4a9e2f]">
                 <HiOutlineShoppingCart size={23} />
                 <Badge count={cartCount} />
@@ -203,7 +217,8 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
 
               <span className="hidden h-5 w-px bg-gray-200 md:block" />
 
-              <Link href="/wishlist" aria-label="Wishlist" className="relative text-[#1f2a17] hover:text-[#4a9e2f]">
+              {/* On phones the wishlist moves into the menu. */}
+              <Link href="/wishlist" aria-label="Wishlist" className="relative hidden text-[#1f2a17] hover:text-[#4a9e2f] md:block">
                 <HiOutlineHeart size={23} />
                 <Badge count={wishlistCount} />
               </Link>
@@ -230,18 +245,30 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
             </div>
           </div>
 
-          {/* Search drops below the bar on small screens. */}
-          <SearchField className="pb-3 lg:hidden" />
+          {/* Search drops below the bar on small screens, once the icon is tapped. */}
+          {searchOpen && <SearchField autoFocus className="pb-3 lg:hidden" />}
         </div>
 
         {mobileOpen && (
-          <nav className="border-t border-gray-100 bg-white xl:hidden">
+          <nav className="border-t border-[#4a9e2f]/10 bg-[#f4f7ee] xl:hidden">
             <div className="mx-auto flex max-w-[1600px] flex-col px-4 py-2 md:px-5">
               <NavLinksWithParams
                 links={navLinks}
                 variant="mobile"
                 onNavigate={() => setMobileOpen(false)}
               />
+              <Link
+                href="/wishlist"
+                onClick={() => setMobileOpen(false)}
+                className="font-display flex items-center justify-between py-3 text-[17px] text-[#1f2a17] md:hidden"
+              >
+                Wishlist
+                {wishlistCount > 0 && (
+                  <span className="flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[#4a9e2f] px-1.5 text-[11px] font-semibold text-white">
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </span>
+                )}
+              </Link>
             </div>
           </nav>
         )}
@@ -280,7 +307,7 @@ function NavLinks({ links, variant, onNavigate, params = null }: NavLinksProps) 
                       ? "font-semibold text-[#4a9e2f] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-[2px] after:rounded-full after:bg-[#4a9e2f] after:content-['']"
                       : "text-[#1f2a17]"
                   }`
-                : `font-display border-b border-gray-50 py-3 text-[17px] transition-colors last:border-b-0 ${
+                : `font-display border-b border-[#4a9e2f]/10 py-3 text-[17px] transition-colors last:border-b-0 ${
                     isActive ? "font-semibold text-[#4a9e2f]" : "text-[#1f2a17]"
                   }`
             }

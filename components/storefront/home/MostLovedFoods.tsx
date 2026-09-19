@@ -31,7 +31,7 @@ export default function MostLovedFoods({ products }: MostLovedFoodsProps) {
 
   return (
     <section className="mx-auto max-w-[1600px] px-4 md:px-8">
-      <h2 className="font-display text-center text-[28px] leading-tight text-[#1f2a17] md:text-[38px]">
+      <h2 className="font-display text-center text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[38px] md:font-normal">
         Our Most Loved Items
       </h2>
 

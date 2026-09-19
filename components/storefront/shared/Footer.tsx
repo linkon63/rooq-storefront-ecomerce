@@ -4,13 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineMapPin } from "react-icons/hi2";
+import { FaWhatsapp } from "react-icons/fa";
 
 import Logo from "./Logo";
 import { activeSocialLinks } from "./social-platforms";
 import { BLOG_ENABLED } from "@/lib/feature-flags";
 import type { Policy } from "@/types/policies";
 import type { ShopSettings } from "@/lib/shop-api";
-import { resolveShopContact, telHref } from "@/lib/shop-contact";
+import { resolveShopContact, telHref, whatsappHref } from "@/lib/shop-contact";
 
 interface FooterProps {
   policies?: Policy[];
@@ -37,6 +38,10 @@ const FALLBACK_PRODUCTS = [
   { label: "Organic Soup", href: "/shop?category=Rice%2C%20Grains%20%26%20Pulses" },
 ];
 
+/** Plain brand-green icon on phones; boxed tile from md up. */
+const CONTACT_ICON_CLASS =
+  "mt-0.5 flex shrink-0 items-center justify-center text-[#4a9e2f] md:h-9 md:w-9 md:rounded-md md:border md:border-[#4a9e2f]/30 md:bg-white";
+
 const PAYMENTS = ["Cash on Delivery", "bKash", "Nagad", "Rocket", "VISA", "Mastercard"];
 
 export default function Footer({ settings, productLinks }: FooterProps) {
@@ -47,12 +52,44 @@ export default function Footer({ settings, productLinks }: FooterProps) {
   // Only the platforms the admin actually filled in are linked.
   const socials = activeSocialLinks(settings?.socialContact);
 
+  // First number takes calls, the second WhatsApp; a shop with one number uses it for both.
+  const callNumber = phones[0].value;
+  const whatsappNumber = phones[1]?.value ?? callNumber;
+
   return (
     <footer className="bg-[#f4f7ee] text-[#1f2a17]">
-      <div className="mx-auto max-w-[1600px] px-4 py-14 md:px-8 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-          {/* Brand */}
-          <div className="max-w-sm">
+      {/* ── Contact CTA (phones) ──────────────────────────────────────────── */}
+      <div className="bg-[#4a9e2f] px-4 py-8 text-center text-white md:hidden">
+        <h2 className="font-display text-[22px] font-bold leading-tight">যোগাযোগ করুন</h2>
+        <p className="mx-auto mt-2 max-w-sm text-[14px] leading-relaxed text-white/85">
+          যেকোনো প্রয়োজনে আমাদের কল করুন অথবা হোয়াটসঅ্যাপে মেসেজ দিন
+        </p>
+        <div className="mx-auto mt-5 grid max-w-sm grid-cols-2 gap-3">
+          <a
+            href={telHref(callNumber)}
+            className="flex h-12 items-center justify-center gap-2 rounded-full bg-white text-[15px] font-semibold text-[#4a9e2f]"
+          >
+            <HiOutlinePhone size={19} />
+            কল করুন
+          </a>
+          {/* WhatsApp's own brand green, so the button reads as WhatsApp at a glance. */}
+          <a
+            href={whatsappHref(whatsappNumber)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#25D366] text-[15px] font-semibold text-white"
+          >
+            <FaWhatsapp size={20} />
+            হোয়াটসঅ্যাপ
+          </a>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1600px] px-4 py-10 md:px-8 md:py-14 lg:py-16">
+        {/* Phones: brand row full width, the two link lists side by side, contact below. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-9 md:gap-10 lg:grid-cols-4 lg:gap-8">
+          {/* Brand — logo centred over a full-width blurb on phones. */}
+          <div className="col-span-2 flex flex-col items-center text-center md:col-span-1 md:block md:max-w-sm md:text-left">
             {/* h-80 is 5x the old h-16. `max-w-full` is what keeps that from
                 bursting the brand column on narrower grids: paired with
                 object-contain the artwork just fits itself into whatever width
@@ -60,29 +97,34 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                 width/height props are only srcset hints, so they have to be big
                 enough for a 320px-tall render or the optimiser serves a blurry
                 source. */}
-            <Link href="/" aria-label="Organishi home" className="inline-flex">
+            <Link href="/" aria-label="Organishi home" className="inline-flex w-44 md:w-auto">
               {settings?.logo ? (
                 <Image
                   src={settings.logo}
                   alt={settings.shopName ?? "Organishi"}
                   width={400}
                   height={200}
-                  className="aspect-auto h-80 w-auto max-w-full object-contain"
+                  className="aspect-auto h-auto w-full object-contain md:h-80 md:w-auto md:max-w-full"
                 />
               ) : (
-                <Logo className="h-40 max-w-full" />
+                <Logo className="h-auto w-full md:h-40 md:w-auto md:max-w-full" />
               )}
             </Link>
 
-            {settings?.slogan && (
-              <p className="font-display mt-5 text-[15px] font-semibold text-[#4a9e2f]">
-                {settings.slogan}
+            <div className="mt-3 w-full md:mt-0">
+              {settings?.slogan && (
+                <p className="font-display text-[15px] font-semibold text-[#4a9e2f] md:mt-5">
+                  {settings.slogan}
+                </p>
+              )}
+
+              <p className="mt-1 text-[13px] leading-relaxed text-gray-600 md:mt-3 md:text-sm">
+                {footerDescription}
               </p>
-            )}
+            </div>
 
-            <p className="mt-3 text-sm leading-relaxed text-gray-600">{footerDescription}</p>
-
-            <div className="mt-6 flex items-center gap-3">
+            {/* The phone CTA above covers this on phones. */}
+            <div className="mt-6 hidden items-center gap-3 md:flex">
               <span className="flex h-11 w-11 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
                 <HiOutlinePhone size={20} />
               </span>
@@ -102,17 +144,42 @@ export default function Footer({ settings, productLinks }: FooterProps) {
           <FooterColumn title="Our Product" links={products} />
 
           {/* Contact */}
-          <div>
-            <h3 className="font-display mb-6 text-[22px] font-semibold">Contact Us</h3>
-            <ul className="space-y-4 text-sm text-gray-600">
+          <div className="col-span-2 text-center md:col-span-1 md:text-left">
+            <h3 className="font-display mb-4 text-[18px] font-semibold md:mb-6 md:text-[22px]">Contact Us</h3>
+            {/* Phones: one tap target per channel, no text. */}
+            <div className="flex items-center justify-center gap-3 md:hidden">
+              {[
+                {
+                  label: "Find us on the map",
+                  href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+                  Icon: HiOutlineMapPin,
+                  external: true,
+                },
+                { label: "Call us", href: telHref(callNumber), Icon: HiOutlinePhone },
+                { label: "WhatsApp us", href: whatsappHref(whatsappNumber), Icon: FaWhatsapp, external: true },
+                { label: "Email us", href: `mailto:${emails[0].value}`, Icon: HiOutlineMail },
+              ].map(({ label, href, Icon, external }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#4a9e2f]/30 bg-white text-[#4a9e2f] transition-colors hover:bg-[#4a9e2f] hover:text-white"
+                >
+                  <Icon size={20} />
+                </a>
+              ))}
+            </div>
+
+            <ul className="hidden space-y-4 text-sm text-gray-600 md:block">
               <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
+                <span className={CONTACT_ICON_CLASS}>
                   <HiOutlineMapPin size={18} />
                 </span>
                 <span className="leading-relaxed">{address}</span>
               </li>
               <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
+                <span className={CONTACT_ICON_CLASS}>
                   <HiOutlinePhone size={18} />
                 </span>
                 <span className="space-y-1.5">
@@ -129,7 +196,7 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                 </span>
               </li>
               <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
+                <span className={CONTACT_ICON_CLASS}>
                   <HiOutlineMail size={18} />
                 </span>
                 <span className="space-y-1.5">
@@ -145,8 +212,9 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                   ))}
                 </span>
               </li>
-              <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#4a9e2f]/30 bg-white text-[#4a9e2f]">
+              {/* Opening hours stay off the phone footer to keep it short. */}
+              <li className="hidden gap-3 md:flex">
+                <span className={CONTACT_ICON_CLASS}>
                   <HiOutlineClock size={18} />
                 </span>
                 <span>
@@ -199,8 +267,8 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="font-display mb-6 text-[22px] font-semibold">{title}</h3>
-      <ul className="space-y-3.5">
+      <h3 className="font-display mb-4 text-[18px] font-semibold md:mb-6 md:text-[22px]">{title}</h3>
+      <ul className="space-y-3 md:space-y-3.5">
         {links.map((link) => (
           <li key={link.label}>
             <Link

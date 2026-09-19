@@ -104,7 +104,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
       >
         {/* ── Testimonials ────────────────────────────────────────────── */}
         <div className="min-w-0">
-          <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
+          <h2 className="font-display text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[34px] md:font-normal">
             What Customer Say About Us
           </h2>
 
@@ -169,7 +169,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
         {/* ── Social ──────────────────────────────────────────────────── */}
         {socials.length > 0 && (
           <div className="min-w-0">
-            <h2 className="font-display text-[26px] leading-tight text-[#1f2a17] md:text-[34px]">
+            <h2 className="font-display text-[22px] font-bold leading-tight text-[#1f2a17] md:text-[34px] md:font-normal">
               Follow Us On
             </h2>
 
