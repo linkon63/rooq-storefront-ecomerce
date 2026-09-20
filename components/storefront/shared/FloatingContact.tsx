@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
 import { FiArrowUp, FiX } from "react-icons/fi";
@@ -24,12 +24,15 @@ const SHOW_TOP_AFTER = 400;
  * call, WhatsApp and e-mail. Numbers follow the footer CTA — the first phone
  * takes calls, the second WhatsApp (or the first again when there is only one).
  * From md up a "back to top" arrow sits above it once the page is scrolled.
+ *
+ * Once open it stays open: only the ✕ closes it (or Escape, or picking one of
+ * the channels). Tapping the page behind it does nothing, so a shopper can
+ * keep reading with the numbers in reach.
  */
 export default function FloatingContact({ settings }: { settings?: ShopSettings | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SHOW_TOP_AFTER);
@@ -42,15 +45,17 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
   const callNumber = phones[0].value;
   const whatsappNumber = phones[1]?.value ?? callNumber;
 
-  // Close on navigation and on a tap anywhere else.
+  // Close on navigation.
   useEffect(() => setOpen(false), [pathname]);
+
+  // Escape closes it, as it does any other popover.
   useEffect(() => {
     if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
     };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
   const raised = RAISED_ON.some((path) => pathname.startsWith(path));
@@ -82,7 +87,6 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
     // The column itself ignores the pointer — only the buttons in it catch
     // clicks — so the empty space above the closed menu never blocks the page.
     <div
-      ref={rootRef}
       className={`pointer-events-none fixed right-4 z-40 flex flex-col items-center gap-3 md:right-6 ${
         raised ? "bottom-24" : "bottom-5"
       } ${raisedOnDesktop ? "md:bottom-36" : "md:bottom-6"}`}

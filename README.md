@@ -78,6 +78,7 @@ Cutting a release turns that section into a numbered version — see
 
 #### Changed
 
+- **Floating contact button:** it stays open until the ✕ is tapped (or Escape, or one of the channels is picked) — tapping the page behind it no longer closes it.
 - **Product page:** a **Back** button now sits beside the breadcrumb, returning to wherever the shopper came from — a category, search results, the wishlist — or to the shop when the page was opened from a fresh link.
 - **Contact page:** the Chat on Messenger card is gone; Live Chat is WhatsApp only.
 - **Header top bar:** the e-mail address is gone, the opening hours lead the left side, and the right side now carries two numbers — one to call and one for WhatsApp. They come from Admin → Settings → Contact: the first saved number is the call line, the second the WhatsApp line, and a shop with one number saved uses it for both.
