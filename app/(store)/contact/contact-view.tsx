@@ -13,7 +13,7 @@ import {
   FiShield,
   FiTruck,
 } from 'react-icons/fi';
-import { FaFacebookMessenger, FaWhatsapp } from 'react-icons/fa';
+import { FaWhatsapp } from 'react-icons/fa';
 import { PiLeaf } from 'react-icons/pi';
 import type { IconType } from 'react-icons';
 import { toast } from 'sonner';
@@ -22,7 +22,6 @@ import SectionHeading from '@/components/storefront/shared/SectionHeading';
 import { formatCurrency, getCurrencySymbol } from '@/lib/currency';
 import type { ShopSettings } from '@/lib/shop-api';
 import {
-  messengerHref,
   resolveDeliveryRates,
   resolveShopContact,
   telHref,
@@ -39,7 +38,6 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
   const mapQuery = encodeURIComponent(contact.address);
   // Same split as the footer CTA: first number takes calls, the second WhatsApp.
   const whatsappNumber = contact.phones[1]?.value ?? contact.phone;
-  const messenger = messengerHref(settings?.socialContact?.facebook);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -116,19 +114,7 @@ export default function ContactView({ settings }: { settings: ShopSettings | nul
     },
   ];
 
-  // Messenger only appears once Admin → Settings has a Facebook page to chat with.
   const chats: ChatCardProps[] = [
-    ...(messenger
-      ? [
-          {
-            Icon: FaFacebookMessenger,
-            title: 'Chat on Messenger',
-            note: 'Tap to open a live chat',
-            href: messenger,
-            tone: CHAT_TONES.messenger,
-          },
-        ]
-      : []),
     {
       Icon: FaWhatsapp,
       title: 'Chat on WhatsApp',
@@ -426,11 +412,6 @@ function ContactCard({ Icon, label, value, note, href, external, wide }: Contact
  * strings because Tailwind only generates classes it can see in the source.
  */
 const CHAT_TONES = {
-  messenger: {
-    soft: 'bg-[#0084FF]/10',
-    text: 'text-[#0068c9]',
-    icon: 'text-[#0084FF]',
-  },
   whatsapp: {
     soft: 'bg-[#25D366]/15',
     text: 'text-[#128C4B]',

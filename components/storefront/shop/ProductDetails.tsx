@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FiHeart, FiMinus, FiPlus, FiShoppingCart, FiTruck, FiShield, FiRefreshCw, FiZap } from "react-icons/fi";
+import { FiArrowLeft, FiHeart, FiMinus, FiPlus, FiShoppingCart, FiTruck, FiShield, FiRefreshCw, FiZap } from "react-icons/fi";
 import { toast } from "sonner";
 
 import type { Product } from "@/lib/admin-api";
@@ -155,12 +155,28 @@ export default function ProductDetails({ product }: { product: Product }) {
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-10 pb-28 md:px-8 md:py-14">
-      <nav className="mb-8 text-sm text-gray-500">
-        <Link href="/" className="hover:text-brand">Home</Link>
-        <span>/ </span>
-        <Link href="/shop" className="hover:text-brand">Shop</Link>
-        <span>/ {product.name}</span>
-      </nav>
+      <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {/* Back to wherever the shopper came from — a category, search results,
+            the wishlist. Opened straight from a link or a new tab there is no
+            history to step back into, so the shop is the sensible landing. */}
+        <button
+          type="button"
+          onClick={() =>
+            window.history.length > 1 ? router.back() : router.push("/shop")
+          }
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand/30 bg-white px-3.5 py-1.5 text-[13px] font-medium text-brand transition-colors hover:bg-brand hover:text-white"
+        >
+          <FiArrowLeft size={15} />
+          Back
+        </button>
+
+        <nav className="text-sm text-gray-500">
+          <Link href="/" className="hover:text-brand">Home</Link>
+          <span>/ </span>
+          <Link href="/shop" className="hover:text-brand">Shop</Link>
+          <span>/ {product.name}</span>
+        </nav>
+      </div>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
         {/* ── Gallery ───────────────────────────────────────────────────── */}
