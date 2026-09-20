@@ -79,11 +79,15 @@ Cutting a release turns that section into a numbered version — see
 #### Changed
 
 - **Header top bar:** the e-mail address is gone, the opening hours lead the left side, and the right side now carries two numbers — one to call and one for WhatsApp. They come from Admin → Settings → Contact: the first saved number is the call line, the second the WhatsApp line, and a shop with one number saved uses it for both.
-- **"Follow Us On" on the home page:** each logo now sits in a tile filled with its own brand colour — Facebook blue, Instagram pink, YouTube red — and the Facebook card is outlined in Facebook blue so it stands out from the other profiles.
+- **"Follow Us On" on the home page:** each logo now sits in a tile filled with its own brand colour — Facebook blue, Instagram pink, YouTube red — instead of the shop green.
 - **Home page:** the "Real organic food, the way it used to taste" section is hidden for now.
 - **Footer on tablets and desktop:** rearranged into even columns — the logo with the social buttons beneath it, then the link lists, then Contact — with matching gutters between all four, and the payment badges and copyright centred in one strip at the bottom. The phone footer is unchanged.
 - The footer no longer repeats the help phone number beside the logo; it is still in the Contact column and on the call button above.
 - **Logo:** the logo file carried a third of its canvas as empty margin, so it always sat inset from whatever was beside it and printed far smaller than its setting suggested. It is now trimmed to the artwork and renders correctly in the header, the footer, the admin panel, the invoice, the favicon and link previews.
+- **Footer social buttons** now carry each platform's own colour instead of the shop green.
+- **Footer payment methods** now show each provider's logo in its brand colour — bKash, Nagad, Rocket, VISA and Mastercard — with a note icon for cash on delivery.
+- The footer's Contact column no longer lists the opening hours; they are still in the header and on the contact page.
+- **"Get Latest Updates & Big Deals"** now sits on a photo of the product range instead of the rotating stock backdrops, and the section takes the photo's own proportions so the whole picture is visible rather than a strip cut out of it.
 
 ### v0.2.0 — 2026-09-19
 

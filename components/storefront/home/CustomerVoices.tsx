@@ -181,10 +181,6 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                   classes: Tailwind cannot generate a class it never sees written
                   out, and these colours come from data. */}
               {socials.map(({ key, label, Icon, color, href }) => {
-                // Facebook is where the shop actually posts, so its card also
-                // carries the brand colour as an outline and a heavier label.
-                // `outline`, not `box-shadow`, so the hover shadow still lands.
-                const lead = key === "facebook";
                 return (
                   <a
                     key={key}
@@ -192,11 +188,6 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                     target="_blank"
                     rel="noreferrer noopener"
                     className="flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow hover:shadow-md"
-                    style={
-                      lead
-                        ? { outline: `2px solid ${color}`, outlineOffset: "-2px" }
-                        : undefined
-                    }
                   >
                     <span
                       className="flex h-9 w-9 items-center justify-center rounded-md text-white"
@@ -205,7 +196,7 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
                       <Icon size={17} />
                     </span>
                     <span
-                      className={`font-display text-[16px] ${lead ? "font-semibold" : ""}`}
+                      className={`font-display text-[16px] font-semibold`}
                       style={{ color }}
                     >
                       {label}

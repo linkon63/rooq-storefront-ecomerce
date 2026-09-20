@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { HiOutlineClock, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
-import { HiOutlineMapPin } from "react-icons/hi2";
+import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
+import { HiOutlineBanknotes, HiOutlineMapPin } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 
 import Logo from "./Logo";
@@ -49,19 +49,33 @@ const FALLBACK_PRODUCTS = [
 const CONTACT_ICON_CLASS =
   "mt-0.5 flex shrink-0 items-center justify-center text-brand md:h-9 md:w-9 md:rounded-md md:border md:border-brand/30 md:bg-white";
 
-const PAYMENTS = [
-  "Cash on Delivery",
-  "bKash",
-  "Nagad",
-  "Rocket",
-  "VISA",
-  "Mastercard",
+/**
+ * Each method with its own logo and brand colour. The marks in
+ * `public/images/payment/color/` are the flat logos this repo already ships,
+ * recoloured from the grey the dark legacy footer needs — the originals beside
+ * them are still what that footer uses. Cash on delivery has no brand, so it
+ * takes the shop green and a banknote icon.
+ */
+const PAYMENTS: {
+  label: string;
+  /** Omitted for cash on delivery, which uses the shop's own token instead. */
+  color?: string;
+  src?: string;
+  /** The mark already spells the name, so no label is printed beside it. */
+  wordmark?: boolean;
+}[] = [
+  { label: "Cash on Delivery" },
+  { label: "bKash", color: "#E2136E", src: "/images/payment/color/bkash.svg" },
+  { label: "Nagad", color: "#EE1C25", src: "/images/payment/color/nagad.svg" },
+  { label: "Rocket", color: "#8C3494", src: "/images/payment/color/rocket.svg" },
+  { label: "VISA", color: "#1A1F71", src: "/images/payment/color/visa.svg", wordmark: true },
+  { label: "Mastercard", color: "#1A1F71", src: "/images/payment/color/mastercard.svg" },
 ];
 
 export default function Footer({ settings, productLinks }: FooterProps) {
   // Everything in the brand blurb and the Contact Us column is admin-managed;
   // `resolveShopContact` falls back to the shop defaults until it is filled in.
-  const { phones, emails, address, hours, footerDescription } =
+  const { phones, emails, address, footerDescription } =
     resolveShopContact(settings);
   const products = productLinks?.length ? productLinks : FALLBACK_PRODUCTS;
   // Only the platforms the admin actually filled in are linked.
@@ -160,9 +174,9 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                 Phones keep their row in the bottom bar. */}
             {socials.length > 0 && (
               <div className="mt-2 hidden items-center gap-2.5 md:flex">
-                {socials.map(({ key, label, Icon, href }) => (
-                  <SocialLink key={key} href={href} label={label}>
-                    <Icon size={14} />
+                {socials.map(({ key, label, Icon, color, href }) => (
+                  <SocialLink key={key} href={href} label={label} color={color}>
+                    <Icon size={15} />
                   </SocialLink>
                 ))}
               </div>
@@ -280,18 +294,6 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                   ))}
                 </span>
               </li>
-              {/* Opening hours stay off the phone footer to keep it short. */}
-              <li className="hidden gap-3 md:flex">
-                <span className={CONTACT_ICON_CLASS}>
-                  <HiOutlineClock size={18} />
-                </span>
-                <span>
-                  <span className="block text-xs text-gray-400">
-                    Open Daily
-                  </span>
-                  {hours}
-                </span>
-              </li>
             </ul>
           </div>
         </div>
@@ -302,20 +304,34 @@ export default function Footer({ settings, productLinks }: FooterProps) {
         <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-4 px-4 py-5 md:px-8">
           {/* The brand column carries these from md up. */}
           <div className="flex items-center gap-2.5 md:hidden">
-            {socials.map(({ key, label, Icon, href }) => (
-              <SocialLink key={key} href={href} label={label}>
-                <Icon size={14} />
+            {socials.map(({ key, label, Icon, color, href }) => (
+              <SocialLink key={key} href={href} label={label} color={color}>
+                <Icon size={15} />
               </SocialLink>
             ))}
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {PAYMENTS.map((name) => (
+            {PAYMENTS.map(({ label, color, src, wordmark }) => (
               <span
-                key={name}
-                className="flex h-7 items-center rounded border border-gray-200 bg-white px-2 text-[10px] font-semibold tracking-wide text-gray-500"
+                key={label}
+                className={`flex h-8 items-center gap-1.5 rounded border bg-white px-2.5 text-[11px] font-semibold tracking-wide ${
+                  color ? "" : "border-brand/20 text-brand"
+                }`}
+                style={color ? { color, borderColor: `${color}33` } : undefined}
               >
-                {name}
+                {src ? (
+                  <Image
+                    src={src}
+                    alt={wordmark ? label : ""}
+                    width={38}
+                    height={24}
+                    className="h-4 w-auto object-contain"
+                  />
+                ) : (
+                  <HiOutlineBanknotes size={15} />
+                )}
+                {!wordmark && label}
               </span>
             ))}
           </div>
@@ -359,13 +375,20 @@ function FooterColumn({
   );
 }
 
+/**
+ * Each button carries its platform's own colour, as the "Follow Us On" tiles on
+ * the home page do. Inline style, not a class: Tailwind only ships classes it
+ * can see written out, and these colours travel as data.
+ */
 function SocialLink({
   href,
   label,
+  color,
   children,
 }: {
   href: string;
   label: string;
+  color: string;
   children: React.ReactNode;
 }) {
   return (
@@ -374,7 +397,8 @@ function SocialLink({
       target="_blank"
       rel="noreferrer noopener"
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-brand/30 bg-white text-brand transition-colors hover:bg-brand hover:text-white"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:-translate-y-0.5"
+      style={{ backgroundColor: color }}
     >
       {children}
     </a>

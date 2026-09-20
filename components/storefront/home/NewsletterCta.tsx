@@ -1,36 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 
 import { validateNewsletterForm } from "@/utils/validateNewsletterForm";
 
-/**
- * Four backdrops that cross-fade behind the sign-up form. The first one ships
- * with the design so the section paints instantly; the rest come from Unsplash,
- * whose host is already allow-listed in next.config.ts.
- */
-const BACKGROUNDS = [
-  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1920&h=900&fit=crop&auto=format&q=80",
-  "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1920&h=900&fit=crop&auto=format&q=80"
-];
-
-/** How long each backdrop holds before the next one fades in. */
-const ROTATE_MS = 5000;
+/** The backdrop behind the sign-up form, and the height the band holds from md
+ * up. The photo is wider than the band, so `object-cover` centres it on the
+ * product row and trims the wall above and the table below. */
+const BACKGROUND = "/images/getupdates.jpg";
+const BAND_HEIGHT = "md:h-[350px]";
 
 export default function NewsletterCta() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [slide, setSlide] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(
-      () => setSlide((current) => (current + 1) % BACKGROUNDS.length),
-      ROTATE_MS,
-    );
-    return () => clearInterval(timer);
-  }, []);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -64,32 +48,29 @@ export default function NewsletterCta() {
   };
 
   return (
-    <section className="relative isolate overflow-hidden">
-      {BACKGROUNDS.map((background, index) => (
-        <Image
-          key={background}
-          src={background}
-          alt=""
-          fill
-          // Only the first backdrop is worth blocking paint for.
-          priority={index === 0}
-          sizes="100vw"
-          className={`-z-10 object-cover transition-opacity duration-1000 ${
-            index === slide ? "opacity-100" : "opacity-0"
-          }`}
-        />
-      ))}
+    <section
+      // On phones the content sets the height; from md up the band is fixed.
+      className={`relative isolate grid place-items-center overflow-hidden ${BAND_HEIGHT}`}
+    >
+      <Image
+        src={BACKGROUND}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="-z-10 object-cover"
+      />
       <div className="absolute inset-0 -z-10 bg-[#1f2a17]/50" />
 
-      <div className="mx-auto max-w-[1600px] px-4 py-20 text-center md:px-8 lg:py-28">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-10 text-center md:px-8 md:py-12 lg:py-14">
         <h2 className="font-display text-[22px] font-bold leading-tight md:font-semibold text-white md:text-[40px]">
           Get Latest Updates & Big Deals
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-[14px] text-white/85">
+        <p className="mx-auto mt-2 max-w-2xl text-[14px] text-white/85">
           Sign up to your newsletters for all the latest update and our exclusive promotion.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-7 flex justify-center" noValidate>
+        <form onSubmit={onSubmit} className="mt-5 flex justify-center" noValidate>
           <div className="flex w-full max-w-[520px] items-center rounded-full border border-white/40 bg-white/10 p-1 backdrop-blur-sm">
             <label htmlFor="newsletter-email" className="sr-only">
               Your email address
