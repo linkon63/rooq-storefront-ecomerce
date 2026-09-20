@@ -1,7 +1,9 @@
 import HomeHero, { type HeroSlide } from "@/components/storefront/home/HomeHero";
 import MostRecentItems from "@/components/storefront/home/MostRecentItems";
 import LatestArrivals from "@/components/storefront/home/LatestArrivals";
-import MostLovedFoods from "@/components/storefront/home/MostLovedFoods";
+import MostLovedFoods, {
+  MAX_LOVED_ITEMS,
+} from "@/components/storefront/home/MostLovedFoods";
 import FeatureStrip from "@/components/storefront/home/FeatureStrip";
 import CustomerVoices from "@/components/storefront/home/CustomerVoices";
 import OrganicShowcase from "@/components/storefront/home/OrganicShowcase";
@@ -44,7 +46,26 @@ const FALLBACK_BANNERS: HeroSlide[] = [
   },
 ];
 
-/** Biggest savings first, so the "loved" rail leads with the best offers. */
+/**
+ * The rail is curated from Admin → Tags: a product tagged Best Seller,
+ * Highlight or Hero rides it. Matching is on the tag's slug, which the admin
+ * derives from the name — "Best Seller" saves as `best-seller`.
+ */
+const LOVED_TAGS = ["best-seller", "highlight", "hero"];
+
+/**
+ * Tagged products first. With none of the three tags set anywhere the rail
+ * falls back to the biggest savings, so the shelf is never empty on a shop
+ * that has not curated it yet.
+ */
+function mostLoved(products: ShopProduct[]): ShopProduct[] {
+  const tagged = products.filter((product) =>
+    product.tags.some((tag) => LOVED_TAGS.includes(tag)),
+  );
+  return (tagged.length > 0 ? tagged : byDiscount(products)).slice(0, MAX_LOVED_ITEMS);
+}
+
+/** Biggest savings first, so the fallback above leads with the best offers. */
 function byDiscount(products: ShopProduct[]): ShopProduct[] {
   const saving = (product: ShopProduct) =>
     product.originalPrice && product.originalPrice > product.price
@@ -93,7 +114,7 @@ export default async function Home() {
         <MostRecentItems products={products} categories={categories} />
         {/* Products arrive newest first, so the first two are the latest. */}
         <LatestArrivals products={products} />
-        <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
+        <MostLovedFoods products={mostLoved(products)} />
         <FeatureStrip />
         <CustomerVoices social={settings?.socialContact} />
         {ORGANIC_SHOWCASE_ENABLED && <OrganicShowcase />}

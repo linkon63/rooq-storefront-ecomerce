@@ -1,93 +1,63 @@
-"use client";
-
-import { useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import type { Swiper as SwiperClass } from "swiper";
-import { PiCaretLeft, PiCaretRight } from "react-icons/pi";
+import { PiStarFill } from "react-icons/pi";
 
 import ProductCard from "@/components/storefront/shop/ProductCard";
 import type { ShopProduct } from "@/lib/shop-api";
 
-import "swiper/css";
+/** A highlight shelf, not a catalogue — four is the most it ever shows. */
+export const MAX_LOVED_ITEMS = 4;
+
+/**
+ * The shelf lays itself out around however many products are tagged. Each count
+ * keeps the cards at a sensible size instead of stretching one card across the
+ * page or squeezing four into a third of it: a single product is a centred
+ * spotlight, two share a narrow pair, four fill the row.
+ *
+ * Written out in full because Tailwind only ships classes it can read in the
+ * source — a class built from a variable never reaches the stylesheet.
+ */
+const LAYOUT: Record<number, string> = {
+  1: "max-w-sm grid-cols-1",
+  2: "max-w-3xl grid-cols-1 sm:grid-cols-2",
+  3: "max-w-5xl grid-cols-2 lg:grid-cols-3",
+  4: "max-w-none grid-cols-2 lg:grid-cols-4",
+};
 
 interface MostLovedFoodsProps {
   products: ShopProduct[];
 }
 
 export default function MostLovedFoods({ products }: MostLovedFoodsProps) {
-  const [swiper, setSwiper] = useState<SwiperClass | null>(null);
-  // `progress` is swiper's 0→1 scroll position; `span` is the share of the
-  // track one screenful covers. Together they drive the progress bar below.
-  const [progress, setProgress] = useState(0);
-  const [span, setSpan] = useState(1);
+  const items = products.slice(0, MAX_LOVED_ITEMS);
 
-  const syncProgress = (instance: SwiperClass) => {
-    const perView = Number(instance.params.slidesPerView) || 1;
-    setSpan(Math.min(1, perView / Math.max(products.length, 1)));
-    setProgress(instance.progress);
-  };
-
-  if (products.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-[1600px] px-4 md:px-8">
-      <h2 className="font-display text-center text-[22px] font-bold leading-tight md:font-semibold text-[#1f2a17] md:text-[38px]">
-        Our Most Loved Items
-      </h2>
+    <section className="bg-brand-mist py-12 md:py-14">
+      <div className="mx-auto max-w-[1600px] px-4 md:px-8">
+        <p className="font-display mx-auto flex w-fit items-center gap-2 rounded-full bg-white px-4 py-1.5 text-[13px] text-brand shadow-sm">
+          <PiStarFill size={14} />
+          Best Sellers
+        </p>
 
-      <div className="relative mt-8 md:mt-10">
-        <Swiper
-          onSwiper={(instance) => {
-            setSwiper(instance);
-            syncProgress(instance);
-          }}
-          onProgress={syncProgress}
-          onResize={syncProgress}
-          spaceBetween={20}
-          breakpoints={{
-            0: { slidesPerView: 1.3 },
-            640: { slidesPerView: 2.3 },
-            1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 4 },
-          }}
+        <h2 className="font-display mt-4 text-center text-[22px] font-bold leading-tight md:font-semibold text-[#1f2a17] md:text-[38px]">
+          Our Most Loved Items
+        </h2>
+
+        <div
+          className={`mx-auto mt-8 grid gap-4 md:mt-10 md:gap-6 ${LAYOUT[items.length]}`}
         >
-          {products.map((product) => (
-            <SwiperSlide key={product.id}>
+          {items.map((product) => (
+            /* A white surface lifts each card off the tinted band — on the
+               plain page the cards had nothing to sit on. */
+            <div
+              key={product.id}
+              className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-brand/10 transition-shadow duration-300 hover:shadow-lg"
+            >
               <ProductCard product={product} />
-            </SwiperSlide>
+            </div>
           ))}
-        </Swiper>
-
-        <CarouselArrow side="left" onClick={() => swiper?.slidePrev()} />
-        <CarouselArrow side="right" onClick={() => swiper?.slideNext()} />
-      </div>
-
-      <div className="mt-8 flex justify-center">
-        <div className="relative h-[3px] w-[130px] overflow-hidden rounded-full bg-gray-200">
-          <span
-            className="absolute inset-y-0 rounded-full bg-brand transition-[left] duration-300"
-            style={{
-              width: `${span * 100}%`,
-              left: `${progress * (100 - span * 100)}%`,
-            }}
-          />
         </div>
       </div>
     </section>
-  );
-}
-
-function CarouselArrow({ side, onClick }: { side: "left" | "right"; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={side === "left" ? "Previous products" : "Next products"}
-      className={`absolute top-[38%] z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#1f2a17] shadow-md transition-colors hover:bg-brand hover:text-white lg:flex ${
-        side === "left" ? "-left-4" : "-right-4"
-      }`}
-    >
-      {side === "left" ? <PiCaretLeft size={18} /> : <PiCaretRight size={18} />}
-    </button>
   );
 }

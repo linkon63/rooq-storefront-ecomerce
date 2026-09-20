@@ -27,6 +27,8 @@ export type ShopProduct = {
   originalPrice?: number;
   image: string;
   variantId?: string;
+  /** Tag slugs from Admin → Tags, lowercased — e.g. "best-seller". */
+  tags: string[];
   /** Listed but not yet on sale — show a badge, do not let it into the cart. */
   comingSoon: boolean;
 };
@@ -219,6 +221,7 @@ function mapProduct(product: AdminProduct): ShopProduct {
   const rawImage = featuredMedia?.media.url ?? firstMedia?.media.url ?? "";
 
   const { price, originalPrice } = resolveVariantPricing(defaultVariant, product);
+  const tags = product.tags?.map((tag) => tag.slug.toLowerCase()) ?? [];
 
   return {
     id: product.id,
@@ -230,7 +233,8 @@ function mapProduct(product: AdminProduct): ShopProduct {
     originalPrice,
     image: resolveImageUrl(rawImage),
     variantId: defaultVariant?.id,
-    comingSoon: product.tags?.some((tag) => tag.slug === COMING_SOON_TAG) ?? false,
+    tags,
+    comingSoon: tags.includes(COMING_SOON_TAG),
   };
 }
 
