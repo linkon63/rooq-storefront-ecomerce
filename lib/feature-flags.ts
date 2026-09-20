@@ -6,3 +6,9 @@
  * live — nothing else needs to change.
  */
 export const BLOG_ENABLED: boolean = false;
+
+/**
+ * The "Real organic food" showcase on the homepage is parked for now. Flip this
+ * back to `true` to bring it back — the section itself is untouched.
+ */
+export const ORGANIC_SHOWCASE_ENABLED: boolean = false;

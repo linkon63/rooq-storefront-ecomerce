@@ -4,8 +4,8 @@ import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { FiClock, FiUser, FiMenu, FiX, FiSearch } from "react-icons/fi";
+import { HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -90,7 +90,12 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const { phone, email, hours } = resolveShopContact(settings);
+  const { phones, hours } = resolveShopContact(settings);
+  // Admin → Settings → Contact can hold two lines: the first is the one people
+  // call, the second is the WhatsApp line. With one number saved, it does both —
+  // the same split the footer and the floating contact button use.
+  const callNumber = phones[0].value;
+  const whatsappNumber = phones[1]?.value ?? callNumber;
 
   // The first few top-level categories, in the order Admin → Categories sets.
   // Each lands on the shop pre-filtered to that category and everything nested
@@ -116,11 +121,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
         <div className="mx-auto max-w-[1600px] px-3 sm:px-4 md:px-5">
           <div className="flex h-10 items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2.5 sm:gap-5 overflow-hidden whitespace-nowrap">
-              <a href={`mailto:${email}`} className="flex items-center gap-1 sm:gap-1.5 hover:underline">
-                <HiOutlineMail className="shrink-0" size={15} />
-                <span>{email}</span>
-              </a>
-              <span className="hidden items-center gap-1.5 lg:flex">
+              <span className="flex items-center gap-1.5">
                 <FiClock className="shrink-0" size={15} />
                 <span>Open Daily: {hours}</span>
               </span>
@@ -128,20 +129,28 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
 
             <div className="flex items-center gap-3 sm:gap-4 whitespace-nowrap">
               <nav className="hidden items-center gap-3 md:flex">
-                <Link href="/order-tracking" className="hover:underline">Order Tracking</Link>
-                <span className="text-white/50">|</span>
-                <Link href="/contact" className="hover:underline">Contact</Link>
-                <span className="text-white/50">|</span>
+                {/* <Link href="/contact" className="hover:underline">Contact</Link>
+                <span className="text-white/50">|</span> */}
               </nav>
 
               <a
-                href={whatsappHref(phone)}
+                href={telHref(callNumber)}
+                className="flex items-center gap-1 sm:gap-1.5 font-medium hover:underline"
+              >
+                <HiOutlinePhone className="shrink-0" size={15} />
+                <span>{callNumber}</span>
+              </a>
+
+              <span className="text-white/50">|</span>
+
+              <a
+                href={whatsappHref(whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 sm:gap-1.5 font-medium hover:underline"
               >
                 <FaWhatsapp className="shrink-0 text-white" size={15} />
-                <span>{phone}</span>
+                <span>{whatsappNumber}</span>
               </a>
             </div>
           </div>
@@ -153,9 +162,9 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
         <div className="mx-auto max-w-[1600px] px-4 md:px-5">
           <div className="flex h-[88px] items-center justify-between gap-4">
             {/* aria-hidden on the ™: the logo's alt text already names the brand,
-                so announcing "trademark" again would only add noise. The offsets
-                differ per branch because they cancel the artwork's own padding,
-                and an admin-uploaded logo has padding of its own (usually none). */}
+                so announcing "trademark" again would only add noise. `self-start`
+                lifts it to the top of the logo whatever height the logo renders
+                at, so neither branch needs pixel offsets. */}
             <Link href="/" className="flex shrink-0 items-center" aria-label="Organishi home">
               {settings?.logo ? (
                 <>
@@ -167,23 +176,17 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
                     alt={settings.shopName ?? "Organishi"}
                     width={150}
                     height={72}
-                    className="aspect-auto w-auto object-contain h-14 md:h-28"
+                    className="aspect-auto w-auto object-contain h-10 md:h-14"
                     priority
                   />
-                  <span aria-hidden className={`${TRADEMARK_CLASS} ml-0.5 -mt-[25px] md:-mt-7`}>
+                  <span aria-hidden className={`${TRADEMARK_CLASS} ml-0.5 self-start`}>
                     ™
                   </span>
                 </>
               ) : (
                 <>
-                  <Logo className="h-32 md:h-40" />
-                  {/* Logo-English.png is 746×612 with the mark occupying only the
-                      middle 338×206 — a third of the box is transparent on every
-                      side. These offsets cancel that padding (~0.31 × rendered
-                      height to the right, ~0.15 above) so the ™ lands on the mark
-                      instead of floating in the empty margin. Rescale them
-                      whenever the h-* values above change. */}
-                  <span aria-hidden className={`${TRADEMARK_CLASS} -ml-[40px] -mt-[18px] md:-ml-[50px] md:-mt-[23px]`}>
+                  <Logo className="h-10 md:h-14" />
+                  <span aria-hidden className={`${TRADEMARK_CLASS} ml-0.5 self-start`}>
                     ™
                   </span>
                 </>

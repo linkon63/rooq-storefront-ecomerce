@@ -6,6 +6,7 @@ import FeatureStrip from "@/components/storefront/home/FeatureStrip";
 import CustomerVoices from "@/components/storefront/home/CustomerVoices";
 import OrganicShowcase from "@/components/storefront/home/OrganicShowcase";
 import NewsletterCta from "@/components/storefront/home/NewsletterCta";
+import { ORGANIC_SHOWCASE_ENABLED } from "@/lib/feature-flags";
 import {
   fetchShopCampaigns,
   fetchShopCategories,
@@ -94,7 +95,7 @@ export default async function Home() {
       <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
       <FeatureStrip />
       <CustomerVoices social={settings?.socialContact} />
-      <OrganicShowcase />
+      {ORGANIC_SHOWCASE_ENABLED && <OrganicShowcase />}
       <NewsletterCta />
     </main>
   );

@@ -23,8 +23,8 @@ export default function StorefrontHeader() {
             <Image
               src="/assets/Logo-English.png"
               alt="Organishi"
-              width={746}
-              height={612}
+              width={342}
+              height={210}
               priority
               className="h-14 w-auto sm:h-20 object-contain"
             />

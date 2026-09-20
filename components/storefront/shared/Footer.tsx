@@ -128,20 +128,20 @@ export default function Footer({ settings, productLinks }: FooterProps) {
 
       <div className="mx-auto max-w-[1600px] px-4 py-10 md:px-8 md:py-14 lg:py-16">
         {/* Phones: brand row full width, the two link lists side by side, contact below. */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-9 md:gap-10 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-9 md:gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:gap-12">
           {/* Brand — logo centred over a full-width blurb on phones. */}
-          <div className="col-span-2 flex flex-col items-center text-center md:col-span-1 md:block md:max-w-sm md:text-left">
-            {/* h-80 is 5x the old h-16. `max-w-full` is what keeps that from
-                bursting the brand column on narrower grids: paired with
-                object-contain the artwork just fits itself into whatever width
-                the column has, instead of overflowing into the next one. The
-                width/height props are only srcset hints, so they have to be big
-                enough for a 320px-tall render or the optimiser serves a blurry
-                source. */}
+          <div className="col-span-2 flex flex-col items-center text-center md:col-span-1 md:block md:text-left">
+            {/* The logo is capped by height so it lines up with the column
+                headings beside it. `max-w-full` is what keeps it from bursting
+                the brand column on narrower grids: paired with object-contain
+                the artwork just fits itself into whatever width the column has,
+                instead of overflowing into the next one. The width/height props
+                are only srcset hints, so they stay generous — undersizing them
+                makes the optimiser serve a blurry source. */}
             <Link
               href="/"
               aria-label="Organishi home"
-              className="inline-flex w-64 md:w-auto"
+              className="inline-flex"
             >
               {settings?.logo ? (
                 <Image
@@ -149,14 +149,26 @@ export default function Footer({ settings, productLinks }: FooterProps) {
                   alt={settings.shopName ?? "Organishi"}
                   width={400}
                   height={200}
-                  className="aspect-auto h-auto w-full object-contain md:h-80 md:w-auto md:max-w-full"
+                  className="aspect-auto h-16 w-auto object-contain md:h-24 md:max-w-full lg:h-28"
                 />
               ) : (
-                <Logo className="h-auto w-full md:h-52 md:w-auto md:max-w-full" />
+                <Logo className="h-16 md:h-24 md:max-w-full lg:h-28" />
               )}
             </Link>
 
-            <div className="mt-3 w-full md:mt-0">
+            {/* Under the logo from md up, as the design lays the footer out.
+                Phones keep their row in the bottom bar. */}
+            {socials.length > 0 && (
+              <div className="mt-2 hidden items-center gap-2.5 md:flex">
+                {socials.map(({ key, label, Icon, href }) => (
+                  <SocialLink key={key} href={href} label={label}>
+                    <Icon size={14} />
+                  </SocialLink>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 w-full md:mt-4">
               {settings?.slogan && (
                 <p className="font-display text-[15px] font-semibold text-brand md:mt-5">
                   {settings.slogan}
@@ -166,24 +178,6 @@ export default function Footer({ settings, productLinks }: FooterProps) {
               <p className="mt-1 text-[13px] leading-relaxed text-gray-600 md:mt-3 md:text-sm">
                 {footerDescription}
               </p>
-            </div>
-
-            {/* The phone CTA above covers this on phones. */}
-            <div className="mt-6 hidden items-center gap-3 md:flex">
-              <span className="flex h-11 w-11 items-center justify-center rounded-md border border-brand/30 bg-white text-brand">
-                <HiOutlinePhone size={20} />
-              </span>
-              <div>
-                <p className="text-sm text-gray-500">
-                  {phones[0].title || "For Any Help"}
-                </p>
-                <a
-                  href={telHref(phones[0].value)}
-                  className="font-display text-lg font-semibold transition-colors hover:text-brand"
-                >
-                  {phones[0].value}
-                </a>
-              </div>
             </div>
           </div>
 
@@ -305,19 +299,15 @@ export default function Footer({ settings, productLinks }: FooterProps) {
 
       {/* ── Bottom bar ──────────────────────────────────────────────────── */}
       <div className="border-t border-brand/15">
-        <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-4 px-4 py-5 md:flex-row md:justify-between md:px-8">
-          <div className="flex items-center gap-2.5">
+        <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-4 px-4 py-5 md:px-8">
+          {/* The brand column carries these from md up. */}
+          <div className="flex items-center gap-2.5 md:hidden">
             {socials.map(({ key, label, Icon, href }) => (
               <SocialLink key={key} href={href} label={label}>
                 <Icon size={14} />
               </SocialLink>
             ))}
           </div>
-
-          <p className="text-center text-sm font-medium text-stone-500">
-            © {new Date().getFullYear()} {settings?.shopName ?? "Organishi"}.
-            All Rights Reserved.
-          </p>
 
           <div className="flex flex-wrap items-center justify-center gap-2">
             {PAYMENTS.map((name) => (
@@ -329,6 +319,11 @@ export default function Footer({ settings, productLinks }: FooterProps) {
               </span>
             ))}
           </div>
+
+          <p className="text-center text-sm font-medium text-stone-500">
+            © {new Date().getFullYear()} {settings?.shopName ?? "Organishi"}.
+            All Rights Reserved.
+          </p>
         </div>
       </div>
     </footer>
@@ -379,7 +374,7 @@ function SocialLink({
       target="_blank"
       rel="noreferrer noopener"
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded border border-brand/30 bg-white text-brand transition-colors hover:bg-brand hover:text-white"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-brand/30 bg-white text-brand transition-colors hover:bg-brand hover:text-white"
     >
       {children}
     </a>

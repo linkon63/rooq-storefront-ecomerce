@@ -174,30 +174,45 @@ export default function CustomerVoices({ social }: CustomerVoicesProps) {
             </h2>
 
             <div className="mt-7 grid grid-cols-2 gap-5">
-              {/* Each mark carries its own logo colour rather than the shop green.
-                  Inline styles, not classes: Tailwind cannot generate a class it
-                  never sees written out, and these colours come from data. The
-                  border is the same hex at 30% alpha — `4D` — to match the tint
-                  the outlined chips elsewhere on the page use. */}
-              {socials.map(({ key, label, Icon, color, href }) => (
-                <a
-                  key={key}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow hover:shadow-md"
-                >
-                  <span
-                    className="flex h-7 w-7 items-center justify-center rounded border"
-                    style={{ color, borderColor: `${color}4D` }}
+              {/* Every mark sits in a tile filled with that platform's own brand
+                  colour — Facebook blue, Instagram pink, YouTube red — with the
+                  glyph knocked out in white, so the logos read at a glance
+                  instead of dissolving into the white card. Inline styles, not
+                  classes: Tailwind cannot generate a class it never sees written
+                  out, and these colours come from data. */}
+              {socials.map(({ key, label, Icon, color, href }) => {
+                // Facebook is where the shop actually posts, so its card also
+                // carries the brand colour as an outline and a heavier label.
+                // `outline`, not `box-shadow`, so the hover shadow still lands.
+                const lead = key === "facebook";
+                return (
+                  <a
+                    key={key}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="flex h-[88px] items-center justify-center gap-2.5 rounded-md bg-white transition-shadow hover:shadow-md"
+                    style={
+                      lead
+                        ? { outline: `2px solid ${color}`, outlineOffset: "-2px" }
+                        : undefined
+                    }
                   >
-                    <Icon size={13} />
-                  </span>
-                  <span className="font-display text-[16px]" style={{ color }}>
-                    {label}
-                  </span>
-                </a>
-              ))}
+                    <span
+                      className="flex h-9 w-9 items-center justify-center rounded-md text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      <Icon size={17} />
+                    </span>
+                    <span
+                      className={`font-display text-[16px] ${lead ? "font-semibold" : ""}`}
+                      style={{ color }}
+                    >
+                      {label}
+                    </span>
+                  </a>
+                );
+              })}
             </div>
           </div>
         )}
