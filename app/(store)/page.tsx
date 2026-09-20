@@ -84,18 +84,22 @@ export default async function Home() {
   );
 
   return (
-    <main className="space-y-14 lg:space-y-20">
-      <HomeHero
-        slides={campaignSlides.length > 0 ? campaignSlides : [FALLBACK_SLIDE]}
-        banners={campaignBanners.length > 0 ? campaignBanners.slice(0, 2) : FALLBACK_BANNERS}
-      />
-      <MostRecentItems products={products} categories={categories} />
-      {/* Products arrive newest first, so the first two are the latest. */}
-      <LatestArrivals products={products} />
-      <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
-      <FeatureStrip />
-      <CustomerVoices social={settings?.socialContact} />
-      {ORGANIC_SHOWCASE_ENABLED && <OrganicShowcase />}
+    <main>
+      <div className="space-y-14 lg:space-y-20">
+        <HomeHero
+          slides={campaignSlides.length > 0 ? campaignSlides : [FALLBACK_SLIDE]}
+          banners={campaignBanners.length > 0 ? campaignBanners.slice(0, 2) : FALLBACK_BANNERS}
+        />
+        <MostRecentItems products={products} categories={categories} />
+        {/* Products arrive newest first, so the first two are the latest. */}
+        <LatestArrivals products={products} />
+        <MostLovedFoods products={byDiscount(products).slice(0, 12)} />
+        <FeatureStrip />
+        <CustomerVoices social={settings?.socialContact} />
+        {ORGANIC_SHOWCASE_ENABLED && <OrganicShowcase />}
+      </div>
+      {/* Outside the stack above: the newsletter band runs edge to edge and
+          butts straight up against the section before it, with no gap. */}
       <NewsletterCta />
     </main>
   );

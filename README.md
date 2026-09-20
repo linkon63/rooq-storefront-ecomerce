@@ -87,7 +87,7 @@ Cutting a release turns that section into a numbered version — see
 - **Footer social buttons** now carry each platform's own colour instead of the shop green.
 - **Footer payment methods** now show each provider's logo in its brand colour — bKash, Nagad, Rocket, VISA and Mastercard — with a note icon for cash on delivery.
 - The footer's Contact column no longer lists the opening hours; they are still in the header and on the contact page.
-- **"Get Latest Updates & Big Deals"** now sits on a photo of the product range instead of the rotating stock backdrops, and the section takes the photo's own proportions so the whole picture is visible rather than a strip cut out of it.
+- **"Get Latest Updates & Big Deals"** now sits on a photo of the product range instead of the rotating stock backdrops, in a shorter band.
 
 ### v0.2.0 — 2026-09-19
 

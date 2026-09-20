@@ -60,7 +60,7 @@ export default function NewsletterCta() {
         sizes="100vw"
         className="-z-10 object-cover"
       />
-      <div className="absolute inset-0 -z-10 bg-[#1f2a17]/50" />
+      <div className="absolute inset-0 -z-10 bg-[#1f2a17]/80" />
 
       <div className="mx-auto w-full max-w-[1600px] px-4 py-10 text-center md:px-8 md:py-12 lg:py-14">
         <h2 className="font-display text-[22px] font-bold leading-tight md:font-semibold text-white md:text-[40px]">
