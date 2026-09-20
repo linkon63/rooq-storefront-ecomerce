@@ -94,6 +94,10 @@ Cutting a release turns that section into a numbered version — see
 - The footer's Contact column no longer lists the opening hours; they are still in the header and on the contact page.
 - **"Get Latest Updates & Big Deals"** now sits on a photo of the product range instead of the rotating stock backdrops, in a shorter band.
 
+#### Fixed
+
+- **Admin → Products:** the ⋮ actions menu on the last rows of the list was cut off by the edge of the table card. It now floats above the page and flips above the button when there is no room below.
+
 ### v0.2.0 — 2026-09-19
 
 Mobile-first storefront pass, checkout rework and brand refresh.

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AdminIcon, PageHeader, ProductThumb, StatusToggle } from "../../_components/admin-shell";
 import { AdjustInventoryModal } from "../../_components/adjust-inventory-modal";
@@ -400,8 +401,55 @@ export default function ProductsPage() {
   const [productToAdjust, setProductToAdjust] = useState<Product | null>(null);
   const [variantToAdjust, setVariantToAdjust] = useState<ProductVariant | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [rowMenuPosition, setRowMenuPosition] = useState<{
+    left: number;
+    top?: number;
+    bottom?: number;
+  } | null>(null);
 
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const closeRowMenu = () => {
+    setOpenMenuId(null);
+    setRowMenuPosition(null);
+  };
+
+  // The table sits inside an overflow-hidden card, so the row menu is rendered in a
+  // portal and anchored to the button, flipping upwards when it would fall off screen.
+  const toggleRowMenu = (event: React.MouseEvent<HTMLButtonElement>, productId: string) => {
+    if (openMenuId === productId) {
+      closeRowMenu();
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const menuWidth = 224;
+    const menuHeight = 200;
+    const gap = 8;
+    const openUpwards =
+      rect.bottom + menuHeight + gap > window.innerHeight && rect.top > menuHeight + gap;
+
+    setRowMenuPosition({
+      left: Math.max(gap, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - gap)),
+      ...(openUpwards
+        ? { bottom: window.innerHeight - rect.top + gap }
+        : { top: rect.bottom + gap }),
+    });
+    setOpenMenuId(productId);
+  };
+
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const close = () => closeRowMenu();
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [openMenuId]);
 
   useEffect(() => {
     if (isLoading || page >= totalPages) return;
@@ -1053,7 +1101,7 @@ export default function ProductsPage() {
                         <td className="px-4 py-4 text-center">
                           <div className="relative inline-block">
                             <button
-                              onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}
+                              onClick={(event) => toggleRowMenu(event, product.id)}
                               className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700 transition-all shadow-sm"
                               title="More actions"
                             >
@@ -1062,16 +1110,23 @@ export default function ProductsPage() {
                               </svg>
                             </button>
                               
-                              {openMenuId === product.id && (
+                              {openMenuId === product.id && rowMenuPosition && createPortal(
                                 <>
                                   <div 
-                                    className="fixed inset-0 z-10" 
-                                    onClick={() => setOpenMenuId(null)}
+                                    className="fixed inset-0 z-30" 
+                                    onClick={closeRowMenu}
                                   />
-                                  <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-xl z-20 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                  <div
+                                    className="fixed w-56 rounded-xl border border-slate-200 bg-white shadow-xl z-40 py-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                                    style={{
+                                      left: rowMenuPosition.left,
+                                      top: rowMenuPosition.top,
+                                      bottom: rowMenuPosition.bottom,
+                                    }}
+                                  >
                                     <Link
                                       href={`/admin/products/${product.id}/edit`}
-                                      onClick={() => setOpenMenuId(null)}
+                                      onClick={closeRowMenu}
                                       className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all"
                                     >
                                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1082,7 +1137,7 @@ export default function ProductsPage() {
                                     <button
                                       onClick={() => {
                                         duplicateProduct(product);
-                                        setOpenMenuId(null);
+                                        closeRowMenu();
                                       }}
                                       disabled={isDuplicating === product.id}
                                       className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-violet-700 hover:bg-violet-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1109,7 +1164,7 @@ export default function ProductsPage() {
                                       onClick={() => {
                                         setProductToDelete(product);
                                         setDeleteModalOpen(true);
-                                        setOpenMenuId(null);
+                                        closeRowMenu();
                                       }}
                                       className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-red-700 hover:bg-red-50 transition-all"
                                     >
@@ -1119,7 +1174,8 @@ export default function ProductsPage() {
                                       Delete Product
                                     </button>
                                   </div>
-                                </>
+                                </>,
+                                document.body
                               )}
                             </div>
                           </td>
