@@ -76,7 +76,9 @@ Cutting a release turns that section into a numbered version — see
 
 ### Unreleased
 
-_Nothing yet._
+#### Fixed
+
+- **"Get Latest Updates & Big Deals" on the home page:** on small phones the **Subscribe Now** button squeezed the e-mail box until the placeholder was unreadable. The field and the button now sit one above the other below 640px and go back side by side on wider screens, the field is large enough that iPhones stop zooming the page in when it is tapped, and the band grows instead of clipping its text when the wording wraps onto more lines.
 
 ### v0.3.0 — 2026-09-20
 

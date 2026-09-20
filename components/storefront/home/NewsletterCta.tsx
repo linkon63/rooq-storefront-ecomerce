@@ -8,9 +8,11 @@ import { validateNewsletterForm } from "@/utils/validateNewsletterForm";
 
 /** The backdrop behind the sign-up form, and the height the band holds from md
  * up. The photo is wider than the band, so `object-cover` centres it on the
- * product row and trims the wall above and the table below. */
+ * product row and trims the wall above and the table below. A minimum rather
+ * than a fixed height, so nothing is clipped when the text wraps further —
+ * large font settings, zoom, a narrow tablet. */
 const BACKGROUND = "/images/getupdates.jpg";
-const BAND_HEIGHT = "md:h-[350px]";
+const BAND_HEIGHT = "md:min-h-[350px]";
 
 export default function NewsletterCta() {
   const [email, setEmail] = useState("");
@@ -71,7 +73,10 @@ export default function NewsletterCta() {
         </p>
 
         <form onSubmit={onSubmit} className="mt-5 flex justify-center" noValidate>
-          <div className="flex w-full max-w-[520px] items-center rounded-full border border-white/40 bg-white/10 p-1 backdrop-blur-sm">
+          {/* Side by side needs room for both: on a small phone the button ate
+              the field until the placeholder was unreadable, so below sm the
+              two stack and each takes the full width. */}
+          <div className="flex w-full max-w-[520px] flex-col gap-2 rounded-2xl border border-white/40 bg-white/10 p-2 backdrop-blur-sm sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-1">
             <label htmlFor="newsletter-email" className="sr-only">
               Your email address
             </label>
@@ -81,12 +86,14 @@ export default function NewsletterCta() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="Your email address"
-              className="h-11 min-w-0 flex-1 bg-transparent px-5 text-[14px] text-white outline-none placeholder:text-white/70"
+              /* 16px on phones: anything smaller makes iOS Safari zoom the page
+                 in when the field is focused, and it does not zoom back out. */
+              className="h-11 w-full min-w-0 rounded-full bg-transparent px-5 text-[16px] text-white outline-none placeholder:text-white/70 sm:flex-1 sm:text-[14px]"
             />
             <button
               type="submit"
               disabled={isSubmitting}
-              className="font-display h-11 shrink-0 rounded-full bg-brand px-6 text-[15px] text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
+              className="font-display h-11 w-full shrink-0 whitespace-nowrap rounded-full bg-brand px-6 text-[15px] text-white transition-colors hover:bg-brand-dark disabled:opacity-60 sm:w-auto"
             >
               {isSubmitting ? "Sending…" : "Subscribe Now"}
             </button>
