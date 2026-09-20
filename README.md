@@ -76,6 +76,11 @@ Cutting a release turns that section into a numbered version — see
 
 ### Unreleased
 
+#### Added
+
+- **Admin → Products → Edit:** a variant that has already been sold can now be taken off the shop. Removing it archives it instead of deleting it — it disappears from the storefront, from search and from the cart, but stays on the orders it was part of. Archived variants are listed at the bottom of the Variant Options section with **Put back on sale**.
+- **Admin → Products:** the ⋮ menu now has **View Product** — a summary of the product without leaving the list: its photos, price, cost, total stock, brand, category, unit, tags, description and every variant with its SKU, price and stock.
+
 #### Changed
 
 - **Floating contact button:** it stays open until the ✕ is tapped (or Escape, or one of the channels is picked) — tapping the page behind it no longer closes it.
@@ -97,6 +102,11 @@ Cutting a release turns that section into a numbered version — see
 #### Fixed
 
 - **Admin → Products:** the ⋮ actions menu on the last rows of the list was cut off by the edge of the table card. It now floats above the page and flips above the button when there is no room below.
+- **Admin → Products → Edit:** a product with variants opened as a **Single product** with none of its options selected, so saving it wiped the variants. It now opens as a variant product with the saved options and values already selected, and saving updates those variants instead of creating duplicates.
+- **Admin → Products → Edit:** taking a variant option (or one of its values) out of a product did nothing — the variants stayed on the product and were back in the list on the next edit. Saving now deletes the variants the configuration list no longer covers, after asking you to confirm which ones go. A variant that has already been ordered is kept and reported instead.
+- **Admin → Products → Edit:** the **Base SKU** of a variant product was read from its default variant, so every save appended that variant's option codes again and SKUs grew each time ("OIL-SKU-5LITRE-1LITRE-500ML-…"). It is now what the product's variant SKUs have in common, and new variant SKUs stay short.
+- **Admin → Products → Edit:** the **Variants configuration list** listed every possible mix of the selected option values, so a product with 2 packagings and 4 volumes showed 8 rows even though only 4 are sold — and saving created the four it invented. It now lists the product's real variants; mixes that have no variant sit below the list as **Combinations not sold as a variant**, one tap away from being added, and a newly added row can be removed again.
+- **Admin → Products:** the variant names in a product's expanded row and in the variant picker were falling back to the bare SKU; they show their options again (for example "Weight: 500 g").
 
 ### v0.2.0 — 2026-09-19
 

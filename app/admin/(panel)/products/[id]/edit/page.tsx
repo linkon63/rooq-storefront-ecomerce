@@ -22,6 +22,10 @@ import {
   type Tag,
   type Unit,
 } from "../../../../../../lib/admin-api";
+import {
+  variantOptionPairs,
+  type VariantOptionPair,
+} from "../../../../../../lib/product-variants";
 import { EditProductSkeleton } from "./EditProductSkeleton";
 
 type CategoryOption = Category & { depth: number };
@@ -109,6 +113,23 @@ function getDefaultVariant(product: Product): ProductVariant | undefined {
   return product.variants?.find((v) => v.isDefault) ?? product.variants?.[0];
 }
 
+/**
+ * The base SKU of a variant product — what its variant SKUs have in common
+ * ("SPR-OG-250-TIN" + "SPR-OG-100-TIN" → "SPR-OG"). Taking the default
+ * variant's whole SKU instead would append its option codes to every SKU
+ * generated afterwards, growing them a little further on each save.
+ */
+function commonSkuPrefix(variants: ProductVariant[]) {
+  const skus = variants.map((variant) => variant.sku).filter(Boolean);
+  if (skus.length === 0) return "";
+  const prefix = skus.reduce((current, sku) => {
+    let i = 0;
+    while (i < current.length && i < sku.length && current[i] === sku[i]) i += 1;
+    return current.slice(0, i);
+  });
+  return prefix.replace(/[-_]+$/, "");
+}
+
 
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -137,7 +158,22 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     emptyVariantSelection,
   ]);
   const [variantDrafts, setVariantDrafts] = useState<VariantDraft[]>([]);
-  const [existingVariants, setExistingVariants] = useState<ProductVariant[]>([]);
+  /**
+   * Combinations of the selected option values that are NOT variants of this
+   * product. Every combination is possible on paper, but only the ones actually
+   * sold exist as variants, so the configuration list below is the product's
+   * real variants — not the full cartesian product.
+   */
+  const [excludedVariantKeys, setExcludedVariantKeys] = useState<Set<string>>(new Set());
+  /** The variants this product had when the page opened, to spot the removed ones. */
+  const [savedVariants, setSavedVariants] = useState<
+    Array<{ id: string; sku: string; label: string }>
+  >([]);
+  const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false);
+  const savedDraftsRef = useRef<Map<string, VariantDraft>>(new Map());
+  const [archivedVariants, setArchivedVariants] = useState<ProductVariant[]>([]);
+  const [isRestoringVariant, setIsRestoringVariant] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   const [form, setForm] = useState<ProductEditForm>({
     name: "", categoryId: "", slug: "", description: "",
@@ -188,6 +224,31 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     return result;
   }, [form.name, form.sku, selectedUnit?.code, selectedVariantGroups]);
 
+  // Saved variants that the configuration list no longer covers — removing an
+  // option or one of its values takes its variants out of the product, so they
+  // are deleted on save instead of quietly coming back on the next edit.
+  const variantsToDelete = useMemo(() => {
+    if (isLoading || savedVariants.length === 0) return [];
+    const keptIds = new Set(
+      form.productType === "variant"
+        ? variantDrafts.map((draft) => draft.id).filter(Boolean)
+        : [form.defaultVariantId],
+    );
+    return savedVariants.filter((variant) => !keptIds.has(variant.id));
+  }, [
+    isLoading,
+    savedVariants,
+    variantDrafts,
+    form.productType,
+    form.defaultVariantId,
+  ]);
+
+  // Combinations of the selected values that this product does not sell.
+  const missingVariantCombinations = useMemo(
+    () => variantPreview.filter((v) => excludedVariantKeys.has(v.key)),
+    [variantPreview, excludedVariantKeys],
+  );
+
   // Prevent accidental navigation when form has unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -218,22 +279,26 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       return;
     }
     setVariantDrafts((current) => {
-      const next: VariantDraft[] = variantPreview.map((v, idx) => {
-        const existing = current.find((d) => d.key === v.key);
-        return {
-          key: v.key,
-          sku: existing?.sku ?? v.sku,
-          valueIds: v.valueIds,
-          label: v.label,
-          price: existing?.price ?? form.retailPrice,
-          cost: existing?.cost ?? form.unitPrice,
-          stockQuantity: existing?.stockQuantity ?? form.stockQuantity,
-          images: existing?.images ?? [],
-          imagePreviews: existing?.imagePreviews ?? [],
-          existingMedia: existing?.existingMedia ?? [],
-          isDefault: existing?.isDefault ?? idx === 0,
-        };
-      });
+      const next: VariantDraft[] = variantPreview
+        .filter((v) => !excludedVariantKeys.has(v.key))
+        .map((v, idx) => {
+          const existing =
+            current.find((d) => d.key === v.key) ?? savedDraftsRef.current.get(v.key);
+          return {
+            key: v.key,
+            id: existing?.id,
+            sku: existing?.sku ?? v.sku,
+            valueIds: v.valueIds,
+            label: v.label,
+            price: existing?.price ?? form.retailPrice,
+            cost: existing?.cost ?? form.unitPrice,
+            stockQuantity: existing?.stockQuantity ?? form.stockQuantity,
+            images: existing?.images ?? [],
+            imagePreviews: existing?.imagePreviews ?? [],
+            existingMedia: existing?.existingMedia ?? [],
+            isDefault: existing?.isDefault ?? idx === 0,
+          };
+        });
       const hasDefault = next.some((d) => d.isDefault);
       if (!hasDefault && next.length > 0) next[0] = { ...next[0], isDefault: true };
       const firstDefaultIndex = next.findIndex((d) => d.isDefault);
@@ -241,7 +306,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         i !== firstDefaultIndex && d.isDefault ? { ...d, isDefault: false } : d,
       );
     });
-  }, [form.productType, form.retailPrice, form.unitPrice, form.stockQuantity, variantPreview]);
+  }, [
+    form.productType,
+    form.retailPrice,
+    form.unitPrice,
+    form.stockQuantity,
+    variantPreview,
+    excludedVariantKeys,
+  ]);
 
   // Load product data + all lookup lists on mount
   useEffect(() => {
@@ -258,7 +330,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             apiRequest<Unit[]>("/units"),
             apiRequest<Tag[]>("/tags"),
             apiRequest<Attribute[]>("/attributes"),
-            apiRequest<Product>(`/products/${id}`),
+            apiRequest<Product>(`/products/${id}?includeArchived=true`),
           ]);
 
         const supplierList = await safeFetch<{ id: string; name: string }>("/suppliers");
@@ -280,11 +352,28 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           ),
         );
 
-        const defaultVariant = getDefaultVariant(product);
-        const isVariantProduct =
-          product.variants?.some((v) => (v.optionValues?.length ?? 0) > 0) ?? false;
+        const activeVariants = (product.variants ?? []).filter(
+          (variant) => variant.isActive !== false,
+        );
+        setArchivedVariants(
+          (product.variants ?? []).filter((variant) => variant.isActive === false),
+        );
+        // The form works on the active variants; archived ones are listed apart.
+        const activeProduct: Product = { ...product, variants: activeVariants };
 
-        setExistingVariants(product.variants ?? []);
+        const defaultVariant = getDefaultVariant(activeProduct);
+        setSavedVariants(
+          activeVariants.map((variant) => ({
+            id: variant.id,
+            sku: variant.sku,
+            label: variantOptionPairs(variant)
+              .map((pair) => pair.value)
+              .join(" / "),
+          })),
+        );
+        const isVariantProduct = activeVariants.some(
+          (v) => variantOptionPairs(v).length > 0,
+        );
 
         setForm({
           name: product.name,
@@ -305,7 +394,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           careGuide: null,
           careGuideUrl: (product as any).careGuideUrl ?? null,
           productType: isVariantProduct ? "variant" : "simple",
-          sku: defaultVariant?.sku ?? "",
+          sku: isVariantProduct
+            ? commonSkuPrefix(activeVariants) ||
+              makeSkuSeed(product.name, product.unit?.code)
+            : defaultVariant?.sku ?? "",
           unitPrice: defaultVariant?.cost ? String(defaultVariant.cost) : "",
           retailPrice: defaultVariant?.price ? String(defaultVariant.price) : "",
           stockQuantity: defaultVariant?.stockQuantity !== undefined
@@ -325,89 +417,105 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           }));
         setImagesList(initialImages);
 
-        // Restore variant selections and drafts for variant products
-        if (isVariantProduct && product.variants && attributeList.length > 0) {
-          const selectionsMap: Record<string, { optionId: string; valueIds: Set<string> }> = {};
-          
-          const sortedVariantsList = [...product.variants].sort((a, b) =>
-            a.sku.localeCompare(b.sku)
+        // Restore variant selections and drafts for variant products, matching the
+        // saved option values to the attribute list by id so the chosen options
+        // come back selected instead of falling back to a simple product.
+        if (isVariantProduct && activeVariants.length > 0 && attributeList.length > 0) {
+          const sortedVariantsList = [...activeVariants].sort((a, b) =>
+            a.sku.localeCompare(b.sku),
           );
-          setExistingVariants(sortedVariantsList);
 
-          sortedVariantsList.forEach((v) => {
-            if (v.optionValues) {
-              v.optionValues.forEach((ov) => {
-                const attr = attributeList.find(
-                  (a) => a.name.toLowerCase() === ov.attribute.name.toLowerCase()
-                );
-                if (attr) {
-                  const val = attr.values?.find(
-                    (av) => av.value.toLowerCase() === ov.value.toLowerCase()
-                  );
-                  if (val) {
-                    if (!selectionsMap[attr.id]) {
-                      selectionsMap[attr.id] = {
-                        optionId: attr.id,
-                        valueIds: new Set<string>(),
-                      };
-                    }
-                    selectionsMap[attr.id].valueIds.add(val.id);
-                  }
-                }
-              });
-            }
+          const resolveOption = (pair: VariantOptionPair) =>
+            attributeList.find(
+              (attribute) =>
+                attribute.id === pair.attributeId ||
+                attribute.name.toLowerCase() === pair.attributeName.toLowerCase(),
+            );
+
+          const resolveValue = (attribute: Attribute, pair: VariantOptionPair) =>
+            attribute.values?.find(
+              (value) =>
+                value.id === pair.valueId ||
+                value.value.toLowerCase() === pair.value.toLowerCase(),
+            );
+
+          // Keep the order the options appear in, so the variant keys built here
+          // line up with the ones the preview generates.
+          const selectionsMap = new Map<string, Set<string>>();
+          sortedVariantsList.forEach((variant) => {
+            variantOptionPairs(variant).forEach((pair) => {
+              const attribute = resolveOption(pair);
+              if (!attribute) return;
+              const value = resolveValue(attribute, pair);
+              if (!value) return;
+              const values = selectionsMap.get(attribute.id) ?? new Set<string>();
+              values.add(value.id);
+              selectionsMap.set(attribute.id, values);
+            });
           });
 
-          const selections = Object.keys(selectionsMap).map((attrId, idx) => ({
-            key: `variant-option-${idx + 1}`,
-            optionId: attrId,
-            pendingValueId: "",
-            valueIds: Array.from(selectionsMap[attrId].valueIds),
-          }));
+          const selections: VariantSelection[] = [...selectionsMap.entries()].map(
+            ([attributeId, valueIds], idx) => ({
+              key: `variant-option-${idx + 1}`,
+              optionId: attributeId,
+              pendingValueId: "",
+              valueIds: [...valueIds],
+            }),
+          );
 
-          const drafts: VariantDraft[] = [];
-          sortedVariantsList.forEach((v) => {
+          const drafts: VariantDraft[] = sortedVariantsList.map((variant) => {
+            const pairs = variantOptionPairs(variant);
             const variantValueIds: string[] = [];
             const variantLabels: string[] = [];
 
-            selections.forEach((sel) => {
-              const attr = attributeList.find((a) => a.id === sel.optionId);
-              if (attr && v.optionValues) {
-                const ov = v.optionValues.find(
-                  (o) => o.attribute.name.toLowerCase() === attr.name.toLowerCase()
-                );
-                if (ov) {
-                  const val = attr.values?.find(
-                    (av) => av.value.toLowerCase() === ov.value.toLowerCase()
-                  );
-                  if (val) {
-                    variantValueIds.push(val.id);
-                    variantLabels.push(val.value);
-                  }
-                }
-              }
+            selections.forEach((selection) => {
+              const attribute = attributeList.find((a) => a.id === selection.optionId);
+              if (!attribute) return;
+              const pair = pairs.find(
+                (p) =>
+                  p.attributeId === attribute.id ||
+                  p.attributeName.toLowerCase() === attribute.name.toLowerCase(),
+              );
+              if (!pair) return;
+              const value = resolveValue(attribute, pair);
+              if (!value) return;
+              variantValueIds.push(value.id);
+              variantLabels.push(value.value);
             });
 
-            const key = variantValueIds.join("|");
-            drafts.push({
-              key,
-              id: v.id,
-              sku: v.sku,
+            return {
+              key: variantValueIds.join("|"),
+              id: variant.id,
+              sku: variant.sku,
               valueIds: variantValueIds,
               label: variantLabels.join(" / "),
-              price: String(v.price),
-              cost: v.cost ? String(v.cost) : "",
-              stockQuantity: String(v.stockQuantity ?? 0),
+              price: String(variant.price),
+              cost: variant.cost ? String(variant.cost) : "",
+              stockQuantity: String(variant.stockQuantity ?? 0),
               images: [],
               imagePreviews: [],
-              existingMedia: v.media ?? [],
-              isDefault: v.isDefault,
-            });
+              existingMedia: variant.media ?? [],
+              isDefault: variant.isDefault,
+            };
           });
 
           if (selections.length > 0) {
+            const draftKeys = new Set(drafts.map((draft) => draft.key));
+            const everyCombination = cartesianProduct(
+              selections.map((selection) => {
+                const attribute = attributeList.find((a) => a.id === selection.optionId);
+                return (attribute?.values ?? []).filter((value) =>
+                  selection.valueIds.includes(value.id),
+                );
+              }),
+            ).map((values) => values.map((value) => value.id).join("|"));
+
+            savedDraftsRef.current = new Map(drafts.map((draft) => [draft.key, draft]));
             setVariantSelections(selections);
             setVariantDrafts(drafts);
+            setExcludedVariantKeys(
+              new Set(everyCombination.filter((key) => !draftKeys.has(key))),
+            );
           }
         }
       } catch (err) {
@@ -419,7 +527,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     const timeoutId = window.setTimeout(() => { void loadData(); }, 0);
     return () => window.clearTimeout(timeoutId);
-  }, [id]);
+  }, [id, reloadToken]);
 
   const handleApplyBaseValues = () => {
     setIsDirty(true);
@@ -580,9 +688,65 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   function updateVariantSelection(key: string, patch: Partial<Omit<VariantSelection, "key">>) {
     setIsDirty(true);
+
+    // Ticking a value back on should bring its combinations back with it.
+    const previous = variantSelections.find((sel) => sel.key === key);
+    const addedValueIds = (patch.valueIds ?? []).filter(
+      (valueId) => !previous?.valueIds.includes(valueId),
+    );
+    if (addedValueIds.length > 0) {
+      setExcludedVariantKeys((current) => {
+        const next = new Set(current);
+        current.forEach((excludedKey) => {
+          if (excludedKey.split("|").some((valueId) => addedValueIds.includes(valueId))) {
+            next.delete(excludedKey);
+          }
+        });
+        return next;
+      });
+    }
+
     setVariantSelections((current) =>
       current.map((sel) => (sel.key === key ? { ...sel, ...patch } : sel)),
     );
+  }
+
+  /** Drop a combination that is not sold — it is never created on save. */
+  function excludeVariantDraft(key: string) {
+    setIsDirty(true);
+    setExcludedVariantKeys((current) => new Set(current).add(key));
+  }
+
+  /** Bring an archived variant back on sale. */
+  async function restoreVariant(variant: ProductVariant) {
+    if (isDirty) {
+      toast.error("Save your changes first, then restore the variant.");
+      return;
+    }
+    try {
+      setIsRestoringVariant(variant.id);
+      await apiRequest(`/variants/${variant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: true }),
+      });
+      toast.success(`${variant.sku} is on sale again`);
+      setReloadToken((token) => token + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to restore variant");
+    } finally {
+      setIsRestoringVariant(null);
+    }
+  }
+
+  /** Put an unused combination back into the configuration list. */
+  function includeVariantDraft(key: string) {
+    setIsDirty(true);
+    setExcludedVariantKeys((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
   }
 
   function removeVariantSelection(key: string) {
@@ -758,12 +922,51 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     event.preventDefault();
     setError("");
 
-    if (form.productType === "variant" && variantPreview.length === 0) {
-      setError("Select at least one variant option value.");
-      toast.error("Select at least one variant option value.");
+    if (form.productType === "variant" && variantDrafts.length === 0) {
+      const message =
+        variantPreview.length === 0
+          ? "Select at least one variant option value."
+          : "Add at least one variant combination.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
+    // Dropping variants is destructive, so it is confirmed before anything saves.
+    if (variantsToDelete.length > 0) {
+      setIsConfirmRemoveOpen(true);
+      return;
+    }
+
+    await saveProduct();
+  }
+
+  async function deleteRemovedVariants() {
+    let archived = 0;
+    for (const variant of variantsToDelete) {
+      const result = await apiRequest<{ archived?: boolean }>(
+        `/variants/${variant.id}`,
+        { method: "DELETE" },
+      );
+      if (result?.archived) archived += 1;
+    }
+    if (archived > 0) {
+      toast.info(
+        archived === 1
+          ? "1 variant had already been ordered, so it was archived instead of deleted."
+          : `${archived} variants had already been ordered, so they were archived instead of deleted.`,
+      );
+    }
+    if (variantsToDelete.length > 0) {
+      const deletedIds = new Set(variantsToDelete.map((variant) => variant.id));
+      setSavedVariants((current) =>
+        current.filter((variant) => !deletedIds.has(variant.id)),
+      );
+    }
+  }
+
+  async function saveProduct() {
+    setError("");
     setIsSaving(true);
     try {
       const savedProduct = await apiRequest<Product>(`/products/${id}`, {
@@ -782,6 +985,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           supplierPrice: form.supplierPrice ? Number(form.supplierPrice) : undefined,
         }),
       });
+
+      await deleteRemovedVariants();
 
       const savedVariants = await saveVariants(savedProduct.id);
 
@@ -1508,6 +1713,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                           <VariantDraftCard
                             key={v.key}
                             v={v}
+                            onRemove={excludeVariantDraft}
                             handleVariantDefaultChange={handleVariantDefaultChange}
                             handleVariantSkuChange={handleVariantSkuChange}
                             handleVariantCostChange={handleVariantCostChange}
@@ -1519,6 +1725,31 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                           />
                         ))}
                       </div>
+
+                      {missingVariantCombinations.length > 0 && (
+                        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-3">
+                          <p className="text-xs font-semibold text-slate-700">
+                            Combinations not sold as a variant
+                          </p>
+                          <p className="mb-2 text-[11px] text-slate-400">
+                            These mixes of the selected values have no variant. Add one only if
+                            you sell it.
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {missingVariantCombinations.map((combination) => (
+                              <button
+                                key={combination.key}
+                                type="button"
+                                onClick={() => includeVariantDraft(combination.key)}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 cursor-pointer"
+                              >
+                                <AdminIcon className="h-3.5 w-3.5" name="plus" />
+                                {combination.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1526,6 +1757,46 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
                   No variant options found. Go to Attribute page to configure them.
                 </p>
+              )}
+
+              {archivedVariants.length > 0 && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-4">
+                  <p className="text-sm font-semibold text-slate-800">
+                    Archived variants
+                  </p>
+                  <p className="mb-3 text-xs text-slate-500">
+                    Already ordered, so they are kept for those orders. They are off the
+                    storefront and out of the list above until you put them back on sale.
+                  </p>
+                  <div className="space-y-2">
+                    {archivedVariants.map((variant) => (
+                      <div
+                        key={variant.id}
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-white px-3 py-2"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-800">
+                            {variantOptionPairs(variant)
+                              .map((pair) => `${pair.attributeName}: ${pair.value}`)
+                              .join(" · ") || "Default"}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {variant.sku} · stock {variant.stockQuantity ?? 0}
+                          </p>
+                        </div>
+                        <button
+                          className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+                          disabled={isRestoringVariant === variant.id}
+                          onClick={() => void restoreVariant(variant)}
+                          type="button"
+                        >
+                          <AdminIcon className="h-3.5 w-3.5" name="refresh" />
+                          {isRestoringVariant === variant.id ? "Restoring..." : "Put back on sale"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </section>
           )}
@@ -1539,6 +1810,25 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       </form>
 
 
+
+      {/* Removing variants deletes them from the product — confirm first */}
+      <ConfirmModal
+        isOpen={isConfirmRemoveOpen}
+        onClose={() => setIsConfirmRemoveOpen(false)}
+        onConfirm={() => {
+          setIsConfirmRemoveOpen(false);
+          void saveProduct();
+        }}
+        title={variantsToDelete.length === 1 ? "Delete variant" : "Delete variants"}
+        message={`Saving removes ${
+          variantsToDelete.length === 1 ? "this variant" : "these variants"
+        } from the product: ${variantsToDelete
+          .map((variant) => `${variant.label || variant.sku} (${variant.sku})`)
+          .join(", ")}. One that has already been ordered is archived instead — off the storefront, still on its orders, and you can put it back on sale from this page.`}
+        confirmText="Yes, delete and save"
+        cancelText="No, keep them"
+        isDestructive={true}
+      />
 
       {/* Confirm Leave Modal */}
       <ConfirmModal
@@ -1690,6 +1980,7 @@ function VariantPillsSelector({
 }
 
 type VariantDraftCardProps = {
+  onRemove: (key: string) => void;
   v: VariantDraft;
   handleVariantDefaultChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleVariantSkuChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -1703,6 +1994,7 @@ type VariantDraftCardProps = {
 
 function VariantDraftCard({
   v,
+  onRemove,
   handleVariantDefaultChange,
   handleVariantSkuChange,
   handleVariantCostChange,
@@ -1719,16 +2011,29 @@ function VariantDraftCard({
           <p className="text-sm font-semibold text-slate-800">{v.label}</p>
           <p className="text-xs text-slate-500">{v.sku}</p>
         </div>
-        <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
-          <input
-            checked={v.isDefault}
-            data-key={v.key}
-            onChange={handleVariantDefaultChange}
-            type="radio"
-            name="default-variant"
-          />
-          Default Variant
-        </label>
+        <div className="flex items-center gap-3">
+          <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
+            <input
+              checked={v.isDefault}
+              data-key={v.key}
+              onChange={handleVariantDefaultChange}
+              type="radio"
+              name="default-variant"
+            />
+            Default Variant
+          </label>
+          {!v.id && (
+            <button
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-red-50 px-2.5 text-xs font-semibold text-red-700 hover:bg-red-100 cursor-pointer"
+              onClick={() => onRemove(v.key)}
+              title="Do not create this combination"
+              type="button"
+            >
+              <AdminIcon className="h-3.5 w-3.5" name="x" />
+              Remove
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-[1.3fr_repeat(3,0.7fr)]">

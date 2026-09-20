@@ -2,6 +2,46 @@ import type { Product } from "./admin-api";
 
 export type Variant = NonNullable<Product["variants"]>[number];
 
+export type VariantOptionPair = {
+  attributeId?: string;
+  attributeName: string;
+  valueId?: string;
+  value: string;
+};
+
+/**
+ * A variant's option values as { attribute, value } pairs. The API returns them
+ * under `attributes` (with ids); `optionValues` is kept as a fallback for the
+ * lighter payloads that only carry names.
+ */
+export function variantOptionPairs(variant: Variant): VariantOptionPair[] {
+  const pairs = (variant.attributes ?? []).flatMap((attribute) => {
+    const attributeValue = attribute.attributeValue;
+    if (!attributeValue?.value || !attributeValue.attribute?.name) return [];
+    return [
+      {
+        attributeId: attributeValue.attribute.id,
+        attributeName: attributeValue.attribute.name,
+        valueId: attributeValue.id,
+        value: attributeValue.value,
+      },
+    ];
+  });
+  if (pairs.length > 0) return pairs;
+
+  return (variant.optionValues ?? []).map((optionValue) => ({
+    attributeName: optionValue.attribute.name,
+    value: optionValue.value,
+  }));
+}
+
+/** "Weight: 500 g · Colour: Red", or an empty string for a variant with no options. */
+export function variantOptionLabel(variant: Variant) {
+  return variantOptionPairs(variant)
+    .map((pair) => `${pair.attributeName}: ${pair.value}`)
+    .join(" · ");
+}
+
 /** "Weight" → ["200 g", "500 g"], preserving the order variants were created in. */
 export function buildAttributeGroups(product: Product) {
   const groups = new Map<string, string[]>();

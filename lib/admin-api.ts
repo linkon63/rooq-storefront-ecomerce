@@ -180,6 +180,8 @@ export type ProductVariant = {
   stockQuantity: number;
   stockAlertThreshold: number;
   isDefault: boolean;
+  /** Archived variants (false) stay on old orders but are no longer sold. */
+  isActive?: boolean;
   optionValues?: { value: string; attribute: { name: string } }[];
   /** Variant attribute links as returned by GET /products/:id. */
   attributes?: {
