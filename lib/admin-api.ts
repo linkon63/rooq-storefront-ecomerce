@@ -1032,6 +1032,51 @@ export function toInventoryRows(
   }));
 }
 
+export type SaveErrorField = "slug" | "sku";
+
+/**
+ * Turns a save failure into something the admin can act on.
+ *
+ * The API answers a unique clash with "Another product already uses that slug."
+ * — true, but it does not say which value clashed or what to do about it, and
+ * an older API build only says "with these details already exists". This names
+ * the value the form actually sent and points at the field to change.
+ */
+export function describeSaveError(
+  error: unknown,
+  context: { slug?: string; sku?: string } = {},
+): { message: string; field?: SaveErrorField } {
+  const raw = error instanceof Error ? error.message : String(error ?? "");
+
+  if (/that slug/i.test(raw) || /slug[^.]*(already|unique|taken)/i.test(raw)) {
+    return {
+      field: "slug",
+      message: context.slug
+        ? `Another product already uses the web address (slug) "${context.slug}". Change the product name, or edit the slug to something unique.`
+        : "Another product already uses this web address (slug). Change the product name, or edit the slug to something unique.",
+    };
+  }
+
+  if (/that sku/i.test(raw) || /sku[^.]*(already|unique|taken)/i.test(raw)) {
+    return {
+      field: "sku",
+      message: context.sku
+        ? `SKU "${context.sku}" already belongs to another product. Every SKU in the shop must be unique — give this one a different SKU.`
+        : "That SKU already belongs to another product. Every SKU in the shop must be unique.",
+    };
+  }
+
+  // Older API builds could not name the field at all.
+  if (/with these details already exists/i.test(raw)) {
+    return {
+      message:
+        "Another product already uses one of these values. The web address (slug) and every SKU must be unique in the shop — change the slug or the SKU and try again.",
+    };
+  }
+
+  return { message: raw || "Failed to save product" };
+}
+
 export function formatMoney(value?: string | number | null, symbol?: string) {
   if (value === undefined || value === null || value === "") return "-";
   const sym = symbol ?? "৳";

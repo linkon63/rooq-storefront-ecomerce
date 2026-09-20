@@ -101,6 +101,9 @@ Cutting a release turns that section into a numbered version — see
 
 #### Fixed
 
+- **Admin → Products → Add product:** the page never raised a toast — a rejected save only wrote a line under the form, so it looked like nothing happened. Every failure now pops a toast, and a successful save confirms with one.
+- **Admin → Products → Add / Edit:** a refused save said only "Another product with these details already exists". It now names the value and the field: "«Oil» already uses the web address (slug) «oil» — change the product name, or edit the slug", or «SKU «OIL-1L» already belongs to another product». The offending box turns red with a one-line hint beside it.
+- **Admin → Products → Add product:** a duplicate web address is now caught before anything is written, and a save that fails partway removes what it had already created — so a failed attempt no longer leaves a product behind whose name and SKUs then block the retry.
 - **Admin → Products:** the ⋮ actions menu on the last rows of the list was cut off by the edge of the table card. It now floats above the page and flips above the button when there is no room below.
 - **Admin → Products → Edit:** a product with variants opened as a **Single product** with none of its options selected, so saving it wiped the variants. It now opens as a variant product with the saved options and values already selected, and saving updates those variants instead of creating duplicates.
 - **Admin → Products → Edit:** taking a variant option (or one of its values) out of a product did nothing — the variants stayed on the product and were back in the list on the next edit. Saving now deletes the variants the configuration list no longer covers, after asking you to confirm which ones go. A variant that has already been ordered is kept and reported instead.

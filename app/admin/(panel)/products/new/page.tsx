@@ -3,16 +3,20 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { AdminIcon, PageHeader } from "../../../_components/admin-shell";
 import {
   apiRequest,
+  describeSaveError,
   slugify,
   unitConversionLabel,
   type Attribute,
   type Brand,
   type Category,
+  type PaginatedProducts,
   type Product,
   type ProductVariant,
+  type SaveErrorField,
   type Tag,
   type Unit,
 } from "../../../../../lib/admin-api";
@@ -20,6 +24,17 @@ import {
 type CategoryOption = Category & {
   depth: number;
 };
+
+/** A variant write that failed, carrying the SKU it was trying to save. */
+class VariantSaveError extends Error {
+  constructor(
+    readonly sku: string,
+    readonly cause: unknown,
+  ) {
+    super(cause instanceof Error ? cause.message : String(cause));
+    this.name = "VariantSaveError";
+  }
+}
 
 type VariantSelection = {
   key: string;
@@ -134,6 +149,7 @@ export default function NewProductPage() {
     emptyVariantSelection,
   ]);
   const [error, setError] = useState("");
+  const [errorField, setErrorField] = useState<SaveErrorField | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -269,7 +285,7 @@ export default function NewProductPage() {
         );
         // Do NOT auto-select any defaults — leave all selects at their placeholder "Select …"
       } catch (err) {
-        setError(
+        failWith(
           err instanceof Error ? err.message : "Failed to load product form data",
         );
       }
@@ -526,11 +542,13 @@ export default function NewProductPage() {
             sku: form.sku.trim(),
             isDefault: true,
           }),
+        }).catch((err: unknown) => {
+          throw new VariantSaveError(form.sku.trim(), err);
         });
         result = [created];
       } else {
         if (variantDrafts.some((variant) => !variant.sku.trim() || !variant.price)) {
-          setError("Every variant needs a SKU and price.");
+          failWith("Every variant needs a SKU and price.");
         } else {
           result = await Promise.all(
             variantDrafts.map((variant) => {
@@ -550,6 +568,8 @@ export default function NewProductPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
+              }).catch((err: unknown) => {
+                throw new VariantSaveError(variant.sku, err);
               });
               return created;
             }),
@@ -561,21 +581,58 @@ export default function NewProductPage() {
     return result;
   }
 
+  /** Errors here were only written under the form, where they were easy to miss. */
+  function failWith(message: string, field: SaveErrorField | null = null) {
+    setError(message);
+    setErrorField(field);
+    toast.error(message);
+  }
+
+  /** The product already using this web address, if there is one. */
+  async function productUsingSlug(slug: string) {
+    try {
+      const found = await apiRequest<PaginatedProducts>(
+        `/products?search=${encodeURIComponent(slug)}&limit=50`,
+      );
+      return found.data.find((item) => item.slug === slug) ?? null;
+    } catch {
+      // The check is a courtesy — the API still refuses a duplicate on save.
+      return null;
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setErrorField(null);
 
     if (form.productType === "variant" && variantPreview.length === 0) {
-      setError("Select at least one variant option value.");
+      failWith("Select at least one variant option value.");
       return;
     }
 
     if (!form.sku.trim() || !form.retailPrice) {
-      setError("SKU and retail price are required.");
+      failWith("SKU and retail price are required.");
       return;
     }
 
+    const slug = form.slug.trim() || slugify(form.name);
+
     setIsSaving(true);
+
+    // The product is written before its variants, so a clash caught here saves
+    // the admin from a half-created product they then have to clean up.
+    const clash = await productUsingSlug(slug);
+    if (clash) {
+      failWith(
+        `"${clash.name}" already uses the web address (slug) "${slug}". Change the product name, or edit the slug to something unique.`,
+        "slug",
+      );
+      setIsSaving(false);
+      return;
+    }
+
+    let createdProductId: string | null = null;
 
     try {
         const product = await apiRequest<Product>("/products", {
@@ -583,7 +640,7 @@ export default function NewProductPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: form.name.trim(),
-            slug: form.slug.trim() || slugify(form.name),
+            slug,
             description: form.description.trim() || undefined,
             status: form.status,
             brandId: form.brandId,
@@ -595,8 +652,13 @@ export default function NewProductPage() {
           }),
         });
 
+      createdProductId = product.id;
+
       const createdVariants = await createVariants(product.id);
-      if (!createdVariants?.length) return;
+      if (!createdVariants?.length) {
+        await rollbackProduct(product.id);
+        return;
+      }
       if (form.productType === "variant" && createdVariants?.length) {
         await Promise.all(
           variantDrafts.map((draft) => {
@@ -618,12 +680,35 @@ export default function NewProductPage() {
       }
       await uploadImages(product.id);
 
+      toast.success("Product created successfully!");
       router.push("/admin/products");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create product");
+      // Nothing half-saved: the product goes away with whatever variants made it.
+      if (createdProductId) await rollbackProduct(createdProductId);
+
+      const described = describeSaveError(err, {
+        slug,
+        sku: err instanceof VariantSaveError ? err.sku : form.sku.trim(),
+      });
+      failWith(described.message, described.field ?? null);
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  /** Undo a create that failed partway, so a retry is not blocked by its leftovers. */
+  async function rollbackProduct(productId: string) {
+    try {
+      const saved = await apiRequest<Product>(`/products/${productId}?includeArchived=true`);
+      await Promise.all(
+        (saved.variants ?? []).map((variant) =>
+          apiRequest(`/variants/${variant.id}`, { method: "DELETE" }).catch(() => undefined),
+        ),
+      );
+      await apiRequest(`/products/${productId}`, { method: "DELETE" });
+    } catch {
+      // Best effort — the message below still tells the admin what to fix.
     }
   }
 
@@ -692,15 +777,25 @@ export default function NewProductPage() {
                     Slug <span className="text-red-500">*</span>
                   </span>
                   <input
-                    className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm outline-none focus:border-blue-500"
+                    className={`h-11 w-full rounded-lg border px-4 text-sm outline-none ${
+                      errorField === "slug"
+                        ? "border-red-400 bg-red-50 focus:border-red-500"
+                        : "border-slate-300 focus:border-blue-500"
+                    }`}
                     onChange={(event) => {
                       setSlugManuallyEdited(true);
+                      if (errorField === "slug") setErrorField(null);
                       setForm((current) => ({ ...current, slug: event.target.value }));
                     }}
                     placeholder="product-slug"
                     required
                     value={form.slug}
                   />
+                  {errorField === "slug" && (
+                    <p className="mt-2 text-[11px] font-semibold text-red-600">
+                      This web address is taken — edit it to something unique.
+                    </p>
+                  )}
                 </label>
                 <label className="block">
                   <span className="mb-2 block text-xs font-semibold text-slate-700">Status</span>
@@ -1022,14 +1117,24 @@ export default function NewProductPage() {
                     </button>
                   </div>
                   <input
-                    className="h-11 w-full rounded-lg border border-slate-300 px-4 text-sm uppercase outline-none focus:border-blue-500"
-                    onChange={(event) =>
-                      setForm((current) => ({ ...current, sku: event.target.value }))
-                    }
+                    className={`h-11 w-full rounded-lg border px-4 text-sm uppercase outline-none ${
+                      errorField === "sku"
+                        ? "border-red-400 bg-red-50 focus:border-red-500"
+                        : "border-slate-300 focus:border-blue-500"
+                    }`}
+                    onChange={(event) => {
+                      if (errorField === "sku") setErrorField(null);
+                      setForm((current) => ({ ...current, sku: event.target.value }));
+                    }}
                     placeholder="PRODUCT-SKU"
                     required
                     value={form.sku}
                   />
+                  {errorField === "sku" && (
+                    <p className="mt-2 text-[11px] font-semibold text-red-600">
+                      This SKU belongs to another product — every SKU must be unique.
+                    </p>
+                  )}
                   {form.productType === "variant" && (
                     <p className="mt-2 text-[11px] text-slate-500">
                       Prefixes every generated variant SKU, e.g. {form.sku || "PRODUCT-SKU"}-500G

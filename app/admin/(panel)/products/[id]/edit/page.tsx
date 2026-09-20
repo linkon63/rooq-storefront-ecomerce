@@ -10,6 +10,7 @@ import { useDeleteProductMedia } from "../../../../_hooks/use-delete-product-med
 import { useUpdateProductMedia } from "../../../../_hooks/use-update-product-media";
 import {
   apiRequest,
+  describeSaveError,
   slugify,
   resolveImageUrl,
   unitConversionLabel,
@@ -1015,8 +1016,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       router.push("/admin/products");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save product");
-      toast.error(err instanceof Error ? err.message : "Failed to save product");
+      const described = describeSaveError(err, {
+        slug: form.slug.trim() || slugify(form.name),
+        sku: form.sku.trim(),
+      });
+      setError(described.message);
+      toast.error(described.message);
     } finally {
       setIsSaving(false);
     }
