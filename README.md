@@ -76,6 +76,10 @@ Cutting a release turns that section into a numbered version — see
 
 ### Unreleased
 
+_Nothing yet._
+
+### v0.3.0 — 2026-09-20
+
 #### Added
 
 - **Admin → Products → Edit:** a variant that has already been sold can now be taken off the shop. Removing it archives it instead of deleting it — it disappears from the storefront, from search and from the cart, but stays on the orders it was part of. Archived variants are listed at the bottom of the Variant Options section with **Put back on sale**.
