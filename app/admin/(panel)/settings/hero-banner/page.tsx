@@ -6,6 +6,8 @@ import { AdminIcon, PageHeader } from "../../../_components/admin-shell";
 import { ConfirmModal } from "../../../_components/confirm-modal";
 import { useDiscounts } from "../../../_hooks/use-discounts";
 import { apiRequest, resolveImageUrl, type Campaign } from "../../../../../lib/admin-api";
+import { ImageSizeHint } from "../../../_components/admin-ui";
+import { pickImages } from "../../../../../lib/admin-image-upload";
 import type { Section } from "../../../_hooks/use-sections";
 import { FieldLabel, SaveButton, SettingsCard, StatusToggle } from "../_components/settings-ui";
 
@@ -241,7 +243,7 @@ export default function HeroBannerPage() {
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
+                      const [file] = pickImages(e.target) ?? [];
                       if (file) pickFile(index, file);
                     }}
                     ref={(el) => {
@@ -279,6 +281,7 @@ export default function HeroBannerPage() {
                       <span className="flex flex-col items-center gap-1.5">
                         <AdminIcon className="h-7 w-7 text-slate-300" name="plus" />
                         <span className="text-xs font-black text-slate-500">Upload banner image</span>
+                        <ImageSizeHint className="mt-1" />
                       </span>
                     </button>
                   )}

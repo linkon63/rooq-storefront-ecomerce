@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminIcon, PageHeader } from "../../../_components/admin-shell";
 import { apiRequest, resolveImageUrl, type AppSettings } from "../../../../../lib/admin-api";
+import { ImageSizeHint } from "../../../_components/admin-ui";
+import { pickImages } from "../../../../../lib/admin-image-upload";
 import { useSettingsSaving, useSettingsLoading } from "../../../_hooks/use-settings";
 import {
   FieldLabel,
@@ -347,6 +349,7 @@ export default function GeneralSettingsPage() {
               hint="Add your logos as instructed to manage your website better."
               separator={false}
             >
+              <ImageSizeHint className="mb-4" />
               {/* Icon / Icon + Text / Favicon tabs */}
               <div className="mb-5 flex gap-0 border-b border-slate-200">
                 {(["icon", "icon+text", "favicon"] as const).map((tab) => (
@@ -402,7 +405,7 @@ export default function GeneralSettingsPage() {
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
+                  const [f] = pickImages(e.target) ?? [];
                   if (f) pickIcon(f);
                 }}
                 ref={iconInputRef}
@@ -412,7 +415,7 @@ export default function GeneralSettingsPage() {
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
+                  const [f] = pickImages(e.target) ?? [];
                   if (f) pickLogo(f);
                 }}
                 ref={logoInputRef}
@@ -422,7 +425,7 @@ export default function GeneralSettingsPage() {
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
+                  const [f] = pickImages(e.target) ?? [];
                   if (f) pickFavicon(f);
                 }}
                 ref={faviconInputRef}

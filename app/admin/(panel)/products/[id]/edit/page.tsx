@@ -23,6 +23,8 @@ import {
   type Tag,
   type Unit,
 } from "../../../../../../lib/admin-api";
+import { ImageSizeHint } from "../../../../_components/admin-ui";
+import { IMAGE_SIZE_HINT, pickImages } from "../../../../../../lib/admin-image-upload";
 import {
   variantOptionPairs,
   type VariantOptionPair,
@@ -626,10 +628,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const handleVariantImagesEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsDirty(true);
     const key = e.currentTarget.getAttribute("data-key") || "";
-    const files = e.target.files;
+    const files = pickImages(e.target);
     if (!files || files.length === 0) return;
 
-    const list = Array.from(files);
+    const list = files;
     const previews = list.map((file) => URL.createObjectURL(file));
     setVariantDrafts((current) =>
       current.map((draft) => {
@@ -775,10 +777,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     return option?.values?.find((item) => item.id === valueId)?.value ?? valueId;
   }
 
-  function handleUploadImages(files: FileList | null) {
-    if (!files) return;
+  function handleUploadImages(files: File[] | null) {
+    if (!files || files.length === 0) return;
     setIsDirty(true);
-    const newItems: ImageItem[] = Array.from(files).map((file, idx) => ({
+    const newItems: ImageItem[] = files.map((file, idx) => ({
       type: "new",
       file,
       url: URL.createObjectURL(file),
@@ -1335,6 +1337,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   <div>
                     <p className="text-xs font-semibold text-slate-700">Upload New Images</p>
                     <p className="text-xs text-slate-500">Supports JPG, PNG, WEBP formats</p>
+                    <ImageSizeHint className="mt-1.5" />
                   </div>
                   <label className="inline-flex h-10 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
                     Upload Files
@@ -1342,7 +1345,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                       accept="image/*"
                       className="hidden"
                       multiple
-                      onChange={(e) => handleUploadImages(e.target.files)}
+                      onChange={(e) => handleUploadImages(pickImages(e.target))}
                       ref={imageInputRef}
                       type="file"
                     />
@@ -1354,16 +1357,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
                   <p className="text-xs font-semibold text-slate-700">Upload Care Guide</p>
                   <p className="text-xs text-slate-500">Add care guidelines image</p>
+                  <ImageSizeHint className="mt-1.5" />
                   <label className="mt-3 inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50">
                     Select File
                     <input
                       accept="image/*"
                       className="hidden"
                       onChange={(e) => {
+                        const files = pickImages(e.target);
+                        if (!files) return;
                         setIsDirty(true);
                         setForm((current) => ({
                           ...current,
-                          careGuide: e.target.files?.[0] ?? null,
+                          careGuide: files[0] ?? null,
                         }));
                       }}
                       type="file"
@@ -2133,7 +2139,7 @@ function VariantDraftCard({
               </button>
             </div>
           ))}
-          <label className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-slate-500 hover:bg-slate-50">
+          <label title={IMAGE_SIZE_HINT} className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-slate-500 hover:bg-slate-50">
             <AdminIcon className="h-4 w-4" name="upload" />
             <span className="mt-1 text-[10px] font-semibold">Add</span>
             <input

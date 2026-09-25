@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { IMAGE_SIZE_HINT } from "../../../lib/admin-image-upload";
+import { AdminIcon } from "./admin-icons";
 
 export function PageHeader({
   title,
@@ -60,5 +62,17 @@ export function ProductThumb({ color, src, alt }: { color: string; src?: string;
         src={src ?? '/images/no-image-icon-6.png'}
       />
     </div>
+  );
+}
+
+// Highlighted upload-limit badge shown next to every admin image picker.
+export function ImageSizeHint({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800 ring-1 ring-inset ring-amber-300 ${className}`}
+    >
+      <AdminIcon className="h-3 w-3" name="info" />
+      {IMAGE_SIZE_HINT}
+    </span>
   );
 }

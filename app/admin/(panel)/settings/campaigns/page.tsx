@@ -7,6 +7,8 @@ import { ConfirmModal } from "../../../_components/confirm-modal";
 import { useDiscounts } from "../../../_hooks/use-discounts";
 import { useSections } from "../../../_hooks/use-sections";
 import { apiRequest, type Campaign } from "../../../../../lib/admin-api";
+import { ImageSizeHint } from "../../../_components/admin-ui";
+import { pickImages } from "../../../../../lib/admin-image-upload";
 import {
   SettingsCard,
   FieldLabel,
@@ -365,11 +367,12 @@ export default function CampaignsPage() {
                   className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium"
                   multiple
                   onChange={(e) => {
-                    const files = e.target.files ? Array.from(e.target.files) : [];
+                    const files = pickImages(e.target) ?? [];
                     setForm((p) => ({ ...p, images: [...p.images, ...files] }));
                   }}
                   type="file"
                 />
+                <ImageSizeHint className="mt-2" />
                 <div className="mt-3 grid grid-cols-4 gap-3">
                   {form.existingImages.map((url, i) => (
                     <div className="relative" key={`e-${i}`}>

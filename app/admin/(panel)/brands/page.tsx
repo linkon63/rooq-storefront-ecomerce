@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminIcon, PageHeader } from "../../_components/admin-shell";
 import { ConfirmModal } from "../../_components/confirm-modal";
 import { apiRequest, formatDate, slugify, resolveImageUrl, type Brand } from "../../../../lib/admin-api";
+import { ImageSizeHint } from "../../_components/admin-ui";
+import { pickImages } from "../../../../lib/admin-image-upload";
 
 type BrandForm = {
   id?: string;
@@ -348,12 +350,15 @@ export default function BrandsPage() {
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">Logo</span>
+                <span className="mb-2 block text-sm font-medium text-slate-700">Logo <ImageSizeHint className="ml-1.5 align-middle" /></span>
                 <input
                   ref={logoInputRef}
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setForm((f) => ({ ...f, logo: e.target.files?.[0] ?? null, removeLogo: false }))}
+                  onChange={(e) => {
+                    const files = pickImages(e.target);
+                    if (files) setForm((f) => ({ ...f, logo: files[0] ?? null, removeLogo: false }));
+                  }}
                   className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white file:mr-4 file:rounded-lg file:border-0 file:bg-slate-200 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-300"
                 />
               </label>

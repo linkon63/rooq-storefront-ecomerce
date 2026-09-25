@@ -13,6 +13,8 @@ import {
   updateNews,
   type News,
 } from "../../../../lib/admin-api";
+import { ImageSizeHint } from "../../_components/admin-ui";
+import { pickImages } from "../../../../lib/admin-image-upload";
 
 type NewsForm = {
   id?: string;
@@ -446,16 +448,18 @@ export default function NewsAdminPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-black text-slate-700">Cover image</span>
+                <span className="mb-2 block text-sm font-black text-slate-700">Cover image <ImageSizeHint className="ml-1.5 align-middle" /></span>
                 <input
                   className="block w-full rounded-lg border border-slate-300 px-4 py-3 font-medium"
-                  onChange={(event) =>
+                  onChange={(event) => {
+                    const files = pickImages(event.target);
+                    if (!files) return;
                     setForm((current) => ({
                       ...current,
-                      image: event.target.files?.[0] ?? null,
+                      image: files[0] ?? null,
                       removeImage: false,
-                    }))
-                  }
+                    }));
+                  }}
                   ref={imageInputRef}
                   type="file"
                   accept="image/*"

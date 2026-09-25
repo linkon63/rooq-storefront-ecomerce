@@ -20,6 +20,8 @@ import {
   type Tag,
   type Unit,
 } from "../../../../../lib/admin-api";
+import { ImageSizeHint } from "../../../_components/admin-ui";
+import { IMAGE_SIZE_HINT, pickImages } from "../../../../../lib/admin-image-upload";
 
 type CategoryOption = Category & {
   depth: number;
@@ -387,10 +389,10 @@ export default function NewProductPage() {
     return value?.value ?? valueId;
   }
 
-  function updateImages(files: FileList | null) {
+  function updateImages(files: File[]) {
     setForm((current) => ({
       ...current,
-      images: files ? Array.from(files) : [],
+      images: files,
     }));
   }
 
@@ -456,8 +458,9 @@ export default function NewProductPage() {
 
   const handleVariantImagesEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
     const key = e.currentTarget.getAttribute("data-key") || "";
-    const files = e.target.files;
-    if (!files || files.length === 0) {
+    const files = pickImages(e.target);
+    if (!files) return;
+    if (files.length === 0) {
       setVariantDrafts((current) =>
         current.map((draft) => {
           let updatedDraft = draft;
@@ -469,7 +472,7 @@ export default function NewProductPage() {
         })
       );
     } else {
-      const list = Array.from(files);
+      const list = files;
       const previews = list.map((file) => URL.createObjectURL(file));
       setVariantDrafts((current) =>
         current.map((draft) => {
@@ -962,6 +965,7 @@ export default function NewProductPage() {
                     <div>
                       <p className="text-xs font-semibold text-slate-700">Upload Images</p>
                       <p className="text-xs text-slate-500">Click to upload or drag and drop</p>
+                      <ImageSizeHint className="mt-1.5" />
                     </div>
                     <label className="inline-flex h-10 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700">
                       Upload
@@ -969,7 +973,10 @@ export default function NewProductPage() {
                         accept="image/*"
                         className="hidden"
                         multiple
-                        onChange={(event) => updateImages(event.target.files)}
+                        onChange={(event) => {
+                          const files = pickImages(event.target);
+                          if (files) updateImages(files);
+                        }}
                         type="file"
                       />
                     </label>
@@ -1024,17 +1031,20 @@ export default function NewProductPage() {
                   <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4">
                     <p className="text-xs font-semibold text-slate-700">Upload Care Guide</p>
                     <p className="text-xs text-slate-500">Click to upload</p>
+                    <ImageSizeHint className="mt-1.5" />
                     <label className="mt-3 inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-4 text-xs font-semibold text-slate-700">
                       Select file
                       <input
                         accept="image/*"
                         className="hidden"
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          const files = pickImages(event.target);
+                          if (!files) return;
                           setForm((current) => ({
                             ...current,
-                            careGuide: event.target.files?.[0] ?? null,
-                          }))
-                        }
+                            careGuide: files[0] ?? null,
+                          }));
+                        }}
                         type="file"
                       />
                     </label>
@@ -1658,7 +1668,7 @@ function VariantDraftCard({
               <img alt="" className="h-full w-full object-cover" src={url} />
             </div>
           ))}
-          <label className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-slate-500 hover:bg-slate-50">
+          <label title={IMAGE_SIZE_HINT} className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white text-slate-500 hover:bg-slate-50">
             <AdminIcon className="h-4 w-4" name="upload" />
             <span className="mt-1 text-[10px] font-bold">Add</span>
             <input

@@ -12,6 +12,8 @@ import {
   type Category,
   type ReorderCategoryItem,
 } from "../../../../lib/admin-api";
+import { ImageSizeHint } from "../../_components/admin-ui";
+import { pickImages } from "../../../../lib/admin-image-upload";
 
 const PAGE_SIZE = 8;
 
@@ -788,17 +790,19 @@ export default function CategoriesPage() {
               </label>
               <label className="block">
                 <span className="mb-2 block text-sm font-medium text-slate-700">
-                  Image
+                  Image <ImageSizeHint className="ml-1.5 align-middle" />
                 </span>
                 <input
                   className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white file:mr-4 file:rounded-lg file:border-0 file:bg-slate-200 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-300"
-                  onChange={(event) =>
+                  onChange={(event) => {
+                    const files = pickImages(event.target);
+                    if (!files) return;
                     setForm((current) => ({
                       ...current,
-                      image: event.target.files?.[0] ?? null,
+                      image: files[0] ?? null,
                       removeImage: false,
-                    }))
-                  }
+                    }));
+                  }}
                   ref={imageInputRef}
                   type="file"
                   accept="image/*"

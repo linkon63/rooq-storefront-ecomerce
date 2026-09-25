@@ -76,6 +76,10 @@ Cutting a release turns that section into a numbered version — see
 
 ### Unreleased
 
+#### Added
+
+- **Admin image uploads:** every image picker in the admin panel (products, product variants, care guides, categories, brands, news, campaigns, hero banners, and the logo, icon and favicon in General settings) now turns away images larger than 1 MB as soon as they are picked. An error names each rejected file and its size and asks for it to be compressed or resized. Images within the limit in the same pick are still added, and the image already chosen stays in place. Each picker now shows the limit in a highlighted "Max 1 MB per image" badge so it is clear before choosing a file, and the error pops up as a toast headed "Image too large — max 1 MB".
+
 #### Fixed
 
 - **"Get Latest Updates & Big Deals" on the home page:** on small phones the **Subscribe Now** button squeezed the e-mail box until the placeholder was unreadable. The field and the button now sit one above the other below 640px and go back side by side on wider screens, the field is large enough that iPhones stop zooming the page in when it is tapped, and the band grows instead of clipping its text when the wording wraps onto more lines.
