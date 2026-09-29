@@ -16,6 +16,7 @@ import { CurrencyProvider } from "../../../lib/currency-context";
 export { PageHeader, StatusToggle, ProductThumb } from "./admin-ui";
 
 import { AdminIcon, type AdminIconName } from "./admin-icons";
+import { Trademark } from "../../../components/storefront/shared/Logo";
 export { AdminIcon } from "./admin-icons";
 export type { AdminIconName } from "./admin-icons";
 
@@ -212,7 +213,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-[312px] border-r border-slate-200 bg-white lg:block">
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between px-5 py-5">
-            <Link className="block" href="/admin/dashboard">
+            <Link className="flex items-center" href="/admin/dashboard">
               <Image
                 src={settings?.logo ? resolveImageUrl(settings.logo) : "/assets/Logo-English.png"}
                 alt={settings?.shopName ?? "Organishi"}
@@ -221,6 +222,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 className="max-h-14 w-auto object-contain"
                 unoptimized
               />
+              <Trademark className="text-[13px]" />
             </Link>
           </div>
           <nav className="flex-1 overflow-y-auto px-3 pb-6 pt-5">

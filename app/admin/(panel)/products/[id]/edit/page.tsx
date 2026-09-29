@@ -24,6 +24,13 @@ import {
   type Unit,
 } from "../../../../../../lib/admin-api";
 import { ImageSizeHint } from "../../../../_components/admin-ui";
+import ProductSpecificationsFields from "../../../../_components/product-specifications-fields";
+import {
+  draftsToSpecifications,
+  emptySpecificationDrafts,
+  specificationsToDrafts,
+  type SpecificationDrafts,
+} from "../../../../../../lib/product-specifications";
 import { IMAGE_SIZE_HINT, pickImages } from "../../../../../../lib/admin-image-upload";
 import {
   variantOptionPairs,
@@ -64,6 +71,7 @@ type ProductEditForm = {
   categoryId: string;
   slug: string;
   description: string;
+  specifications: SpecificationDrafts;
   brandId: string;
   unitId: string;
   status: "active" | "inactive" | "draft";
@@ -180,6 +188,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   const [form, setForm] = useState<ProductEditForm>({
     name: "", categoryId: "", slug: "", description: "",
+    specifications: emptySpecificationDrafts,
     brandId: "", unitId: "", status: "draft", tagIds: [], supplierId: "",
     supplierPrice: "", factor: "1",
     markup: "", purchaseDate: "", purchaseOrderReturnable: false, includeStock: true,
@@ -382,6 +391,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           name: product.name,
           slug: product.slug,
           description: product.description ?? "",
+          specifications: specificationsToDrafts(product.specifications),
           status: product.status,
           brandId: product.brand?.id ?? product.brandId ?? "",
           categoryId: product.category?.id ?? product.categoryId ?? "",
@@ -979,6 +989,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           name: form.name.trim(),
           slug: form.slug.trim() || slugify(form.name),
           description: form.description.trim() || undefined,
+          specifications: draftsToSpecifications(form.specifications),
           status: form.status,
           brandId: form.brandId || undefined,
           categoryId: form.categoryId || undefined,
@@ -1262,6 +1273,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
           </section>
+
+          <ProductSpecificationsFields
+            value={form.specifications}
+            onChange={(key, text) => {
+              setIsDirty(true);
+              setForm((current) => ({
+                ...current,
+                specifications: { ...current.specifications, [key]: text },
+              }));
+            }}
+          />
 
           {/* Section 2: Media */}
           <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">

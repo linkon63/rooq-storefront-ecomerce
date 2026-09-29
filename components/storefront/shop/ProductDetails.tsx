@@ -11,6 +11,7 @@ import type { Product } from "@/lib/admin-api";
 import { resolveImageUrl } from "@/lib/admin-api";
 import { resolveVariantPricing } from "@/lib/shop-api";
 import { buildAttributeGroups, variantValues } from "@/lib/product-variants";
+import { SPECIFICATION_SECTIONS } from "@/lib/product-specifications";
 import { isPhoneViewport } from "@/lib/viewport";
 import BuyNowSheet from "./BuyNowSheet";
 import { useCart } from "@/app/_providers/cart-provider";
@@ -34,6 +35,12 @@ export default function ProductDetails({ product }: { product: Product }) {
   }, [product.media]);
 
   const attributeGroups = useMemo(() => buildAttributeGroups(product), [product]);
+
+  // Only the spec sections the admin actually filled in are shown.
+  const specSections = SPECIFICATION_SECTIONS.map((section) => ({
+    ...section,
+    items: product.specifications?.[section.key] ?? [],
+  })).filter((section) => section.items.length > 0);
 
   const defaultVariant =
     product.variants?.find((variant) => variant.isDefault) ?? product.variants?.[0];
@@ -242,9 +249,6 @@ export default function ProductDetails({ product }: { product: Product }) {
             ) : (
               <span className="text-red-500">Out of stock</span>
             )}
-            {selectedVariant?.sku && (
-              <span className="ml-3 text-gray-400">SKU: {selectedVariant.sku}</span>
-            )}
           </p>
 
           {/* On a phone the description pushes the size choice below the fold,
@@ -253,7 +257,7 @@ export default function ProductDetails({ product }: { product: Product }) {
               block twice; desktop keeps the original order. */}
           <div className="flex flex-col-reverse md:flex-col">
             {product.description && (
-              <p className="mt-5 text-sm leading-relaxed text-gray-600">{product.description}</p>
+              <p className="mt-5 whitespace-pre-line text-sm leading-relaxed text-gray-600">{product.description}</p>
             )}
 
             {/* Variant pickers, one row per attribute. Wrapped so the swap
@@ -340,6 +344,27 @@ export default function ProductDetails({ product }: { product: Product }) {
           ) : null}
         </div>
       </div>
+
+      {specSections.length > 0 && (
+        <section className="mt-14 border-t border-gray-100 pt-10">
+          <h2 className="font-display text-2xl font-semibold text-[#1f2a17]">Product Specification</h2>
+          <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
+            {specSections.map(({ key, label, items }) => (
+              <div key={key}>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-brand">{label}</h3>
+                <ul className="mt-3 space-y-2">
+                  {items.map((item, index) => (
+                    <li key={index} className="flex gap-2.5 text-sm leading-relaxed text-gray-600">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Docked purchase bar — on a phone the actions scroll out of reach long
           before the shopper has finished reading, so they stay pinned to the

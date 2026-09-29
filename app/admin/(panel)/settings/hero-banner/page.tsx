@@ -8,21 +8,20 @@ import { useDiscounts } from "../../../_hooks/use-discounts";
 import { apiRequest, resolveImageUrl, type Campaign } from "../../../../../lib/admin-api";
 import { ImageSizeHint } from "../../../_components/admin-ui";
 import { pickImages } from "../../../../../lib/admin-image-upload";
+import { HERO_BANNER_SLOTS, type HeroBannerSlot } from "../../../../../lib/hero-banners";
 import type { Section } from "../../../_hooks/use-sections";
 import { FieldLabel, SaveButton, SettingsCard, StatusToggle } from "../_components/settings-ui";
 
 /**
- * The two stacked banners beside the hero slider on the storefront home page.
+ * The three artwork blocks of the storefront home hero: the main banner on the
+ * left and the two stacked beside it (see `HERO_BANNER_SLOTS`).
  *
  * They are stored as ordinary campaigns filed under the banner section, which
  * is what the storefront reads — this screen just narrows the campaign form
- * down to the one job: two images, each pointing at an offer.
+ * down to the one job: an image per block, each pointing at an offer. The
+ * campaign title is what ties a campaign to its block.
  */
 const BANNER_SECTION_TITLE = "Banner Campaign";
-const SLOT_COUNT = 2;
-
-/** Titles are what keeps slot 1 and slot 2 apart across reloads. */
-const slotTitle = (index: number) => `Hero Banner ${index + 1}`;
 
 type Slot = {
   /** Campaign backing this slot, absent until the first save. */
@@ -47,7 +46,7 @@ function isBannerSection(title?: string | null): boolean {
 }
 
 export default function HeroBannerPage() {
-  const [slots, setSlots] = useState<Slot[]>(() => Array.from({ length: SLOT_COUNT }, emptySlot));
+  const [slots, setSlots] = useState<Slot[]>(() => HERO_BANNER_SLOTS.map(emptySlot));
   const [sectionId, setSectionId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,13 +65,13 @@ export default function HeroBannerPage() {
       setSectionId(bannerSection?.id ?? "");
 
       const campaigns = await apiRequest<Campaign[]>("/campaigns");
-      const banners = campaigns
-        .filter((c) => (bannerSection ? c.sectionId === bannerSection.id : isBannerSection(c.section?.title)))
-        .sort((a, b) => a.title.localeCompare(b.title));
+      const banners = campaigns.filter((c) =>
+        bannerSection ? c.sectionId === bannerSection.id : isBannerSection(c.section?.title),
+      );
 
       setSlots(
-        Array.from({ length: SLOT_COUNT }, (_, index) => {
-          const campaign = banners[index];
+        HERO_BANNER_SLOTS.map(({ title }) => {
+          const campaign = banners.find((c) => c.title === title);
           if (!campaign) return emptySlot();
           const image = (campaign.images ?? []).flatMap((entry) => entry.images ?? [])[0] ?? "";
           return {
@@ -157,7 +156,7 @@ export default function HeroBannerPage() {
         }
 
         const body = new FormData();
-        body.append("title", slotTitle(index));
+        body.append("title", HERO_BANNER_SLOTS[index].title);
         body.append("sectionId", sectionId);
         body.append("status", slot.active ? "active" : "inactive");
         // Always sent, empty included, so clearing the offer clears the link.
@@ -206,7 +205,7 @@ export default function HeroBannerPage() {
     <>
       <PageHeader
         title="Hero Banner"
-        description="The two banners shown beside the hero slider on the home page."
+        description="The three banners at the top of the home page: the large one on the left and the two beside it."
         action={
           <SaveButton onClick={save} saving={saving}>
             {saving ? "Saving..." : "Update"}
@@ -216,19 +215,30 @@ export default function HeroBannerPage() {
 
       <SettingsCard
         title="Home Page Banners"
-        description="Upload one image per slot. Recommended ratio 552 × 300. Pick an offer to send shoppers straight to those products."
+        description="Upload one image per block. The diagram on each card shows which block of the home page it fills. Pick an offer to send shoppers straight to those products."
       >
         {loading ? (
           <p className="text-sm font-medium text-slate-400">Loading banners...</p>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
             {slots.map((slot, index) => {
+              const slotInfo = HERO_BANNER_SLOTS[index];
               const displayUrl = slot.preview ?? (slot.imageUrl ? resolveImageUrl(slot.imageUrl) : "");
               return (
-                <div className="rounded-lg border border-slate-200 p-5" key={index}>
+                <div className="flex flex-col rounded-lg border border-slate-200 p-5" key={slotInfo.key}>
+                  <div className="mb-4 flex items-start gap-3">
+                    <HeroLayoutDiagram active={slotInfo.key} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-slate-800">{slotInfo.label}</p>
+                      <p className="mt-0.5 text-xs font-medium text-slate-500">{slotInfo.placement}</p>
+                    </div>
+                  </div>
+
                   <div className="mb-4 flex items-center justify-between">
-                    <p className="text-sm font-black text-slate-800">Banner {index + 1}</p>
-                    <div className="flex items-center gap-2">
+                    <p className="mt-1 text-xs font-semibold text-slate-600">
+                      Recommended size {slotInfo.size} px
+                    </p>
+                    <div className="flex shrink-0 items-center gap-2">
                       <StatusToggle
                         active={slot.active}
                         onChange={(v) => patchSlot(index, { active: v })}
@@ -255,9 +265,9 @@ export default function HeroBannerPage() {
                   {displayUrl ? (
                     <div className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img alt={`Banner ${index + 1}`} className="h-40 w-full object-cover" src={displayUrl} />
+                      <img alt={slotInfo.label} className="h-40 w-full object-cover" src={displayUrl} />
                       <button
-                        aria-label={`Remove banner ${index + 1}`}
+                        aria-label={`Remove ${slotInfo.label.toLowerCase()}`}
                         className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-red-500 text-white shadow transition hover:bg-red-600 cursor-pointer"
                         onClick={() => setRemoveIndex(index)}
                         type="button"
@@ -286,7 +296,7 @@ export default function HeroBannerPage() {
                     </button>
                   )}
 
-                  <div className="mt-4">
+                  <div className="mt-auto pt-4">
                     <FieldLabel>Links To Offer or Discount</FieldLabel>
                     <select
                       className="h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-800 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
@@ -316,11 +326,34 @@ export default function HeroBannerPage() {
         confirmText="Yes, Remove"
         isDestructive
         isOpen={removeIndex !== null}
-        message="This banner will stop showing on the home page."
+        message={
+          removeIndex !== null && HERO_BANNER_SLOTS[removeIndex].key === "main"
+            ? "This banner will stop showing in the home page slider."
+            : "This banner will stop showing on the home page. The default artwork will show in its place."
+        }
         onClose={() => setRemoveIndex(null)}
         onConfirm={confirmRemove}
         title="Remove Banner"
       />
     </>
+  );
+}
+
+/**
+ * A thumbnail of the home hero — the large block on the left, two stacked on
+ * the right, in the storefront's proportions — with this slot's block filled in.
+ */
+function HeroLayoutDiagram({ active }: { active: HeroBannerSlot["key"] }) {
+  const block = (key: HeroBannerSlot["key"]) =>
+    `rounded-[3px] ${key === active ? "bg-blue-600" : "bg-slate-200"}`;
+  return (
+    <div
+      aria-hidden
+      className="grid h-11 w-20 shrink-0 grid-cols-[minmax(0,1fr)_32%] grid-rows-2 gap-1 rounded-md border border-slate-200 bg-white p-1"
+    >
+      <div className={`row-span-2 ${block("main")}`} />
+      <div className={block("top")} />
+      <div className={block("bottom")} />
+    </div>
   );
 }

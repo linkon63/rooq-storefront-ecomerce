@@ -6,7 +6,7 @@ import { HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineBanknotes, HiOutlineMapPin } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 
-import Logo from "./Logo";
+import Logo, { Trademark } from "./Logo";
 import { activeSocialLinks } from "./social-platforms";
 import { BLOG_ENABLED } from "@/lib/feature-flags";
 import type { Policy } from "@/types/policies";
@@ -168,19 +168,8 @@ export default function Footer({ settings, productLinks }: FooterProps) {
               ) : (
                 <Logo className="h-16 md:h-24 md:max-w-full lg:h-28" />
               )}
+              <Trademark className="text-[13px] md:text-base lg:text-lg" />
             </Link>
-
-            {/* Under the logo from md up, as the design lays the footer out.
-                Phones keep their row in the bottom bar. */}
-            {socials.length > 0 && (
-              <div className="mt-2 hidden items-center gap-2.5 md:flex">
-                {socials.map(({ key, label, Icon, color, href }) => (
-                  <SocialLink key={key} href={href} label={label} color={color}>
-                    <Icon size={15} />
-                  </SocialLink>
-                ))}
-              </div>
-            )}
 
             <div className="mt-3 w-full md:mt-4">
               {settings?.slogan && (
@@ -302,14 +291,15 @@ export default function Footer({ settings, productLinks }: FooterProps) {
       {/* ── Bottom bar ──────────────────────────────────────────────────── */}
       <div className="border-t border-brand/15">
         <div className="mx-auto flex max-w-[1600px] flex-col items-center gap-4 px-4 py-5 md:px-8">
-          {/* The brand column carries these from md up. */}
-          <div className="flex items-center gap-2.5 md:hidden">
-            {socials.map(({ key, label, Icon, color, href }) => (
-              <SocialLink key={key} href={href} label={label} color={color}>
-                <Icon size={15} />
-              </SocialLink>
-            ))}
-          </div>
+          {socials.length > 0 && (
+            <div className="flex items-center gap-2.5">
+              {socials.map(({ key, label, Icon, color, href }) => (
+                <SocialLink key={key} href={href} label={label} color={color}>
+                  <Icon size={15} />
+                </SocialLink>
+              ))}
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-2">
             {PAYMENTS.map(({ label, color, src, wordmark }) => (

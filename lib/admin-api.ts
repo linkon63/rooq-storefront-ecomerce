@@ -1,3 +1,5 @@
+import type { ProductSpecifications } from "./product-specifications";
+
 export type AdminUser = {
   id: string;
   name: string;
@@ -210,6 +212,7 @@ export type Product = {
   metaTitle?: string | null;
   metaDescription?: string | null;
   metaKeywords?: string | null;
+  specifications?: ProductSpecifications | null;
   status: "active" | "inactive" | "draft";
   createdAt?: string;
   updatedAt?: string;

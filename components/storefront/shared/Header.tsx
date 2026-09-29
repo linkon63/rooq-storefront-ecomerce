@@ -9,7 +9,7 @@ import { HiOutlinePhone } from "react-icons/hi";
 import { HiOutlineShoppingCart, HiOutlineHeart } from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
 
-import Logo from "./Logo";
+import Logo, { Trademark } from "./Logo";
 import SearchField from "./SearchField";
 import type { ShopCategory, ShopSettings } from "@/lib/shop-api";
 import { BLOG_ENABLED } from "@/lib/feature-flags";
@@ -78,10 +78,6 @@ function activeHrefFor(links: NavLink[], pathname: string, params: URLSearchPara
   return best;
 }
 
-/** Shared look for the ™ beside the header logo; each branch adds its own offsets. */
-const TRADEMARK_CLASS =
-  "select-none font-gotham text-[11px] font-semibold leading-none text-[#1f2a17] md:text-[13px]";
-
 export default function Header({ settings, categories = [] }: HeaderProps) {
   const { user } = useAuth();
   const { itemCount: cartCount } = useCart();
@@ -113,7 +109,10 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-brand-mist shadow-sm">
+    // From md up the header sticks 40px above the viewport (`-top-10`, the
+    // utility bar's h-10), so the bar scrolls away and only the main bar stays
+    // pinned. Keep the two in step if the bar's height changes.
+    <header className="sticky top-0 z-50 w-full bg-brand-mist shadow-sm md:-top-10">
       {/* ── Top utility bar ─────────────────────────────────────────────────
           Hidden on phones — the footer's call/WhatsApp CTA carries the
           numbers there, and the sticky header stays short. */}
@@ -161,36 +160,23 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
       <div className="border-b border-brand/10 bg-brand-mist">
         <div className="mx-auto max-w-[1600px] px-4 md:px-5">
           <div className="flex h-[88px] items-center justify-between gap-4">
-            {/* aria-hidden on the ™: the logo's alt text already names the brand,
-                so announcing "trademark" again would only add noise. `self-start`
-                lifts it to the top of the logo whatever height the logo renders
-                at, so neither branch needs pixel offsets. */}
             <Link href="/" className="flex shrink-0 items-center" aria-label="Organishi home">
               {settings?.logo ? (
-                <>
-                  {/* `aspect-auto` drops the ratio the width/height props imply, so an
-                     admin-uploaded logo of any shape sizes from its own artwork
-                     instead of being letterboxed inside a fixed box. */}
-                  <Image
-                    src={settings.logo}
-                    alt={settings.shopName ?? "Organishi"}
-                    width={150}
-                    height={72}
-                    className="aspect-auto w-auto object-contain h-10 md:h-14"
-                    priority
-                  />
-                  <span aria-hidden className={`${TRADEMARK_CLASS} ml-0.5 self-start`}>
-                    ™
-                  </span>
-                </>
+                /* `aspect-auto` drops the ratio the width/height props imply, so an
+                   admin-uploaded logo of any shape sizes from its own artwork
+                   instead of being letterboxed inside a fixed box. */
+                <Image
+                  src={settings.logo}
+                  alt={settings.shopName ?? "Organishi"}
+                  width={150}
+                  height={72}
+                  className="aspect-auto w-auto object-contain h-10 md:h-14"
+                  priority
+                />
               ) : (
-                <>
-                  <Logo className="h-10 md:h-14" />
-                  <span aria-hidden className={`${TRADEMARK_CLASS} ml-0.5 self-start`}>
-                    ™
-                  </span>
-                </>
+                <Logo className="h-10 md:h-14" />
               )}
+              <Trademark className="text-[11px] md:text-[13px]" />
             </Link>
 
             {/* min-w-0 + overflow-hidden: category names come from the admin, so a

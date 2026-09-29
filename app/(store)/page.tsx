@@ -9,6 +9,7 @@ import CustomerVoices from "@/components/storefront/home/CustomerVoices";
 import OrganicShowcase from "@/components/storefront/home/OrganicShowcase";
 import NewsletterCta from "@/components/storefront/home/NewsletterCta";
 import { ORGANIC_SHOWCASE_ENABLED } from "@/lib/feature-flags";
+import { HERO_BANNER_SLOTS, type HeroBannerSlot } from "@/lib/hero-banners";
 import {
   fetchShopCampaigns,
   fetchShopCategories,
@@ -32,7 +33,7 @@ const FALLBACK_SLIDE: HeroSlide = {
     alt: "খাঁটি সরিষার তেল — cold pressed mustard oil",
 };
 
-/** Shown until Admin → Settings → Hero Banner has artwork of its own. */
+/** Top and bottom right, each shown until its slot in Admin → Settings → Hero Banner has artwork. */
 const FALLBACK_BANNERS: HeroSlide[] = [
   {
     image: "/images/home/seed.jpeg",
@@ -83,9 +84,11 @@ export default async function Home() {
     fetchShopSettings(),
   ]);
 
-  // Campaigns filed under a banner section fill the two static slots beside the
-  // hero; everything else rides the slider. Each click carries the offer the
-  // artwork advertises through to the shop.
+  // Admin → Settings → Hero Banner fills three slots, each a banner-section
+  // campaign told apart by title: the main one leads the slider and the other
+  // two are the static blocks beside it. Every other campaign rides the slider
+  // after the main banner. Each click carries the offer the artwork advertises
+  // through to the shop.
   const toSlides = (list: typeof campaigns): HeroSlide[] =>
     list.flatMap((campaign) =>
       campaign.images.map((image) => ({
@@ -95,21 +98,27 @@ export default async function Home() {
       })),
     );
 
-  const campaignSlides = toSlides(campaigns.filter((c) => !isBannerSection(c.sectionTitle)));
-  // Sorted by title so "Hero Banner 1" always takes the top slot, whatever
-  // order the admin saved them in.
-  const campaignBanners = toSlides(
-    campaigns
-      .filter((c) => isBannerSection(c.sectionTitle))
-      .sort((a, b) => a.title.localeCompare(b.title)),
-  );
+  const slotArtwork = (key: HeroBannerSlot["key"]) => {
+    const { title } = HERO_BANNER_SLOTS.find((slot) => slot.key === key)!;
+    return toSlides(campaigns.filter((c) => isBannerSection(c.sectionTitle) && c.title === title));
+  };
+
+  const heroSlides = [
+    ...slotArtwork("main"),
+    ...toSlides(campaigns.filter((c) => !isBannerSection(c.sectionTitle))),
+  ];
+  // The layout needs both side blocks, so an empty slot keeps its default artwork.
+  const heroBanners = [
+    slotArtwork("top")[0] ?? FALLBACK_BANNERS[0],
+    slotArtwork("bottom")[0] ?? FALLBACK_BANNERS[1],
+  ];
 
   return (
     <main>
       <div className="space-y-14 lg:space-y-20">
         <HomeHero
-          slides={campaignSlides.length > 0 ? campaignSlides : [FALLBACK_SLIDE]}
-          banners={campaignBanners.length > 0 ? campaignBanners.slice(0, 2) : FALLBACK_BANNERS}
+          slides={heroSlides.length > 0 ? heroSlides : [FALLBACK_SLIDE]}
+          banners={heroBanners}
         />
         <MostRecentItems products={products} categories={categories} />
         {/* Products arrive newest first, so the first two are the latest. */}

@@ -21,6 +21,12 @@ import {
   type Unit,
 } from "../../../../../lib/admin-api";
 import { ImageSizeHint } from "../../../_components/admin-ui";
+import ProductSpecificationsFields from "../../../_components/product-specifications-fields";
+import {
+  draftsToSpecifications,
+  emptySpecificationDrafts,
+  type SpecificationDrafts,
+} from "../../../../../lib/product-specifications";
 import { IMAGE_SIZE_HINT, pickImages } from "../../../../../lib/admin-image-upload";
 
 type CategoryOption = Category & {
@@ -63,6 +69,7 @@ type ProductCreateForm = {
   categoryId: string;
   slug: string;
   description: string;
+  specifications: SpecificationDrafts;
   brandId: string;
   unitId: string;
   status: "active" | "inactive" | "draft";
@@ -88,6 +95,7 @@ const emptyForm: ProductCreateForm = {
   categoryId: "",
   slug: "",
   description: "",
+  specifications: emptySpecificationDrafts,
   brandId: "",
   unitId: "",
   status: "active",
@@ -645,6 +653,7 @@ export default function NewProductPage() {
             name: form.name.trim(),
             slug,
             description: form.description.trim() || undefined,
+            specifications: draftsToSpecifications(form.specifications),
             status: form.status,
             brandId: form.brandId,
             categoryId: form.categoryId,
@@ -953,6 +962,16 @@ export default function NewProductPage() {
                 </div>
               </div>
             </section>
+
+            <ProductSpecificationsFields
+              value={form.specifications}
+              onChange={(key, text) =>
+                setForm((current) => ({
+                  ...current,
+                  specifications: { ...current.specifications, [key]: text },
+                }))
+              }
+            />
 
             <section className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="mb-4">
