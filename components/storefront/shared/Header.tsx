@@ -112,49 +112,7 @@ export default function Header({ settings, categories = [] }: HeaderProps) {
     // From md up the header sticks 40px above the viewport (`-top-10`, the
     // utility bar's h-10), so the bar scrolls away and only the main bar stays
     // pinned. Keep the two in step if the bar's height changes.
-    <header className="sticky top-0 z-50 w-full bg-brand-mist shadow-sm md:-top-10">
-      {/* ── Top utility bar ─────────────────────────────────────────────────
-          Hidden on phones — the footer's call/WhatsApp CTA carries the
-          numbers there, and the sticky header stays short. */}
-      <div className="hidden bg-brand text-white text-[11px] sm:text-[13px] md:block">
-        <div className="mx-auto max-w-[1600px] px-3 sm:px-4 md:px-5">
-          <div className="flex h-10 items-center justify-between gap-2 sm:gap-4">
-            <div className="flex items-center gap-2.5 sm:gap-5 overflow-hidden whitespace-nowrap">
-              <span className="flex items-center gap-1.5">
-                <FiClock className="shrink-0" size={15} />
-                <span>Open Daily: {hours}</span>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 sm:gap-4 whitespace-nowrap">
-              <nav className="hidden items-center gap-3 md:flex">
-                {/* <Link href="/contact" className="hover:underline">Contact</Link>
-                <span className="text-white/50">|</span> */}
-              </nav>
-
-              <a
-                href={telHref(callNumber)}
-                className="flex items-center gap-1 sm:gap-1.5 font-medium hover:underline"
-              >
-                <HiOutlinePhone className="shrink-0" size={15} />
-                <span>{callNumber}</span>
-              </a>
-
-              <span className="text-white/50">|</span>
-
-              <a
-                href={whatsappHref(whatsappNumber)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 sm:gap-1.5 font-medium hover:underline"
-              >
-                <FaWhatsapp className="shrink-0 text-white" size={15} />
-                <span>{whatsappNumber}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
+    <header className="sticky top-0 z-50 w-full bg-brand-mist shadow-sm">
 
       {/* ── Main bar ────────────────────────────────────────────────────── */}
       <div className="border-b border-brand/10 bg-brand-mist">

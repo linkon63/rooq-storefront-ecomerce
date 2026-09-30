@@ -220,7 +220,7 @@ export default function HeroBannerPage() {
         {loading ? (
           <p className="text-sm font-medium text-slate-400">Loading banners...</p>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 2xl:grid-cols-3">
             {slots.map((slot, index) => {
               const slotInfo = HERO_BANNER_SLOTS[index];
               const displayUrl = slot.preview ?? (slot.imageUrl ? resolveImageUrl(slot.imageUrl) : "");
