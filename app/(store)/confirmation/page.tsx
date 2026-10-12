@@ -6,7 +6,7 @@ import { LuPrinter, LuCircleCheck, LuShoppingBag } from "react-icons/lu";
 import type { OrderResult } from "@/lib/types";
 import { fetchShopSettings, type ShopSettings } from "@/lib/shop-api";
 import { resolveShopContact } from "@/lib/shop-contact";
-import OrderInvoice from "./_components/order-invoice";
+import OrderInvoice from "@/components/order-invoice";
 
 export default function ConfirmationPage() {
   const [order] = useState<OrderResult | null>(() => {

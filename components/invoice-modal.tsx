@@ -4,286 +4,112 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { LuPrinter, LuX } from "react-icons/lu";
 import type { OrderResult } from "@/lib/types";
+import type { ShopSettings } from "@/lib/shop-api";
+import OrderInvoice from "@/components/order-invoice";
 
-const COMPANY = {
-  name: "Organishi",
-  logo: "/assets/Logo-English.png",
-  addressLine: "Sector 13, Uttara, Dhaka 1230, Bangladesh",
-  phone: "017 3360 0964",
-  email: "support@organishi.com",
-};
-
-const currency = (n: number) =>
-  `৳${new Intl.NumberFormat("en-BD", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(n)}`;
-
+/**
+ * The customer's invoice on a screen that is not the confirmation page — the
+ * admin panel opens it over the order it belongs to. The sheet inside is the
+ * very same component the shopper prints after checkout, so there is one
+ * invoice design to keep right; this only adds the backdrop and the Print
+ * button, and its own print rules so the surrounding page (admin sidebar and
+ * all) does not reach the paper.
+ */
 export default function InvoiceModal({
   order,
+  settings,
   open,
   onClose,
 }: {
   order: OrderResult;
+  settings: ShopSettings | null;
   open: boolean;
   onClose: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Close on Escape and lock body scroll while open
+  // Close on Escape, and hold the page still behind the backdrop.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = previousOverflow;
     };
   }, [open, onClose]);
 
   if (!open || !mounted) return null;
 
-  const subtotal = order.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shipping = order.shippingCost ?? 0;
-  const tax = 0;
-  // Prefer the discount the API recorded; fall back to the gap only for older
-  // stored orders that predate the field.
-  const discount = order.discount ?? Math.max(0, subtotal + shipping + tax - order.total);
-  const payable = order.total ?? subtotal - discount + shipping + tax;
-  const issuedOn = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const { address } = order;
-
   return createPortal(
     <div className="invoice-portal">
-      {/* Print rules: only the invoice sheet flows onto the page */}
+      {/* Only the sheet goes to paper: everything outside this portal is taken
+          out of the print flow, and the backdrop stops being a scrolling
+          overlay so the invoice can run onto a second page if it is long. */}
       <style>{`
         @media print {
-          @page { margin: 14mm; }
+          @page { size: A4; margin: 14mm; }
           body > *:not(.invoice-portal) { display: none !important; }
           .invoice-portal .invoice-backdrop {
             position: static !important;
+            display: block !important;
+            overflow: visible !important;
             background: transparent !important;
             backdrop-filter: none !important;
             padding: 0 !important;
-            overflow: visible !important;
-            display: block !important;
           }
           .invoice-portal .invoice-frame {
             max-width: none !important;
             margin: 0 !important;
           }
-          .invoice-no-print { display: none !important; }
-          #invoice-sheet {
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            padding: 0 !important;
-          }
+          .invoice-portal .invoice-toolbar { display: none !important; }
         }
       `}</style>
 
       <div
-        className="invoice-backdrop fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-stone-900/60 backdrop-blur-sm p-4 sm:p-8"
+        className="invoice-backdrop fixed inset-0 z-100 flex items-start justify-center overflow-y-auto bg-stone-900/60 p-4 backdrop-blur-sm sm:p-8"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
-        aria-label="Order invoice"
+        aria-label={`Invoice for order ${order.orderNumber}`}
       >
         <div
-          className="invoice-frame relative w-full max-w-3xl my-4"
+          className="invoice-frame relative my-4 w-full max-w-3xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Toolbar */}
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-white/90 font-sans text-sm font-medium uppercase tracking-wider">
-              Invoice Preview
+          <div className="invoice-toolbar mb-3 flex items-center justify-between gap-3">
+            <span className="font-sans text-sm font-medium uppercase tracking-wider text-white/90">
+              Invoice #{order.orderNumber}
             </span>
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => window.print()}
-                className="px-5 py-2.5 bg-brand text-white font-sans text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-brand-dark transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+                className="flex cursor-pointer items-center gap-2 rounded-full bg-brand px-5 py-2.5 font-sans text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-colors hover:bg-brand-dark"
               >
-                <LuPrinter className="w-4 h-4" />
+                <LuPrinter className="h-4 w-4" />
                 Print
               </button>
               <button
+                type="button"
                 onClick={onClose}
                 aria-label="Close invoice"
-                className="p-2.5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors cursor-pointer"
+                className="cursor-pointer rounded-full bg-white/10 p-2.5 text-white transition-colors hover:bg-white/20"
               >
-                <LuX className="w-4 h-4" />
+                <LuX className="h-4 w-4" />
               </button>
             </div>
           </div>
 
-          {/* Invoice Sheet */}
-          <div
-            id="invoice-sheet"
-            className="bg-white rounded-lg shadow-2xl px-6 sm:px-10 py-8 sm:py-10 text-stone-800"
-          >
-            {/* Header: logo + company / invoice meta */}
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 pb-6 border-b border-stone-200">
-              <div className="flex items-center gap-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={COMPANY.logo}
-                  alt={COMPANY.name}
-                  className="w-16 h-16 object-contain"
-                />
-                <div>
-                  <p className="font-serif text-xl text-stone-800 leading-tight">
-                    {COMPANY.name}
-                  </p>
-                  <p className="font-sans text-xs text-stone-500 mt-1 leading-relaxed max-w-[220px]">
-                    {COMPANY.addressLine}
-                  </p>
-                  <p className="font-sans text-xs text-stone-500">{COMPANY.phone}</p>
-                  <p className="font-sans text-xs text-stone-500">{COMPANY.email}</p>
-                </div>
-              </div>
-
-              <div className="sm:text-right">
-                <h2 className="font-serif text-3xl text-stone-800 tracking-wide">
-                  INVOICE
-                </h2>
-                <p className="font-sans text-sm text-stone-600 mt-1">
-                  <span className="text-stone-400">No. </span>
-                  <span className="font-semibold">{order.orderNumber}</span>
-                </p>
-                <p className="font-sans text-xs text-stone-500 mt-0.5">
-                  Issued: {issuedOn}
-                </p>
-                {order.paymentMethod && (
-                  <p className="font-sans text-xs text-stone-500 mt-0.5 capitalize">
-                    Payment: {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Bill To */}
-            <div className="py-6 border-b border-stone-200">
-              <p className="font-sans text-[11px] uppercase tracking-wider text-stone-400 mb-2">
-                Bill To
-              </p>
-              <p className="font-sans text-sm font-semibold text-stone-800">
-                {address.fullName}
-              </p>
-              <div className="font-sans text-sm text-stone-600 leading-relaxed mt-0.5">
-                <p>{address.addressLine1}</p>
-                {address.addressLine2 && <p>{address.addressLine2}</p>}
-                <p>
-                  {[address.city, address.state, address.postalCode]
-                    .filter(Boolean)
-                    .join(", ")}
-                </p>
-                <p>{address.country}</p>
-                <p className="mt-1">{address.phone}</p>
-                <p>{address.email}</p>
-              </div>
-            </div>
-
-            {/* Items table */}
-            <div className="py-6">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-stone-200">
-                    <th className="font-sans text-[11px] uppercase tracking-wider text-stone-400 font-medium pb-3">
-                      Item
-                    </th>
-                    <th className="font-sans text-[11px] uppercase tracking-wider text-stone-400 font-medium pb-3 text-center w-16">
-                      Qty
-                    </th>
-                    <th className="font-sans text-[11px] uppercase tracking-wider text-stone-400 font-medium pb-3 text-right w-24">
-                      Price
-                    </th>
-                    <th className="font-sans text-[11px] uppercase tracking-wider text-stone-400 font-medium pb-3 text-right w-28">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item, idx) => (
-                    <tr key={idx} className="border-b border-stone-100">
-                      <td className="py-3 font-sans text-sm text-stone-700 pr-2">
-                        {item.name}
-                      </td>
-                      <td className="py-3 font-sans text-sm text-stone-600 text-center">
-                        {item.quantity}
-                      </td>
-                      <td className="py-3 font-sans text-sm text-stone-600 text-right">
-                        {currency(item.price)}
-                      </td>
-                      <td className="py-3 font-sans text-sm text-stone-800 text-right font-medium">
-                        {currency(item.price * item.quantity)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Totals */}
-            <div className="flex justify-end">
-              <div className="w-full sm:w-64 space-y-2">
-                <div className="flex justify-between font-sans text-sm text-stone-600">
-                  <span>Subtotal</span>
-                  <span>{currency(subtotal)}</span>
-                </div>
-                <div className="flex justify-between font-sans text-sm text-stone-600">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : currency(shipping)}</span>
-                </div>
-                <div className="flex justify-between font-sans text-sm text-stone-600">
-                  <span>Tax</span>
-                  <span>{currency(tax)}</span>
-                </div>
-                {discount > 0.001 && (
-                  <div className="flex justify-between font-sans text-sm text-stone-600">
-                    <span>Discount</span>
-                    <span>-{currency(discount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-serif text-lg text-stone-900 pt-2 mt-2 border-t border-stone-300">
-                  <span>Payable Amount</span>
-                  <span className="text-[#D31F3A] font-semibold">
-                    {currency(payable)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Order note */}
-            {order.orderNote && (
-              <div className="mt-6 pt-4 border-t border-stone-100">
-                <p className="font-sans text-[11px] uppercase tracking-wider text-stone-400 mb-1">
-                  Order Note
-                </p>
-                <p className="font-sans text-sm text-stone-600">{order.orderNote}</p>
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-stone-200 text-center">
-              <p className="font-serif text-base text-stone-700">
-                Thank you for your order
-              </p>
-              <p className="font-sans text-xs text-stone-400 mt-1">
-                This is a computer-generated invoice and does not require a signature.
-              </p>
-            </div>
-          </div>
+          <OrderInvoice order={order} settings={settings} />
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

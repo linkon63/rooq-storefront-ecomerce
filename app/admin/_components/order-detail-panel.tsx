@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { RichDropdown } from "./rich-dropdown";
 import { AdminIcon, ProductThumb } from "./admin-shell";
 import { ConfirmModal } from "./confirm-modal";
+import InvoiceModal from "../../../components/invoice-modal";
+import { orderToInvoice } from "../../../lib/admin-invoice";
+import { fetchShopSettings, type ShopSettings } from "../../../lib/shop-api";
 import {
   formatMoney,
   orderCustomer,
@@ -88,6 +91,20 @@ export function OrderDetailPanel({
   const customer = orderCustomer(order);
   const payment = orderPaymentMethod(order);
 
+  // The shop's own invoice, printed from the admin side. The letterhead comes
+  // from the public settings, fetched the first time an invoice is opened
+  // rather than on every order that is clicked through.
+  const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [shopSettings, setShopSettings] = useState<ShopSettings | null>(null);
+  useEffect(() => {
+    if (!invoiceOpen || shopSettings) return;
+    fetchShopSettings()
+      .then(setShopSettings)
+      .catch(() => {
+        /* the invoice falls back to the packaged logo and contact details */
+      });
+  }, [invoiceOpen, shopSettings]);
+
   // Payment is settled once the parcel is delivered — that is when the courier
   // hands over the cash — so the payment controls appear then even on the New
   // Orders screen, which otherwise keeps them out of the way.
@@ -138,6 +155,14 @@ export function OrderDetailPanel({
         </div>
 
         <div className="flex flex-wrap gap-3 items-end">
+          <button
+            type="button"
+            onClick={() => setInvoiceOpen(true)}
+            className="flex h-11 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
+          >
+            <AdminIcon className="h-4 w-4" name="printer" />
+            Invoice
+          </button>
           {canSettlePayment && (
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Payment Status</span>
@@ -422,6 +447,13 @@ export function OrderDetailPanel({
           </div>
         </div>
       </div>
+
+      <InvoiceModal
+        order={orderToInvoice(order, totals, shopSettings)}
+        settings={shopSettings}
+        open={invoiceOpen}
+        onClose={() => setInvoiceOpen(false)}
+      />
 
       <ConfirmModal
         isOpen={confirmReturn}

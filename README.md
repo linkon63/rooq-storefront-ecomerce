@@ -78,6 +78,8 @@ Cutting a release turns that section into a numbered version — see
 
 #### Added
 
+- **Admin → Orders:** every order now has an **Invoice** button beside its status controls. It opens the customer's own invoice — the same sheet the shopper gets on the confirmation page after checkout, with the shop letterhead, the items, the offers and coupon taken off, the delivery charge and the amount payable — and prints it on its own, without the admin panel around it. It works for guest and account orders alike, on the order list's mobile panel as well as the desktop one.
+
 - **Admin image uploads:** every image picker in the admin panel (products, product variants, care guides, categories, brands, news, campaigns, hero banners, and the logo, icon and favicon in General settings) now turns away images larger than 1 MB as soon as they are picked. An error names each rejected file and its size and asks for it to be compressed or resized. Images within the limit in the same pick are still added, and the image already chosen stays in place. Each picker now shows the limit in a highlighted "Max 1 MB per image" badge so it is clear before choosing a file, and the error pops up as a toast headed "Image too large — max 1 MB".
 
 #### Changed
