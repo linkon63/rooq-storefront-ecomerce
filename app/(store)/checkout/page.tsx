@@ -77,6 +77,9 @@ export default function CheckoutPage() {
   const [agreeToTerms, setAgreeToTerms] = useState(true);
   const [showFieldErrors, setShowFieldErrors] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Flags the phone field red when Place Order rejects the number typed in it.
+  const [phoneError, setPhoneError] = useState(false);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
 
   // Zone and rates are shared with the cart, so whatever was picked there is
   // still selected — and priced the same — here.
@@ -323,6 +326,22 @@ export default function CheckoutPage() {
       return;
     }
 
+    // We only deliver inside Bangladesh and the courier calls before every
+    // delivery, so the order has to carry a Bangladeshi mobile number. Empty
+    // fields were already caught above, so anything left here is a wrong number.
+    const orderPhone = usingSavedAddress && selectedAddress ? selectedAddress.phone : address.phone;
+    if (!isValidBdPhone(orderPhone)) {
+      const message = usingSavedAddress
+        ? "The selected address needs a valid Bangladeshi phone number (e.g. 01XXXXXXXXX) — edit the address to update it."
+        : "Please enter a valid Bangladeshi phone number (e.g. 01XXXXXXXXX). We only deliver inside Bangladesh.";
+      setPhoneError(true);
+      setSubmitError(message);
+      toast.error(message);
+      phoneInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      phoneInputRef.current?.focus({ preventScroll: true });
+      return;
+    }
+
     if (blockingReason) {
       setSubmitError(blockingReason);
       toast.error(blockingReason);
@@ -336,7 +355,7 @@ export default function CheckoutPage() {
       ? {
           email: user?.email ?? address.email,
           fullName: selectedAddress.fullName,
-          phone: selectedAddress.phone,
+          phone: normalizeBdPhone(selectedAddress.phone),
           addressLine1: selectedAddress.addressLine1,
           addressLine2: selectedAddress.addressLine2 ?? "",
           city: selectedAddress.city,
@@ -345,12 +364,13 @@ export default function CheckoutPage() {
           country: selectedAddress.country || COUNTRY,
         }
       : isAuthenticated
-        ? { ...address, country: COUNTRY }
+        ? { ...address, phone: normalizeBdPhone(address.phone), country: COUNTRY }
         : // Guests give name, phone and address only. The order still needs a
           // city and district, so they carry the area the guest picked —
           // otherwise the API would file an Outside Dhaka order under "Dhaka".
           {
             ...address,
+            phone: normalizeBdPhone(address.phone),
             state: ZONE_LABELS[deliveryZone],
             city: ZONE_LABELS[deliveryZone],
             postalCode: "",
@@ -549,13 +569,16 @@ export default function CheckoutPage() {
         {/* Empty required fields turn red once Place Order has been tried. */}
         <form
           onSubmit={handlePlaceOrder}
-          onInput={() => submitError && setSubmitError(null)}
+          onInput={() => {
+            if (submitError) setSubmitError(null);
+            if (phoneError) setPhoneError(false);
+          }}
           noValidate
-          className={
+          className={`[&_input[aria-invalid=true]]:outline-red-500 [&_input[aria-invalid=true]]:bg-red-50/40${
             showFieldErrors
-              ? "[&_input:invalid]:outline-red-500 [&_input:invalid]:bg-red-50/40 [&_select:invalid]:outline-red-500 [&_select:invalid]:bg-red-50/40"
-              : undefined
-          }
+              ? " [&_input:invalid]:outline-red-500 [&_input:invalid]:bg-red-50/40 [&_select:invalid]:outline-red-500 [&_select:invalid]:bg-red-50/40"
+              : ""
+          }`}
         >
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_384px] gap-8 lg:gap-16 lg:items-start">
             {/* ── Left Column: Billing Details ── */}
@@ -737,11 +760,21 @@ export default function CheckoutPage() {
                       </label>
                       <input
                         required
+                        ref={phoneInputRef}
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        aria-invalid={phoneError}
                         value={address.phone}
                         onChange={(e) => setAddress({ ...address, phone: e.target.value })}
                         placeholder="01XXXXXXXXX"
                         className={INPUT_CLASS}
                       />
+                      {phoneError && (
+                        <p className="mt-1 font-gotham text-xs text-red-600">
+                          Bangladeshi number only, e.g. 01712345678.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block font-gotham text-sm font-medium text-[#222222] mb-1">

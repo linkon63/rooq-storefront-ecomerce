@@ -11,6 +11,7 @@ import {
   updateAddress,
   type CustomerAddress,
 } from "@/lib/address-api";
+import { isValidBdPhone, normalizeBdPhone } from "@/lib/utils";
 
 const SECTION_LABEL = "text-[10px] font-bold tracking-[0.18em] uppercase text-brand";
 const FIELD_LABEL   = "block text-[10px] font-bold tracking-[0.14em] uppercase text-stone-600 mb-1.5";
@@ -77,12 +78,21 @@ export default function AddressBookView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Orders ship inside Bangladesh only, and these addresses are what the
+    // courier is given — so the number has to be a Bangladeshi mobile one.
+    if (!isValidBdPhone(form.phone)) {
+      toast.error("Please enter a valid Bangladeshi phone number (e.g. 01XXXXXXXXX).");
+      return;
+    }
+    const payload = { ...form, phone: normalizeBdPhone(form.phone) };
+
     setSubmitting(true);
     try {
       if (editing) {
-        await updateAddress(editing.id, form);
+        await updateAddress(editing.id, payload);
       } else {
-        await createAddress(form);
+        await createAddress(payload);
       }
       toast.success(editing ? "Address updated." : "Address saved.");
       setModalOpen(false);
@@ -218,7 +228,7 @@ export default function AddressBookView() {
                   </div>
                   <div>
                     <label className={FIELD_LABEL}>Phone *</label>
-                    <input type="tel" value={form.phone} onChange={(e) => patch("phone", e.target.value)} className={INPUT_BASE} placeholder="+880 1xxx" required />
+                    <input type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(e) => patch("phone", e.target.value)} className={INPUT_BASE} placeholder="01XXXXXXXXX" required />
                   </div>
                 </div>
 

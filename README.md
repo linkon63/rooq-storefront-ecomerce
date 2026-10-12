@@ -80,6 +80,11 @@ Cutting a release turns that section into a numbered version — see
 
 - **Admin image uploads:** every image picker in the admin panel (products, product variants, care guides, categories, brands, news, campaigns, hero banners, and the logo, icon and favicon in General settings) now turns away images larger than 1 MB as soon as they are picked. An error names each rejected file and its size and asks for it to be compressed or resized. Images within the limit in the same pick are still added, and the image already chosen stays in place. Each picker now shows the limit in a highlighted "Max 1 MB per image" badge so it is clear before choosing a file, and the error pops up as a toast headed "Image too large — max 1 MB".
 
+#### Changed
+
+- **Checkout:** an order can no longer be placed with a phone number that is not a Bangladeshi mobile number. Place Order now checks it, scrolls to the phone box, turns it red and asks for a number like 01712345678 — and the number is saved in the plain 11-digit form, so `+8801712345678` and `+880 1712-345678` are accepted and stored the same way. Picking a saved address whose number is not a Bangladeshi one asks for that address to be edited first.
+- **Profile → Address Book:** saving an address now needs a Bangladeshi mobile number too, and stores it in the same 11-digit form.
+
 #### Fixed
 
 - **"Get Latest Updates & Big Deals" on the home page:** on small phones the **Subscribe Now** button squeezed the e-mail box until the placeholder was unreadable. The field and the button now sit one above the other below 640px and go back side by side on wider screens, the field is large enough that iPhones stop zooming the page in when it is tapped, and the band grows instead of clipping its text when the wording wraps onto more lines.
