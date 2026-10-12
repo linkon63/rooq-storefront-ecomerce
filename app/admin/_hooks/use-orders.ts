@@ -83,7 +83,12 @@ export function useOrders({ fixedStatus, defaultStatus = "" }: UseOrdersOptions 
     }
   }, [page, status, paymentStatus, search]);
 
-  async function updateOrderStatus(newStatus: OrderStatus) {
+  /**
+   * `note` is written to the order's history beside the new status — the
+   * reason a cancellation or a return was made, which the panel then shows
+   * back on the order.
+   */
+  async function updateOrderStatus(newStatus: OrderStatus, note?: string) {
     if (!selectedId || isUpdatingStatus) return;
     setIsUpdatingStatus(true);
     setError("");
@@ -91,7 +96,7 @@ export function useOrders({ fixedStatus, defaultStatus = "" }: UseOrdersOptions 
       await apiRequest(`/orders/${selectedId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, note: note?.trim() || undefined }),
       });
       await loadOrders();
       const msg =

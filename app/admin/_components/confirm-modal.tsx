@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { AdminIcon } from "./admin-shell";
 
 interface ConfirmModalProps {
@@ -12,6 +14,10 @@ interface ConfirmModalProps {
   cancelText?: string;
   isDestructive?: boolean;
   error?: string | null;
+  /** Anything the confirmation needs answered first — a reason box, say. */
+  children?: ReactNode;
+  /** Holds the confirm button shut until `children` has what it needs. */
+  confirmDisabled?: boolean;
 }
 
 export function ConfirmModal({
@@ -24,6 +30,8 @@ export function ConfirmModal({
   cancelText = "Cancel",
   isDestructive = true,
   error,
+  children,
+  confirmDisabled = false,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
 
@@ -53,6 +61,8 @@ export function ConfirmModal({
           </button>
         </div>
 
+        {children}
+
         {error && (
           <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700">
             {error}
@@ -68,11 +78,12 @@ export function ConfirmModal({
             {cancelText}
           </button>
           <button
-            className={`inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-all cursor-pointer ${
+            className={`inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
               isDestructive
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
+            disabled={confirmDisabled}
             onClick={onConfirm}
             type="button"
           >

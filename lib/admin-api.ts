@@ -433,6 +433,14 @@ export function orderPaymentMethod(order: Order): { label: string; isCod: boolea
   return { label: "Cash on Delivery", isCod: true };
 }
 
+/** One line of an order's history — the note is what the admin typed, if any. */
+export type OrderStatusLog = {
+  id: string;
+  status: string;
+  note?: string | null;
+  createdAt: string;
+};
+
 export type Order = {
   id: string;
   orderNumber: string;
@@ -456,7 +464,19 @@ export type Order = {
   shippingAddress?: GuestShippingAddress | null;
   items?: OrderItem[];
   payments?: { id: string; amount: string | number; method: string; status: string }[];
+  /** Newest first, as the API sorts them. */
+  statusLogs?: OrderStatusLog[];
 };
+
+/**
+ * What was written down the last time the order reached `status` — the reason
+ * an order was cancelled or returned, for the screen that has to explain it.
+ */
+export function orderStatusNote(order: Order, status: OrderStatus): string | null {
+  const log = (order.statusLogs ?? []).find((entry) => entry.status === status);
+  const note = log?.note?.trim();
+  return note ? note : null;
+}
 
 export type PaginatedOrders = {
   data: Order[];

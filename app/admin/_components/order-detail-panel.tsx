@@ -12,6 +12,7 @@ import {
   formatMoney,
   orderCustomer,
   orderPaymentMethod,
+  orderStatusNote,
   resolveImageUrl,
   type Order,
   type OrderPaymentStatus,
@@ -69,7 +70,8 @@ interface OrderDetailPanelProps {
   order: Order;
   totals: OrderTotals | null;
   symbol: string;
-  onUpdateOrderStatus: (status: OrderStatus) => void;
+  /** `note` is filed with the new status as the reason for the change. */
+  onUpdateOrderStatus: (status: OrderStatus, note?: string) => void;
   onUpdatePaymentStatus: (paymentStatus: OrderPaymentStatus) => void;
   isUpdatingStatus?: boolean;
   /** Off on New Orders — payment is settled once the order is delivered. */
@@ -88,6 +90,11 @@ export function OrderDetailPanel({
   // Marking an order returned puts it in the refund queue and cannot be undone
   // from this screen, so it asks first.
   const [confirmReturn, setConfirmReturn] = useState(false);
+  // Cancelling is final and the shop has to be able to say why later — to the
+  // customer, or to whoever asks next week — so the reason is typed first and
+  // filed with the order rather than lost in someone's memory.
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [cancelNote, setCancelNote] = useState("");
   const customer = orderCustomer(order);
   const payment = orderPaymentMethod(order);
 
@@ -118,6 +125,9 @@ export function OrderDetailPanel({
       ? Math.round((totalSaving / totals.subtotal) * 100)
       : 0;
   const awaitingCod = isDelivered && payment.isCod && order.paymentStatus === "unpaid";
+
+  // Why this order was cancelled, as it was written down at the time.
+  const cancelReason = order.status === "cancelled" ? orderStatusNote(order, "cancelled") : null;
 
   return (
     <>
@@ -155,14 +165,19 @@ export function OrderDetailPanel({
         </div>
 
         <div className="flex flex-wrap gap-3 items-end">
-          <button
-            type="button"
-            onClick={() => setInvoiceOpen(true)}
-            className="flex h-11 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
-          >
-            <AdminIcon className="h-4 w-4" name="printer" />
-            Invoice
-          </button>
+          {/* A cancelled order was never sold, so there is nothing to invoice —
+              a returned one was, and its invoice is what the refund is settled
+              against, so that one keeps the button. */}
+          {order.status !== "cancelled" && (
+            <button
+              type="button"
+              onClick={() => setInvoiceOpen(true)}
+              className="flex h-11 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50"
+            >
+              <AdminIcon className="h-4 w-4" name="printer" />
+              Invoice
+            </button>
+          )}
           {canSettlePayment && (
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Payment Status</span>
@@ -203,7 +218,10 @@ export function OrderDetailPanel({
               <button
                 type="button"
                 disabled={isUpdatingStatus}
-                onClick={() => onUpdateOrderStatus("cancelled")}
+                onClick={() => {
+                  setCancelNote("");
+                  setConfirmCancel(true);
+                }}
                 className="h-11 rounded-lg bg-red-600 px-5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Cancel
@@ -236,6 +254,15 @@ export function OrderDetailPanel({
           )}
         </div>
       </div>
+
+      {cancelReason && (
+        <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50/70 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-500">
+            Cancellation reason
+          </p>
+          <p className="mt-1 text-sm font-medium text-rose-800 whitespace-pre-line">{cancelReason}</p>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 mb-4">
         <div className="rounded-lg border border-slate-200/60 bg-white p-5 shadow-xs">
@@ -448,12 +475,42 @@ export function OrderDetailPanel({
         </div>
       </div>
 
-      <InvoiceModal
-        order={orderToInvoice(order, totals, shopSettings)}
-        settings={shopSettings}
-        open={invoiceOpen}
-        onClose={() => setInvoiceOpen(false)}
-      />
+      {order.status !== "cancelled" && (
+        <InvoiceModal
+          order={orderToInvoice(order, totals, shopSettings)}
+          settings={shopSettings}
+          open={invoiceOpen}
+          onClose={() => setInvoiceOpen(false)}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={confirmCancel}
+        onClose={() => setConfirmCancel(false)}
+        onConfirm={() => {
+          setConfirmCancel(false);
+          onUpdateOrderStatus("cancelled", cancelNote);
+        }}
+        title={`Cancel order #${order.orderNumber}?`}
+        message={`This cancels the order for ${customer.name} and cannot be undone from this screen. Say why — it is kept on the order.`}
+        confirmText="Yes, cancel the order"
+        cancelText="Keep the order"
+        confirmDisabled={!cancelNote.trim()}
+      >
+        <label className="block">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            Reason *
+          </span>
+          <textarea
+            autoFocus
+            rows={3}
+            value={cancelNote}
+            onChange={(e) => setCancelNote(e.target.value)}
+            placeholder="Out of stock, customer asked to cancel, wrong number…"
+            className="mt-1.5 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-slate-400"
+          />
+        </label>
+      </ConfirmModal>
 
       <ConfirmModal
         isOpen={confirmReturn}
