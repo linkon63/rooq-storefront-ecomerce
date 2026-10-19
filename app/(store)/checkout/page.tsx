@@ -42,12 +42,12 @@ function FreeDeliveryNote({ className = "" }: { className?: string }) {
   if (!FREE_DELIVERY_NOTE) return null;
   return (
     <p
-      className={`flex items-start gap-2.5 rounded-md border border-brand-leaf/50 bg-brand-mist px-3 py-2 font-gotham text-[13px] font-semibold leading-snug text-brand-dark ${className}`}
+      className={`flex items-start gap-2.5 rounded-md border border-red-700 bg-red-500 px-3 py-2 font-gotham text-[13px] font-semibold leading-snug text-white animate-border-ping motion-reduce:animate-none ${className}`}
       role="note"
     >
       <span aria-hidden className="relative mt-1 flex h-2.5 w-2.5 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-leaf opacity-75" />
-        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
       </span>
       <span>{FREE_DELIVERY_NOTE}</span>
     </p>
@@ -565,7 +565,8 @@ export default function CheckoutPage() {
             {shippingLabel}
           </span>
         </div>
-        <FreeDeliveryNote className="text-[12px]" />
+        {/* Guests read it under Delivery Area in the form instead. */}
+        {isAuthenticated && <FreeDeliveryNote className="text-[12px]" />}
       </div>
       <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-zinc-200 pt-2.5">
         <span className="text-[15px] font-bold text-[#222222]">Total</span>
@@ -938,6 +939,7 @@ export default function CheckoutPage() {
                           );
                         })}
                       </div>
+                      <FreeDeliveryNote className="mt-3" />
                     </fieldset>
                   )}
 
@@ -1028,7 +1030,8 @@ export default function CheckoutPage() {
                     {shippingLabel}
                   </span>
                 </div>
-                <FreeDeliveryNote className="-mt-2" />
+                {/* Guests read it under Delivery Area in the form instead. */}
+                {isAuthenticated && <FreeDeliveryNote className="-mt-2" />}
                 {COUPONS_ENABLED && (
                   <>
                     <div className="h-px bg-zinc-200" />

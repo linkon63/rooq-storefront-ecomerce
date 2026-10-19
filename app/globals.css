@@ -56,6 +56,19 @@
     }
   }
 
+  /* Checkout's free-delivery note: a red ring that pings out of its border. */
+  --animate-border-ping: border-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  @keyframes border-ping {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-red-500) 70%, transparent);
+    }
+    80%,
+    100% {
+      box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-red-500) 0%, transparent);
+    }
+  }
+
   /* Retained because the admin panel still references them */
   --color-stone-850: #1c1917;
   --color-zinc-850: #1f1f1f;

@@ -81,7 +81,7 @@ Cutting a release turns that section into a numbered version — see
 
 - **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off.
 
-- **Checkout:** a highlighted note with a pulsing dot now sits under the delivery charge to tell shoppers about free delivery (for example, on orders over ৳2500). The wording is set in the storefront's environment and the note is hidden when it is not set; it does not change the total — the shop waives the charge on the order from the admin panel.
+- **Checkout:** a highlighted note with a pulsing dot now tells shoppers about free delivery (for example, on orders over ৳2500). Guests see it in the delivery form right under **Delivery Area**; signed-in shoppers, who have no Delivery Area field, see it under the delivery charge in the order summary. The wording is set in the storefront's environment and the note is hidden when it is not set; it does not change the total — the shop waives the charge on the order from the admin panel.
 
 - **Admin → Orders:** cancelling an order now asks why first. **Cancel** opens a confirmation with a **Reason** box — out of stock, the customer changed their mind, an unreachable number — and will not go through until something is written. The reason is kept on the order and shown at the top of the order whenever it is opened again, so there is no guessing a week later why it was stopped. An order a customer cancelled themselves reads "Cancelled by the customer".
 
