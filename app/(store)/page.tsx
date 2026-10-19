@@ -124,7 +124,8 @@ export default async function Home() {
         {/* Products arrive newest first, so the first two are the latest. */}
         <LatestArrivals products={products} />
         <MostLovedFoods products={mostLoved(products)} />
-        <FeatureStrip />
+        {/* Admin → Settings → General can switch the certification strip off. */}
+        {settings?.showCertifications !== false && <FeatureStrip />}
         <CustomerVoices social={settings?.socialContact} />
         {ORGANIC_SHOWCASE_ENABLED && <OrganicShowcase />}
       </div>

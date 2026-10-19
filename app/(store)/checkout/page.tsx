@@ -31,6 +31,29 @@ import PolicyModal from "@/components/storefront/shared/policy-modal";
 /** The two policies a shopper is asked to accept before paying. */
 const CHECKOUT_POLICY_IDS = ["return", "refund"] as const;
 
+/**
+ * Free-delivery promise shown under the delivery charge, worded in
+ * NEXT_PUBLIC_FREE_DELIVERY_NOTE (unset hides it). The shop waives the charge
+ * on the order from the admin panel, so the note leaves the total alone.
+ */
+const FREE_DELIVERY_NOTE = process.env.NEXT_PUBLIC_FREE_DELIVERY_NOTE?.trim() ?? "";
+
+function FreeDeliveryNote({ className = "" }: { className?: string }) {
+  if (!FREE_DELIVERY_NOTE) return null;
+  return (
+    <p
+      className={`flex items-start gap-2.5 rounded-md border border-brand-leaf/50 bg-brand-mist px-3 py-2 font-gotham text-[13px] font-semibold leading-snug text-brand-dark ${className}`}
+      role="note"
+    >
+      <span aria-hidden className="relative mt-1 flex h-2.5 w-2.5 shrink-0">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-leaf opacity-75" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand" />
+      </span>
+      <span>{FREE_DELIVERY_NOTE}</span>
+    </p>
+  );
+}
+
 const emptyAddress: AddressForm = {
   email: "",
   fullName: "",
@@ -542,6 +565,7 @@ export default function CheckoutPage() {
             {shippingLabel}
           </span>
         </div>
+        <FreeDeliveryNote className="text-[12px]" />
       </div>
       <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-zinc-200 pt-2.5">
         <span className="text-[15px] font-bold text-[#222222]">Total</span>
@@ -1004,6 +1028,7 @@ export default function CheckoutPage() {
                     {shippingLabel}
                   </span>
                 </div>
+                <FreeDeliveryNote className="-mt-2" />
                 {COUPONS_ENABLED && (
                   <>
                     <div className="h-px bg-zinc-200" />

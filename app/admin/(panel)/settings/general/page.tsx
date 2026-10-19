@@ -242,6 +242,7 @@ export default function GeneralSettingsPage() {
       slogan: settings.slogan,
       footerDescription: settings.footerDescription,
       isTopBarVisible: settings.isTopBarVisible,
+      showCertifications: settings.showCertifications ?? true,
       hideOutOfStock: settings.hideOutOfStock,
       deliveryChargeInside: Number(settings.deliveryChargeInside ?? 0),
       deliveryChargeOutside: Number(settings.deliveryChargeOutside ?? 0),
@@ -438,10 +439,22 @@ export default function GeneralSettingsPage() {
           <div className="px-6 py-7 sm:px-8">
             <SettingsRow
               label="UI Settings"
-              hint="Update your top bar settings."
+              hint="Update your top bar and homepage sections."
               separator={false}
             >
               <div className="space-y-4">
+                <div className="flex items-center justify-between gap-4 rounded-md border border-slate-200 bg-slate-50 px-5 py-4">
+                  <div>
+                    <p className="text-sm font-black text-slate-800">Show Certification Section</p>
+                    <p className="mt-0.5 text-xs font-medium text-slate-500">
+                      The &ldquo;Our Product Quality &amp; Recognition&rdquo; certificates on the homepage.
+                    </p>
+                  </div>
+                  <StatusToggle
+                    active={settings.showCertifications ?? true}
+                    onChange={(v) => setSettings((p) => ({ ...p, showCertifications: v }))}
+                  />
+                </div>
                 {/* <div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-5 py-4">
                   <div>
                     <p className="text-sm font-black text-slate-800">Display Top bar</p>

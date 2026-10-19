@@ -36,6 +36,7 @@ cp .env.example .env
 | `NEXT_PUBLIC_API_BASE_URL` | Yes | Backend API base, e.g. `http://localhost:5010/api/v1` |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | No | Google OAuth web client ID — enables "Sign in with Google" |
 | `NEXT_PUBLIC_GTM_ID` | No | Google Tag Manager ID — leave unset to disable tracking |
+| `NEXT_PUBLIC_FREE_DELIVERY_NOTE` | No | Highlighted note under the delivery charge at checkout (e.g. the free-delivery offer) — leave unset to hide it. Read at build time, so rebuild after changing it |
 | `RESEND_API_KEY` | No | Resend key for the contact form and newsletter e-mails |
 | `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` | No | Sender and inbox for those e-mails |
 | `NEXT_PUBLIC_SITE_URL` | No | Public site URL used in the sitemap (defaults to `https://organishi.com`) |
@@ -77,6 +78,10 @@ Cutting a release turns that section into a numbered version — see
 ### Unreleased
 
 #### Added
+
+- **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off.
+
+- **Checkout:** a highlighted note with a pulsing dot now sits under the delivery charge to tell shoppers about free delivery (for example, on orders over ৳2500). The wording is set in the storefront's environment and the note is hidden when it is not set; it does not change the total — the shop waives the charge on the order from the admin panel.
 
 - **Admin → Orders:** cancelling an order now asks why first. **Cancel** opens a confirmation with a **Reason** box — out of stock, the customer changed their mind, an unreachable number — and will not go through until something is written. The reason is kept on the order and shown at the top of the order whenever it is opened again, so there is no guessing a week later why it was stopped. An order a customer cancelled themselves reads "Cancelled by the customer".
 

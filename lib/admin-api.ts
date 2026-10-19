@@ -531,6 +531,8 @@ export type AppSettings = {
   /** Business hours as 24-hour "HH:mm" strings — the storefront formats them. */
   openingTime?: string | null;
   closingTime?: string | null;
+  /** Homepage certification strip — on unless switched off in General. */
+  showCertifications?: boolean;
   isTopBarVisible?: boolean;
   hideOutOfStock?: boolean;
   branchName?: string | null;

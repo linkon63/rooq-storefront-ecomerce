@@ -131,6 +131,8 @@ export type ShopSettings = {
   /** 24-hour "HH:mm" — Admin → Settings → Contact. */
   openingTime?: string | null;
   closingTime?: string | null;
+  /** Homepage certification strip — Admin → Settings → General. */
+  showCertifications?: boolean;
   logo?: string | null;
   icon?: string | null;
   favicon?: string | null;
