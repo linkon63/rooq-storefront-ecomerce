@@ -401,9 +401,12 @@ input:disabled {
    anything marked `no-print` is dropped and the sheet is given plain paper
    margins instead of the on-screen card treatment. */
 @media print {
+  /* No page margin leaves the browser no room for its own header and footer
+     (date, page title, URL), which must not reach the customer's invoice.
+     The sheet below carries the margin as padding instead. */
   @page {
     size: A4;
-    margin: 14mm;
+    margin: 0;
   }
 
   body {
@@ -421,8 +424,11 @@ input:disabled {
     border-radius: 0 !important;
     box-shadow: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 14mm !important;
     max-width: none !important;
+    /* A second page gets the same padding at its top and bottom. */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   .invoice-sheet table {

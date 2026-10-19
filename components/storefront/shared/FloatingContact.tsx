@@ -87,7 +87,7 @@ export default function FloatingContact({ settings }: { settings?: ShopSettings 
     // The column itself ignores the pointer — only the buttons in it catch
     // clicks — so the empty space above the closed menu never blocks the page.
     <div
-      className={`pointer-events-none fixed right-4 z-40 flex flex-col items-center gap-3 md:right-6 ${
+      className={`no-print pointer-events-none fixed right-4 z-40 flex flex-col items-center gap-3 md:right-6 ${
         raised ? "bottom-24" : "bottom-5"
       } ${raisedOnDesktop ? "md:bottom-36" : "md:bottom-6"}`}
     >

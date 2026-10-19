@@ -18,6 +18,8 @@ export const FALLBACK_EMAILS: ShopContactEntry[] = [
   { title: "Support", value: "Organishi.bd@gmail.com" },
 ];
 export const FALLBACK_ADDRESS = "Sector 10, Uttara, Dhaka, Bangladesh";
+/** The shop's website as printed on paper — the invoice letterhead. */
+export const SHOP_WEBSITE = { label: "www.organishi.com", href: "https://www.organishi.com" };
 export const FALLBACK_HOURS = "8:00 AM – 10:00 PM";
 export const FALLBACK_FOOTER_DESCRIPTION =
   "Nature has always known what’s best for us. Organishi brings that goodness closer to you with thoughtfully selected, natural and wholesome foods you can trust. We believe healthy living doesn’t have to be complicated—it starts with simple, better choices, every day.";
@@ -28,6 +30,8 @@ export type ShopContact = {
   /** First phone / e-mail — the one a header or a call-to-action prints. */
   phone: string;
   email: string;
+  /** Second phone takes WhatsApp; a shop with one number uses it for both. */
+  whatsapp: string;
   address: string;
   /** "8:00 AM – 10:00 PM". */
   hours: string;
@@ -106,6 +110,7 @@ export function resolveShopContact(settings?: ShopSettings | null): ShopContact 
     emails,
     phone: phones[0].value,
     email: emails[0].value,
+    whatsapp: phones[1]?.value ?? phones[0].value,
     address: settings?.branchAddress?.trim() || FALLBACK_ADDRESS,
     hours: formatOpeningHours(settings?.openingTime, settings?.closingTime) ?? FALLBACK_HOURS,
     footerDescription: settings?.footerDescription?.trim() || FALLBACK_FOOTER_DESCRIPTION,

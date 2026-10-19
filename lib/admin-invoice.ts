@@ -1,23 +1,15 @@
 import type { DeliveryZone, OrderResult, OrderResultItem } from "@/lib/types";
 import type { ShopSettings } from "@/lib/shop-api";
+import { variantOptionLines } from "@/lib/product-variants";
 import {
   orderCustomer,
   orderPaymentMethod,
   type Order,
-  type OrderItem,
   type OrderTotals,
 } from "@/lib/admin-api";
 
 function num(value: unknown): number {
   return Number(value ?? 0);
-}
-
-/** "Weight: 500 g · Colour: Red" for a variant, or "" when it has no options. */
-function variantSuffix(item: OrderItem): string {
-  const parts = (item.variant?.optionValues ?? [])
-    .map(({ attribute, value }) => `${attribute?.name ?? "Variant"}: ${value}`)
-    .filter(Boolean);
-  return parts.length > 0 ? ` (${parts.join(" · ")})` : "";
 }
 
 /**
@@ -64,7 +56,10 @@ export function orderToInvoice(
     const unitPrice = num(item.unitPrice);
     const listPrice = num(item.listPrice ?? item.unitPrice);
     return {
-      name: `${item.product?.name ?? "Product"}${variantSuffix(item)}`,
+      // The variant's SKU and options print on their own line under the name.
+      name: item.product?.name ?? "Product",
+      sku: item.variant?.sku,
+      options: item.variant ? variantOptionLines(item.variant) : [],
       quantity: item.quantity,
       price: unitPrice,
       // Only a discounted line carries a list price, which is what makes the
@@ -78,6 +73,7 @@ export function orderToInvoice(
 
   return {
     orderNumber: order.orderNumber,
+    invoiceNumber: order.invoiceNumber ?? undefined,
     total: totals?.grand ?? num(order.total),
     shippingCost,
     subtotal: totals?.subtotal,
