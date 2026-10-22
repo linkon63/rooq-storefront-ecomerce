@@ -98,6 +98,8 @@ Cutting a release turns that section into a numbered version — see
 
 #### Fixed
 
+- **Prices with a percentage offer:** a product on a percentage discount showed a price in poisha — ৳382.5 for 15% off ৳450 — on the product cards, the product page, the cart, checkout and the invoice. Offer prices are now whole taka, rounded down so the shopper always saves at least the advertised percentage (৳382 in that example), and the cart, checkout and the order charge the same figure the product page shows.
+
 - **"Get Latest Updates & Big Deals" on the home page:** on small phones the **Subscribe Now** button squeezed the e-mail box until the placeholder was unreadable. The field and the button now sit one above the other below 640px and go back side by side on wider screens, the field is large enough that iPhones stop zooming the page in when it is tapped, and the band grows instead of clipping its text when the wording wraps onto more lines.
 
 ### v0.3.0 — 2026-09-20
