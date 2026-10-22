@@ -79,7 +79,7 @@ Cutting a release turns that section into a numbered version — see
 
 #### Added
 
-- **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off.
+- **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off. Switched off, the section leaves no blank space behind: "Our Most Loved Items" runs straight into "What Customer Say About Us" as one band.
 
 - **Invoice (checkout confirmation and Admin → Orders):** reworked for customers. It now has its own **Invoice No.** (`INV-2026-000123`), shown beside the **Order ID** instead of the order ID standing in for it; the number is fixed per order, so a reprint carries the same one. Each product shows its SKU and weight or size under its name. The logo sits on the right of the letterhead, with the shop name, address, phone and www.organishi.com on the left, and the invoice title and details in their own band below. The delivery address no longer repeats "Inside Dhaka", and the total reads "Payable on Delivery" once instead of twice. The footer gives the phone, contact hours, the Facebook page and a WhatsApp number that opens a chat, in place of the e-mail address. Printing no longer adds the browser's date, page title and web address to the top and bottom of the page, and the floating chat button stays off the paper.
 
@@ -97,6 +97,8 @@ Cutting a release turns that section into a numbered version — see
 - **Profile → Address Book:** saving an address now needs a Bangladeshi mobile number too, and stores it in the same 11-digit form.
 
 #### Fixed
+
+- **Printing the invoice on A5 paper (checkout confirmation and Admin → Orders):** the invoice was fixed to A4, so the print dialog offered no paper choice and an A5 print came out broken — the details dropped under the title, the addresses stacked, and the Amount column was cut off. It now prints on whatever paper is picked in the print dialog, keeping the same layout on A5 as on A4 with tighter margins so every column fits, and a longer invoice moves the totals and the footer to the next page whole instead of splitting "Subtotal" from "Payable".
 
 - **Prices with a percentage offer:** a product on a percentage discount showed a price in poisha — ৳382.5 for 15% off ৳450 — on the product cards, the product page, the cart, checkout and the invoice. Offer prices are now whole taka, rounded down so the shopper always saves at least the advertised percentage (৳382 in that example), and the cart, checkout and the order charge the same figure the product page shows.
 

@@ -53,7 +53,7 @@ export default function InvoiceModal({
           overlay so the invoice can run onto a second page if it is long. */}
       <style>{`
         @media print {
-          @page { size: A4; margin: 0; }
+          @page { margin: 0; }
           body > *:not(.invoice-portal) { display: none !important; }
           .invoice-portal .invoice-backdrop {
             position: static !important;

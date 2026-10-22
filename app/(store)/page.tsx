@@ -123,10 +123,23 @@ export default async function Home() {
         <MostRecentItems products={products} categories={categories} />
         {/* Products arrive newest first, so the first two are the latest. */}
         <LatestArrivals products={products} />
-        <MostLovedFoods products={mostLoved(products)} />
-        {/* Admin → Settings → General can switch the certification strip off. */}
-        {settings?.showCertifications !== false && <FeatureStrip />}
-        <CustomerVoices social={settings?.socialContact} />
+        {/* Admin → Settings → General can switch the certification strip off.
+            Without it, Most Loved and Customer Voices are both mist bands, so
+            they share one wrapper and meet with no white gap between them —
+            and Customer Voices drops its top padding so the two read as one
+            band rather than leaving a double-height gap of mist. */}
+        {settings?.showCertifications !== false ? (
+          <>
+            <MostLovedFoods products={mostLoved(products)} />
+            <FeatureStrip />
+            <CustomerVoices social={settings?.socialContact} />
+          </>
+        ) : (
+          <div className="[&>section+section]:pt-0">
+            <MostLovedFoods products={mostLoved(products)} />
+            <CustomerVoices social={settings?.socialContact} />
+          </div>
+        )}
         {ORGANIC_SHOWCASE_ENABLED && <OrganicShowcase />}
       </div>
       {/* Outside the stack above: the newsletter band runs edge to edge and

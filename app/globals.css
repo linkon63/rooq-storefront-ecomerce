@@ -403,9 +403,10 @@ input:disabled {
 @media print {
   /* No page margin leaves the browser no room for its own header and footer
      (date, page title, URL), which must not reach the customer's invoice.
-     The sheet below carries the margin as padding instead. */
+     The sheet below carries the margin as padding instead. No `size` either:
+     it hides the paper choice in the print dialog, and the shop prints on A5
+     as well as A4. */
   @page {
-    size: A4;
     margin: 0;
   }
 
@@ -437,5 +438,26 @@ input:disabled {
 
   .invoice-sheet tr {
     break-inside: avoid;
+  }
+
+  /* The totals and the footer each move to the next page whole rather than
+     leaving "Subtotal" on one sheet and "Payable" on the next. */
+  .invoice-keep {
+    break-inside: avoid;
+  }
+}
+
+/* A5 and other small paper: the page is narrower than the `sm` breakpoint, so
+   the invoice relies on its `print:` classes for the layout and gets tighter
+   margins here so the five item columns still fit across the sheet. */
+@media print and (max-width: 170mm) {
+  .invoice-sheet {
+    padding: 8mm !important;
+  }
+
+  .invoice-sheet th,
+  .invoice-sheet td {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
   }
 }

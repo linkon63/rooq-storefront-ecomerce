@@ -97,7 +97,7 @@ export default function OrderInvoice({
   ];
 
   return (
-    <div className="invoice-sheet overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 shadow-md sm:p-10">
+    <div className="invoice-sheet overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 shadow-md sm:p-10 print:overflow-visible">
       {/* ── Letterhead ─────────────────────────────────────────────────
           Shop identity on the left, logo on the right; the invoice title and
           its details sit in their own band below, clear of the logo. */}
@@ -126,7 +126,7 @@ export default function OrderInvoice({
         />
       </div>
 
-      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between print:flex-row print:items-start print:justify-between">
         <h2 className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-[#1f2a17]">
           Invoice
         </h2>
@@ -135,7 +135,7 @@ export default function OrderInvoice({
             {details.map(([label, value]) => (
               <tr key={label}>
                 <td className="pr-4 text-stone-400">{label}</td>
-                <td className="font-semibold text-[#1f2a17] sm:text-right">{value}</td>
+                <td className="font-semibold text-[#1f2a17] sm:text-right print:text-right">{value}</td>
               </tr>
             ))}
           </tbody>
@@ -143,7 +143,7 @@ export default function OrderInvoice({
       </div>
 
       {/* ── Bill to / Ship to ──────────────────────────────────────────── */}
-      <div className="my-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="my-6 grid grid-cols-1 gap-6 sm:grid-cols-2 print:grid-cols-2">
         <div>
           <p className="mb-2 font-gotham text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
             Billed To
@@ -180,7 +180,7 @@ export default function OrderInvoice({
       </div>
 
       {/* ── Items ──────────────────────────────────────────────────────── */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto print:overflow-visible">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-y border-stone-300 bg-stone-50 font-gotham text-[10px] font-bold uppercase tracking-[0.12em] text-[#1f2a17]">
@@ -197,7 +197,7 @@ export default function OrderInvoice({
                 <td className="py-3 px-3 text-center text-stone-400">{index + 1}</td>
                 <td className="py-3 px-3">
                   <p className="font-semibold text-stone-900">{item.name}</p>
-                  {(item.sku || item.options?.length) && (
+                  {Boolean(item.sku || item.options?.length) && (
                     <p className="mt-0.5 text-[11px] text-stone-500">
                       {[item.sku && `SKU: ${item.sku}`, ...(item.options ?? [])]
                         .filter(Boolean)
@@ -224,8 +224,8 @@ export default function OrderInvoice({
       </div>
 
       {/* ── Totals ─────────────────────────────────────────────────────── */}
-      <div className="mt-6 flex flex-col items-end">
-        <div className="w-full space-y-2 font-gotham text-xs text-stone-700 sm:w-72">
+      <div className="invoice-keep mt-6 flex flex-col items-end">
+        <div className="w-full space-y-2 font-gotham text-xs text-stone-700 sm:w-72 print:w-72">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span className="font-semibold text-stone-900">{money(subtotal)}</span>
@@ -275,7 +275,7 @@ export default function OrderInvoice({
       )}
 
       {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <div className="mt-8 grid grid-cols-1 gap-6 border-t border-stone-200 pt-5 sm:grid-cols-[1fr_auto]">
+      <div className="invoice-keep mt-8 grid grid-cols-1 gap-6 border-t border-stone-200 pt-5 sm:grid-cols-[1fr_auto] print:grid-cols-[1fr_auto]">
         <div className="font-gotham text-[11px] leading-relaxed text-stone-500">
           <p className="font-semibold text-stone-700">Thank you for shopping with {shopName}.</p>
           <p className="mt-1">
@@ -309,7 +309,7 @@ export default function OrderInvoice({
           </p>
         </div>
         <div className="text-center">
-          <div className="h-10 border-b border-dashed border-stone-400 sm:w-40" />
+          <div className="h-10 border-b border-dashed border-stone-400 sm:w-40 print:w-40" />
           <p className="mt-1.5 font-gotham text-[10px] uppercase tracking-wider text-stone-400">
             Authorised Signature
           </p>
