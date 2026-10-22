@@ -77,6 +77,10 @@ Cutting a release turns that section into a numbered version — see
 
 ### Unreleased
 
+_Nothing yet._
+
+### v0.4.0 — 2026-10-22
+
 #### Added
 
 - **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off. Switched off, the section leaves no blank space behind: "Our Most Loved Items" runs straight into "What Customer Say About Us" as one band.
