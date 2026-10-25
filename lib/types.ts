@@ -155,10 +155,20 @@ export type OrderResultItem = {
   /** Unit list price, present only when this line was discounted. */
   originalPrice?: number;
   image: string;
+  /** Variant SKU, printed under the product name on the invoice. */
+  sku?: string;
+  /** The variant's options — ["Weight: 250 g"] — printed beside the SKU. */
+  options?: string[];
 };
 
 export type OrderResult = {
+  /** The order ID, "ORD-1791814438172". */
   orderNumber: string;
+  /**
+   * "INV-2026-000123", issued by the API once per order and never changed.
+   * Absent on orders the API returned before invoice numbers existed.
+   */
+  invoiceNumber?: string;
   total: number;
   /** Delivery charge the API applied, from Admin → Settings → General. */
   shippingCost?: number;

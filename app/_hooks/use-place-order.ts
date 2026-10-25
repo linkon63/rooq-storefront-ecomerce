@@ -6,6 +6,8 @@ import { getItemKey, useCart } from "@/app/_providers/cart-provider";
 import { getCustomerToken } from "@/lib/storefront-api";
 import { cartTotals } from "@/lib/cart-pricing";
 import type { AddressForm, DeliveryZone, OrderResult } from "@/lib/types";
+import type { OrderItem } from "@/lib/admin-api";
+import { variantOptionLines } from "@/lib/product-variants";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5010/api/v1";
 
@@ -151,20 +153,33 @@ export function usePlaceOrder() {
         data.productDiscount != null ? Number(data.productDiscount) : totals.productDiscount;
       const quoted = totals.subtotal - couponDiscount + shippingCost;
 
+      // The order the API wrote, line by line, for each line's SKU and options.
+      const orderedLines = new Map(
+        ((data.items ?? []) as OrderItem[]).flatMap((line) =>
+          line.variant ? [[line.variant.id, line] as const] : [],
+        ),
+      );
+
       const result: OrderResult = {
         orderNumber: (data.orderNumber ?? data.id ?? "N/A") as string,
+        invoiceNumber: typeof data.invoiceNumber === "string" ? data.invoiceNumber : undefined,
         total: Number(data.total ?? quoted),
         shippingCost,
         subtotal: totals.listSubtotal,
         productDiscount,
         discount: couponDiscount,
-        items: targetItems.map((i) => ({
-          name: i.name,
-          quantity: i.quantity,
-          price: i.price,
-          originalPrice: i.originalPrice,
-          image: i.image,
-        })),
+        items: targetItems.map((i, index) => {
+          const line = orderedLines.get(lineItems[index].variantId);
+          return {
+            name: line?.product?.name ?? i.name,
+            quantity: i.quantity,
+            price: i.price,
+            originalPrice: i.originalPrice,
+            image: i.image,
+            sku: line?.variant?.sku,
+            options: line?.variant ? variantOptionLines(line.variant) : [],
+          };
+        }),
         address: { ...address },
         paymentMethod: extra?.paymentMethod,
         orderNote: extra?.orderNote,

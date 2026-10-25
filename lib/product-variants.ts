@@ -35,6 +35,11 @@ export function variantOptionPairs(variant: Variant): VariantOptionPair[] {
   }));
 }
 
+/** ["Weight: 500 g", "Colour: Red"] — one entry per option, for the invoice lines. */
+export function variantOptionLines(variant: Variant): string[] {
+  return variantOptionPairs(variant).map((pair) => `${pair.attributeName}: ${pair.value}`);
+}
+
 /** "Weight: 500 g · Colour: Red", or an empty string for a variant with no options. */
 export function variantOptionLabel(variant: Variant) {
   return variantOptionPairs(variant)

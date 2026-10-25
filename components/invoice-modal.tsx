@@ -53,7 +53,7 @@ export default function InvoiceModal({
           overlay so the invoice can run onto a second page if it is long. */}
       <style>{`
         @media print {
-          @page { size: A4; margin: 14mm; }
+          @page { margin: 0; }
           body > *:not(.invoice-portal) { display: none !important; }
           .invoice-portal .invoice-backdrop {
             position: static !important;
@@ -84,7 +84,7 @@ export default function InvoiceModal({
         >
           <div className="invoice-toolbar mb-3 flex items-center justify-between gap-3">
             <span className="font-sans text-sm font-medium uppercase tracking-wider text-white/90">
-              Invoice #{order.orderNumber}
+              Invoice {order.invoiceNumber ?? `#${order.orderNumber}`}
             </span>
             <div className="flex items-center gap-2">
               <button

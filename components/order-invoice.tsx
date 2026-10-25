@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { OrderResult } from "@/lib/types";
 import type { ShopSettings } from "@/lib/shop-api";
 import { getCurrencySymbol } from "@/lib/currency";
-import { resolveShopContact } from "@/lib/shop-contact";
+import { SHOP_WEBSITE, resolveShopContact, whatsappHref } from "@/lib/shop-contact";
 import { cartTotals, isDiscounted, unitListPrice } from "@/lib/cart-pricing";
 
 /** Delivery zone → what the customer should see it called. */
@@ -18,6 +18,21 @@ function formatDate(value?: string): string {
   const date = value ? new Date(value) : new Date();
   const safe = Number.isNaN(date.getTime()) ? new Date() : date;
   return safe.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+/**
+ * Each part once, in order. Guest checkout stores the delivery zone in both
+ * city and state, which printed "Inside Dhaka, Inside Dhaka"; the zone itself
+ * is already on the Delivery row, so it is left out of the address too.
+ */
+function addressParts(parts: (string | undefined)[], omit?: string): string[] {
+  const seen = new Set(omit ? [omit.trim().toLowerCase()] : []);
+  return parts.flatMap((part) => {
+    const value = part?.trim();
+    if (!value || seen.has(value.toLowerCase())) return [];
+    seen.add(value.toLowerCase());
+    return [value];
+  });
 }
 
 /**
@@ -67,75 +82,68 @@ export default function OrderInvoice({
   const savedPercent =
     subtotal > 0 && totalDiscount > 0 ? Math.round((totalDiscount / subtotal) * 100) : 0;
   const isCod = (order.paymentMethod ?? "cod") === "cod";
+  const zoneLabel = order.deliveryZone
+    ? ZONE_LABELS[order.deliveryZone] ?? order.deliveryZone
+    : undefined;
+  const cityLine = addressParts([order.address.city, order.address.state], zoneLabel).join(", ");
+  const facebookUrl = settings?.socialContact?.facebook?.trim();
+
+  const details: [string, string][] = [
+    ...(order.invoiceNumber ? [["Invoice No.", order.invoiceNumber] as [string, string]] : []),
+    ["Order ID", order.orderNumber],
+    ["Date", formatDate(order.placedAt)],
+    ["Payment", isCod ? "Cash on Delivery" : "Paid online"],
+    ...(zoneLabel ? [["Delivery", zoneLabel] as [string, string]] : []),
+  ];
 
   return (
-    <div className="invoice-sheet overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 shadow-md sm:p-10">
-      {/* ── Letterhead ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col justify-between gap-6 border-b-2 border-[#1f2a17] pb-6 sm:flex-row">
-        <div className="flex-1">
-          {settings?.logo ? (
-            <Image
-              src={settings.logo}
-              alt={shopName}
-              width={160}
-              height={48}
-              className="mb-3 h-10 w-auto object-contain"
-              unoptimized
-            />
-          ) : (
-            <Image
-              src="/assets/Logo-English.png"
-              alt={shopName}
-              width={150}
-              height={48}
-              className="mb-3 h-10 w-auto object-contain"
-              priority
-            />
-          )}
-          <p className="font-gotham text-xs font-semibold text-[#1f2a17]">{shopName}</p>
-          <p className="mt-0.5 font-gotham text-[11px] leading-relaxed text-stone-500">
+    <div className="invoice-sheet overflow-hidden rounded-2xl border border-stone-200 bg-white p-6 shadow-md sm:p-10 print:overflow-visible">
+      {/* ── Letterhead ─────────────────────────────────────────────────
+          Shop identity on the left, logo on the right; the invoice title and
+          its details sit in their own band below, clear of the logo. */}
+      <div className="flex items-start justify-between gap-6 border-b-2 border-[#1f2a17] pb-5">
+        <div className="min-w-0">
+          <p className="font-gotham text-sm font-bold text-[#1f2a17]">{shopName}</p>
+          <p className="mt-1 font-gotham text-[11px] leading-relaxed text-stone-500">
             {contact.address}
           </p>
-          <p className="font-gotham text-[11px] text-stone-500">
-            {contact.phone} · {contact.email}
-          </p>
+          <p className="font-gotham text-[11px] text-stone-500">{contact.phone}</p>
+          <a
+            href={SHOP_WEBSITE.href}
+            className="font-gotham text-[11px] font-semibold text-[#1f2a17]"
+          >
+            {SHOP_WEBSITE.label}
+          </a>
         </div>
+        <Image
+          src={settings?.logo || "/assets/Logo-English.png"}
+          alt={shopName}
+          width={160}
+          height={48}
+          className="h-12 w-auto max-w-[45%] shrink-0 object-contain"
+          unoptimized={Boolean(settings?.logo)}
+          priority
+        />
+      </div>
 
-        <div className="sm:text-right">
-          <h2 className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-[#1f2a17]">
-            Invoice
-          </h2>
-          <table className="mt-2 sm:ml-auto">
-            <tbody className="font-gotham text-[11px] text-stone-600">
-              <tr>
-                <td className="pr-3 text-stone-400">Invoice No.</td>
-                <td className="font-semibold text-[#1f2a17]">#{order.orderNumber}</td>
+      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between print:flex-row print:items-start print:justify-between">
+        <h2 className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-[#1f2a17]">
+          Invoice
+        </h2>
+        <table>
+          <tbody className="font-gotham text-[11px] text-stone-600">
+            {details.map(([label, value]) => (
+              <tr key={label}>
+                <td className="pr-4 text-stone-400">{label}</td>
+                <td className="font-semibold text-[#1f2a17] sm:text-right print:text-right">{value}</td>
               </tr>
-              <tr>
-                <td className="pr-3 text-stone-400">Date</td>
-                <td className="font-semibold text-[#1f2a17]">{formatDate(order.placedAt)}</td>
-              </tr>
-              <tr>
-                <td className="pr-3 text-stone-400">Payment</td>
-                <td className="font-semibold text-[#1f2a17]">
-                  {isCod ? "Cash on Delivery" : "Paid online"}
-                </td>
-              </tr>
-              {order.deliveryZone && (
-                <tr>
-                  <td className="pr-3 text-stone-400">Delivery</td>
-                  <td className="font-semibold text-[#1f2a17]">
-                    {ZONE_LABELS[order.deliveryZone] ?? order.deliveryZone}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* ── Bill to / Ship to ──────────────────────────────────────────── */}
-      <div className="my-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="my-6 grid grid-cols-1 gap-6 sm:grid-cols-2 print:grid-cols-2">
         <div>
           <p className="mb-2 font-gotham text-[10px] font-bold uppercase tracking-[0.18em] text-brand">
             Billed To
@@ -156,9 +164,15 @@ export default function OrderInvoice({
           <p className="font-gotham text-xs leading-relaxed text-stone-700">
             {order.address.addressLine1}
             {order.address.addressLine2 ? `, ${order.address.addressLine2}` : ""}
-            <br />
-            {[order.address.city, order.address.state].filter(Boolean).join(", ")}
-            {order.address.postalCode ? ` - ${order.address.postalCode}` : ""}
+            {(cityLine || order.address.postalCode) && (
+              <>
+                <br />
+                {cityLine}
+                {order.address.postalCode
+                  ? `${cityLine ? " - " : ""}${order.address.postalCode}`
+                  : ""}
+              </>
+            )}
             <br />
             {order.address.country}
           </p>
@@ -166,7 +180,7 @@ export default function OrderInvoice({
       </div>
 
       {/* ── Items ──────────────────────────────────────────────────────── */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto print:overflow-visible">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-y border-stone-300 bg-stone-50 font-gotham text-[10px] font-bold uppercase tracking-[0.12em] text-[#1f2a17]">
@@ -181,7 +195,16 @@ export default function OrderInvoice({
             {order.items?.map((item, index) => (
               <tr key={`${item.name}-${index}`}>
                 <td className="py-3 px-3 text-center text-stone-400">{index + 1}</td>
-                <td className="py-3 px-3 font-semibold text-stone-900">{item.name}</td>
+                <td className="py-3 px-3">
+                  <p className="font-semibold text-stone-900">{item.name}</p>
+                  {Boolean(item.sku || item.options?.length) && (
+                    <p className="mt-0.5 text-[11px] text-stone-500">
+                      {[item.sku && `SKU: ${item.sku}`, ...(item.options ?? [])]
+                        .filter(Boolean)
+                        .join(" | ")}
+                    </p>
+                  )}
+                </td>
                 <td className="py-3 px-3 text-center">{item.quantity}</td>
                 <td className="py-3 px-3 text-right">
                   {isDiscounted(item) && (
@@ -201,8 +224,8 @@ export default function OrderInvoice({
       </div>
 
       {/* ── Totals ─────────────────────────────────────────────────────── */}
-      <div className="mt-6 flex flex-col items-end">
-        <div className="w-full space-y-2 font-gotham text-xs text-stone-700 sm:w-72">
+      <div className="invoice-keep mt-6 flex flex-col items-end">
+        <div className="w-full space-y-2 font-gotham text-xs text-stone-700 sm:w-72 print:w-72">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span className="font-semibold text-stone-900">{money(subtotal)}</span>
@@ -226,7 +249,8 @@ export default function OrderInvoice({
             </span>
           </div>
           <div className="flex justify-between border-t-2 border-[#1f2a17] pt-2 text-sm font-bold text-[#1f2a17]">
-            <span>Payable Amount</span>
+            {/* Cash on Delivery is on the Payment row, so the total says it once. */}
+            <span>{isCod ? "Payable on Delivery" : "Payable Amount"}</span>
             <span>{money(payable)}</span>
           </div>
           {totalDiscount > 0 && (
@@ -236,12 +260,6 @@ export default function OrderInvoice({
                 {money(totalDiscount)}
                 {savedPercent > 0 && ` (${savedPercent}%)`}
               </span>
-            </div>
-          )}
-          {isCod && (
-            <div className="flex justify-between rounded bg-brand-mist px-3 py-2 text-xs font-bold text-[#1f2a17]">
-              <span>Payable on delivery</span>
-              <span>{money(payable)}</span>
             </div>
           )}
         </div>
@@ -257,7 +275,7 @@ export default function OrderInvoice({
       )}
 
       {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <div className="mt-8 grid grid-cols-1 gap-6 border-t border-stone-200 pt-5 sm:grid-cols-[1fr_auto]">
+      <div className="invoice-keep mt-8 grid grid-cols-1 gap-6 border-t border-stone-200 pt-5 sm:grid-cols-[1fr_auto] print:grid-cols-[1fr_auto]">
         <div className="font-gotham text-[11px] leading-relaxed text-stone-500">
           <p className="font-semibold text-stone-700">Thank you for shopping with {shopName}.</p>
           <p className="mt-1">
@@ -265,11 +283,33 @@ export default function OrderInvoice({
             return or replacement claim is settled against the invoice number above.
           </p>
           <p className="mt-1">
-            Questions? Call {contact.phone} ({contact.hours}) or email {contact.email}.
+            Questions? Call {contact.phone} ({contact.hours}), or message us on our{" "}
+            {facebookUrl ? (
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-stone-700 underline"
+              >
+                Facebook page
+              </a>
+            ) : (
+              "Facebook page"
+            )}{" "}
+            or WhatsApp:{" "}
+            <a
+              href={whatsappHref(contact.whatsapp)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-stone-700 underline"
+            >
+              {contact.whatsapp}
+            </a>
+            .
           </p>
         </div>
         <div className="text-center">
-          <div className="h-10 border-b border-dashed border-stone-400 sm:w-40" />
+          <div className="h-10 border-b border-dashed border-stone-400 sm:w-40 print:w-40" />
           <p className="mt-1.5 font-gotham text-[10px] uppercase tracking-wider text-stone-400">
             Authorised Signature
           </p>

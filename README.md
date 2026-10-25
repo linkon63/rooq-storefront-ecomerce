@@ -77,9 +77,15 @@ Cutting a release turns that section into a numbered version — see
 
 ### Unreleased
 
+_Nothing yet._
+
+### v0.4.0 — 2026-10-22
+
 #### Added
 
-- **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off.
+- **Admin → Settings → General:** a **Show Certification Section** switch under UI Settings turns the homepage's "Our Product Quality & Recognition" certificates on or off. It is on by default, so the homepage looks the same until it is switched off. Switched off, the section leaves no blank space behind: "Our Most Loved Items" runs straight into "What Customer Say About Us" as one band.
+
+- **Invoice (checkout confirmation and Admin → Orders):** reworked for customers. It now has its own **Invoice No.** (`INV-2026-000123`), shown beside the **Order ID** instead of the order ID standing in for it; the number is fixed per order, so a reprint carries the same one. Each product shows its SKU and weight or size under its name. The logo sits on the right of the letterhead, with the shop name, address, phone and www.organishi.com on the left, and the invoice title and details in their own band below. The delivery address no longer repeats "Inside Dhaka", and the total reads "Payable on Delivery" once instead of twice. The footer gives the phone, contact hours, the Facebook page and a WhatsApp number that opens a chat, in place of the e-mail address. Printing no longer adds the browser's date, page title and web address to the top and bottom of the page, and the floating chat button stays off the paper.
 
 - **Checkout:** a highlighted note with a pulsing dot now tells shoppers about free delivery (for example, on orders over ৳2500). Guests see it in the delivery form right under **Delivery Area**; signed-in shoppers, who have no Delivery Area field, see it under the delivery charge in the order summary. The wording is set in the storefront's environment and the note is hidden when it is not set; it does not change the total — the shop waives the charge on the order from the admin panel.
 
@@ -95,6 +101,10 @@ Cutting a release turns that section into a numbered version — see
 - **Profile → Address Book:** saving an address now needs a Bangladeshi mobile number too, and stores it in the same 11-digit form.
 
 #### Fixed
+
+- **Printing the invoice on A5 paper (checkout confirmation and Admin → Orders):** the invoice was fixed to A4, so the print dialog offered no paper choice and an A5 print came out broken — the details dropped under the title, the addresses stacked, and the Amount column was cut off. It now prints on whatever paper is picked in the print dialog, keeping the same layout on A5 as on A4 with tighter margins so every column fits, and a longer invoice moves the totals and the footer to the next page whole instead of splitting "Subtotal" from "Payable".
+
+- **Prices with a percentage offer:** a product on a percentage discount showed a price in poisha — ৳382.5 for 15% off ৳450 — on the product cards, the product page, the cart, checkout and the invoice. Offer prices are now whole taka, rounded down so the shopper always saves at least the advertised percentage (৳382 in that example), and the cart, checkout and the order charge the same figure the product page shows.
 
 - **"Get Latest Updates & Big Deals" on the home page:** on small phones the **Subscribe Now** button squeezed the e-mail box until the placeholder was unreadable. The field and the button now sit one above the other below 640px and go back side by side on wider screens, the field is large enough that iPhones stop zooming the page in when it is tapped, and the band grows instead of clipping its text when the wording wraps onto more lines.
 

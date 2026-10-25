@@ -444,6 +444,8 @@ export type OrderStatusLog = {
 export type Order = {
   id: string;
   orderNumber: string;
+  /** "INV-2026-000123" — issued once when the order is created. */
+  invoiceNumber?: string | null;
   status: OrderStatus;
   paymentStatus: OrderPaymentStatus;
   total: string | number;
