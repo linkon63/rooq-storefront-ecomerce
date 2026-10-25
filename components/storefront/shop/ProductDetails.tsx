@@ -18,7 +18,7 @@ import { useCart } from "@/app/_providers/cart-provider";
 import { useWishlist } from "@/app/_providers/wishlist-provider";
 
 const money = (value: number) =>
-  `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 export default function ProductDetails({ product }: { product: Product }) {
   const { addItem, buyNow } = useCart();
