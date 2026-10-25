@@ -10,7 +10,7 @@ interface LatestArrivalsProps {
 }
 
 const money = (value: number) =>
-  `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 /**
  * Sits where the two artwork banners used to. Same footprint on the page, but

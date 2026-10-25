@@ -14,7 +14,7 @@ import { isPhoneViewport } from "@/lib/viewport";
 import BuyNowSheet from "./BuyNowSheet";
 
 const money = (value: number) =>
-  `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 export default function ProductCard({ product }: { product: ShopProduct }) {
   const router = useRouter();

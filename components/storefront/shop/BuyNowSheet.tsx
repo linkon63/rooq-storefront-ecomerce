@@ -12,7 +12,7 @@ import { buildAttributeGroups, defaultVariantOf, variantValues } from "@/lib/pro
 import { fetchShopProductById, resolveVariantPricing } from "@/lib/shop-api";
 
 const money = (value: number) =>
-  `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 /** Matches the slide/fade duration below, so the sheet unmounts once it is off screen. */
 const EXIT_MS = 250;

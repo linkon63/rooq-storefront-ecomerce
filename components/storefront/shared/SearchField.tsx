@@ -9,7 +9,7 @@ import { useProductSearch } from "@/hooks/useProductSearch";
 import type { ProductItem } from "@/types/shop";
 
 const money = (value: number) =>
-  `৳${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `৳${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
 /**
  * Header search: debounced suggestions as you type, Enter (or the button) hands
