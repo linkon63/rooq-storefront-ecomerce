@@ -5,7 +5,6 @@ const certifications = [
   { name: "BRITISH TEA COUNCIL", image: "/images/quality/British Tea Council.png" },
   { name: "ISO 22000:2018", image: "/images/quality/ISO-22000.png" },
   { name: "FDA", image: "/images/quality/FDA.png" },
-  { name: "HALAL", image: "/images/quality/Halal.png" },
   { name: "HACCP", image: "/images/quality/HACCP.png" },
   { name: "FAIR PAY CHARTER", image: "/images/quality/Fair Pay Charter.png" },
   { name: "GMP", image: "/images/quality/GMP.png" },

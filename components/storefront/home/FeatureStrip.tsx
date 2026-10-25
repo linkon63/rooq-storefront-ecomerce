@@ -58,12 +58,6 @@ const CERTIFICATES = [
     image: "/images/certificate/iaf.webp",
   },
   {
-    id: "halal",
-    title: "100% Halal Certified",
-    description: "Guaranteed 100% Halal compliant raw materials, ingredients, and hygienic processing procedures.",
-    image: "/images/quality/Halal.png",
-  },
-  {
     id: "fda",
     title: "FDA Compliant",
     description: "Complies with global Food and Drug Administration safety standards for consumer health.",
