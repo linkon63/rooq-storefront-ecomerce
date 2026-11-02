@@ -7,8 +7,8 @@ import { FiMinus, FiPlus, FiShoppingCart, FiX, FiZap } from "react-icons/fi";
 
 import ModalPortal from "@/components/storefront/shared/modal-portal";
 import { useCart } from "@/app/_providers/cart-provider";
-import { resolveImageUrl, type Product } from "@/lib/admin-api";
-import { buildAttributeGroups, defaultVariantOf, variantValues } from "@/lib/product-variants";
+import type { Product } from "@/lib/admin-api";
+import { buildAttributeGroups, defaultVariantOf, productGallery, variantValues } from "@/lib/product-variants";
 import { fetchShopProductById, resolveVariantPricing } from "@/lib/shop-api";
 
 const money = (value: number) =>
@@ -116,12 +116,8 @@ export default function BuyNowSheet({
   const pricing = variant
     ? resolveVariantPricing(variant, product ?? undefined)
     : { price: preview.price, originalPrice: preview.originalPrice };
-  const image = useMemo(() => {
-    const media = [...(product?.media ?? [])].sort(
-      (a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder,
-    );
-    return media[0] ? resolveImageUrl(media[0].media.url) : preview.image;
-  }, [product?.media, preview.image]);
+  // Follows the variant being picked, so the thumbnail matches what is bought.
+  const image = (product ? productGallery(product, variant)[0] : undefined) ?? preview.image;
 
   const stock = variant?.stockQuantity ?? 0;
   const unavailable = !loading && (!product || !variant);

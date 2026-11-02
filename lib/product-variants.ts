@@ -1,4 +1,5 @@
 import type { Product } from "./admin-api";
+import { resolveImageUrl } from "./admin-api";
 
 export type Variant = NonNullable<Product["variants"]>[number];
 
@@ -72,6 +73,26 @@ export function variantValues(variant: Variant) {
     if (name && value) map[name] = value;
   }
   return map;
+}
+
+type MediaEntry = { isFeatured: boolean; sortOrder: number; media: { url: string; type?: string } };
+
+/** Image URLs in display order: featured first, then by sort order. Videos are skipped. */
+function orderedImageUrls(entries: MediaEntry[] | undefined) {
+  return [...(entries ?? [])]
+    .filter((entry) => entry.media?.type !== "video")
+    .sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder)
+    .map((entry) => resolveImageUrl(entry.media.url))
+    .filter(Boolean);
+}
+
+/**
+ * The gallery for a product with one variant picked: that variant's own images
+ * first, then the product's, without duplicates. A variant with no images of
+ * its own just shows the product's.
+ */
+export function productGallery(product: Product, variant?: Variant) {
+  return [...new Set([...orderedImageUrls(variant?.media), ...orderedImageUrls(product.media)])];
 }
 
 export function defaultVariantOf(product: Product): Variant | undefined {

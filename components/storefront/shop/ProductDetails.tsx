@@ -8,9 +8,8 @@ import { FiArrowLeft, FiHeart, FiMinus, FiPlus, FiShoppingCart, FiTruck, FiShiel
 import { toast } from "sonner";
 
 import type { Product } from "@/lib/admin-api";
-import { resolveImageUrl } from "@/lib/admin-api";
 import { resolveVariantPricing } from "@/lib/shop-api";
-import { buildAttributeGroups, variantValues } from "@/lib/product-variants";
+import { buildAttributeGroups, productGallery, variantValues } from "@/lib/product-variants";
 import { SPECIFICATION_SECTIONS } from "@/lib/product-specifications";
 import { isPhoneViewport } from "@/lib/viewport";
 import BuyNowSheet from "./BuyNowSheet";
@@ -26,13 +25,6 @@ export default function ProductDetails({ product }: { product: Product }) {
   const router = useRouter();
   const [buyingNow, setBuyingNow] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-
-  const gallery = useMemo(() => {
-    const media = [...(product.media ?? [])].sort(
-      (a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder,
-    );
-    return media.map((entry) => resolveImageUrl(entry.media.url)).filter(Boolean);
-  }, [product.media]);
 
   const attributeGroups = useMemo(() => buildAttributeGroups(product), [product]);
 
@@ -57,6 +49,20 @@ export default function ProductDetails({ product }: { product: Product }) {
       const values = variantValues(variant);
       return attributeGroups.every((group) => values[group.name] === selection[group.name]);
     }) ?? defaultVariant;
+
+  // The selected variant's own images lead the gallery, followed by the product's.
+  const gallery = useMemo(
+    () => productGallery(product, selectedVariant),
+    [product, selectedVariant],
+  );
+
+  // Picking another variant jumps back to its first image. Adjusted during
+  // render (not in an effect) so the old image never flashes.
+  const [galleryVariantId, setGalleryVariantId] = useState(selectedVariant?.id);
+  if (galleryVariantId !== selectedVariant?.id) {
+    setGalleryVariantId(selectedVariant?.id);
+    setActiveImage(0);
+  }
 
   // The offer price is per variant, so it follows whichever variant is picked.
   const price = Number(selectedVariant?.price ?? 0);
