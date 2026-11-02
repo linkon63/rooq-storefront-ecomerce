@@ -79,6 +79,12 @@ Cutting a release turns that section into a numbered version — see
 
 _Nothing yet._
 
+### v0.4.1 — 2026-11-02
+
+#### Fixed
+
+- **Product page:** picking a variant (for example, another weight) now shows that variant's own photos. They lead the gallery, followed by the product's photos, and the main image jumps to the variant's first photo; before, the gallery only ever showed the product's photos. The cart, the wishlist and the Buy Now sheet on phones now show the chosen variant's photo too.
+
 ### v0.4.0 — 2026-10-22
 
 #### Added
