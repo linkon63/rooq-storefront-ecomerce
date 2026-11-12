@@ -20,8 +20,9 @@ export const BANGLADESH_DISTRICTS = [
  * The districts that ring Dhaka and take the "Near Dhaka" rate rather than the
  * full outside-Dhaka one.
  *
- * The API keeps the same list in `mycommerce-backend/src/order/delivery-zone.util.ts`
- * and is the one that actually prices the order — change both together.
+ * This is the only copy of the list: checkout uses it to pick the delivery zone it
+ * sends with the order, and the order API prices that zone with the Admin →
+ * Settings delivery rates.
  */
 export const NEAR_DHAKA_DISTRICTS = [
   "Gazipur",
@@ -39,8 +40,8 @@ const NEAR_DHAKA_LOOKUP = new Set(NEAR_DHAKA_DISTRICTS.map((name) => name.toLowe
  * Dhaka as the district is therefore not enough on its own to decide the rate —
  * Savar and Keraniganj are Dhaka district, but they are not Dhaka city.
  *
- * Mirrored in `mycommerce-backend/src/order/delivery-zone.util.ts`, which is the
- * list that actually prices the order — change both together.
+ * Checkout uses this list to pick the zone; the order API prices the zone it is
+ * sent with the Admin → Settings delivery rates.
  */
 export const NEAR_DHAKA_AREAS = [
   "Ashulia",

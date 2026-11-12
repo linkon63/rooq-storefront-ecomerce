@@ -1,22 +1,20 @@
-# Neocomerz Admin Dashboard Style Guide
+# Rooq Admin Dashboard Style Guide
 
-This style guide establishes consistency for **Typography, Colors, Spacing, Buttons, Form Inputs, Tables, and Modals** in the Products Catalog and all related modules of the Neocomerz Admin Dashboard.
+This style guide establishes consistency for **Typography, Colors, Spacing, Buttons, Form Inputs, Tables, and Modals** in the Products Catalog and all related modules of the Rooq admin dashboard. The storefront design tokens and rationale live in [docs/design/storefront-design.md](docs/design/storefront-design.md).
 
 ---
 
 ## 1. Typography & Font Families
 
-The dashboard utilizes custom typography definitions configured via CSS custom properties in [globals.css](file:///Users/almumeetusaikat/Documents/Neocomer-Admin/neocomerz-store-and-admin/app/globals.css).
+The dashboard utilizes custom typography definitions configured via CSS custom properties in [globals.css](app/globals.css); the fonts are loaded with `next/font` in [app/layout.tsx](app/layout.tsx).
 
 ### Font Families
-- **Primary Font (Sans-Serif)**: `Gotham` (fallback: `Arial, Helvetica, sans-serif`)
-  - CSS Variable: `var(--font-gotham)`
-  - Tailwind Token: `font-gotham`
+- **Body Font (Sans-Serif)**: `Poppins` (fallback: the Bengali font, then `sans-serif`)
+  - CSS Variable: `var(--font-poppins)`
   - Usage: Applied by default to `body` and used for all admin interfaces.
-- **Secondary Font (Serif)**: `Bembo Std` (fallback: `Georgia, serif`)
-  - CSS Variable: `var(--font-bembo)`
-  - Tailwind Token: `font-bembo`
-  - Usage: Reserved for specialized headings or branded text.
+- **Display Font**: `Archivo` (fallback: the Bengali font, then `ui-sans-serif, system-ui`)
+  - CSS Variable / Tailwind Token: `--font-display` / `font-display`
+  - Usage: Storefront headings and the Rooq wordmark.
 
 ### Font Weight Override (Critical Rule)
 The admin panel implements a global font weight reset in `globals.css`:
@@ -59,13 +57,16 @@ Maintain the following standard sizing for catalog pages:
 
 To keep the UI professional and aligned with the brand, adhere to these precise color tokens:
 
-### Brand Colors (NeoComerz Identity)
-- **Primary Brand Red**: `rgba(228, 0, 43, 1)` (`var(--brand-primary)`)
-  - Usage: Top-level branding, active menus, logo.
-- **Brand Accent 2 (Beige)**: `rgba(197, 185, 172, 1)` (`var(--brand-color-2)`)
-- **Brand Accent 3 (Gold)**: `rgba(185, 151, 91, 1)` (`var(--brand-color-3)`)
-- **Brand Accent 4 (Dark Brown)**: `rgba(71, 55, 41, 1)` (`var(--brand-color-4)`)
-- **Brand Accent 5 (Dark Forest Green)**: `rgba(33, 39, 33, 1)` (`var(--brand-color-5)`)
+### Brand Colors (Rooq Identity)
+Defined in the `@theme` block of [globals.css](app/globals.css), so each is also a Tailwind token (`bg-ink`, `text-dye`, …):
+- **Ink**: `#1b1f3b` (`--color-ink`), soft variant `#2c3157` (`--color-ink-soft`)
+  - Usage: Primary text, the wordmark, dark surfaces.
+- **Dye**: `#ff4f9a` (`--color-dye`), deep variant `#c2185b` (`--color-dye-deep`)
+  - Usage: The single accent: focus rings, highlights, sale and active states.
+- **Chalk**: `#f3f4f6` (`--color-chalk`): Page background.
+- **Selvedge**: `#dde2ee` (`--color-selvedge`), **Line**: `#c9cedc` (`--color-line`): Borders and dividers.
+- **Stone**: `#5b6178` (`--color-stone`): Secondary text.
+- **Paper**: `#ffffff` (`--color-paper`): Cards and sheets.
 
 ### Neutral Shades (Slate System)
 - **Dashboard Background**: `#fbfbfc` (light slate/off-white)
