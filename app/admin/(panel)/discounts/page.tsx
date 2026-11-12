@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { AdminIcon, PageHeader } from "../../_components/admin-shell";
 import { ConfirmModal } from "../../_components/confirm-modal";
 import { InfiniteScroll } from "../../_components/infinite-scroll";
-import { type ProductDiscount } from "../../../../lib/type";
+import { type ProductDiscount } from "@/types/product-discount";
 import { useDiscounts } from "../../_hooks/use-discounts";
 import { DiscountModal } from "./discount-modal";
 import { DiscountRow } from "./discount-row";
@@ -15,7 +17,7 @@ export default function DiscountsPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [discountToDelete, setDiscountToDelete] = useState<ProductDiscount | null>(null);
   const [error, setError] = useState("");
-  const { discounts, isLoading, loadDiscounts, refreshDiscounts, deleteDiscount, toggleStatus, search, setSearch, page, setPage, total, hasMore } = useDiscounts();
+  const { discounts, isLoading, error: loadError, loadDiscounts, refreshDiscounts, deleteDiscount, toggleStatus, search, setSearch, setPage, total, hasMore } = useDiscounts();
 
   function openAddModal() {
     setEditingDiscountId(null);
@@ -45,7 +47,7 @@ export default function DiscountsPage() {
       setDiscountToDelete(null);
       await loadDiscounts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete discount");
+      setError(err instanceof Error ? err.message : ERROR_MESSAGES.discount.deleteFailed);
     }
   }
 
@@ -59,7 +61,8 @@ export default function DiscountsPage() {
     try {
       await toggleStatus(discount.id, discount.status);
       await loadDiscounts();
-    } catch {
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : ERROR_MESSAGES.discount.statusFailed);
     }
   }
 
@@ -81,6 +84,12 @@ export default function DiscountsPage() {
           </div>
         }
       />
+
+      {loadError && (
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">
+          {loadError}
+        </p>
+      )}
 
       <section>
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">

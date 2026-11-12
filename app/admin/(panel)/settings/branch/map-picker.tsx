@@ -5,7 +5,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Fix default marker icons (Leaflet's default icon paths break in bundlers)
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/images/leaflet/marker-icon-2x.png",
   iconUrl: "/images/leaflet/marker-icon.png",

@@ -1,12 +1,14 @@
-# Organishi — Storefront & Admin
+# Rooq — Storefront, Admin & API
 
-The Organishi web app: the customer storefront (shop, cart, checkout, account)
-and the admin panel (`/admin`), built with Next.js. It talks to the NestJS API in
-[`mycommerce-backend`](../mycommerce-backend).
+Rooq is a fashion e-commerce web app in one Next.js project: the customer
+storefront (shop, product, cart, checkout, account), the admin panel (`/admin`)
+and the REST API (`/api/v1/*`, route handlers). Data lives in Postgres through
+Prisma; product images are stored in the database and served by
+`GET /api/v1/media/:id`. There is no separate backend.
 
-- **Stack:** Next.js 16 (App Router), React 19, Tailwind CSS 4, Swiper, Recharts, Sonner
+- **Stack:** Next.js 16 (App Router), React 19, Tailwind CSS 4, Prisma 7 (Postgres, `pg` adapter), zod, jose, sharp, Redux Toolkit, GSAP, three.js
 - **Package manager:** pnpm
-- **Design:** [Figma](https://www.figma.com/design/n7CxByfjTSzRNkLRcLZ8zN/Dev-Team?node-id=13464-164&t=KBNH9MtqN8HqniJo-1) · UI rules in [STYLE_GUIDE.md](STYLE_GUIDE.md)
+- **Architecture notes:** [docs/architecture/porting-guide.md](docs/architecture/porting-guide.md) · [docs/architecture/fashion-api-contract.md](docs/architecture/fashion-api-contract.md) · UI rules in [STYLE_GUIDE.md](STYLE_GUIDE.md)
 
 > This Next.js version has breaking changes from older releases — read
 > [AGENTS.md](AGENTS.md) and `node_modules/next/dist/docs/` before changing framework code.
@@ -15,14 +17,14 @@ and the admin panel (`/admin`), built with Next.js. It talks to the NestJS API i
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 20+ (24 recommended)
 - pnpm
-- The backend API running (see [`mycommerce-backend/README.md`](../mycommerce-backend/README.md))
+- A PostgreSQL database (any Postgres 14+; Prisma Postgres works)
 
 ### 1. Install dependencies
 
 ```bash
-pnpm install
+pnpm install          # also runs `prisma generate` (postinstall)
 ```
 
 ### 2. Environment variables
@@ -33,41 +35,66 @@ cp .env.example .env
 
 | Variable | Required | What it is |
 | --- | --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | Yes | Backend API base, e.g. `http://localhost:5010/api/v1` |
+| `DATABASE_URL` | Yes | Postgres connection string |
+| `JWT_SECRET` | Yes | Secret that signs access tokens — a long random string |
+| `JWT_EXPIRES_IN` | No | Token lifetime, e.g. `7d` (default) |
+| `NEXT_PUBLIC_APP_URL` | Yes | Public app origin, used in e-mail links (password reset), e.g. `http://localhost:3002` |
+| `NEXT_PUBLIC_SITE_URL` | No | Public site URL used in metadata, `robots.txt` and the sitemap (default `https://rooq.store`) |
+| `SEED_ADMIN_EMAIL` | No | Staff account the seed creates (default `admin@rooq.local`) |
+| `SEED_ADMIN_PASSWORD` | No | Its first password (default `ChangeMe123!` — change it for any shared database) |
+| `RESEND_API_KEY` | No | Resend key for transactional e-mail (password reset, orders, back-in-stock). Without it mail is a logged dry run |
+| `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` / `STORE_EMAIL` | No | Sender, contact-form inbox and store notification inbox |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | No | Google OAuth web client ID — enables "Sign in with Google" |
 | `NEXT_PUBLIC_GTM_ID` | No | Google Tag Manager ID — leave unset to disable tracking |
-| `NEXT_PUBLIC_FREE_DELIVERY_NOTE` | No | Highlighted note under the delivery charge at checkout (e.g. the free-delivery offer) — leave unset to hide it. Read at build time, so rebuild after changing it |
-| `RESEND_API_KEY` | No | Resend key for the contact form and newsletter e-mails |
-| `RESEND_FROM_EMAIL` / `RESEND_TO_EMAIL` | No | Sender and inbox for those e-mails |
-| `NEXT_PUBLIC_SITE_URL` | No | Public site URL used in the sitemap (defaults to `https://organishi.com`) |
 
-The full list lives in [`docs-ecomx/ENVIRONMENT_VARIABLES.md`](../docs-ecomx/ENVIRONMENT_VARIABLES.md).
+The API is served by this app at `/api/v1` (same origin), so there is no API URL to configure. `.env` is git-ignored; never commit it.
 
-### 3. Run
+### 3. Database
 
 ```bash
-pnpm dev      # development server on http://localhost:3002
-pnpm build    # production build
-pnpm start    # serve the production build
-pnpm lint     # ESLint
+pnpm db:migrate:deploy   # apply prisma/migrations to DATABASE_URL (or: pnpm db:migrate:pg — see below)
+pnpm db:seed             # roles, admin account, sizes, colours, categories, demo fashion catalogue, images (~3 min on a remote DB)
+```
+
+- `pnpm db:migrate` — create a new migration while developing (`prisma migrate dev`).
+- `pnpm db:migrate:pg` — fallback that applies pending migrations through the `pg` driver, for networks where Prisma's schema engine cannot connect (P1001). It records them in `_prisma_migrations` like `migrate deploy` does.
+- `pnpm db:studio` — browse the data. `pnpm db:generate` — regenerate the client into `lib/generated/prisma` (git-ignored).
+- The seed is idempotent; rerunning it updates the demo data instead of duplicating it.
+- Images are stored in Postgres (`media` + `media_blobs`, WebP, max 1600 px) and served by `GET /api/v1/media/:id`; nothing is written to `public/`, so no S3 bucket or writable disk is needed.
+- Schema reference: `docs/database/` — `rooq-erd.drawio` (open in diagrams.net), `schema.dbml` (paste into dbdiagram.io) and `README.md` (every table and relation).
+
+### 4. Run
+
+```bash
+pnpm dev        # http://localhost:3002
+pnpm build      # prisma generate && next build
+pnpm start      # serve the production build on port 3002
+pnpm typecheck  # tsc --noEmit
+pnpm lint       # ESLint
 ```
 
 - Storefront: <http://localhost:3002>
-- Admin panel: <http://localhost:3002/admin>
+- Admin panel: <http://localhost:3002/admin> — sign in with the seeded staff account (`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`, defaults above). It is the superadmin, so Staff & Roles is visible.
+- API: <http://localhost:3002/api/v1> (`GET /api/v1` is a liveness probe)
+- Use another port with `pnpm exec next start -p <port>` (or `next dev -p <port>`).
 
 ## Project layout
 
 ```
-app/(store)/        storefront routes — home, shop, product, cart, checkout, contact, faq, profile …
-app/admin/          admin panel
-app/_providers/     auth, cart, wishlist, compare context
-components/storefront/  storefront UI (home sections, shop, checkout, shared header/footer)
-lib/                API clients, pricing (cart-pricing.ts), contact & delivery helpers
-public/             static assets
+app/(store)/            storefront routes (server components read services via lib/storefront)
+app/admin/              admin panel (client pages; _components, _hooks per page)
+app/api/v1/<module>/    API route handlers (thin — call lib/server)
+lib/server/             server-only code: prisma, http wrapper, validation, auth, media, services
+lib/admin/, lib/admin-api/   admin browser client (transport + per-domain calls)
+lib/storefront/         storefront server loaders (cached, in-process service calls)
+lib/constants/          ERROR_MESSAGES (every error string) and other constants
+lib/store/              Redux Toolkit store (client state)
+lib/generated/prisma/   generated Prisma client (not committed)
+utils/                  pure functions: formatting, pricing, mappers, validation helpers
+types/                  shared TypeScript types
+prisma/                 schema.prisma, migrations, seed
+docs/                   architecture (porting guide, API contract), database (ERD, DBML), design
 ```
-
-Storefront colours come from the tokens in `app/globals.css` (`bg-brand`, `text-brand-sky-dark`, …) —
-change the palette there, not per component.
 
 ## Release Notes
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin Panel | Organishi",
-  description: "Organishi Store Management & Administration Panel",
+  title: "Admin | Rooq",
+  description: "Rooq store management",
   robots: {
     index: false,
     follow: false,

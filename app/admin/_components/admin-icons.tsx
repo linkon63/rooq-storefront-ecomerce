@@ -22,6 +22,7 @@ export type AdminIconName =
   | "info"
   | "link"
   | "logout"
+  | "menu"
   | "orders"
   | "package"
   | "plus"
@@ -328,6 +329,7 @@ const iconPaths: Record<AdminIconName, ReactNode> = {
     </>
   ),
   zap: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />,
+  menu: <path d="M4 6h16M4 12h16M4 18h16" />,
 };
 
 export function AdminIcon({

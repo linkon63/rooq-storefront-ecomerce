@@ -1,7 +1,8 @@
 "use client";
 
-import { resolveImageUrl, type Product } from "../../../../lib/admin-api";
 import { AdminIcon } from "../../_components/admin-shell";
+import { useCurrency } from "@/hooks/use-currency";
+import { DiscountProductPicker } from "./discount-product-picker";
 import { useDiscountForm } from "../../_hooks/use-discount-form";
 
 interface DiscountModalProps {
@@ -22,23 +23,11 @@ export function DiscountModal({ isOpen, discountId, onClose, onSaved }: Discount
     error,
     isSaving,
     isLoadingProducts,
-    canSubmit,
     handleSubmit,
     toggleProduct,
     close,
   } = useDiscountForm({ isOpen, discountId, onSaved, onClose });
-
-  function productThumb(product: Product) {
-    const url = product.media?.[0]?.media?.url;
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        alt={product.name}
-        className="h-8 w-8 shrink-0 rounded border border-slate-200 object-cover"
-        src={url ? resolveImageUrl(url) : '/images/no-image-icon-6.png'}
-      />
-    );
-  }
+  const { symbol } = useCurrency();
 
   if (!isOpen) return null;
 
@@ -107,10 +96,11 @@ export function DiscountModal({ isOpen, discountId, onClose, onSaved }: Discount
 
               <label className="block">
                 <span className="mb-2 block text-sm font-semibold text-slate-700">
-                  Value {form.type === "percentage" ? "(%)" : "(৳)"} <span className="text-red-500">*</span>
+                  Value {form.type === "percentage" ? "(%)" : `(${symbol})`} <span className="text-red-500">*</span>
                 </span>
                 <input
                   className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
+                  max={form.type === "percentage" ? 100 : undefined}
                   min={0}
                   onChange={(e) => setForm((c) => ({ ...c, value: e.target.value }))}
                   required
@@ -157,88 +147,16 @@ export function DiscountModal({ isOpen, discountId, onClose, onSaved }: Discount
               </select>
             </label>
 
-            <div className="block">
-              <span className="mb-2 block text-sm font-semibold text-slate-700">
-                Linked Products <span className="text-red-500">*</span> ({form.productIds.length} selected)
-              </span>
-              <div className="rounded-lg border border-slate-300">
-                <div className="flex items-center gap-3 border-b border-slate-200 p-3">
-                  <AdminIcon className="h-5 w-5 shrink-0 text-slate-400" name="search" />
-                  <input
-                    className="w-full bg-transparent font-medium outline-none"
-                    onChange={(e) => setProductSearch(e.target.value)}
-                    placeholder="Search products..."
-                    value={productSearch}
-                  />
-                </div>
-                <div className="max-h-60 overflow-y-auto">
-                  {isLoadingProducts ? (
-                    <div className="p-4 text-center font-medium text-slate-500">
-                      Loading products...
-                    </div>
-                  ) : filteredProducts.length === 0 ? (
-                    <div className="p-4 text-center font-medium text-slate-500">
-                      {products.length === 0
-                        ? "No products found."
-                        : "No products match your search."}
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-slate-100">
-                      <div className="flex gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2">
-                        <button
-                        className="text-sm font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
-                        onClick={() =>
-                            setForm((c) => ({
-                              ...c,
-                              productIds: filteredProducts.map((p) => p.id),
-                            }))
-                          }
-                          type="button"
-                        >
-                          Select All
-                        </button>
-                        <span className="text-slate-300">|</span>
-                        <button
-                        className="text-sm font-semibold text-slate-600 hover:text-slate-800 cursor-pointer"
-                        onClick={() =>
-                            setForm((c) => ({
-                              ...c,
-                              productIds: c.productIds.filter(
-                                (id) => !filteredProducts.some((p) => p.id === id),
-                              ),
-                            }))
-                          }
-                          type="button"
-                        >
-                          Clear
-                        </button>
-                      </div>
-                      {filteredProducts.map((product) => (
-                        <label
-                          className={`flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-slate-50 ${
-                            form.productIds.includes(product.id) ? "bg-blue-50" : ""
-                          }`}
-                          key={product.id}
-                        >
-                          <input
-                            checked={form.productIds.includes(product.id)}
-                            className="h-4 w-4 rounded border-slate-300 text-blue-600"
-                            onChange={() => toggleProduct(product.id)}
-                            type="checkbox"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate font-medium text-slate-800">
-                              {product.name}
-                            </p>
-                          </div>
-                          {productThumb(product)}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <DiscountProductPicker
+              filtered={filteredProducts}
+              isLoading={isLoadingProducts}
+              onSearch={setProductSearch}
+              onSelect={(productIds) => setForm((c) => ({ ...c, productIds }))}
+              onToggle={toggleProduct}
+              products={products}
+              search={productSearch}
+              selected={form.productIds}
+            />
 
             {error && (
               <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700">

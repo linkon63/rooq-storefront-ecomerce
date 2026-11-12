@@ -8,17 +8,18 @@ export function ReviewsTableSkeleton() {
         <table className="w-full min-w-[900px] text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-2 py-2 text-sm font-semibold text-slate-700">User</th>
-              <th className="px-2 py-2 text-sm font-semibold text-slate-700">Product</th>
-              <th className="px-2 py-2 text-sm font-semibold text-slate-700">Rating</th>
-              <th className="px-2 py-2 text-sm font-semibold text-slate-700">Comment</th>
+              {["Customer", "Product", "Rating", "Review", "Status", "Actions"].map((heading) => (
+                <th className="px-4 py-2.5 text-sm font-semibold text-slate-700" key={heading}>
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
-                {Array.from({ length: 4 }).map((_, j) => (
-                  <td className="px-2 py-2" key={j}>
+                {Array.from({ length: 6 }).map((_, j) => (
+                  <td className="px-4 py-3" key={j}>
                     <div className="h-5 w-full max-w-28 animate-pulse rounded bg-slate-100" />
                   </td>
                 ))}

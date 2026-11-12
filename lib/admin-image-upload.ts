@@ -1,15 +1,14 @@
 import { toast } from "sonner";
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@/lib/constants/media";
+import { formatFileSize } from "@/utils/file-size";
 
-// Largest image the admin panel lets through to the upload endpoints.
-export const MAX_IMAGE_BYTES = 1024 * 1024;
-export const MAX_IMAGE_LABEL = "1 MB";
+/** Largest image the admin lets through — the API's own limit (it re-encodes to WebP on upload). */
+export const MAX_IMAGE_BYTES = MAX_UPLOAD_BYTES;
+export const MAX_IMAGE_LABEL = `${MAX_UPLOAD_MB} MB`;
 export const IMAGE_SIZE_HINT = `Max ${MAX_IMAGE_LABEL} per image`;
 
-function formatSize(bytes: number): string {
-  // Round up so a file just over the limit never reads as exactly the limit.
-  if (bytes >= 1024 * 1024) return `${(Math.ceil((bytes / (1024 * 1024)) * 10) / 10).toFixed(1)} MB`;
-  return `${Math.ceil(bytes / 1024)} KB`;
-}
+const TOAST_MS = 6000;
 
 /**
  * Reads the files picked in an image input, drops any over the size limit and tells the
@@ -21,17 +20,18 @@ export function pickImages(input: HTMLInputElement): File[] | null {
   const tooLarge = picked.filter((file) => file.size > MAX_IMAGE_BYTES);
   if (tooLarge.length === 0) return picked;
 
+  const { upload } = ERROR_MESSAGES;
   if (tooLarge.length === 1) {
     const [file] = tooLarge;
-    toast.error(`Image too large — max ${MAX_IMAGE_LABEL}`, {
-      description: `"${file.name}" is ${formatSize(file.size)}. Please compress or resize it and try again.`,
-      duration: 6000,
+    toast.error(upload.imageTooLarge(MAX_IMAGE_LABEL), {
+      description: upload.imageTooLargeDetail(file.name, formatFileSize(file.size)),
+      duration: TOAST_MS,
     });
   } else {
-    const names = tooLarge.map((file) => `"${file.name}" (${formatSize(file.size)})`).join(", ");
-    toast.error(`${tooLarge.length} images too large — max ${MAX_IMAGE_LABEL} each`, {
-      description: `Not added: ${names}. Please compress or resize them and try again.`,
-      duration: 6000,
+    const names = tooLarge.map((file) => `"${file.name}" (${formatFileSize(file.size)})`).join(", ");
+    toast.error(upload.imagesTooLarge(tooLarge.length, MAX_IMAGE_LABEL), {
+      description: upload.imagesTooLargeDetail(names),
+      duration: TOAST_MS,
     });
   }
 

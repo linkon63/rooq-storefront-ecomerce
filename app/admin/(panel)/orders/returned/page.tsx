@@ -1,13 +1,10 @@
-"use client";
-
-import OrderPageView from "../../../_components/order-page-view";
+import { Suspense } from "react";
+import OrderPageView from "../_components/order-page-view";
 
 export default function ReturnedOrdersPage() {
   return (
-    <OrderPageView
-      title="Returned Orders"
-      description="Review returned items and process refunds"
-      fixedStatus="returned"
-    />
+    <Suspense>
+      <OrderPageView title="Returned Orders" description="Orders that came back in full. Partial returns live under Returns." fixedStatus="returned" />
+    </Suspense>
   );
 }

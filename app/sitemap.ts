@@ -1,81 +1,41 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/constants/storefront";
+import { sitemapEntities, type SitemapEntity } from "@/lib/server/seo/sitemap";
 
 export const revalidate = 3600;
 
+type Freq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+
+const STATIC_ROUTES: { path: string; changeFrequency: Freq; priority: number }[] = [
+  { path: "", changeFrequency: "daily", priority: 1 },
+  { path: "/shop", changeFrequency: "daily", priority: 0.9 },
+  { path: "/new", changeFrequency: "daily", priority: 0.9 },
+  { path: "/sale", changeFrequency: "daily", priority: 0.8 },
+  { path: "/collections", changeFrequency: "weekly", priority: 0.7 },
+  { path: "/contact", changeFrequency: "monthly", priority: 0.5 },
+  { path: "/faq", changeFrequency: "monthly", priority: 0.5 },
+  { path: "/privacy-policy", changeFrequency: "monthly", priority: 0.3 },
+  { path: "/terms-and-conditions", changeFrequency: "monthly", priority: 0.3 },
+];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://organishi.com").replace(/\/$/, "");
+  const base = SITE_URL.replace(/\/$/, "");
+  const now = new Date();
+  const routes: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({ url: `${base}${route.path}`, lastModified: now, ...route }));
 
-  // Static customer-facing store routes
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/shop`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/faq`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms-and-conditions`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-  ];
-
-  // Dynamic product routes fetched from backend API
-  let productRoutes: MetadataRoute.Sitemap = [];
+  const toEntries = (rows: SitemapEntity[], prefix: string, changeFrequency: Freq, priority: number) =>
+    rows.map((row) => ({ url: `${base}${prefix}${encodeURIComponent(row.slug)}`, lastModified: row.updatedAt, changeFrequency, priority }));
 
   try {
-    const apiBaseUrl =
-      process.env.API_BASE_URL ??
-      process.env.NEXT_PUBLIC_API_BASE_URL ??
-      "http://localhost:5020/api/v1";
-
-    const res = await fetch(`${apiBaseUrl}/products?limit=200`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (res.ok) {
-      const paginated = await res.json();
-      const products = Array.isArray(paginated.data)
-        ? paginated.data
-        : Array.isArray(paginated)
-        ? paginated
-        : [];
-
-      productRoutes = products.map((product: { id: string; updatedAt?: string }) => ({
-        url: `${baseUrl}/product/${product.id}`,
-        lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
-        changeFrequency: "weekly" as const,
-        priority: 0.8,
-      }));
-    }
+    const { products, categories, collections } = await sitemapEntities();
+    routes.push(
+      ...toEntries(products, "/product/", "weekly", 0.8),
+      ...toEntries(categories, "/shop?category=", "weekly", 0.6),
+      ...toEntries(collections, "/collections/", "weekly", 0.6),
+    );
   } catch (error) {
-    console.error("Failed to fetch products for sitemap:", error);
+    // The database may be unreachable at build time; ship the static routes rather than fail the build.
+    console.error("[sitemap] could not read the catalogue", error);
   }
-
-  return [...staticRoutes, ...productRoutes];
+  return routes;
 }

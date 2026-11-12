@@ -1,921 +1,134 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { AdminIcon, PageHeader } from "../../_components/admin-shell";
+import { useMemo, useState } from "react";
+import { flattenCategories, type CategoryRow as Row } from "@/utils/admin/category-tree";
+import { PageHeader } from "../../_components/admin-shell";
 import { ConfirmModal } from "../../_components/confirm-modal";
-import {
-  apiRequest,
-  formatDate,
-  reorderCategories,
-  resolveImageUrl,
-  slugify,
-  type Category,
-  type ReorderCategoryItem,
-} from "../../../../lib/admin-api";
-import { ImageSizeHint } from "../../_components/admin-ui";
-import { pickImages } from "../../../../lib/admin-image-upload";
+import { InfiniteScroll } from "../../_components/infinite-scroll";
+import { AddButton } from "../../_components/list/add-button";
+import { SearchToggle } from "../../_components/list/search-toggle";
+import { TableStateRow } from "../../_components/list/table-state-row";
+import { useClientList } from "../../_hooks/use-client-list";
+import { CategoryFormModal } from "./_components/category-form-modal";
+import { CategoryRow } from "./_components/category-row";
+import { ReorderStatus } from "./_components/reorder-status";
+import { useCategories, categoryToForm, EMPTY_CATEGORY_FORM, type CategoryForm } from "./_hooks/use-categories";
+import { useCategoryDrag } from "./_hooks/use-category-drag";
 
+const HEADINGS = ["Name", "Image", "Slug", "Parent", "Products", "Created", "Actions"];
 const PAGE_SIZE = 8;
-
-type CategoryForm = {
-  id?: string;
-  name: string;
-  slug: string;
-  parentId: string;
-  image: File | null;
-  imageUrl?: string | null;
-  removeImage: boolean;
-};
-
-type CategoryRow = Category & {
-  depth: number;
-  parentName: string;
-};
-
-const emptyForm: CategoryForm = {
-  name: "",
-  slug: "",
-  parentId: "",
-  image: null,
-  imageUrl: null,
-  removeImage: false,
-};
-
-function flattenCategories(
-  categories: Category[],
-  depth = 0,
-  parentName = "Root",
-): CategoryRow[] {
-  return categories.flatMap((category) => [
-    { ...category, depth, parentName },
-    ...flattenCategories(category.children ?? [], depth + 1, category.name),
-  ]);
-}
-
-// ─── Drag-and-drop tree helpers ──────────────────────────────────────────────
-
-type DropMode = "before" | "after" | "inside";
-
-/** Flatten the tree into the {id, parentId, sortOrder} list the API expects. */
-function flattenForReorder(
-  categories: Category[],
-  parentId: string | null = null,
-): ReorderCategoryItem[] {
-  return categories.flatMap((category, index) => [
-    { id: category.id, parentId, sortOrder: index },
-    ...flattenForReorder(category.children ?? [], category.id),
-  ]);
-}
-
-/** Find a node anywhere in the tree by id. */
-function findNode(categories: Category[], id: string): Category | null {
-  for (const category of categories) {
-    if (category.id === id) return category;
-    const found = findNode(category.children ?? [], id);
-    if (found) return found;
-  }
-  return null;
-}
-
-/** True when `id` is `node` itself or one of its descendants. */
-function containsId(node: Category, id: string): boolean {
-  if (node.id === id) return true;
-  return (node.children ?? []).some((child) => containsId(child, id));
-}
-
-/** Return a new tree with `id` removed, plus the removed node (immutably). */
-function removeNode(
-  categories: Category[],
-  id: string,
-): { tree: Category[]; node: Category | null } {
-  let removed: Category | null = null;
-
-  const walk = (nodes: Category[]): Category[] => {
-    const result: Category[] = [];
-    for (const node of nodes) {
-      if (node.id === id) {
-        removed = node;
-        continue;
-      }
-      result.push({ ...node, children: walk(node.children ?? []) });
-    }
-    return result;
-  };
-
-  return { tree: walk(categories), node: removed };
-}
-
-/** Insert `node` relative to `targetId` per the drop mode (immutably). */
-function insertNode(
-  categories: Category[],
-  node: Category,
-  targetId: string,
-  mode: DropMode,
-): Category[] {
-  const walk = (nodes: Category[]): Category[] => {
-    const result: Category[] = [];
-    for (const current of nodes) {
-      if (current.id === targetId) {
-        if (mode === "before") result.push(node);
-        if (mode === "inside") {
-          result.push({
-            ...current,
-            children: [...(current.children ?? []), node],
-          });
-        } else {
-          result.push({ ...current, children: walk(current.children ?? []) });
-        }
-        if (mode === "after") result.push(node);
-        continue;
-      }
-      result.push({ ...current, children: walk(current.children ?? []) });
-    }
-    return result;
-  };
-
-  return walk(categories);
-}
+const rowText = (row: Row) => `${row.name} ${row.slug} ${row.parentName}`;
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState<CategoryForm>(emptyForm);
-  const [search, setSearch] = useState("");
-  const [showSearchInput, setShowSearchInput] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const observerTarget = useRef<HTMLDivElement>(null);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<CategoryRow | null>(
-    null,
-  );
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<{
-    id: string;
-    mode: DropMode;
-  } | null>(null);
-  const [isReordering, setIsReordering] = useState(false);
+  const data = useCategories();
+  const rows = useMemo(() => flattenCategories(data.categories), [data.categories]);
+  const list = useClientList(rows, rowText, PAGE_SIZE);
+  const drag = useCategoryDrag(data.categories, (tree) => void data.reorder(tree));
+  const [editing, setEditing] = useState<CategoryForm | null>(null);
+  const [toDelete, setToDelete] = useState<Row | null>(null);
+  // Reordering only works on the unfiltered list, so the tree we move matches what is shown.
+  const searching = list.search.trim() !== "";
+  const canReorder = !searching && !data.isReordering;
 
-  const rows = useMemo(() => flattenCategories(categories), [categories]);
-  const filteredRows = useMemo(() => {
-    const result = rows.filter((category) =>
-      `${category.name} ${category.slug} ${category.parentName}`
-        .toLowerCase()
-        .includes(search.toLowerCase()),
-    );
-    return result;
-  }, [rows, search]);
-
-  // Reset visibleCount when search changes
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [search]);
-
-  const paginatedRows = useMemo(() => {
-    return filteredRows.slice(0, visibleCount);
-  }, [filteredRows, visibleCount]);
-
-  function handleLoadMore() {
-    setIsLoadingMore(true);
-    setTimeout(() => {
-      setVisibleCount((prev) => prev + PAGE_SIZE);
-      setIsLoadingMore(false);
-    }, 300);
-  }
-
-  useEffect(() => {
-    if (isLoadingMore || paginatedRows.length >= filteredRows.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore) {
-          handleLoadMore();
-        }
-      },
-      { threshold: 0.1, rootMargin: "100px" }
-    );
-
-    const target = observerTarget.current;
-    if (target) {
-      observer.observe(target);
-    }
-
-    return () => {
-      if (target) {
-        observer.unobserve(target);
-      }
-    };
-  }, [isLoadingMore, paginatedRows.length, filteredRows.length]);
-
-  useEffect(() => {
-    if (!form.image) {
-      const timeoutId = window.setTimeout(() => {
-        setImagePreviewUrl(null);
-      }, 0);
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    const objectUrl = URL.createObjectURL(form.image);
-    const timeoutId = window.setTimeout(() => {
-      setImagePreviewUrl(objectUrl);
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      URL.revokeObjectURL(objectUrl);
-    };
-  }, [form.image]);
-
-  async function loadCategories() {
-    setError("");
-    setIsLoading(true);
-    try {
-      setCategories(await apiRequest<Category[]>("/category"));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load categories",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void loadCategories();
-    }, 0);
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  function updateName(name: string) {
-    setForm((current) => ({
-      ...current,
-      name,
-      slug: current.id ? current.slug : slugify(name),
-    }));
-  }
-
-  function openAddModal() {
-    setError("");
-    setForm(emptyForm);
-    setIsModalOpen(true);
-  }
-
-  function openEditModal(category: CategoryRow) {
-    setError("");
-    setForm({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      parentId: category.parentId ?? "",
-      image: null,
-      imageUrl: category.imageUrl ?? null,
-      removeImage: false,
-    });
-    setIsModalOpen(true);
-  }
-
-  function closeModal() {
-    if (isSaving) return;
-
-    setError("");
-    setForm(emptyForm);
-    setIsModalOpen(false);
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setIsSaving(true);
-
-    // Validate form fields
-    if (!form.name || form.name.trim() === "") {
-      setError("Name should not be empty");
-      setIsSaving(false);
-      return;
-    }
-
-    const slugValue = form.slug || slugify(form.name);
-    if (!slugValue || slugValue.trim() === "") {
-      setError("Slug should not be empty");
-      setIsSaving(false);
-      return;
-    }
-
-    const body = new FormData();
-    body.append("name", form.name.trim());
-    body.append("slug", slugValue);
-    if (form.image) body.append("image", form.image);
-    if (form.id && form.removeImage && !form.image) body.append("imageUrl", "");
-    if (form.parentId) {
-      body.append("parentId", form.parentId);
-    } else if (form.id) {
-      body.append("parentId", "");
-    }
-
-    try {
-      await apiRequest<Category>(
-        form.id ? `/category/${form.id}` : "/category",
-        {
-          method: form.id ? "PATCH" : "POST",
-          body,
-        },
-      );
-
-      setForm(emptyForm);
-      setIsModalOpen(false);
-      await loadCategories();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save category");
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function deleteCategory(category: CategoryRow) {
-    setCategoryToDelete(category);
-    setDeleteModalOpen(true);
-  }
-
-  async function confirmDelete() {
-    if (!categoryToDelete) return;
-
-    setError("");
-    try {
-      await apiRequest(`/category/${categoryToDelete.id}`, {
-        method: "DELETE",
-      });
-      setDeleteModalOpen(false);
-      setCategoryToDelete(null);
-      await loadCategories();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete category",
-      );
-    }
-  }
-
-  function removeImageFromForm() {
-    if (imageInputRef.current) {
-      imageInputRef.current.value = "";
-    }
-
-    setForm((current) => ({
-      ...current,
-      image: null,
-      imageUrl: null,
-      removeImage: true,
-    }));
-  }
-
-  const visibleImagePreview =
-    imagePreviewUrl ?? (form.removeImage ? null : (form.imageUrl ? resolveImageUrl(form.imageUrl) : null));
-
-  function cancelDelete() {
-    setDeleteModalOpen(false);
-    setCategoryToDelete(null);
-    setError("");
-  }
-
-  // ─── Drag-and-drop reordering ──────────────────────────────────────────────
-  // Reordering is only enabled when the list is unfiltered, so the tree we
-  // mutate matches exactly what the user sees.
-  const canReorder = search.trim() === "" && !isReordering;
-
-  function handleDragStart(event: React.DragEvent, id: string) {
-    setDraggingId(id);
-    event.dataTransfer.effectAllowed = "move";
-    // Firefox requires data to be set for a drag to start.
-    event.dataTransfer.setData("text/plain", id);
-  }
-
-  function handleDragOver(event: React.DragEvent, targetId: string) {
-    if (!draggingId || draggingId === targetId) {
-      setDropTarget(null);
-      return;
-    }
-
-    // Never allow dropping a category into itself or one of its descendants.
-    const dragged = findNode(categories, draggingId);
-    if (dragged && containsId(dragged, targetId)) {
-      setDropTarget(null);
-      return;
-    }
-
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const ratio = (event.clientY - rect.top) / rect.height;
-    const mode: DropMode =
-      ratio < 0.3 ? "before" : ratio > 0.7 ? "after" : "inside";
-    setDropTarget({ id: targetId, mode });
-  }
-
-  function handleDragEnd() {
-    setDraggingId(null);
-    setDropTarget(null);
-  }
-
-  async function persistReorder(nextTree: Category[]) {
-    const previous = categories;
-    setCategories(nextTree);
-    setIsReordering(true);
-    setError("");
-    try {
-      const updated = await reorderCategories(flattenForReorder(nextTree));
-      setCategories(updated);
-    } catch (err) {
-      setCategories(previous);
-      setError(
-        err instanceof Error ? err.message : "Failed to reorder categories",
-      );
-    } finally {
-      setIsReordering(false);
-    }
-  }
-
-  function handleDrop(event: React.DragEvent, targetId: string) {
-    event.preventDefault();
-    const dragId = draggingId;
-    setDraggingId(null);
-    setDropTarget(null);
-
-    if (!dragId || dragId === targetId) return;
-
-    const mode: DropMode = dropTarget?.id === targetId ? dropTarget.mode : "after";
-
-    const { tree: without, node } = removeNode(categories, dragId);
-    // Guard against dropping a node into its own subtree.
-    if (!node || containsId(node, targetId)) return;
-
-    const nextTree = insertNode(without, node, targetId, mode);
-    void persistReorder(nextTree);
-  }
+  const open = (form: CategoryForm) => {
+    data.setError("");
+    setEditing(form);
+  };
 
   return (
     <>
       <PageHeader
-        title="Category"
-        description="Create, update, and remove product categories from the API."
         action={
-          <div className="flex gap-3 items-center">
-            {showSearchInput ? (
-              <div className="relative flex h-11 w-64 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 shadow-sm transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-                <AdminIcon className="h-5 w-5 text-slate-400" name="search" />
-                <input
-                  className="w-full bg-transparent text-sm font-medium outline-none placeholder:text-slate-400 text-slate-800"
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search categories..."
-                  value={search}
-                  autoFocus
-                />
-                <button
-                  onClick={() => {
-                    setSearch("");
-                    setShowSearchInput(false);
-                  }}
-                  className="grid h-6 w-6 place-items-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
-                  title="Close search"
-                  type="button"
-                >
-                  <AdminIcon className="h-4 w-4" name="x" />
-                </button>
-              </div>
-            ) : (
-              <button
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-slate-300 bg-white hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm"
-                onClick={() => setShowSearchInput(true)}
-                type="button"
-                title="Search categories"
-              >
-                <AdminIcon className="h-5 w-5 text-slate-600" name="search" />
-              </button>
-            )}
-            <button
-              className="inline-flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-[14px] font-semibold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 shrink-0 whitespace-nowrap"
-              onClick={openAddModal}
-              type="button"
-            >
-              <AdminIcon className="h-5 w-5" name="plus" />
-              Add Category
-            </button>
+          <div className="flex items-center gap-3">
+            <SearchToggle label="Search categories" onChange={list.setSearch} value={list.search} />
+            <AddButton label="Add Category" onClick={() => open(EMPTY_CATEGORY_FORM)} />
           </div>
         }
+        description="Create, update, reorder and nest product categories."
+        title="Category"
       />
-
-      <section>
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm">
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
-            <p className="text-sm font-medium text-slate-500">
-              {filteredRows.length} {filteredRows.length === 1 ? "category" : "categories"}
-            </p>
-            {isReordering ? (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
-                <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Saving order...
-              </span>
-            ) : canReorder ? (
-              <span className="hidden items-center gap-1.5 text-xs font-medium text-slate-400 sm:inline-flex">
-                <AdminIcon className="h-3.5 w-3.5" name="grip" />
-                Drag the handle to reorder, or drop onto a row to nest it
-              </span>
-            ) : search.trim() !== "" ? (
-              <span className="text-xs font-medium text-amber-600">
-                Clear the search to reorder categories
-              </span>
-            ) : null}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[840px] text-left">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="w-10 px-2 py-4" aria-label="Reorder" />
-                  {[
-                    "Name",
-                    "Image",
-                    "Slug",
-                    "Parent",
-                    "Products",
-                    "Created",
-                    "Actions",
-                  ].map((heading) => (
-                    <th className="px-5 py-4 text-sm font-semibold text-slate-700" key={heading}>
-                      {heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {isLoading ? (
-                  <tr>
-                    <td
-                      className="px-5 py-8 text-slate-500"
-                      colSpan={8}
-                    >
-                      Loading categories...
-                    </td>
-                  </tr>
-                ) : filteredRows.length === 0 ? (
-                  <tr>
-                    <td
-                      className="px-5 py-8 text-slate-500"
-                      colSpan={8}
-                    >
-                      No categories found.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedRows.map((category) => {
-                    const isDragging = draggingId === category.id;
-                    const indicator =
-                      dropTarget?.id === category.id ? dropTarget.mode : null;
-                    return (
-                    <tr
-                      className={`odd:bg-white even:bg-slate-50/70 transition-colors ${
-                        isDragging ? "opacity-40" : ""
-                      } ${indicator === "inside" ? "!bg-blue-50 ring-1 ring-inset ring-blue-300" : ""} ${
-                        indicator === "before"
-                          ? "shadow-[inset_0_2px_0_0_#2563eb]"
-                          : ""
-                      } ${
-                        indicator === "after"
-                          ? "shadow-[inset_0_-2px_0_0_#2563eb]"
-                          : ""
-                      }`}
-                      key={category.id}
-                      onDragOver={
-                        canReorder
-                          ? (event) => handleDragOver(event, category.id)
-                          : undefined
-                      }
-                      onDrop={
-                        canReorder
-                          ? (event) => handleDrop(event, category.id)
-                          : undefined
-                      }
-                    >
-                      <td className="w-10 px-2 py-4 align-middle">
-                        <button
-                          type="button"
-                          aria-label={`Drag to reorder ${category.name}`}
-                          title={
-                            canReorder
-                              ? "Drag to reorder or nest"
-                              : "Clear search to reorder categories"
-                          }
-                          draggable={canReorder}
-                          onDragStart={
-                            canReorder
-                              ? (event) => handleDragStart(event, category.id)
-                              : undefined
-                          }
-                          onDragEnd={handleDragEnd}
-                          className={`grid h-8 w-6 place-items-center rounded-md text-slate-400 ${
-                            canReorder
-                              ? "cursor-grab hover:bg-slate-100 hover:text-slate-600 active:cursor-grabbing"
-                              : "cursor-not-allowed opacity-40"
-                          }`}
-                        >
-                          <AdminIcon className="h-4 w-4" name="grip" />
-                        </button>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-800">
-                        <span
-                           style={{ paddingLeft: `${category.depth * 18}px` }}
-                        >
-                          {category.depth > 0 ? "↳ " : ""}
-                          {category.name}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        {category.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            alt=""
-                            className="h-12 w-12 rounded-lg border border-slate-200 object-cover"
-                            src={resolveImageUrl(category.imageUrl)}
-                          />
-                        ) : (
-                          <div className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white text-xl">
-                            <AdminIcon
-                              className="h-5 w-5 text-slate-400"
-                              name="category"
-                            />
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {category.slug}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {category.parentName}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {(category as any)._count?.products ?? category.products?.length ?? 0}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {formatDate(category.createdAt)}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => openEditModal(category)}
-                            className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
-                            type="button"
-                            title="Edit category"
-                          >
-                            <AdminIcon className="h-4 w-4" name="edit" />
-                          </button>
-                          <button
-                            onClick={() => deleteCategory(category)}
-                            className="grid h-8 w-8 place-items-center rounded-lg border border-red-100 text-red-500 hover:bg-red-50 transition-colors"
-                            type="button"
-                            title="Delete category"
-                          >
-                            <AdminIcon className="h-4 w-4" name="trash" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Lazy Loading */}
-          {!isLoading && filteredRows.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 px-5 py-4 bg-gradient-to-r from-slate-50 to-white">
-              <div className="flex flex-col items-start gap-1.5">
-                <p className="text-sm font-medium text-slate-500">
-                  Showing <span className="font-bold text-slate-800">{paginatedRows.length}</span> of{" "}
-                  <span className="font-bold text-slate-800">{filteredRows.length}</span> categories
-                </p>
-                <div className="h-1.5 w-48 overflow-hidden rounded bg-slate-200">
-                  <div
-                    className="h-full bg-blue-600 transition-all duration-300 ease-out"
-                    style={{ width: `${Math.min(100, (paginatedRows.length / filteredRows.length) * 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {paginatedRows.length < filteredRows.length ? (
-                <div
-                  ref={observerTarget}
-                  className="flex items-center gap-2 py-2 text-xs font-semibold text-slate-500"
-                >
-                  <svg className="animate-spin h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Loading more on scroll...</span>
-                </div>
+      <section className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
+          <p className="text-sm font-medium text-slate-500">
+            {list.filtered.length} {list.filtered.length === 1 ? "category" : "categories"}
+          </p>
+          <ReorderStatus canReorder={canReorder} isReordering={data.isReordering} searching={searching} />
+        </div>
+        {data.error && !editing && !toDelete ? <p className="mx-5 my-3 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert">{data.error}</p> : null}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[840px] text-left">
+            <thead className="bg-slate-50">
+              <tr>
+                <th aria-label="Reorder" className="w-10 px-2 py-4" scope="col" />
+                {HEADINGS.map((h) => (
+                  <th className="px-5 py-4 text-sm font-semibold text-slate-700" key={h} scope="col">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {data.isLoading ? (
+                <TableStateRow colSpan={HEADINGS.length + 1}>Loading categories…</TableStateRow>
+              ) : list.filtered.length === 0 ? (
+                <TableStateRow colSpan={HEADINGS.length + 1}>No categories found.</TableStateRow>
               ) : (
-                <span className="text-xs font-semibold text-slate-400">All categories loaded</span>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6 modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="category-modal-title"
-        >
-          <form
-            className="modal-panel flex w-full max-w-lg flex-col rounded-xl border border-slate-200 bg-white shadow-2xl min-h-[480px] max-h-[calc(100vh-3rem)]"
-            onSubmit={handleSubmit}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 pt-6 pb-5 shrink-0">
-              <div>
-                <h3 className="text-base font-semibold text-slate-900" id="category-modal-title">
-                  {form.id ? "Edit Category" : "Add Category"}
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Build root and nested category records.
-                </p>
-              </div>
-              <button
-                className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600"
-                disabled={isSaving}
-                onClick={closeModal}
-                type="button"
-              >
-                <AdminIcon className="h-4 w-4" name="x" />
-              </button>
-            </div>
-            <div className="flex-1 modal-body px-6 py-5">
-            <div className="space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">
-                  Name
-                </span>
-                <input
-                  autoFocus
-                  className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
-                  onChange={(event) => updateName(event.target.value)}
-                  required
-                  value={form.name}
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">
-                  Slug
-                </span>
-                <input
-                  className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      slug: event.target.value,
-                    }))
-                  }
-                  required
-                  value={form.slug}
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">
-                  Image <ImageSizeHint className="ml-1.5 align-middle" />
-                </span>
-                <input
-                  className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white file:mr-4 file:rounded-lg file:border-0 file:bg-slate-200 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-300"
-                  onChange={(event) => {
-                    const files = pickImages(event.target);
-                    if (!files) return;
-                    setForm((current) => ({
-                      ...current,
-                      image: files[0] ?? null,
-                      removeImage: false,
-                    }));
-                  }}
-                  ref={imageInputRef}
-                  type="file"
-                  accept="image/*"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">
-                  Parent category
-                </span>
-                <select
-                  className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none transition-colors focus:border-blue-500 focus:bg-white"
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      parentId: event.target.value,
-                    }))
-                  }
-                  value={form.parentId}
-                >
-                  <option value="">Root category</option>
-                  {rows
-                    .filter((category) => category.id !== form.id)
-                    .map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {"--".repeat(category.depth)} {category.name}
-                      </option>
-                    ))}
-                </select>
-              </label>
-              <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4">
-                {visibleImagePreview ? (
-                  <div className="flex items-center gap-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      alt="Category image preview"
-                      className="h-20 w-20 rounded-lg border border-slate-200 bg-white object-cover"
-                      src={visibleImagePreview}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-slate-800">
-                        {form.image?.name ?? "Current image"}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Preview before saving.
-                      </p>
-                    </div>
-                    <button
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-red-50 px-3 text-xs font-medium text-red-700 hover:bg-red-100 transition-colors"
-                      disabled={isSaving}
-                      onClick={removeImageFromForm}
-                      type="button"
-                    >
-                      <AdminIcon className="h-3.5 w-3.5" name="x" />
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 text-slate-500">
-                    <span className="grid h-12 w-12 place-items-center rounded-lg border border-slate-200 bg-white">
-                      <AdminIcon className="h-5 w-5" name="category" />
-                    </span>
-                    <p className="text-sm font-medium">
-                      No image selected. Upload an image to preview it here.
-                    </p>
-                  </div>
-                )}
-              </div>
-              {error && (
-                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                  {error}
-                </p>
-              )}
-            </div>
-            </div>
-            <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-4 shrink-0">
-                <button
-                  className="h-10 rounded-lg border border-slate-300 bg-white px-5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                  disabled={isSaving}
-                  onClick={closeModal}
-                  type="button"
-                >
-                  Cancel
-                </button>
-                <button
-                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white disabled:bg-slate-400 hover:bg-blue-700 transition-colors"
-                  disabled={isSaving}
-                  type="submit"
-                >
-                  <AdminIcon
-                    className="h-4 w-4"
-                    name={form.id ? "check" : "plus"}
+                list.visible.map((row) => (
+                  <CategoryRow
+                    canReorder={canReorder}
+                    category={row}
+                    indicator={drag.indicatorFor(row.id)}
+                    isDragging={drag.draggingId === row.id}
+                    key={row.id}
+                    onDelete={() => setToDelete(row)}
+                    onDragEnd={drag.end}
+                    onDragOver={drag.over}
+                    onDragStart={drag.start}
+                    onDrop={drag.drop}
+                    onEdit={() => open(categoryToForm(row))}
                   />
-                  {isSaving
-                    ? "Saving..."
-                    : form.id
-                      ? "Update Category"
-                      : "Add Category"}
-                </button>
-            </div>
-          </form>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
-
+        {!data.isLoading && list.filtered.length > 0 ? (
+          <InfiniteScroll
+            allLoadedLabel="All categories loaded"
+            hasMore={list.hasMore}
+            isLoading={false}
+            itemLabel="categories"
+            loaded={list.visible.length}
+            onLoadMore={list.loadMore}
+            total={list.filtered.length}
+          />
+        ) : null}
+      </section>
+      {editing ? (
+        <CategoryFormModal
+          busy={data.isSaving}
+          error={data.error}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onSave={async (form) => {
+            if (await data.save(form)) setEditing(null);
+          }}
+          rows={rows}
+        />
+      ) : null}
       <ConfirmModal
-        isOpen={deleteModalOpen}
-        onClose={cancelDelete}
-        onConfirm={confirmDelete}
+        cancelText="No"
+        confirmText="Yes"
+        error={data.error}
+        isDestructive
+        isOpen={!!toDelete}
+        message={`Delete "${toDelete?.name}"? This cannot be undone.`}
+        onClose={() => {
+          setToDelete(null);
+          data.setError("");
+        }}
+        onConfirm={async () => {
+          if (toDelete && (await data.remove(toDelete))) setToDelete(null);
+        }}
         title="Delete Category"
-        message={`Are you sure you want to delete "${categoryToDelete?.name}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-        isDestructive={true}
-        error={error}
       />
     </>
   );

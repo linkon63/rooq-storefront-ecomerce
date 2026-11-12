@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
+import { CartPageView } from "@/components/storefront/cart/cart-page-view";
+import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
+import { getStoreSettings } from "@/lib/storefront/catalog-data";
 
-import CartView from "@/components/storefront/checkout/CartView";
-import RelatedProducts from "@/components/storefront/shop/RelatedProducts";
-import { fetchShopProducts } from "@/lib/shop-api";
-
-export const metadata: Metadata = {
-  title: "Shopping Cart | Organishi",
-};
+export const metadata: Metadata = { title: "Your bag", robots: { index: false } };
 
 export default async function CartPage() {
-  const { data: products } = await fetchShopProducts({ limit: 8 });
-
+  const settings = await getStoreSettings();
   return (
-    <>
-      <CartView />
-      <RelatedProducts title="You May Also Like" products={products.slice(0, 8)} />
-    </>
+    <div className="flex flex-col gap-20">
+      <div className="page-gutter pt-8 md:pt-12">
+        <h1 className="mb-8 font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Your bag</h1>
+        <CartPageView delivery={settings.delivery} />
+      </div>
+      <RecentlyViewedRail />
+    </div>
   );
 }

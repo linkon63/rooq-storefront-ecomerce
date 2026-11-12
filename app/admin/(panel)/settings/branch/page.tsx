@@ -3,27 +3,24 @@
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { PageHeader } from "../../../_components/admin-shell";
-import { type AppSettings } from "../../../../../lib/admin-api";
+import type { AppSettings } from "@/types/admin/settings";
 import { useSettingsSaving, useSettingsLoading } from "../../../_hooks/use-settings";
+import { SUCCESS_MESSAGES } from "@/lib/constants/success-messages";
 import {
   SettingsCard,
   FieldLabel,
   Input,
   Textarea,
   SaveButton,
+  ErrorBanner,
 } from "../_components/settings-ui";
 
 const MapPicker = dynamic(() => import("./map-picker"), { ssr: false });
 
-function toNum(v: number | string | null | undefined): string {
-  if (v === null || v === undefined || v === "") return "";
-  return String(Number(v));
-}
-
 export default function BranchPage() {
   const [settings, setSettings] = useState<AppSettings>({});
   const { saving, saveSettings } = useSettingsSaving();
-  const { loading, loadSettings: loadData } = useSettingsLoading();
+  const { loading, error, loadSettings: loadData } = useSettingsLoading();
 
   const loadSettings = useCallback(async () => {
     const data = await loadData();
@@ -39,7 +36,7 @@ export default function BranchPage() {
       branchLat: settings.branchLat ?? null,
       branchLng: settings.branchLng ?? null,
     }, {
-      successMessage: "Branch settings saved successfully.",
+      successMessage: SUCCESS_MESSAGES.common.saved,
       onSuccess: loadSettings,
     });
   }
@@ -48,7 +45,7 @@ export default function BranchPage() {
     <>
       <PageHeader
         title="Branch"
-        description="Manage & customize your website content & interface."
+        description="The store address and map pin shown on the contact page."
         action={
           <SaveButton onClick={save} saving={saving}>
             Save Branch
@@ -56,6 +53,7 @@ export default function BranchPage() {
         }
       />
 
+      <ErrorBanner message={error} />
       <SettingsCard title="Branch Settings">
         {loading ? (
           <p className="py-8 text-sm font-medium text-slate-400">Loading...</p>
@@ -67,7 +65,7 @@ export default function BranchPage() {
               <div className="pt-1">
                 <p className="text-sm font-black text-slate-800">Branch Info</p>
                 <p className="mt-1 text-xs font-medium text-slate-500">
-                  Select branch to manage eCommerce.
+                  Name and address of the flagship store.
                 </p>
               </div>
               <div className="space-y-4">

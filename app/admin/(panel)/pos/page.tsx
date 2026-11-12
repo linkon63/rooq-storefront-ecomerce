@@ -1,39 +1,42 @@
 "use client";
 
-import { products } from "../../_components/admin-data";
-import { AdminIcon, PageHeader, ProductThumb } from "../../_components/admin-shell";
-import { useCurrency } from "../../../../lib/currency-context";
+import { useState } from "react";
+import { useCurrency } from "@/hooks/use-currency";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { posActions } from "@/lib/store/slices/pos-slice";
+import type { ProductCard } from "@/utils/mappers/product-card";
+import { PageHeader } from "../../_components/admin-shell";
+import { PosProductGrid } from "./_components/pos-product-grid";
+import { PosReceipt } from "./_components/pos-receipt";
+import { PosTicket } from "./_components/pos-ticket";
+import { PosVariantPicker } from "./_components/pos-variant-picker";
+import { usePosCheckout } from "./_hooks/use-pos-checkout";
 
 export default function PosPage() {
   const { symbol } = useCurrency();
+  const dispatch = useAppDispatch();
+  const [picking, setPicking] = useState<ProductCard | null>(null);
+  const { checkout, isSubmitting, completed, dismissReceipt } = usePosCheckout();
+
   return (
     <>
-      <PageHeader title="POS" description="Create in-store sales and quick invoices" />
-      <section className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        <div className="rounded-xl bg-white p-5 shadow-sm">
-          <label className="mb-5 flex h-14 items-center gap-3 rounded-lg border border-slate-300 px-4">
-            <AdminIcon className="h-5 w-5 text-slate-400" name="search" />
-            <input className="w-full bg-transparent outline-none" placeholder="Search product or scan SKU" />
-          </label>
-          <div className="grid gap-4 md:grid-cols-2">
-            {products.map((product) => (
-              <button className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 text-left" key={product.sku}>
-                <ProductThumb color={product.color} />
-                <span><b className="block">{product.name}</b><span className="text-sm text-slate-500">{product.price}</span></span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <aside className="rounded-xl bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-black">Current cart</h2>
-          <div className="mt-8 space-y-4">
-            <div className="flex justify-between font-medium"><span>Subtotal</span><span>{symbol}1,899</span></div>
-            <div className="flex justify-between font-medium"><span>Discount</span><span>{symbol}0</span></div>
-            <div className="flex justify-between border-t border-slate-200 pt-4 text-xl font-black"><span>Total</span><span>{symbol}1,899</span></div>
-          </div>
-          <button className="mt-8 h-14 w-full rounded-lg bg-blue-600 font-black text-white">Checkout</button>
-        </aside>
+      <PageHeader title="POS" description="Ring up in-store sales by size and colour. Stock is taken immediately and the sale is recorded as paid." />
+      {completed ? <PosReceipt onDone={dismissReceipt} order={completed} symbol={symbol} /> : null}
+      <section className="grid gap-6 xl:grid-cols-[1fr_440px]">
+        <PosProductGrid onPick={setPicking} symbol={symbol} />
+        <PosTicket isSubmitting={isSubmitting} onCheckout={checkout} symbol={symbol} />
       </section>
+      {picking ? (
+        <PosVariantPicker
+          onAdd={(line) => {
+            dispatch(posActions.addLine(line));
+            setPicking(null);
+          }}
+          onClose={() => setPicking(null)}
+          product={picking}
+          symbol={symbol}
+        />
+      ) : null}
     </>
   );
 }

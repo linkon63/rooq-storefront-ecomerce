@@ -8,21 +8,19 @@
  * in the admin panel lands everywhere at once.
  */
 
-import { formatOpeningHours } from "./business-hours";
+import { formatOpeningHours } from "@/utils/business-hours";
 import { contactEntries, type ShopContactEntry, type ShopSettings } from "./shop-api";
 
-export const FALLBACK_PHONES: ShopContactEntry[] = [
-  { title: "Customer Support", value: "+8801629377644" },
-];
-export const FALLBACK_EMAILS: ShopContactEntry[] = [
-  { title: "Support", value: "Organishi.bd@gmail.com" },
-];
-export const FALLBACK_ADDRESS = "Sector 10, Uttara, Dhaka, Bangladesh";
+/** No invented numbers or addresses: until Settings → Contact is filled, these print nothing. */
+export const FALLBACK_PHONES: ShopContactEntry[] = [];
+export const FALLBACK_EMAILS: ShopContactEntry[] = [];
+export const FALLBACK_ADDRESS = "Dhaka, Bangladesh";
 /** The shop's website as printed on paper — the invoice letterhead. */
-export const SHOP_WEBSITE = { label: "www.organishi.com", href: "https://www.organishi.com" };
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store").replace(/\/$/, "");
+export const SHOP_WEBSITE = { label: SITE.replace(/^https?:\/\//, ""), href: SITE };
 export const FALLBACK_HOURS = "8:00 AM – 10:00 PM";
 export const FALLBACK_FOOTER_DESCRIPTION =
-  "Nature has always known what’s best for us. Organishi brings that goodness closer to you with thoughtfully selected, natural and wholesome foods you can trust. We believe healthy living doesn’t have to be complicated—it starts with simple, better choices, every day.";
+  "Rooq makes considered clothing, footwear and accessories for women, men and kids, with honest sizing and easy returns.";
 
 export type ShopContact = {
   phones: ShopContactEntry[];
@@ -54,8 +52,7 @@ export function whatsappHref(number: string): string {
 }
 
 /** Pre-filled WhatsApp text so a shopper only has to hit send to ask their question. */
-export const WHATSAPP_ENQUIRY_MESSAGE =
-  "আসসালামু আলাইকুম, আমি Organishi-এর পণ্য সম্পর্কে জানতে চাই।";
+export const WHATSAPP_ENQUIRY_MESSAGE = "Hi Rooq, I have a question about a product.";
 
 /** WhatsApp chat link with the enquiry message already typed in. */
 export function whatsappChatHref(number: string): string {
@@ -108,9 +105,9 @@ export function resolveShopContact(settings?: ShopSettings | null): ShopContact 
   return {
     phones,
     emails,
-    phone: phones[0].value,
-    email: emails[0].value,
-    whatsapp: phones[1]?.value ?? phones[0].value,
+    phone: phones[0]?.value ?? "",
+    email: emails[0]?.value ?? "",
+    whatsapp: phones[1]?.value ?? phones[0]?.value ?? "",
     address: settings?.branchAddress?.trim() || FALLBACK_ADDRESS,
     hours: formatOpeningHours(settings?.openingTime, settings?.closingTime) ?? FALLBACK_HOURS,
     footerDescription: settings?.footerDescription?.trim() || FALLBACK_FOOTER_DESCRIPTION,

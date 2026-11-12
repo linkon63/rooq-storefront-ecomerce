@@ -1,65 +1,33 @@
-import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
-import fs from 'fs/promises';
-import path from 'path';
-import 'dotenv/config';
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
+import { SUCCESS_MESSAGES } from "@/lib/constants/success-messages";
+import { STORE_NAME } from "@/lib/constants/store";
+import { sendMail } from "@/lib/server/mail/client";
+import { addSubscriber, hasSubscriber } from "@/lib/server/newsletter/subscribers";
+import { newsletterEmail } from "@/utils/mail-templates/contact";
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key');
-const fromEmail = process.env.RESEND_FROM_EMAIL;
-const toEmail = process.env.RESEND_TO_EMAIL;
+const bodySchema = z.object({ email: z.email().trim() });
 
-const DATA_FILE_PATH = path.join(process.cwd(), 'data', 'subscribers.json');
-
+/** POST /api/resend/newsletter — storefront newsletter sign-up. Answers `{ success, message }`. */
 export async function POST(request: Request) {
-    try {
-        const { email } = await request.json();
+  const parsed = bodySchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, message: ERROR_MESSAGES.newsletter.emailRequired }, { status: 400 });
+  }
 
-        if (!fromEmail || !toEmail || !process.env.RESEND_API_KEY) {
-            return NextResponse.json({ success: false, message: "Configuration Error" }, { status: 500 });
-        }
+  const email = parsed.data.email.toLowerCase();
+  if (await hasSubscriber(email)) {
+    return NextResponse.json({ success: false, message: ERROR_MESSAGES.newsletter.alreadySubscribed }, { status: 400 });
+  }
 
-        if (!email) {
-            return NextResponse.json({ success: false, message: "Email is required" }, { status: 400 });
-        }
+  const inbox = process.env.RESEND_TO_EMAIL || process.env.STORE_EMAIL;
+  if (inbox) {
+    await sendMail({ to: inbox, ...newsletterEmail(email, STORE_NAME) });
+  } else if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ success: false, message: ERROR_MESSAGES.newsletter.notConfigured }, { status: 503 });
+  }
 
-        let subscribers: string[] = [];
-        try {
-            const fileData = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-            subscribers = JSON.parse(fileData);
-        } catch (error: any) {
-            if (error.code !== 'ENOENT') {
-                throw error;
-            }
-        }
-
-        const normalizedEmail = email.trim().toLowerCase();
-        if (subscribers.includes(normalizedEmail)) {
-            return NextResponse.json({ success: false, message: "This email is already subscribed!" }, { status: 400 });
-        }
-
-        const { data, error } = await resend.emails.send({
-            from: fromEmail,
-            to: [toEmail],
-            subject: 'New Newsletter Subscription',
-            html: `
-                <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
-                    <h1 style="color: #000;">New Newsletter Subscriber</h1>
-                    <p>Someone just subscribed to the newsletter!</p>
-                    <p><b>Subscriber Email:</b> ${email}</p>
-                </div>
-            `,
-        });
-
-        if (error) {
-            return NextResponse.json({ success: false, message: error.message }, { status: 400 });
-        }
-
-        subscribers.push(normalizedEmail);
-        await fs.writeFile(DATA_FILE_PATH, JSON.stringify(subscribers, null, 2), 'utf-8');
-
-        return NextResponse.json({ success: true, message: "Subscribed Successfully!" }, { status: 200 });
-
-    } catch (error: any) {
-        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
-    }
+  await addSubscriber(email);
+  return NextResponse.json({ success: true, message: SUCCESS_MESSAGES.commerce.newsletterSubscribed });
 }

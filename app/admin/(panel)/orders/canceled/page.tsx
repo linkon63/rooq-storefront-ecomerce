@@ -1,13 +1,10 @@
-"use client";
-
-import OrderPageView from "../../../_components/order-page-view";
+import { Suspense } from "react";
+import OrderPageView from "../_components/order-page-view";
 
 export default function CanceledOrdersPage() {
   return (
-    <OrderPageView
-      title="Canceled Orders"
-      description="Review canceled ecommerce orders and refund status"
-      fixedStatus="cancelled"
-    />
+    <Suspense>
+      <OrderPageView title="Canceled Orders" description="Orders that were cancelled and restocked." fixedStatus="cancelled" />
+    </Suspense>
   );
 }

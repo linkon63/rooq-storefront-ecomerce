@@ -1,13 +1,11 @@
 "use client";
 
 import { AdminIcon, StatusToggle } from "../../_components/admin-shell";
-import {
-  formatDate,
-  formatMoney,
-} from "../../../../lib/admin-api";
-import { useCurrency } from "../../../../lib/currency-context";
+import { formatMoney } from "@/utils/admin/format";
+import { formatDate } from "@/utils/format-date";
+import { useCurrency } from "@/hooks/use-currency";
 
-import { ProductDiscount } from "@/lib/type";
+import { ProductDiscount } from "@/types/product-discount";
 
 interface DiscountRowProps {
   discount: ProductDiscount;

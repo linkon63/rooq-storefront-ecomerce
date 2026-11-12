@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
-import { Hind_Siliguri, Poppins } from "next/font/google";
+import { Archivo, Hind_Siliguri, Poppins } from "next/font/google";
 import "./globals.css";
+import { StoreProvider } from "@/lib/store/store-provider";
 
+/**
+ * Storefront face: Archivo, variable on weight and width. The width axis is
+ * the type hierarchy (expanded display, normal body) — see
+ * docs/design/storefront-design.md.
+ */
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+/** Admin panel face (not preloaded: the storefront never renders it). */
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-poppins",
   display: "swap",
+  preload: false,
 });
 
 /**
@@ -21,64 +36,42 @@ const hindSiliguri = Hind_Siliguri({
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-bengali",
   display: "swap",
+  preload: false,
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://organishi.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store";
+const siteTitle = "Rooq — Modern Fashion for Men, Women & Kids";
+const siteDescription =
+  "Rooq is a modern fashion label: considered clothing, footwear and accessories for men, women and kids. New arrivals every week, easy size guides and free returns.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Organishi — Pure Organic Food, Straight From the Farm",
-    template: "%s | Organishi",
+    default: siteTitle,
+    template: "%s | Rooq",
   },
-  description:
-    "Nature has always known what’s best for us. Organishi brings that goodness closer to you with thoughtfully selected, natural and wholesome foods you can trust. We believe healthy living doesn’t have to be complicated—it starts with simple, better choices, every day.",
-  keywords: [
-    "Organishi",
-    "organic food Bangladesh",
-    "cold pressed mustard oil",
-    "virgin coconut oil",
-    "hand churned ghee",
-    "raw honey",
-    "organic snacks",
-    "pure organic food",
-  ],
-  authors: [{ name: "Organishi" }],
-  creator: "Organishi",
-  publisher: "Organishi",
+  description: siteDescription,
+  keywords: ["Rooq", "fashion", "clothing", "men's fashion", "women's fashion", "kids fashion", "footwear", "accessories"],
+  authors: [{ name: "Rooq" }],
+  creator: "Rooq",
+  publisher: "Rooq",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  icons: {
-    icon: "/assets/Logo-English.png",
-    shortcut: "/assets/Logo-English.png",
-    apple: "/assets/Logo-English.png",
-  },
   openGraph: {
-    title: "Organishi — Pure Organic Food, Straight From the Farm",
-    description:
-      "Nature has always known what’s best for us. Organishi brings that goodness closer to you with thoughtfully selected, natural and wholesome foods you can trust. We believe healthy living doesn’t have to be complicated—it starts with simple, better choices, every day.",
+    title: siteTitle,
+    description: siteDescription,
     url: siteUrl,
-    siteName: "Organishi",
-    images: [
-      {
-        url: "/assets/Logo-English.png",
-        width: 1200,
-        height: 630,
-        alt: "Organishi Organic Food",
-      },
-    ],
+    siteName: "Rooq",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Organishi — Pure Organic Food, Straight From the Farm",
-    description:
-      "Nature has always known what’s best for us. Organishi brings that goodness closer to you with thoughtfully selected, natural and wholesome foods you can trust. We believe healthy living doesn’t have to be complicated—it starts with simple, better choices, every day.",
-    images: ["/assets/Logo-English.png"],
+    title: siteTitle,
+    description: siteDescription,
   },
   robots: {
     index: true,
@@ -102,9 +95,11 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`h-full antialiased scroll-smooth ${poppins.variable} ${hindSiliguri.variable}`}
+      className={`h-full antialiased scroll-smooth ${archivo.variable} ${poppins.variable} ${hindSiliguri.variable}`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

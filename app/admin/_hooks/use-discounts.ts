@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { apiRequest } from "../../../lib/admin-api";
-import { type PaginatedDiscounts, type ProductDiscount } from "../../../lib/type";
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
+import { deleteProductDiscount, saveProductDiscount } from "@/lib/admin-api/content";
+import { apiRequest } from "@/lib/admin/http";
+import { type PaginatedDiscounts, type ProductDiscount } from "@/types/product-discount";
 
 const PAGE_SIZE = 20;
 
@@ -34,7 +36,7 @@ export function useDiscounts() {
       setTotal(totalCount);
     } catch (err) {
       if (myReq !== reqRef.current) return;
-      setError(err instanceof Error ? err.message : "Failed to load discounts");
+      setError(err instanceof Error ? err.message : ERROR_MESSAGES.discount.loadFailed);
       setDiscounts([]);
     } finally {
       if (myReq === reqRef.current) setIsLoading(false);
@@ -57,7 +59,7 @@ export function useDiscounts() {
       setTotal(totalCount);
     } catch (err) {
       if (myReq !== reqRef.current) return;
-      setError(err instanceof Error ? err.message : "Failed to load discounts");
+      setError(err instanceof Error ? err.message : ERROR_MESSAGES.discount.loadFailed);
     } finally {
       if (myReq === reqRef.current) setIsLoading(false);
     }
@@ -80,15 +82,11 @@ export function useDiscounts() {
   const hasMore = page < totalPages;
 
   async function deleteDiscount(id: string) {
-    await apiRequest(`/product-discounts/${id}`, { method: "DELETE" });
+    await deleteProductDiscount(id);
   }
 
   async function toggleStatus(id: string, currentStatus: string) {
-    await apiRequest(`/product-discounts/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: currentStatus === "active" ? "inactive" : "active" }),
-    });
+    await saveProductDiscount(id, { status: currentStatus === "active" ? "inactive" : "active" });
   }
 
   return {

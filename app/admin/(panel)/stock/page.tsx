@@ -1,207 +1,88 @@
 "use client";
 
 import { useState } from "react";
-import { resolveImageUrl } from "../../../../lib/admin-api";
-import { AdminIcon, PageHeader, ProductThumb } from "../../_components/admin-shell";
-import { AdjustInventoryModal } from "../../_components/adjust-inventory-modal";
-import { InfiniteScroll } from "../../_components/infinite-scroll";
-import { useStockData } from "../../_hooks/use-stock-data";
-import { AdjustmentLogsModal } from "./_components/adjustment-logs-modal";
+import { catalogApi } from "@/lib/admin-api/catalog";
+import type { AdminInventoryRow } from "@/types/catalog-admin";
+import { PageHeader } from "../../_components/admin-ui";
+import { useAsyncData } from "../_catalog/use-async-data";
+import { Card, DataTable } from "../_catalog/table";
+import { Pager } from "../_catalog/pager";
+import { SelectInput, TextInput } from "../_catalog/field";
+import { EmptyBlock, ErrorBlock, LoadingBlock } from "../_catalog/data-states";
+import { AdjustStockModal } from "./_components/adjust-stock-modal";
+import { MovementsModal } from "./_components/movements-modal";
+import { InventoryRowView } from "./_components/inventory-row";
+import { StockSummary } from "./_components/stock-summary";
 
-const THUMB_COLORS = [
-  "bg-blue-600",
-  "bg-emerald-700",
-  "bg-violet-600",
-  "bg-amber-600",
-  "bg-rose-600",
-  "bg-stone-700",
-  "bg-pink-300",
-  "bg-olive-600",
-];
+type Filter = "all" | "low" | "out" | "attention";
+
+const FILTER_PARAMS: Record<Filter, Record<string, string>> = {
+  all: {},
+  low: { lowStock: "true" },
+  out: { outOfStock: "true" },
+  attention: { lowStock: "true", outOfStock: "true", sort: "stock_asc" },
+};
 
 export default function StockPage() {
-  const { variants, isLoading, error, totalStock, lowStockCount, adjustmentsToday, todayLogs, refetch, total, hasMore, setPage } = useStockData();
-  const [showLogsModal, setShowLogsModal] = useState(false);
-  const [adjustingItem, setAdjustingItem] = useState<{
-    product: { id: string; name: string; slug: string; imageUrl?: string };
-    variant: { id: string; sku: string; stockQuantity: number };
-  } | null>(null);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<Filter>("all");
+  const [page, setPage] = useState(1);
+  const [adjusting, setAdjusting] = useState<AdminInventoryRow | null>(null);
+  const [history, setHistory] = useState<AdminInventoryRow | null>(null);
+  const params = new URLSearchParams({ page: String(page), limit: "30", ...FILTER_PARAMS[filter], ...(search.trim() ? { search: search.trim() } : {}) });
+  const rows = useAsyncData(() => catalogApi.inventory.list(params), params.toString());
+  const report = useAsyncData(() => catalogApi.inventory.lowStock(5), "low-stock");
 
-  function openVariantAdjust(variant: typeof variants[number]) {
-    if (!variant.id || !variant.sku) return;
-    setAdjustingItem({
-      product: {
-        id: variant.product.id,
-        name: variant.product.name,
-        slug: variant.product.slug,
-        imageUrl: resolveImageUrl(variant.product.media?.[0]?.media?.url),
-      },
-      variant: {
-        id: variant.id,
-        sku: variant.sku,
-        stockQuantity: variant.stockQuantity,
-      },
-    });
-  }
+  const pickFilter = (next: Filter) => {
+    setFilter(next);
+    setPage(1);
+  };
 
   return (
-    <>
-      <PageHeader
-        title="Stock Management"
-        description="Track inventory, low stock alerts, and manual adjustments"
-        action={undefined}
-      />
-
-      {error && (
-        <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700">
-          {error}
+    <div className="grid gap-6 pb-10">
+      <PageHeader title="Stock" description="Stock per size and colour. Every change is written to the stock ledger." />
+      {report.data ? <StockSummary report={report.data} onFilter={pickFilter} /> : null}
+      <Card>
+        <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-4 py-3">
+          <div className="w-72"><TextInput type="search" aria-label="Search stock" placeholder="Product, style code, SKU or barcode" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} /></div>
+          <div className="w-52">
+            <SelectInput aria-label="Filter" value={filter} onChange={(e) => pickFilter(e.target.value as Filter)}>
+              <option value="all">All variants</option>
+              <option value="attention">Needs attention</option>
+              <option value="low">Running low</option>
+              <option value="out">Sold out</option>
+            </SelectInput>
+          </div>
         </div>
-      )}
-
-      <section className="overflow-hidden rounded-xl bg-white shadow-sm">
-        {isLoading && variants.length === 0 ? (
-          <div className="space-y-4 p-5">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div className="h-16 animate-pulse rounded-xl bg-slate-100" key={i} />
-              ))}
-            </div>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div className="h-16 animate-pulse rounded-xl bg-slate-100" key={i} />
-            ))}
-          </div>
-        ) : variants.length === 0 ? (
-          <div className="p-10 text-center font-medium text-slate-400">
-            No products found. Add products to get started.
-          </div>
-        ) : (
-          <>
-            <div className="grid gap-4 p-5 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-200 p-5">
-                <p className="text-sm font-medium text-slate-500">Total stock</p>
-                <p className="mt-1 text-2xl font-semibold">{totalStock.toLocaleString()} pcs</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 p-5">
-                <p className="text-sm font-medium text-slate-500">Low stock items</p>
-                <p className={`mt-1 text-2xl font-semibold ${lowStockCount > 0 ? "text-rose-600" : ""}`}>
-                  {lowStockCount} items
-                </p>
-              </div>
-              <button
-                className="cursor-pointer rounded-xl border border-slate-200 p-5 text-left transition-all hover:bg-slate-50"
-                onClick={() => setShowLogsModal(true)}
-                type="button"
-              >
-                <p className="text-sm font-medium text-slate-500">Adjustments today</p>
-                <p className="mt-1 text-2xl font-semibold">{adjustmentsToday}</p>
-              </button>
-            </div>
-
-            <div className="divide-y divide-slate-100 border-t border-slate-200">
-              {variants.map((variant, index) => {
-                const isLowStock = variant.stockQuantity <= variant.stockAlertThreshold;
-                const hasVariant = variant.id !== null;
-                return (
-                  <div
-                    className={`flex items-center justify-between gap-5 p-5 ${
-                      isLowStock ? "bg-rose-50/50" : ""
-                    }`}
-                    key={variant.id ?? `product-${variant.product.id}`}
-                  >
-                    <div className="flex min-w-0 items-center gap-4">
-                      <ProductThumb
-                        color={THUMB_COLORS[index % THUMB_COLORS.length]}
-                        src={variant.product.media?.[0]?.media?.url}
-                        alt={variant.product.name}
-                      />
-                      <div className="min-w-0">
-                        <p className="max-w-[50ch] truncate font-semibold uppercase">
-                          {variant.product.name}
-                        </p>
-                        <div className="max-w-[70ch] truncate text-sm font-medium text-slate-500">
-                          {hasVariant ? (
-                            <>
-                              <p className="">{variant.sku}</p>
-                              alert below{" "}
-                              {variant.stockAlertThreshold} pcs
-                            </>
-                          ) : (
-                            <span className="text-slate-400">No variant created yet</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p
-                          className={`whitespace-nowrap font-semibold ${
-                            isLowStock
-                              ? "text-rose-600"
-                              : "text-slate-700"
-                          }`}
-                        >
-                              {variant.stockQuantity} pcs
-                        </p>
-                        {!hasVariant && (
-                          <span className="inline-block rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
-                            NO VARIANT
-                          </span>
-                        )}
-                        {hasVariant && isLowStock && (
-                          <span className="inline-block rounded-md border border-rose-200 bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700">
-                            LOW STOCK
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        className="grid h-8 w-8 cursor-pointer place-items-center rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50"
-                        onClick={() => openVariantAdjust(variant)}
-                        disabled={!hasVariant}
-                        title={hasVariant ? "Adjust stock" : "No variant to adjust"}
-                        type="button"
-                      >
-                        <AdminIcon className="h-4 w-4" name="edit" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {variants.length > 0 && (
-              <InfiniteScroll
-                hasMore={hasMore}
-                isLoading={isLoading}
-                onLoadMore={() => setPage((p) => p + 1)}
-                total={total}
-                loaded={variants.length}
-                itemLabel="variants"
-                loadingLabel="Loading more..."
-                allLoadedLabel="All variants loaded"
-              />
-            )}
-          </>
-        )}
-      </section>
-
-      {showLogsModal && (
-        <AdjustmentLogsModal
-          logs={todayLogs}
-          onClose={() => setShowLogsModal(false)}
-        />
-      )}
-
-      {adjustingItem && (
-        <AdjustInventoryModal
-          product={adjustingItem.product}
-          variant={adjustingItem.variant}
-          onClose={() => setAdjustingItem(null)}
-          onSuccess={() => {
-            setAdjustingItem(null);
-            refetch();
+        {rows.loading ? <LoadingBlock label="Loading stock" /> : null}
+        {rows.error ? <div className="p-4"><ErrorBlock message={rows.error} onRetry={rows.reload} /></div> : null}
+        {rows.data && !rows.loading ? (
+          rows.data.data.length ? (
+            <>
+              <DataTable headings={["Product", "Colour / size", "SKU", "Stock", "Alert at", "Status", ""]} minWidth={900}>
+                {rows.data.data.map((row) => (
+                  <InventoryRowView key={row.id} row={row} onAdjust={() => setAdjusting(row)} onHistory={() => setHistory(row)} />
+                ))}
+              </DataTable>
+              <Pager page={rows.data.meta.page} totalPages={rows.data.meta.totalPages} total={rows.data.meta.total} onPage={setPage} />
+            </>
+          ) : (
+            <EmptyBlock title="Nothing matches" body="No variants match this search or filter. Variants appear here once a product has sizes and colours." />
+          )
+        ) : null}
+      </Card>
+      {adjusting ? (
+        <AdjustStockModal
+          row={adjusting}
+          onClose={() => setAdjusting(null)}
+          onSaved={(updated) => {
+            setAdjusting(null);
+            rows.setData((current) => current && { ...current, data: current.data.map((r) => (r.id === updated.id ? updated : r)) });
+            void report.reload();
           }}
         />
-      )}
-    </>
+      ) : null}
+      {history ? <MovementsModal variantId={history.id} title={`Stock history · ${history.sku}`} onClose={() => setHistory(null)} /> : null}
+    </div>
   );
 }

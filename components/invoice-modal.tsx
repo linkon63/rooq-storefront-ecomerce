@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { LuPrinter, LuX } from "react-icons/lu";
-import type { OrderResult } from "@/lib/types";
+import type { OrderResult } from "@/types/storefront/ui";
 import type { ShopSettings } from "@/lib/shop-api";
 import OrderInvoice from "@/components/order-invoice";
 

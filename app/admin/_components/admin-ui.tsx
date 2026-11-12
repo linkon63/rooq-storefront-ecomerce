@@ -52,13 +52,13 @@ export function StatusToggle({
   );
 }
 
-export function ProductThumb({ color, src, alt }: { color: string; src?: string; alt?: string }) {
+export function ProductThumb({ src, alt }: { src?: string; alt?: string }) {
   return (
     <div className="relative h-12 w-16 overflow-hidden rounded-md bg-slate-50">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt={alt ?? ''}
-        className="h-full w-full object-full object-center"
+        className="h-full w-full object-cover object-center"
         src={src ?? '/images/no-image-icon-6.png'}
       />
     </div>

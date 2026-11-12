@@ -1,139 +1,50 @@
-"use client";
-
-import { FormEvent, useState } from "react";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FiLoader, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
-import { apiRequest, setAdminSession, type AdminUser } from "../../../lib/admin-api";
+import { connection } from "next/server";
+import { STORE_NAME } from "@/lib/constants/store";
+import { getStoreSettings } from "@/lib/server/settings/service";
+import { AdminLoginForm } from "./_components/admin-login-form";
 
-type LoginResponse = {
-  accessToken: string;
-  user: AdminUser;
-};
+export const metadata: Metadata = { title: `Sign in | ${STORE_NAME} Admin` };
 
-export default function AdminLoginPage() {
-  const router = useRouter();
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setIsSubmitting(true);
-
-    try {
-      const response = await apiRequest<LoginResponse>("/auth/login", {
-        auth: false,
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: identifier.trim(), password }),
-      });
-
-      if (response.user.role?.name !== "admin") {
-        throw new Error("Only admin users can access the admin panel.");
-      }
-
-      setAdminSession(response.accessToken, response.user);
-      const nextPath = new URLSearchParams(window.location.search).get("next");
-      router.replace(nextPath?.startsWith("/admin") ? nextPath : "/admin/dashboard");
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
-      setIsSubmitting(false);
-    }
+/** Logo + name from Settings; falls back to the wordmark if the DB is unreachable. */
+async function loadBrand(): Promise<{ name: string; logo: string | null }> {
+  await connection();
+  try {
+    const settings = await getStoreSettings();
+    return { name: settings?.shopName ?? STORE_NAME, logo: settings?.logo ?? null };
+  } catch {
+    return { name: STORE_NAME, logo: null };
   }
+}
+
+export default async function AdminLoginPage() {
+  const brand = await loadBrand();
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f4f8f3] via-[#FAF9F5] to-[#edf4ea] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-[440px] bg-white border border-stone-200/80 p-8 sm:p-10 shadow-xl shadow-stone-200/50 flex flex-col items-center rounded-2xl animate-fadeIn">
-        <Link href="/" className="mb-4 inline-block hover:opacity-90 transition-opacity">
-          <Image
-            src="/assets/Logo-English.png"
-            alt="Organishi Logo"
-            width={220}
-            height={68}
-            className="h-14 w-auto object-contain"
-            priority
-          />
+    <main className="flex min-h-screen items-center justify-center bg-stone-100 px-4 py-12">
+      <div className="flex w-full max-w-[420px] flex-col items-center rounded-2xl border border-stone-200 bg-white p-8 shadow-sm sm:p-10">
+        <Link className="mb-6 inline-flex items-center gap-3" href="/">
+          {brand.logo ? (
+            <Image
+              alt=""
+              className="h-12 w-12 object-contain"
+              height={48}
+              priority
+              src={brand.logo}
+              unoptimized={!brand.logo.startsWith("/")}
+              width={48}
+            />
+          ) : null}
+          <span className="text-2xl font-semibold tracking-tight text-stone-900">{brand.name}</span>
         </Link>
-        <h1 className="text-xl font-bold text-slate-800 tracking-tight mb-1">
-          Admin Portal
-        </h1>
-        <p className="text-xs text-slate-500 font-medium mb-6">
-          Sign in to manage your store
-        </p>
-
-        <div className="flex mb-6 w-full items-center justify-center">
-          <span className="px-4 py-1 text-[11px] font-bold tracking-widest uppercase rounded-full bg-[#4a9e2f]/10 text-[#4a9e2f]">
-            Administrator Access
-          </span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="w-full space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Email or Phone Number
-            </label>
-            <div className="relative">
-              <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input
-                type="text"
-                value={identifier}
-                onChange={(event) => setIdentifier(event.target.value)}
-                placeholder="Email or phone number"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-800 focus:bg-white focus:border-[#4a9e2f] focus:ring-2 focus:ring-[#4a9e2f]/20 outline-none transition-all"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Password
-            </label>
-            <div className="relative">
-              <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-10 py-3 text-sm text-slate-800 focus:bg-white focus:border-[#4a9e2f] focus:ring-2 focus:ring-[#4a9e2f]/20 outline-none transition-all"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition cursor-pointer"
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <p className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 leading-snug">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-[#4a9e2f] hover:bg-[#3d8427] text-white font-semibold text-sm py-3.5 rounded-xl shadow-lg shadow-[#4a9e2f]/25 transition duration-200 flex items-center justify-center gap-2 cursor-pointer mt-6 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? (
-              <FiLoader className="animate-spin text-white w-4 h-4" />
-            ) : (
-              "Log In to Dashboard"
-            )}
-          </button>
-        </form>
+        <h1 className="mb-1 text-lg font-semibold text-stone-900">Sign in to the admin</h1>
+        <p className="mb-7 text-sm text-stone-500">Staff accounts only. Shoppers sign in on the storefront.</p>
+        <Suspense fallback={null}>
+          <AdminLoginForm />
+        </Suspense>
       </div>
     </main>
   );

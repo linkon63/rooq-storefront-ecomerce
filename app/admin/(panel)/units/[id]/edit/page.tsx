@@ -1,9 +1,12 @@
 "use client";
 
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
+import { errorText } from "@/utils/error-text";
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import UnitForm from "../../_components/unit-form";
-import { apiRequest, type Unit } from "../../../../../../lib/admin-api";
+import { apiRequest } from "@/lib/admin/http";
+import type { Unit } from "@/types/admin/catalog";
 
 export default function EditUnitPage({
   params,
@@ -19,7 +22,7 @@ export default function EditUnitPage({
     apiRequest<Unit>(`/units/${id}`)
       .then(setUnit)
       .catch((err) =>
-        setError(err instanceof Error ? err.message : "Failed to load unit"),
+        setError(errorText(err, ERROR_MESSAGES.ui.loadFailed)),
       );
   }, [id]);
 

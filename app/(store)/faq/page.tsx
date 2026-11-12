@@ -1,19 +1,31 @@
 import type { Metadata } from "next";
-
-import { fetchShopSettings } from "@/lib/shop-api";
-import FaqView from "./faq-view";
+import { Disclosure } from "@/components/storefront/shared/disclosure";
+import { getStoreSettings } from "@/lib/storefront/catalog-data";
+import { buildFaqs } from "@/utils/storefront/faqs";
 
 export const metadata: Metadata = {
-  title: "FAQ | Organishi",
-  description:
-    "Answers on cash on delivery, delivery times and charges, payment, product purity, returns and wholesale orders at Organishi.",
+  title: "Questions and answers",
+  description: "Sizing, delivery, cash on delivery, returns and exchanges at Rooq.",
 };
 
-/**
- * Answers quote the admin-managed phone, e-mail and delivery charges, so the
- * settings row is fetched on the server — the same source the contact page uses.
- */
 export default async function FaqPage() {
-  const settings = await fetchShopSettings();
-  return <FaqView settings={settings} />;
+  const faqs = buildFaqs(await getStoreSettings());
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })),
+  };
+  return (
+    <div className="page-gutter grid gap-10 pt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:pt-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <h1 className="font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Questions and answers</h1>
+      <div className="border-t border-line">
+        {faqs.map((faq) => (
+          <Disclosure key={faq.question} title={faq.question}>
+            <p className="max-w-[64ch]">{faq.answer}</p>
+          </Disclosure>
+        ))}
+      </div>
+    </div>
+  );
 }
