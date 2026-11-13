@@ -48,6 +48,7 @@ export default function LoomScene({ children }: { children?: ReactNode }) {
         heddles: q("[data-heddle]"),
         cloth: q("[data-cloth-layer]"),
         messages: q("[data-woven-message]"),
+        sharees: q("[data-sharee]"),
       };
       const [wheel, spinnerArm] = [q("[data-charkha-wheel]"), q("[data-spinner-arm]")];
       const media = gsap.matchMedia();
@@ -57,7 +58,7 @@ export default function LoomScene({ children }: { children?: ReactNode }) {
         gsap.set(targets.clip, still.clip);
         gsap.set(targets.fell, still.fell);
         gsap.set(targets.shuttle, { x: SHUTTLE.travel * 0.6 });
-        gsap.set(targets.messages, { autoAlpha: (i: number) => (i === 0 ? 1 : 0) });
+        gsap.set([targets.messages, targets.sharees], { autoAlpha: (i: number) => (i % targets.messages.length === 0 ? 1 : 0) });
       });
 
       media.add("(prefers-reduced-motion: no-preference)", () => {

@@ -5,15 +5,15 @@ const LEFT = LOOM.warpLeft + 50;
 const RIGHT = LOOM.warpRight - 50;
 const TOP = WORDMARK.baseline - WORDMARK.size * 0.82;
 
-/** The two gold-and-magenta pallu bands above and below the woven letters (part of the cloth). */
-export function WordmarkPallu() {
+/** The two pallu bands above and below the woven letters (part of the cloth), in the sharee's colours. */
+export function WordmarkPallu({ line, band }: { line: string; band: string }) {
   const width = RIGHT - LEFT;
   return (
     <g>
-      <rect x={LEFT} y={WORDMARK.baseline + 14} width={width} height={3} className="fill-gold/80" />
-      <rect x={LEFT} y={WORDMARK.baseline + 20} width={width} height={8} className="fill-dye/55" />
-      <rect x={LEFT} y={TOP - 14} width={width} height={3} className="fill-gold/80" />
-      <rect x={LEFT} y={Math.max(FELL.end, TOP - 24)} width={width} height={6} className="fill-dye/45" />
+      <rect x={LEFT} y={WORDMARK.baseline + 14} width={width} height={3} className={line} />
+      <rect x={LEFT} y={WORDMARK.baseline + 20} width={width} height={8} className={band} />
+      <rect x={LEFT} y={TOP - 14} width={width} height={3} className={line} />
+      <rect x={LEFT} y={Math.max(FELL.end, TOP - 24)} width={width} height={6} className={band} />
     </g>
   );
 }
