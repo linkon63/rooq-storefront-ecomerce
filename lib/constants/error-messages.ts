@@ -335,8 +335,22 @@ export const ERROR_MESSAGES = {
     deleteFailed: "Could not delete the campaign. Please try again.",
     statusFailed: "Could not change the campaign status. Please try again.",
     bannersLoadFailed: "Could not load the hero banners.",
+    countdownEndRequired: "A countdown sale needs an end date.",
+    countdownEndPast: "The countdown end date must be in the future.",
+    countdownSectionFailed: "Could not prepare the Sale Countdown section. Please try again.",
     bannersSaveFailed: "Could not save the hero banners.",
     bannerRemoveFailed: "Could not remove the banner.",
+  },
+
+  heroSlide: {
+    notFound: notFound("Hero slide"),
+    imageRequired: "Choose an image for the slide.",
+    productNotFound: notFound("Product"),
+    reorderMismatch: "The slide order is out of date. Refresh and try again.",
+    loadFailed: "Could not load the hero slides. Refresh to try again.",
+    saveFailed: "Could not save the hero slide. Please try again.",
+    deleteFailed: "Could not delete the hero slide. Please try again.",
+    modeFailed: "Could not change what the hero shows. Please try again.",
   },
 
   discount: {

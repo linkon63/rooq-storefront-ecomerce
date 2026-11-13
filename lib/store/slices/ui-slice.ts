@@ -9,6 +9,8 @@ export type UiState = {
   quickViewProductId: string | null;
   /** Product id whose size guide is open, or null. */
   sizeGuideProductId: string | null;
+  /** The home page's stitched thread has reached the end and points at the WhatsApp button. */
+  isWhatsappHighlighted: boolean;
 };
 
 export const initialUiState: UiState = {
@@ -17,6 +19,7 @@ export const initialUiState: UiState = {
   isCartDrawerOpen: false,
   quickViewProductId: null,
   sizeGuideProductId: null,
+  isWhatsappHighlighted: false,
 };
 
 export const uiSlice = createSlice({
@@ -44,6 +47,9 @@ export const uiSlice = createSlice({
     closeSizeGuide(state) {
       state.sizeGuideProductId = null;
     },
+    setWhatsappHighlighted(state, action: PayloadAction<boolean>) {
+      state.isWhatsappHighlighted = action.payload;
+    },
     closeAllOverlays() {
       return initialUiState;
     },
@@ -54,6 +60,7 @@ export const uiSlice = createSlice({
     selectIsCartDrawerOpen: (state) => state.isCartDrawerOpen,
     selectQuickViewProductId: (state) => state.quickViewProductId,
     selectSizeGuideProductId: (state) => state.sizeGuideProductId,
+    selectIsWhatsappHighlighted: (state) => state.isWhatsappHighlighted,
   },
 });
 
@@ -65,6 +72,7 @@ export const {
   closeQuickView,
   openSizeGuide,
   closeSizeGuide,
+  setWhatsappHighlighted,
   closeAllOverlays,
 } = uiSlice.actions;
 
@@ -74,4 +82,5 @@ export const {
   selectIsCartDrawerOpen,
   selectQuickViewProductId,
   selectSizeGuideProductId,
+  selectIsWhatsappHighlighted,
 } = uiSlice.selectors;

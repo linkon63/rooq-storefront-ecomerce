@@ -17,14 +17,14 @@ export function CollectionCard({ collection, sizes = "(min-width: 1024px) 32vw, 
             className="object-cover transition-transform duration-700 ease-[var(--ease-cloth)] group-hover:scale-[1.03]"
           />
         ) : (
-          <span aria-hidden className="absolute inset-0 grid place-items-center font-expanded text-4xl font-extrabold text-ink/15">
+          <span aria-hidden className="absolute inset-0 grid place-items-center type-h2 text-ink/15">
             {collection.name.slice(0, 1)}
           </span>
         )}
       </span>
       <span>
-        <span className="block font-wide text-lg font-bold leading-tight group-hover:underline">{collection.name}</span>
-        <span className="text-sm text-stone">
+        <span className="type-h3 block group-hover:underline">{collection.name}</span>
+        <span className="type-meta text-stone">
           {collection.type === "LOOKBOOK" ? `${COLLECTION_TYPE_LABELS.LOOKBOOK}, ` : ""}
           {collection.productCount} pieces
         </span>

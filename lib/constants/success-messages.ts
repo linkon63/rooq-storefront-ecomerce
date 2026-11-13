@@ -1,5 +1,12 @@
 /** Success messages returned by the API ({ message }) and shown in toasts. */
 export const SUCCESS_MESSAGES = {
+  heroSlide: {
+    added: (count: number) => (count === 1 ? "Slide added" : `${count} slides added`),
+    saved: "Slide saved",
+    deleted: "Slide deleted",
+    reordered: "Slide order saved",
+    modeSaved: "Hero updated",
+  },
   auth: {
     loggedOut: "Logged out successfully",
     passwordChanged: "Password changed successfully",

@@ -13,6 +13,7 @@ export const categoryCreateSchema = z.strictObject({
   description: optionalText,
   sortOrder: z.coerce.number().int().min(0).optional(),
   isActive: formBoolean.optional(),
+  isComingSoon: formBoolean.optional(),
   sizeChartId: nullableUuid("sizeChartId"),
   metaTitle: optionalText,
   metaDescription: optionalText,

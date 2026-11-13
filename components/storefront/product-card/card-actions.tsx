@@ -17,7 +17,7 @@ export function CardActions({ productId, snapshot }: { productId: string; snapsh
       <button
         type="button"
         onClick={() => dispatch(openQuickView(productId))}
-        className="absolute bottom-2 right-2 inline-flex h-9 items-center gap-1.5 rounded bg-paper/95 px-3 text-xs font-semibold text-ink shadow-sm transition-opacity hover:bg-paper [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
+        className="type-meta absolute right-2 top-12 inline-flex h-9 items-center gap-1.5 bg-paper/95 px-3 text-ink transition-opacity duration-300 hover:bg-paper [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
         aria-label={`Quick view: ${snapshot.name}`}
       >
         <FiEye aria-hidden className="size-4" />

@@ -17,9 +17,10 @@ export type CategoryForm = {
   image: File | null;
   imageUrl: string | null;
   removeImage: boolean;
+  isComingSoon: boolean;
 };
 
-export const EMPTY_CATEGORY_FORM: CategoryForm = { name: "", slug: "", parentId: "", image: null, imageUrl: null, removeImage: false };
+export const EMPTY_CATEGORY_FORM: CategoryForm = { name: "", slug: "", parentId: "", image: null, imageUrl: null, removeImage: false, isComingSoon: false };
 
 export const categoryToForm = (category: CategoryRow): CategoryForm => ({
   id: category.id,
@@ -29,6 +30,7 @@ export const categoryToForm = (category: CategoryRow): CategoryForm => ({
   image: null,
   imageUrl: category.imageUrl ?? null,
   removeImage: false,
+  isComingSoon: category.isComingSoon ?? false,
 });
 
 /** Validation message, or null when the form can be sent. */
@@ -42,6 +44,7 @@ function toFormData(form: CategoryForm): FormData {
   const body = new FormData();
   body.append("name", form.name.trim());
   body.append("slug", form.slug || slugify(form.name));
+  body.append("isComingSoon", String(form.isComingSoon));
   if (form.image) body.append("image", form.image);
   if (form.id && form.removeImage && !form.image) body.append("imageUrl", "");
   if (form.parentId) body.append("parentId", form.parentId);

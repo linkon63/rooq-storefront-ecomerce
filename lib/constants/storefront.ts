@@ -69,15 +69,37 @@ export const SORT_OPTIONS = [
   { value: "rating", label: "Top rated" },
 ] as const;
 
-/** Top-level navigation. Department links filter the shop; the rest are views. */
-export const PRIMARY_NAV = [
-  { label: "New in", href: "/new" },
-  { label: "Women", href: "/shop?department=WOMEN" },
-  { label: "Men", href: "/shop?department=MEN" },
-  { label: "Kids", href: "/shop?department=KIDS" },
-  { label: "Collections", href: "/collections" },
-  { label: "Sale", href: "/sale" },
+/** Product tags with a storefront meaning; the slugs are seeded in prisma/seed/store.ts. */
+export const PRODUCT_TAGS = { bestSeller: "best-seller", newArrival: "new-arrival", comingSoon: "coming-soon" } as const;
+
+/** Shop page titles for `/shop?tag=…`. */
+export const TAG_TITLES = {
+  "best-seller": "Best sellers",
+  "new-arrival": "New arrivals",
+  "coming-soon": "Coming soon",
+} as const;
+
+/** How many products each home-page shelf shows. */
+export const HOME_SHELF_SIZE = 5;
+
+/** The order journey shown on the home page, in order (cash on delivery: payment comes last). */
+export const ORDER_JOURNEY_STEPS = [
+  { key: "placed", title: "Order placed", body: "You check out on the site in a few taps.", action: "Place the order" },
+  { key: "accepted", title: "Order accepted", body: "We confirm your order by phone or message.", action: "Confirm on the call" },
+  { key: "packed", title: "Packed", body: "Your saree is folded, checked and packed.", action: "Hand it to the courier" },
+  { key: "delivery", title: "Out for delivery", body: "A courier brings it to your door.", action: "Ring the doorbell" },
+  { key: "received", title: "Received", body: "Open the parcel and check it with the rider.", action: "Pay the rider" },
+  { key: "paid", title: "Paid", body: "Pay on delivery, in cash or by mobile banking.", action: "Watch it again" },
 ] as const;
+
+/** Home-page anchor that coming-soon categories and the "Soon" tags link to. */
+export const COMING_SOON_ANCHOR = "coming-soon";
+export const COMING_SOON_HREF = `/#${COMING_SOON_ANCHOR}`;
+
+/** Fixed ends of the main navigation; the categories in between come from the database. */
+export const NAV_SHOP = { label: "Shop", href: "/shop" } as const;
+export const NAV_LEAD = { label: "New in", href: "/new" } as const;
+export const NAV_TAIL = { label: "Sale", href: "/sale" } as const;
 
 export const ACCOUNT_TABS = [
   { key: "orders", label: "Orders" },
@@ -110,6 +132,8 @@ export const CATALOG_WRITE_PREFIXES = [
   "/api/v1/product-discounts",
   "/api/v1/reviews",
   "/api/v1/settings",
+  "/api/v1/campaigns",
+  "/api/v1/hero-slides",
   "/api/v1/policies",
   "/api/v1/tags",
   "/api/v1/orders",

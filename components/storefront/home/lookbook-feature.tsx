@@ -16,10 +16,10 @@ export function LookbookFeature({ lookbook }: { lookbook: CollectionSummary }) {
       </div>
       <div className="flex flex-col justify-end gap-5 p-6 md:p-12 lg:p-16">
         <RevealHeading id="lookbook-title">{lookbook.name}</RevealHeading>
-        {lookbook.description ? <p className="max-w-[46ch] text-[0.9375rem] leading-relaxed">{lookbook.description}</p> : null}
+        {lookbook.description ? <p className="type-lead max-w-[46ch]">{lookbook.description}</p> : null}
         <Link
           href={`/collections/${lookbook.slug}`}
-          className="inline-flex h-12 w-fit items-center rounded bg-ink px-6 text-sm font-semibold text-chalk hover:bg-ink-soft"
+          className="type-label inline-flex h-12 w-fit items-center bg-ink px-6 text-chalk transition-colors duration-300 hover:bg-ink/80"
         >
           Shop the looks
         </Link>

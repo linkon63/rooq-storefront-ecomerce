@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api";
+import { compressFormImages } from "@/lib/compress-image";
 import { SEARCH_RESULTS_LIMIT } from "@/lib/constants/storefront";
 import type { ProductDetail, ProductList } from "@/types/storefront/catalog";
 import type { Review, ReviewSort, ReviewSummary } from "@/types/storefront/commerce";
@@ -39,8 +40,10 @@ export function listReviews(
 }
 
 /** Multipart: rating, title?, comment?, fitFeedback?, variantId?, photos[]. */
-export function postReview(productId: string, form: FormData): Promise<Review> {
-  return apiRequest<Review>(`/products/${encodeURIComponent(productId)}/reviews`, { method: "POST", body: form });
+/** Photos are shrunk in the browser first, so five phone photos still fit the host's body limit. */
+export async function postReview(productId: string, form: FormData): Promise<Review> {
+  const body = await compressFormImages(form);
+  return apiRequest<Review>(`/products/${encodeURIComponent(productId)}/reviews`, { method: "POST", body });
 }
 
 // ─── Legacy settings shape (admin invoice + order panel still read it) ────────

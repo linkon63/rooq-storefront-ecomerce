@@ -15,33 +15,20 @@ type CollectionSeed = {
 
 const COLLECTIONS: CollectionSeed[] = [
   {
-    slug: "summer-edit",
-    name: "The Summer Edit",
+    slug: "saree-edit",
+    name: "The Saree Edit",
     type: "COLLECTION",
-    description: "Linen, light cotton and easy shapes for the hottest months.",
-    tone: ["#CDBB93", "#F4F1EB"],
-    products: ["oversized-heavyweight-tee", "linen-camp-collar-shirt", "wrap-linen-dress", "satin-slip-midi-dress", "canvas-tote-bag"],
-  },
-  {
-    slug: "city-layers",
-    name: "City Layers — AW Lookbook",
-    type: "LOOKBOOK",
-    description: "Tailoring, knits and outerwear styled for cooler city days.",
-    tone: ["#3A3D42", "#B08454"],
-    products: [],
-    looks: [
-      {
-        title: "Weekday Oxford",
-        description: "Oxford shirt, pleated trousers and clean court sneakers.",
-        tone: ["#9DBEDF", "#3A3D42"],
-        products: ["oxford-button-down-shirt", "relaxed-pleated-trousers", "leather-court-sneaker"],
-      },
-      {
-        title: "Camel & Rib",
-        description: "A tailored camel coat over a fine rib top and wide-leg denim.",
-        tone: ["#B08454", "#E9E1CF"],
-        products: ["wool-blend-tailored-coat", "ribbed-knit-top", "high-rise-wide-leg-jeans"],
-      },
+    description: "Handloom cottons and zari borders in colours made for the season.",
+    tone: ["#B0125B", "#F2B8C6"],
+    products: [
+      "off-white-red-border-saree",
+      "mustard-block-print-saree",
+      "bright-pink-zari-border-saree",
+      "magenta-zari-flower-saree",
+      "teal-block-print-saree",
+      "red-ethnic-print-saree",
+      "lavender-embroidered-border-saree",
+      "light-pink-floral-saree",
     ],
   },
 ];

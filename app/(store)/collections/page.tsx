@@ -24,7 +24,7 @@ export default async function CollectionsPage() {
       ) : null}
       {lookbooks.length ? (
         <section aria-labelledby="lookbooks-title">
-          <h2 id="lookbooks-title" className="mb-6 font-wide text-2xl font-bold">
+          <h2 id="lookbooks-title" className="type-h2 section-head">
             Lookbooks
           </h2>
           <ul className="grid gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
@@ -38,7 +38,7 @@ export default async function CollectionsPage() {
       ) : null}
       {collections.length ? (
         <section aria-labelledby="edits-title">
-          <h2 id="edits-title" className="mb-6 font-wide text-2xl font-bold">
+          <h2 id="edits-title" className="type-h2 section-head">
             Edits
           </h2>
           <ul className="grid grid-cols-2 gap-x-3 gap-y-10 lg:grid-cols-4">

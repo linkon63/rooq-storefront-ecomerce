@@ -233,6 +233,12 @@ enum ActiveStatus {
   inactive
 }
 
+/// What the home hero shows: the slider of hero slides, or the live hero campaign.
+enum HeroMode {
+  SLIDER
+  CAMPAIGN
+}
+
 enum ContactKind {
   PHONE
   EMAIL
@@ -459,6 +465,7 @@ model Media {
   collectionCovers     Collection[]     @relation("CollectionCover")
   lookImages           CollectionLook[] @relation("LookImage")
   campaignMedia        CampaignMedia[]
+  heroSlides           HeroSlide[]
   newsCovers           News[]           @relation("NewsCover")
   settingLogos         Setting[]        @relation("SettingLogo")
   settingIcons         Setting[]        @relation("SettingIcon")
@@ -499,6 +506,8 @@ model Category {
   description     String?
   sortOrder       Int     @default(0) @map("sort_order")
   isActive        Boolean @default(true) @map("is_active")
+  /// Announced in the storefront as "coming soon" (no products yet). Turn off when it launches.
+  isComingSoon    Boolean @default(false) @map("is_coming_soon")
   metaTitle       String? @map("meta_title")
   metaDescription String? @map("meta_description")
 
@@ -803,6 +812,7 @@ model Product {
   attributeValues ProductAttributeValue[]
   tags            Tag[]                       @relation("product_tags")
   collections     CollectionProduct[]
+  heroSlides      HeroSlide[]
   lookItems       CollectionLookItem[]
   wishlists       Wishlist[]
   reviews         Review[]
@@ -1624,6 +1634,8 @@ model Setting {
   showCertifications Boolean @default(false) @map("show_certifications")
   isTopBarVisible    Boolean @default(true) @map("is_top_bar_visible")
   hideOutOfStock     Boolean @default(false) @map("hide_out_of_stock")
+  /// Home hero: the slider of hero slides, or the live hero campaign.
+  heroMode           HeroMode @default(SLIDER) @map("hero_mode")
 
   deliveryChargeInside   Decimal  @default(0) @map("delivery_charge_inside") @db.Decimal(12, 2)
   deliveryChargeNearCity Decimal  @default(0) @map("delivery_charge_near_city") @db.Decimal(12, 2)
@@ -1806,4 +1818,25 @@ model WholesaleOrderRequestItem {
   @@index([productId])
   @@index([variantId])
   @@map("wholesale_order_request_items")
+}
+
+/// One image in the home hero slider, optionally linked to a product (its card shows in the hero corner).
+model HeroSlide {
+  id       String  @id @default(uuid(7))
+  position Int     @default(0)
+  isActive Boolean @default(true) @map("is_active")
+
+  mediaId String @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  productId String?  @map("product_id")
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, position])
+  @@index([mediaId])
+  @@index([productId])
+  @@map("hero_slides")
 }

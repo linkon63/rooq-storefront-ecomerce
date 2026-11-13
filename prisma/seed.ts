@@ -15,6 +15,7 @@ import { seedBrandsAndTags, seedStore } from "./seed/store";
 import { seedProducts } from "./seed/products";
 import { seedCollections } from "./seed/collections";
 import { seedContent } from "./seed/content";
+import { seedHeroSlides } from "./seed/hero";
 
 async function main() {
   const started = Date.now();
@@ -36,9 +37,12 @@ async function main() {
   const variantCount = await prisma.productVariant.count();
   console.log(`✓ ${products.size} products, ${variantCount} variants`);
 
+  const heroSlides = await seedHeroSlides(prisma, products);
+  console.log(`✓ ${heroSlides} hero slides added (0 = already set up in the admin)`);
+
   const collections = await seedCollections(prisma, products);
   const content = await seedContent(prisma);
-  console.log(`✓ ${content.campaigns} campaigns, ${content.news} articles, ${content.reviews} reviews`);
+  console.log(`✓ ${content.campaigns} campaigns, empty Sale discount`);
   const mediaCount = await prisma.media.count();
   console.log(`✓ ${collections} collections · ${mediaCount} media rows · ${((Date.now() - started) / 1000).toFixed(1)}s`);
 }

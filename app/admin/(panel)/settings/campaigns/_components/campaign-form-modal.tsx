@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { AdminIcon } from "../../../../_components/admin-shell";
 import type { CampaignSection } from "@/types/admin/content";
 import type { ProductDiscount } from "@/types/product-discount";
 import type { CampaignFormState } from "@/utils/mappers/campaign-form";
+import { isCountdownSection } from "@/utils/storefront/countdown";
 import { FieldLabel, Input, StatusToggle, Textarea } from "../../_components/settings-ui";
 import { CampaignDiscountField } from "./campaign-discount-field";
 import { CampaignImagesField } from "./campaign-images-field";
@@ -25,8 +28,12 @@ export function CampaignFormModal({ initial, sections, discounts, onClose, onSav
   const [saving, setSaving] = useState(false);
   const set = (patch: Partial<CampaignFormState>) => setForm((p) => ({ ...p, ...patch }));
 
+  const isCountdown = isCountdownSection(sections.find((s) => s.id === form.sectionId));
+
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (isCountdown && !form.endAt) return void toast.error(ERROR_MESSAGES.campaign.countdownEndRequired);
+    if (isCountdown && new Date(form.endAt).getTime() <= Date.now()) return void toast.error(ERROR_MESSAGES.campaign.countdownEndPast);
     setSaving(true);
     const saved = await onSave(form);
     setSaving(false);
@@ -99,8 +106,9 @@ export function CampaignFormModal({ initial, sections, discounts, onClose, onSav
               <Input onChange={(startAt) => set({ startAt })} type="datetime-local" value={form.startAt} />
             </div>
             <div>
-              <FieldLabel>Ends</FieldLabel>
-              <Input onChange={(endAt) => set({ endAt })} type="datetime-local" value={form.endAt} />
+              <FieldLabel required={isCountdown}>Ends</FieldLabel>
+              <Input onChange={(endAt) => set({ endAt })} required={isCountdown} type="datetime-local" value={form.endAt} />
+              {isCountdown && <p className="mt-1.5 text-xs font-medium text-rose-600">The home page counts down to this moment.</p>}
             </div>
           </div>
           <CampaignDiscountField discounts={discounts} onChange={(discountId) => set({ discountId })} value={form.discountId} />

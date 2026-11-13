@@ -40,14 +40,14 @@ export async function ShopListing({ title, intro, basePath, searchParams, preset
 
   return (
     <ShopNavigationProvider filters={filters} facets={list?.facets ?? null} preset={preset} total={total}>
-      <div className="page-gutter pt-8 md:pt-12">
-        <header className="mb-6 flex flex-col gap-2">
-          <h1 className="font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none tracking-[-0.02em]">{heading}</h1>
-          {intro ? <p className="max-w-[60ch] text-stone">{intro}</p> : null}
+      <div className="page-gutter">
+        <header className="page-head flex flex-col gap-2">
+          <h1 className="type-h1">{heading}</h1>
+          {intro ? <p className="type-lead max-w-[60ch] text-stone">{intro}</p> : null}
         </header>
         <div className="grid gap-8 lg:grid-cols-[15.5rem_minmax(0,1fr)] xl:gap-12">
           <aside aria-label="Filters" className="hidden lg:block">
-            <div className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto pr-2">
+            <div className="sticky top-[calc(var(--header-h)+1rem)] max-h-[calc(100dvh-var(--header-h)-2rem)] overflow-y-auto pr-2">
               <FilterControls />
             </div>
           </aside>
@@ -64,7 +64,7 @@ export async function ShopListing({ title, intro, basePath, searchParams, preset
                 />
               ) : (
                 <>
-                  <ProductGrid products={list.data} />
+                  <ProductGrid products={list.data} offset={(list.meta.page - 1) * SHOP_PAGE_SIZE} />
                   <Pagination meta={list.meta} hrefFor={hrefFor} />
                 </>
               )}

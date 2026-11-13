@@ -17,6 +17,8 @@ export const SECTION_TITLES = {
   newArrivals: "New Arrivals Banner",
   lookbook: "Lookbook Banner",
   collections: "Collections Banner",
+  /** Home "sale ends in" banner: its live campaign needs an end date. */
+  countdown: "Sale Countdown",
 } as const;
 
 /** Page key of the home page sections. */

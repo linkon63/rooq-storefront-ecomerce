@@ -3,6 +3,7 @@ import { ADMIN_TOKEN_COOKIE, REMEMBER_ME_MAX_AGE } from "@/lib/constants/auth";
 import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { API_PREFIX } from "@/lib/constants/storefront";
 import type { AdminUser } from "@/types/admin/catalog";
+import { compressFormImages } from "@/lib/compress-image";
 
 /**
  * Admin browser client. Same transport and error mapping as the storefront
@@ -61,12 +62,16 @@ function authHeaders(init: HeadersInit | undefined, auth: boolean): Headers {
   return headers;
 }
 
-/** JSON request to `/api/v1<path>`. Throws `ApiError` with a toast-safe message. */
-export function apiRequest<T>(
+/**
+ * JSON request to `/api/v1<path>`. Throws `ApiError` with a toast-safe message.
+ * Images in a FormData body are shrunk in the browser first (compressImage).
+ */
+export async function apiRequest<T>(
   path: string,
-  { auth = true, headers, timeoutMs = DEFAULT_TIMEOUT_MS, ...options }: RequestOptions = {},
+  { auth = true, headers, timeoutMs = DEFAULT_TIMEOUT_MS, body, ...options }: RequestOptions = {},
 ): Promise<T> {
-  return sendRequest<T>(`${API_PREFIX}${path}`, { ...options, headers: authHeaders(headers, auth) }, timeoutMs);
+  const payload = body instanceof FormData ? await compressFormImages(body) : body;
+  return sendRequest<T>(`${API_PREFIX}${path}`, { ...options, body: payload, headers: authHeaders(headers, auth) }, timeoutMs);
 }
 
 /** Raw response (file downloads). Throws `ApiError` on a non-2xx status. */

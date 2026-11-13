@@ -42,8 +42,23 @@ export function useSections() {
     }
   }
 
+  /** The section with this title on `page`, created at the end of the list when missing; null on failure. */
+  async function ensureSection(title: string, page: string): Promise<Section | null> {
+    const existing = sections.find((s) => s.title === title && s.page === page);
+    if (existing) return existing;
+    try {
+      const position = Math.max(0, ...sections.map((s) => s.position)) + 1;
+      const created = await createSection({ title, page, position });
+      await loadSections();
+      return created;
+    } catch {
+      return null;
+    }
+  }
+
   return {
     sections,
+    ensureSection,
     isLoading,
     error,
     loadSections,

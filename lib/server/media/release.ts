@@ -20,6 +20,7 @@ const referenceCount = {
   collectionCovers: true,
   lookImages: true,
   campaignMedia: true,
+  heroSlides: true,
   newsCovers: true,
   settingLogos: true,
   settingIcons: true,

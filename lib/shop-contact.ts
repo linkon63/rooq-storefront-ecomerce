@@ -18,6 +18,8 @@ export const FALLBACK_ADDRESS = "Dhaka, Bangladesh";
 /** The shop's website as printed on paper — the invoice letterhead. */
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store").replace(/\/$/, "");
 export const SHOP_WEBSITE = { label: SITE.replace(/^https?:\/\//, ""), href: SITE };
+/** Shop WhatsApp line shown in the footer. */
+export const WHATSAPP_NUMBER = "01712508063";
 export const FALLBACK_HOURS = "8:00 AM – 10:00 PM";
 export const FALLBACK_FOOTER_DESCRIPTION =
   "Rooq makes considered clothing, footwear and accessories for women, men and kids, with honest sizing and easy returns.";

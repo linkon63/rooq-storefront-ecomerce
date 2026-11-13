@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { PRIMARY_NAV } from "@/lib/constants/storefront";
+import { FaWhatsapp } from "react-icons/fa6";
+import { WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
+import type { NavItem } from "@/types/storefront/catalog";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import Logo from "../shared/Logo";
+import { FooterWeavingArt } from "./footer-art/footer-weaving-art";
+import { FooterPayments } from "./footer-payments";
 import { NewsletterForm } from "./newsletter-form";
 import { SocialLinks } from "./social-links";
 
-type SiteFooterProps = { settings: StoreSettings; policies: StorePolicy[] };
+type SiteFooterProps = { nav: NavItem[]; settings: StoreSettings; policies: StorePolicy[] };
 
 const HELP_LINKS = [
   { label: "Contact us", href: "/contact" },
@@ -15,23 +19,24 @@ const HELP_LINKS = [
 ];
 
 /** Footer: newsletter, shop and help links, contact and policies from Settings. */
-export function SiteFooter({ settings, policies }: SiteFooterProps) {
+export function SiteFooter({ nav, settings, policies }: SiteFooterProps) {
   const year = new Date().getFullYear();
   return (
     <footer className="mt-24 bg-ink text-chalk">
       <div className="page-gutter grid gap-12 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="flex flex-col gap-5">
-          <Logo variant="light" className="h-7" />
+          <Logo kechi variant="light" className="h-auto w-44 self-start" />
           {settings.footerDescription ? <p className="max-w-[42ch] text-sm text-chalk/75">{settings.footerDescription}</p> : null}
           <NewsletterForm />
         </div>
         <nav aria-label="Shop">
           <h2 className="mb-4 text-sm font-semibold">Shop</h2>
           <ul className="flex flex-col gap-2.5 text-sm text-chalk/80">
-            {PRIMARY_NAV.map((item) => (
-              <li key={item.href}>
+            {nav.map((item) => (
+              <li key={item.label}>
                 <Link href={item.href} className="hover:text-chalk hover:underline">
                   {item.label}
+                  {item.soon ? <span className="ml-1.5 text-chalk/50">(soon)</span> : null}
                 </Link>
               </li>
             ))}
@@ -47,6 +52,11 @@ export function SiteFooter({ settings, policies }: SiteFooterProps) {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/cookie-policy" className="hover:text-chalk hover:underline">
+                Cookie policy
+              </Link>
+            </li>
             {policies.map((policy) => (
               <li key={policy.key}>
                 <Link href={`/policies/${policy.key}`} className="hover:text-chalk hover:underline">
@@ -70,14 +80,27 @@ export function SiteFooter({ settings, policies }: SiteFooterProps) {
                 {email.value}
               </a>
             ))}
+            <a href={whatsappChatHref(WHATSAPP_NUMBER)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-chalk">
+              <FaWhatsapp aria-hidden className="size-4" /> {WHATSAPP_NUMBER}
+            </a>
             {settings.address ? <span>{settings.address}</span> : null}
           </address>
           <SocialLinks social={settings.social} />
         </div>
       </div>
+      <div className="page-gutter border-t border-chalk/15 py-8">
+        <FooterPayments />
+      </div>
+      <div className="border-t border-chalk/15 py-8" aria-hidden>
+        <div className="page-gutter">
+          <div className="relative isolate aspect-[112/39] overflow-hidden">
+            <FooterWeavingArt />
+          </div>
+        </div>
+      </div>
       <div className="border-t border-chalk/15">
-        <p className="page-gutter py-5 text-xs text-chalk/60">
-          © {year} {settings.shopName}. Prices in {settings.currency}.
+        <p className="page-gutter py-5 text-center text-xs text-chalk/60">
+          © {year} Rooq. All rights reserved to Rooq. Prices in {settings.currency}.
         </p>
       </div>
     </footer>

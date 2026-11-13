@@ -1,4 +1,5 @@
 import { DEPARTMENT_LABELS, PRODUCT_SORTS } from "@/lib/constants/catalog";
+import { TAG_TITLES } from "@/lib/constants/storefront";
 import type { Department, Fit, ProductSort } from "@/types/storefront/catalog";
 import type { QueryParams } from "@/utils/query-string";
 
@@ -23,6 +24,8 @@ export type ShopFilters = {
   onSale: boolean;
   isNew: boolean;
   collection: string | null;
+  /** Product tag slug (`best-seller`, `coming-soon`). */
+  tag: string | null;
   sort: ProductSort;
   page: number;
 };
@@ -78,6 +81,7 @@ export function parseShopFilters(params: RawSearchParams, preset: Partial<ShopFi
     onSale: flag(params.onSale),
     isNew: flag(params.new),
     collection: single(params.collection) || null,
+    tag: single(params.tag) || null,
     sort: (PRODUCT_SORTS as readonly string[]).includes(sort) ? (sort as ProductSort) : DEFAULT_SORT,
     page: Number.isInteger(page) && page > 0 ? page : 1,
     ...preset,
@@ -101,6 +105,7 @@ export function toProductQuery(filters: ShopFilters, limit: number): QueryParams
     onSale: filters.onSale || undefined,
     new: filters.isNew || undefined,
     collection: filters.collection,
+    tag: filters.tag,
     sort: filters.sort,
     page: filters.page,
     limit,
@@ -125,6 +130,7 @@ export function toShopQuery(filters: ShopFilters, preset: Partial<ShopFilters> =
     inStock: filters.inStock || undefined,
     onSale: keep("onSale") ? true : undefined,
     new: keep("isNew") ? true : undefined,
+    tag: keep("tag") as string | null | undefined,
     sort: filters.sort === DEFAULT_SORT ? undefined : filters.sort,
     page: filters.page > 1 ? filters.page : undefined,
   };
@@ -165,6 +171,7 @@ export function clearedFilters(filters: ShopFilters, preset: Partial<ShopFilters
 
 /** Page title for /shop: the department name when exactly one is chosen. */
 export function shopTitle(params: RawSearchParams): string {
-  const { department } = parseShopFilters(params);
+  const { department, tag } = parseShopFilters(params);
+  if (tag && tag in TAG_TITLES) return TAG_TITLES[tag as keyof typeof TAG_TITLES];
   return department.length === 1 ? DEPARTMENT_LABELS[department[0]] : "Shop all";
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { displayPrice } from "@/utils/storefront/variant-selection";
 import { AddToBag } from "../product/add-to-bag";
 import { BackInStockForm } from "../product/back-in-stock-form";
+import { BuyNow } from "../product/buy-now";
 import { ColorPicker } from "../product/color-picker";
 import { useProductSelection } from "../product/selection-context";
 import { SizeGuideDialog } from "../product/size-guide-dialog";
@@ -27,14 +28,17 @@ export function QuickViewBody({ onDone }: { onDone: () => void }) {
       </div>
       <div className="flex flex-col gap-5">
         <div>
-          <p className="text-sm text-stone">{product.brand.name}</p>
-          <h2 className="font-wide text-2xl font-bold leading-tight">{product.name}</h2>
-          <Price price={price} compareAtPrice={compareAtPrice} className="mt-2 text-lg" />
+          <p className="type-meta text-stone">{product.brand.name}</p>
+          <h2 className="type-h2">{product.name}</h2>
+          <Price price={price} compareAtPrice={compareAtPrice} className="type-lead mt-2" />
         </div>
         <ColorPicker />
         <SizePicker />
         {lowStock !== null ? <p className="text-sm font-semibold text-dye-deep">Only {lowStock} left in this size</p> : null}
-        <AddToBag image={lead?.url ?? null} onAdded={onDone} />
+        <div className="grid gap-2 sm:grid-cols-2">
+          <AddToBag image={lead?.url ?? null} onAdded={onDone} />
+          <BuyNow image={lead?.url ?? null} onDone={onDone} />
+        </div>
         <BackInStockForm />
         <Link href={`/product/${product.slug}`} onClick={onDone} className="text-sm font-semibold underline underline-offset-4">
           See full details

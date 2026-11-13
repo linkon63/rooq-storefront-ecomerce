@@ -1,18 +1,27 @@
 import Link from "next/link";
-import { PRIMARY_NAV } from "@/lib/constants/storefront";
-import type { ShopCategoryNode } from "@/types/storefront/catalog";
+import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
 import Logo from "../shared/Logo";
 import { HeaderActions } from "./header-actions";
 import { MobileNavButton } from "./mobile-nav-button";
+import { Suspense } from "react";
+import { NavLink } from "./nav-link";
+import { TopBar } from "./top-bar";
 
 type SiteHeaderProps = {
+  nav: NavItem[];
   categories: ShopCategoryNode[];
   announcement: string | null;
+  phone: string | null;
+  whatsapp: string;
 };
 
 /** Sticky header: thin, left-aligned, the garment gets the space. */
-export function SiteHeader({ categories, announcement }: SiteHeaderProps) {
-  const topCategories = categories.filter((category) => !category.parentId && category.isActive !== false).slice(0, 8);
+export function SiteHeader({ nav: allNav, categories, announcement, phone, whatsapp }: SiteHeaderProps) {
+  // Coming-soon categories stay out of the header (they remain in the footer and on the home page).
+  const nav = allNav.filter((item) => !item.soon);
+  const topCategories = categories
+    .filter((category) => !category.parentId && category.isActive !== false && !category.isComingSoon)
+    .slice(0, 8);
   return (
     <>
       <a
@@ -21,29 +30,26 @@ export function SiteHeader({ categories, announcement }: SiteHeaderProps) {
       >
         Skip to content
       </a>
-      {announcement ? (
-        <p className="bg-ink px-4 py-2 text-center text-xs font-medium text-chalk">{announcement}</p>
-      ) : null}
-      <header className="sticky top-0 z-40 border-b border-selvedge bg-chalk/90 backdrop-blur-md">
-        <div className="page-gutter flex h-14 items-center gap-3 md:h-16 md:gap-6">
-          <MobileNavButton categories={topCategories} />
-          <Link href="/" aria-label="Rooq home" className="shrink-0">
-            <Logo className="h-6 md:h-7" />
+      <TopBar phone={phone} whatsapp={whatsapp} announcement={announcement} />
+      <header className="sticky top-0 z-40 border-b border-ink/10 bg-chalk/90 backdrop-blur-md">
+        <div className="page-gutter grid h-[4.5rem] grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-24 lg:gap-8">
+          <div className="flex items-center">
+            <MobileNavButton nav={nav} categories={topCategories} />
+            <nav aria-label="Main" className="hidden lg:block">
+              <ul className="flex items-center gap-6">
+                <Suspense fallback={null}>
+                  {nav.map((item) => (
+                    <li key={item.label}>
+                      <NavLink item={item} />
+                    </li>
+                  ))}
+                </Suspense>
+              </ul>
+            </nav>
+          </div>
+          <Link href="/" aria-label="Rooq home" className="shrink-0" data-stitch-origin>
+            <Logo kechi className="h-14 lg:h-[4.5rem]" />
           </Link>
-          <nav aria-label="Main" className="hidden lg:block">
-            <ul className="flex items-center gap-1">
-              {PRIMARY_NAV.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`rounded px-3 py-2 text-sm font-medium hover:bg-selvedge ${item.label === "Sale" ? "text-dye-deep" : ""}`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
           <HeaderActions />
         </div>
       </header>

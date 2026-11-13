@@ -8,6 +8,7 @@ import { LabelTag } from "../shared/label-tag";
 import { Price } from "../shared/price";
 import { StarRating } from "../shared/star-rating";
 import { AddToBag } from "./add-to-bag";
+import { BuyNow } from "./buy-now";
 import { BackInStockForm } from "./back-in-stock-form";
 import { ColorPicker } from "./color-picker";
 import { CompareToggle } from "./compare-toggle";
@@ -56,6 +57,7 @@ export function BuyPanel() {
         <AddToBag image={leadImage} className="flex-1" />
         <WishlistButton productId={product.id} snapshot={snapshot} variant="labelled" />
       </div>
+      <BuyNow image={leadImage} />
       <StickyBagBar anchorId="buy-actions" image={leadImage} />
       <BackInStockForm />
       <CompareToggle snapshot={snapshot} />

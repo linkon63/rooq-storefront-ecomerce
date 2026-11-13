@@ -1,3 +1,5 @@
+import type { ProductCard } from "./catalog";
+
 /** Storefront view of settings, policies and the signed-in shopper. */
 
 export type ContactEntry = { title: string | null; value: string };
@@ -27,6 +29,36 @@ export type StoreSettings = {
     returnWindowDays: number;
   };
 };
+
+/** An image shown in the home hero. */
+export type HeroImage = { id: string; url: string; alt: string | null; width: number | null; height: number | null };
+
+/** The live hero campaign: its copy, call to action and images (first live campaign in the hero section). */
+export type HeroCampaign = {
+  title: string;
+  description: string | null;
+  linkUrl: string | null;
+  linkLabel: string | null;
+  images: HeroImage[];
+};
+
+/** The live "Sale Countdown" campaign on the home page; `endAt` is an ISO string in the future when loaded. */
+export type SaleCountdownCampaign = {
+  id: string;
+  title: string;
+  description: string | null;
+  linkUrl: string | null;
+  linkLabel: string | null;
+  endAt: string;
+  image: HeroImage | null;
+  discount: { name: string; type: "percentage" | "fixed"; value: number } | null;
+};
+
+/** One slide of the hero slider; `product` is the linked product's card (its details show in the hero corner). */
+export type HeroSlide = { id: string; image: HeroImage; product: ProductCard | null };
+
+/** What the home hero renders: the admin's chosen mode with its slides and the live hero campaign. */
+export type HomeHeroData = { mode: "SLIDER" | "CAMPAIGN"; slides: HeroSlide[]; campaign: HeroCampaign | null };
 
 export type StorePolicy = { key: string; title: string; content: string };
 

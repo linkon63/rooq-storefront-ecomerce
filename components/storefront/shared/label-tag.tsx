@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 const TONES = {
   ink: "bg-ink text-chalk",
-  dye: "bg-dye text-ink",
+  dye: "bg-dye text-chalk",
   paper: "bg-paper text-ink",
   warn: "bg-paper text-dye-deep",
 } as const;

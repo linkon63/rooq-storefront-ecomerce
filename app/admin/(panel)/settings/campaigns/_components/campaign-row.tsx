@@ -3,7 +3,9 @@
 import { AdminIcon } from "../../../../_components/admin-shell";
 import type { Campaign } from "@/types/admin/content";
 import { campaignImageUrls } from "@/utils/admin/content";
+import { isCountdownSection } from "@/utils/storefront/countdown";
 import { StatusToggle } from "../../_components/settings-ui";
+import { CountdownBadge } from "./countdown-badge";
 
 type Props = { campaign: Campaign; onEdit: (c: Campaign) => void; onDelete: (c: Campaign) => void; onToggle: (c: Campaign) => void };
 
@@ -21,7 +23,14 @@ export function CampaignRow({ campaign, onEdit, onDelete, onToggle }: Props) {
           </div>
         )}
       </td>
-      <td className="px-5 py-3 text-sm font-semibold text-slate-800">{campaign.title}</td>
+      <td className="px-5 py-3 text-sm font-semibold text-slate-800">
+        {campaign.title}
+        {isCountdownSection(campaign.section) ? (
+          <span className="mt-1 block">
+            <CountdownBadge endAt={campaign.endAt} />
+          </span>
+        ) : null}
+      </td>
       <td className="px-5 py-3 text-sm text-slate-600">{campaign.section?.title ?? "—"}</td>
       <td className="px-5 py-3 text-sm text-slate-600">{campaign.discount?.name ?? "—"}</td>
       <td className="px-5 py-3">

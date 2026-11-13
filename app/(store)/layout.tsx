@@ -1,10 +1,14 @@
+import { HomeStitch } from "@/components/storefront/home/stitch/home-stitch";
 import { StoreSync } from "@/app/_providers/store-sync";
 import { GoogleTagManagerNoScript, GoogleTagManagerScript } from "@/components/analytics/google-tag-manager";
 import { SiteFooter } from "@/components/storefront/shell/site-footer";
+import { FloatingActions } from "@/components/storefront/shell/floating-actions";
 import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
 import { StoreToaster } from "@/components/storefront/shell/store-toaster";
+import { WHATSAPP_NUMBER } from "@/lib/shop-contact";
 import { getCategoryTree, getStorePolicies, getStoreSettings } from "@/lib/storefront/catalog-data";
+import { buildPrimaryNav } from "@/utils/storefront/nav";
 import { announcementFor } from "@/utils/storefront/settings";
 
 /**
@@ -19,17 +23,27 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
     settings.currency,
   );
 
+  const nav = buildPrimaryNav(categories);
+
   return (
     <>
       <GoogleTagManagerNoScript />
       <GoogleTagManagerScript />
-      <div className="storefront-root flex min-h-full flex-1 flex-col">
-        <SiteHeader categories={categories} announcement={announcement} />
+      <div className="storefront-root relative flex min-h-full flex-1 flex-col">
+        <SiteHeader
+          nav={nav}
+          categories={categories}
+          announcement={announcement}
+          phone={settings.phones[0]?.value ?? null}
+          whatsapp={WHATSAPP_NUMBER}
+        />
         <main id="main" className="flex-1">
           {children}
         </main>
-        <SiteFooter settings={settings} policies={policies} />
+        <SiteFooter nav={nav} settings={settings} policies={policies} />
+        <HomeStitch />
       </div>
+      <FloatingActions phone={settings.phones[0]?.value ?? null} shopName={settings.shopName} />
       <StoreSync currency={settings.currency} />
       <StoreOverlays delivery={settings.delivery} />
       <StoreToaster />
