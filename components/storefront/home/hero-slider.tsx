@@ -28,6 +28,8 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const tween = useRef<gsap.core.Tween | null>(null);
   const reduced = usePrefersReducedMotion();
   const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const dragged = useRef(false);
   const [active, setActive] = useState(0);
   const loop = !reduced && slides.length > 1;
   const items = loop ? [...slides, ...slides] : slides;
@@ -62,12 +64,51 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
     if (!tween.current) return;
     const next = !paused;
     setPaused(next);
+    pausedRef.current = next;
     gsap.to(tween.current, { timeScale: next ? 0 : 1, duration: 0.6, ease: "power2.out" });
+  };
+
+  /** Drag the line-up either way; the loop holds while dragging and resumes on release. */
+  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const t = tween.current;
+    const list = track.current;
+    if (!t || !list || (event.pointerType === "mouse" && event.button !== 0)) return;
+    const half = list.scrollWidth / 2;
+    let lastX = event.clientX;
+    dragged.current = false;
+    gsap.killTweensOf(t);
+    t.timeScale(0);
+    const move = (e: PointerEvent) => {
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      if (Math.abs(e.clientX - event.clientX) > 5) dragged.current = true;
+      const progress = t.progress() - dx / half;
+      t.progress(((progress % 1) + 1) % 1);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      if (!pausedRef.current) gsap.to(t, { timeScale: 1, duration: 0.6, ease: "power2.out" });
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   };
 
   return (
     <div className="relative bg-white">
-      <div className={loop ? "overflow-hidden" : "rail-scroll overflow-x-auto"}>
+      <div
+        onPointerDown={loop ? onPointerDown : undefined}
+        onClickCapture={(e) => {
+          if (dragged.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            dragged.current = false;
+          }
+        }}
+        className={loop ? "cursor-grab touch-pan-y select-none overflow-hidden active:cursor-grabbing [&_img]:pointer-events-none" : "rail-scroll overflow-x-auto"}
+      >
         <ul ref={track} className="flex w-max">
           {items.map((slide, index) => {
             const copy = index >= slides.length;
@@ -90,6 +131,7 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                   );
                   return slide.product ? (
                     <Link
+                      draggable={false}
                       href={`/product/${slide.product.slug}`}
                       tabIndex={copy ? -1 : undefined}
                       aria-label={copy ? undefined : `View details: ${slide.product.name}`}
