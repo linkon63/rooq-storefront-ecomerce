@@ -4,6 +4,7 @@ import type { DragEvent } from "react";
 import { resolveImageUrl } from "@/utils/admin/format";
 import type { CategoryRow as Row, DropMode } from "@/utils/admin/category-tree";
 import { formatDate } from "@/utils/format-date";
+import { StatusToggle } from "../../../_components/admin-ui";
 import { AdminIcon } from "../../../_components/admin-icons";
 import { RowActions } from "../../../_components/list/row-actions";
 
@@ -18,6 +19,7 @@ type Props = {
   onDragEnd: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onToggleActive: () => void;
 };
 
 const INDICATOR_CLASS: Record<DropMode, string> = {
@@ -26,7 +28,7 @@ const INDICATOR_CLASS: Record<DropMode, string> = {
   after: "shadow-[inset_0_-2px_0_0_#2563eb]",
 };
 
-export function CategoryRow({ category, canReorder, isDragging, indicator, onDragStart, onDragOver, onDrop, onDragEnd, onEdit, onDelete }: Props) {
+export function CategoryRow({ category, canReorder, isDragging, indicator, onDragStart, onDragOver, onDrop, onDragEnd, onEdit, onDelete, onToggleActive }: Props) {
   return (
     <tr
       className={`transition-colors odd:bg-white even:bg-slate-50/70 ${isDragging ? "opacity-40" : ""} ${indicator ? INDICATOR_CLASS[indicator] : ""}`}
@@ -65,6 +67,12 @@ export function CategoryRow({ category, canReorder, isDragging, indicator, onDra
       <td className="px-5 py-4 text-sm text-slate-600">{category.slug}</td>
       <td className="px-5 py-4 text-sm text-slate-600">{category.parentName}</td>
       <td className="px-5 py-4 text-sm tabular-nums text-slate-600">{category.productCount ?? 0}</td>
+      <td className="px-5 py-4">
+        <span className="inline-flex items-center gap-2" title={category.isActive === false ? "Hidden from the website" : "Shown on the website"}>
+          <StatusToggle checked={category.isActive !== false} onChange={onToggleActive} />
+          <span className="text-xs font-medium text-slate-500">{category.isActive === false ? "Off" : "On"}</span>
+        </span>
+      </td>
       <td className="px-5 py-4 text-sm text-slate-600">{formatDate(category.createdAt)}</td>
       <td className="px-5 py-4">
         <RowActions label={category.name} onDelete={onDelete} onEdit={onEdit} />

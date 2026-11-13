@@ -25,6 +25,7 @@ import type {
 } from "@/types/storefront/catalog";
 import type { ReviewWithProduct } from "@/types/storefront/commerce";
 import type { HomeHeroData, SaleCountdownCampaign, StorePolicy, StoreSettings } from "@/types/storefront/content";
+import { activeTree } from "@/utils/catalog/category-tree";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
 import { toSaleCountdown } from "@/utils/storefront/countdown";
 import { attachProducts, linkedProductIds, toHeroCampaign } from "@/utils/storefront/hero";
@@ -77,7 +78,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
 
 export const getStorePolicies = cache(async (): Promise<StorePolicy[]> => normalisePolicies(await readOr("policies", readPolicies, null)));
 
-export const getCategoryTree = cache((): Promise<ShopCategoryNode[]> => readOr("categories", readCategories, []));
+/** Storefront categories: switched-off ones (admin Status) never reach the website. */
+export const getCategoryTree = cache(async (): Promise<ShopCategoryNode[]> => activeTree(await readOr("categories", readCategories, [])));
 
 export const getBrands = cache((): Promise<ShopBrandRef[]> => readOr("brands", readBrands, []));
 

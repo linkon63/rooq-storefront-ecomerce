@@ -107,6 +107,20 @@ export function useCategories() {
     }
   }
 
+  /** Status switch: off hides the category (and its sub-categories) from the website. */
+  async function toggleActive(category: Category) {
+    const isActive = category.isActive === false;
+    const body = new FormData();
+    body.append("isActive", String(isActive));
+    setError("");
+    try {
+      await apiRequest<Category>(`/category/${category.id}`, { method: "PATCH", body });
+      await load();
+    } catch (err) {
+      setError(errorText(err, ERROR_MESSAGES.ui.saveFailed));
+    }
+  }
+
   /** Optimistically applies a new tree, then persists it; rolls back on failure. */
   async function reorder(nextTree: Category[]) {
     const previous = categories;
@@ -123,5 +137,5 @@ export function useCategories() {
     }
   }
 
-  return { categories, isLoading, isSaving, isReordering, error, setError, save, remove, reorder };
+  return { categories, isLoading, isSaving, isReordering, error, setError, save, remove, reorder, toggleActive };
 }

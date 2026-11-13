@@ -52,7 +52,7 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
               </ul>
             </nav>
           </div>
-          <Link href="/" aria-label={t.header.home} className="shrink-0" data-stitch-origin>
+          <Link href="/" prefetch aria-label={t.header.home} className="shrink-0" data-stitch-origin>
             <Logo kechi className="h-[calc(3.5rem-1.25rem*var(--p))] lg:h-[calc(4.5rem-1.75rem*var(--p))]" />
           </Link>
           <HeaderActions t={t.header} />

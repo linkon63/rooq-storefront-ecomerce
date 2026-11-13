@@ -3,6 +3,7 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { authClosed, authViewChanged, selectAuthView } from "@/lib/store/slices/session-slice";
+import Logo from "../shared/Logo";
 import { Modal } from "../shared/modal";
 import { ForgotForm } from "./forgot-form";
 import { GoogleButton } from "./google-button";
@@ -21,6 +22,7 @@ export function AuthSheet() {
   return (
     <Modal open onOpenChange={(open) => (open ? null : close())} title={TITLES[view]} placement="right">
       <div className="flex flex-col gap-6 px-4 py-6 md:px-6">
+        <Logo kechi className="h-16 self-center" />
         {view === "login" ? <LoginForm /> : null}
         {view === "register" ? <RegisterForm /> : null}
         {view === "forgot" ? <ForgotForm /> : null}

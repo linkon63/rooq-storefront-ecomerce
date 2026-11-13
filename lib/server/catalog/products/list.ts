@@ -6,6 +6,7 @@ import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { buildPaginationMeta, pageWindow, type PaginationMeta } from "@/utils/pagination";
 import { toProductCard, toProductCardAdmin, type ProductCard, type ProductCardAdmin } from "@/utils/mappers/product-card";
 import type { ProductFacets } from "@/utils/mappers/product-facets";
+import { visibleNodes } from "@/utils/catalog/category-tree";
 import { loadCategoryNodes } from "../categories/nodes";
 import { productCardSelect } from "../selects";
 import { buildProductFilters, orderByFor, whereFor } from "./filters";
@@ -33,7 +34,8 @@ export async function listProducts(query: ProductListQuery, viewer: { isStaff: b
   const [rows, total, facets] = await Promise.all([
     prisma.product.findMany({ where, select: productCardSelect(now), orderBy: orderByFor(query.sort, admin), skip, take }),
     prisma.product.count({ where }),
-    wantFacets ? productFacets(filters, categories) : Promise.resolve(undefined),
+    // Shoppers never see a switched-off category in the filters.
+    wantFacets ? productFacets(filters, admin ? categories : visibleNodes(categories)) : Promise.resolve(undefined),
   ]);
 
   return {

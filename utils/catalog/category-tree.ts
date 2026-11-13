@@ -48,3 +48,18 @@ export function createsCycle(nodes: readonly Pick<CategoryNode, "id" | "parentId
   }
   return false;
 }
+
+type ActiveTreeNode = { isActive?: boolean; children?: ActiveTreeNode[] };
+
+/** The tree without switched-off categories (an off parent hides its whole branch). */
+export function activeTree<T extends ActiveTreeNode>(nodes: readonly T[]): T[] {
+  return nodes
+    .filter((node) => node.isActive !== false)
+    .map((node) => (node.children ? { ...node, children: activeTree(node.children) } : node));
+}
+
+/** Flat nodes minus switched-off categories and everything below them. */
+export function visibleNodes<T extends CategoryNode & { isActive: boolean }>(nodes: readonly T[]): T[] {
+  const hidden = new Set(descendantIds(nodes, nodes.filter((node) => !node.isActive).map((node) => node.id)));
+  return nodes.filter((node) => !hidden.has(node.id));
+}

@@ -9,6 +9,7 @@ import { EmptyState } from "../shared/empty-state";
 import { FilterControls } from "./filter-controls";
 import { Pagination } from "./pagination";
 import { PendingResults } from "./pending-results";
+import { ShopPagePrefetch } from "./shop-page-prefetch";
 import { ShopNavigationProvider } from "./shop-navigation";
 import { ShopToolbar } from "./shop-toolbar";
 
@@ -37,6 +38,8 @@ export async function ShopListing({ title, intro, basePath, searchParams, preset
   const total = list?.meta.total ?? 0;
   const heading = filters.search ? `${title}: “${filters.search}”` : title;
   const hrefFor = (page: number) => withQuery(basePath, toShopQuery({ ...filters, page }, preset));
+  const page = list?.meta.page ?? 1;
+  const neighbours = [page + 1, page - 1].filter((n) => n >= 1 && n <= (list?.meta.totalPages ?? 0)).map(hrefFor);
 
   return (
     <ShopNavigationProvider filters={filters} facets={list?.facets ?? null} preset={preset} total={total}>
@@ -66,6 +69,7 @@ export async function ShopListing({ title, intro, basePath, searchParams, preset
                 <>
                   <ProductGrid products={list.data} offset={(list.meta.page - 1) * SHOP_PAGE_SIZE} />
                   <Pagination meta={list.meta} hrefFor={hrefFor} />
+                  <ShopPagePrefetch hrefs={neighbours} />
                 </>
               )}
             </PendingResults>

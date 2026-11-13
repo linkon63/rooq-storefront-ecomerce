@@ -15,7 +15,7 @@ import { ReorderStatus } from "./_components/reorder-status";
 import { useCategories, categoryToForm, EMPTY_CATEGORY_FORM, type CategoryForm } from "./_hooks/use-categories";
 import { useCategoryDrag } from "./_hooks/use-category-drag";
 
-const HEADINGS = ["Name", "Image", "Slug", "Parent", "Products", "Created", "Actions"];
+const HEADINGS = ["Name", "Image", "Slug", "Parent", "Products", "Status", "Created", "Actions"];
 const PAGE_SIZE = 8;
 const rowText = (row: Row) => `${row.name} ${row.slug} ${row.parentName}`;
 
@@ -84,6 +84,7 @@ export default function CategoriesPage() {
                     onDragStart={drag.start}
                     onDrop={drag.drop}
                     onEdit={() => open(categoryToForm(row))}
+                    onToggleActive={() => void data.toggleActive(row)}
                   />
                 ))
               )}

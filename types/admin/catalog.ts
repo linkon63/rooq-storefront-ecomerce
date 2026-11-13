@@ -25,6 +25,8 @@ export type Category = {
   parentId?: string | null;
   imageUrl?: string | null;
   sortOrder?: number;
+  /** Off = hidden from the website (admin Status switch). */
+  isActive?: boolean;
   /** Shown in the storefront as "coming soon". */
   isComingSoon?: boolean;
   createdAt?: string;

@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Client router cache: revisiting a page (logo → home, back to the shop) renders
+  // instantly; the server data cache (CATALOG_REVALIDATE_SECONDS) keeps it fresh.
+  experimental: {
+    staleTimes: { dynamic: 30, static: 180 },
+  },
   turbopack: {
     root: __dirname,
   },

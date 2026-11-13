@@ -2,6 +2,7 @@ import { HomeStitch } from "@/components/storefront/home/stitch/home-stitch";
 import { StoreSync } from "@/app/_providers/store-sync";
 import { GoogleTagManagerNoScript, GoogleTagManagerScript } from "@/components/analytics/google-tag-manager";
 import { SiteFooter } from "@/components/storefront/shell/site-footer";
+import { RoutePrefetch } from "@/components/storefront/shell/route-prefetch";
 import { FloatingActions } from "@/components/storefront/shell/floating-actions";
 import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
@@ -56,6 +57,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
       <StoreSync currency={settings.currency} />
       <StoreOverlays delivery={settings.delivery} />
       <StoreToaster />
+      <RoutePrefetch />
     </>
   );
 }
