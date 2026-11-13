@@ -28,7 +28,7 @@ export function SiteHeader({ categories, announcement }: SiteHeaderProps) {
         <div className="page-gutter flex h-14 items-center gap-3 md:h-16 md:gap-6">
           <MobileNavButton categories={topCategories} />
           <Link href="/" aria-label="Rooq home" className="shrink-0">
-            <Logo className="h-6 md:h-7" />
+            <Logo className="h-10 md:h-12" />
           </Link>
           <nav aria-label="Main" className="hidden lg:block">
             <ul className="flex items-center gap-1">

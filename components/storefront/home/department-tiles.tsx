@@ -4,7 +4,7 @@ import type { Image as ImageRef } from "@/types/storefront/catalog";
 
 export type DepartmentTile = { label: string; href: string; image: ImageRef | null };
 
-const TONES = ["bg-selvedge text-ink", "bg-ink text-chalk", "bg-dye text-ink"];
+const TONES = ["bg-selvedge text-ink", "bg-ink text-chalk", "bg-dye text-chalk"];
 
 /**
  * Three colour-blocked tiles, each showing the newest piece in that

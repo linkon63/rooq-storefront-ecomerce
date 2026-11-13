@@ -46,7 +46,7 @@ export function NewsletterForm() {
           aria-describedby={error ? "newsletter-error" : undefined}
           className="h-11 min-w-0 flex-1 rounded border border-chalk/30 bg-transparent px-3 text-base text-chalk placeholder:text-chalk/50"
         />
-        <button type="submit" disabled={status === "sending"} className="h-11 rounded bg-dye px-4 text-sm font-semibold text-ink hover:bg-chalk disabled:opacity-60">
+        <button type="submit" disabled={status === "sending"} className="h-11 rounded bg-dye px-4 text-sm font-semibold text-chalk hover:bg-dye-deep disabled:opacity-60">
           Join
         </button>
       </div>

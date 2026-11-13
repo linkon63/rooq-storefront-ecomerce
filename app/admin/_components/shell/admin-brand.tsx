@@ -19,7 +19,7 @@ export function AdminBrand({ logo, shopName }: { logo?: string | null; shopName?
           width={200}
         />
       ) : (
-        <Logo className="h-8" />
+        <Logo className="h-12" />
       )}
     </Link>
   );

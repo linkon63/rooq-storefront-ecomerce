@@ -1,6 +1,6 @@
 /**
  * GLSL for the hero cloth: a plane draped by layered travelling waves, an
- * indigo twill face and a dye-pink lining on the back. Lighting is a cheap
+ * deep-green twill face and a magenta lining on the back. Lighting is a cheap
  * half-Lambert from screen-space derivatives, so no normal attribute is needed.
  */
 
@@ -56,9 +56,9 @@ export const CLOTH_FRAGMENT = /* glsl */ `
   }
 `;
 
-/** Brand colours as linear 0–1 RGB triples (ink, a lit indigo, dye pink). */
+/** Brand colours as linear 0–1 RGB triples (ink, a lit green, magenta). */
 export const CLOTH_COLORS = {
-  face: [0.106, 0.122, 0.231] as const,
-  faceLight: [0.29, 0.33, 0.58] as const,
-  lining: [1.0, 0.31, 0.6] as const,
+  face: [0.110, 0.224, 0.204] as const,
+  faceLight: [0.263, 0.447, 0.408] as const,
+  lining: [0.608, 0.102, 0.255] as const,
 };

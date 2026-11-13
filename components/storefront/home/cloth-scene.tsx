@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { ClothMesh } from "./cloth-mesh";
 
 /**
- * The hero's one orchestrated moment: a length of indigo twill with a pink
+ * The hero's one orchestrated moment: a length of deep-green twill with a magenta
  * lining, drifting in a slow draught. Loaded with next/dynamic (ssr: false)
  * only when motion is allowed; `active` pauses the loop when off screen.
  */

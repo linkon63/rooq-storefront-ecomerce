@@ -5,20 +5,21 @@
 
 /* ══════════════════════════════════════════════════════════════════════════
    Rooq storefront theme — see docs/design/storefront-design.md.
-   Indigo ink on cool chalk, dye pink as the single accent, Archivo used at
+   Deep green ink on white chalk, magenta as the single accent, gold rules (from the Rooq logo), Archivo used at
    two widths (expanded display, normal body). The admin panel keeps its own
    section at the bottom of this file.
    ══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  --color-ink: #1b1f3b;
-  --color-ink-soft: #2c3157;
-  --color-chalk: #f3f4f6;
-  --color-selvedge: #dde2ee;
-  --color-stone: #5b6178;
-  --color-line: #c9cedc;
-  --color-dye: #ff4f9a;
-  --color-dye-deep: #c2185b;
+  --color-ink: #1c3934;
+  --color-ink-soft: #2b514a;
+  --color-chalk: #ffffff;
+  --color-selvedge: #f0dfc6;
+  --color-stone: #675f4f;
+  --color-line: #dccaad;
+  --color-dye: #9b1a41;
+  --color-dye-deep: #7d1434;
+  --color-gold: #a08c6b;
   --color-paper: #ffffff;
 
   --font-display: var(--font-archivo), var(--font-bengali), ui-sans-serif, system-ui, sans-serif;
@@ -33,7 +34,7 @@
   --color-zinc-650: #52525b;
 
   --ease-cloth: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow-sheet: 0 24px 64px -16px rgb(27 31 59 / 0.35);
+  --shadow-sheet: 0 24px 64px -16px rgb(28 57 52 / 0.35);
 }
 
 /* Width axis utilities — the type hierarchy device. */
@@ -107,7 +108,7 @@ body {
 
 .storefront-root ::selection {
   background: var(--color-dye);
-  color: var(--color-ink);
+  color: var(--color-chalk);
 }
 
 button,

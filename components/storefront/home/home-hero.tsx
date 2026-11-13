@@ -5,7 +5,7 @@ import { HeroIntro } from "./hero-intro";
 const HEADLINE = ["Wear it", "out."];
 
 /**
- * Opens on the subject itself: a length of indigo cloth (three.js) with the
+ * Opens on the subject itself: a length of deep-green cloth (three.js) with the
  * wordmark-weight headline set in Archivo Expanded over it. Copy is
  * left-aligned and pinned to the bottom so the cloth reads first.
  */

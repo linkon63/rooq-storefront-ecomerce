@@ -21,7 +21,7 @@ export function SiteFooter({ settings, policies }: SiteFooterProps) {
     <footer className="mt-24 bg-ink text-chalk">
       <div className="page-gutter grid gap-12 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="flex flex-col gap-5">
-          <Logo variant="light" className="h-7" />
+          <Logo variant="light" className="h-20" />
           {settings.footerDescription ? <p className="max-w-[42ch] text-sm text-chalk/75">{settings.footerDescription}</p> : null}
           <NewsletterForm />
         </div>
