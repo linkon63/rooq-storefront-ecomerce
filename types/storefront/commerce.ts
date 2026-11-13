@@ -96,6 +96,8 @@ export type Order = {
   shippingCost: number;
   total: number;
   couponCode: string | null;
+  customerNote: string | null;
+  deliveryZone: DeliveryZoneKey | null;
   placedAt: string;
   items: OrderLine[];
   shippingAddress: ShippingAddressInput | null;

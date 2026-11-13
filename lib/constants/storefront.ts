@@ -139,3 +139,8 @@ export const CATALOG_WRITE_PREFIXES = [
   "/api/v1/orders",
   "/api/v1/returns",
 ] as const;
+
+/** Checkout coupon box. Off for now: the field is hidden and no code is sent with the order. */
+export const CHECKOUT_COUPONS_ENABLED = false;
+/** Longest order note a shopper can leave at checkout. */
+export const ORDER_NOTE_MAX = 500;

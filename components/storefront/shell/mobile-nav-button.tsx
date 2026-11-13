@@ -7,9 +7,11 @@ import type { Messages } from "@/lib/i18n/messages";
 import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
 import { MobileNav } from "./mobile-nav";
 
-type Props = { nav: NavItem[]; categories: ShopCategoryNode[]; t: Messages["mobileNav"]; openLabel: string; soon: string };
+import type { Locale } from "@/lib/i18n/locales";
 
-export function MobileNavButton({ nav, categories, t, openLabel, soon }: Props) {
+type Props = { locale: Locale; languageLabels: Messages["language"]; nav: NavItem[]; categories: ShopCategoryNode[]; t: Messages["mobileNav"]; openLabel: string; soon: string };
+
+export function MobileNavButton({ nav, categories, t, openLabel, soon, locale, languageLabels }: Props) {
   const dispatch = useAppDispatch();
   const open = useAppSelector(selectIsMobileNavOpen);
   return (
@@ -23,7 +25,7 @@ export function MobileNavButton({ nav, categories, t, openLabel, soon }: Props) 
       >
         <FiMenu aria-hidden className="size-5" />
       </button>
-      <MobileNav open={open} onOpenChange={(next) => dispatch(setMobileNavOpen(next))} nav={nav} categories={categories} t={t} soon={soon} />
+      <MobileNav open={open} onOpenChange={(next) => dispatch(setMobileNavOpen(next))} nav={nav} categories={categories} t={t} soon={soon} locale={locale} languageLabels={languageLabels} />
     </>
   );
 }

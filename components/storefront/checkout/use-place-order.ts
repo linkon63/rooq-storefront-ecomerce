@@ -7,6 +7,7 @@ import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { emptyBag } from "@/lib/store/slices/cart-thunks";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { placeGuestOrder, placeOrder } from "@/lib/storefront/orders-api";
+import { forgetCheckoutToken } from "@/lib/storefront/abandoned-cart";
 import { rememberLastOrder } from "@/lib/storefront/last-order";
 import type { CartLine, DeliveryZoneKey, ShippingAddressInput } from "@/types/storefront/commerce";
 import { errorText } from "@/utils/api-error";
@@ -20,6 +21,8 @@ type PlaceOrderInput = {
   /** Saved address id, or null to use `address`. */
   addressId: string | null;
   address: ShippingAddressInput;
+  /** Optional note for the shop. */
+  note: string;
 };
 
 /**
@@ -43,16 +46,18 @@ export function usePlaceOrder() {
     setError(null);
     const items = input.lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity }));
     const couponCode = input.couponCode ?? undefined;
+    const customerNote = input.note.trim() || undefined;
     try {
       const address = cleanAddress(input.address);
       let order;
       if (input.signedIn) {
         const addressId = input.addressId ?? (await createAddress({ ...address, isDefault: true })).id;
-        order = await placeOrder({ addressId, items, deliveryZone: input.zone, couponCode });
+        order = await placeOrder({ addressId, items, deliveryZone: input.zone, couponCode, customerNote });
       } else {
-        order = await placeGuestOrder({ address, items, deliveryZone: input.zone, couponCode });
+        order = await placeGuestOrder({ address, items, deliveryZone: input.zone, couponCode, customerNote });
       }
       rememberLastOrder(order);
+      forgetCheckoutToken();
       await dispatch(emptyBag());
       router.push(`/confirmation?order=${encodeURIComponent(order.orderNumber)}`);
     } catch (caught) {

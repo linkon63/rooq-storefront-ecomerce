@@ -12,7 +12,7 @@ type Props = {
 
 const selectClass = "h-12 w-full rounded border border-line bg-paper px-3 text-base";
 
-/** Name, phone, district and area (which set the delivery zone), and the street address. */
+/** Required first (name, phone, district, street address, marked *), then the optional fields. */
 export function AddressFields({ value, onChange, withEmail }: Props) {
   const set = (key: keyof ShippingAddressInput) => (event: { target: { value: string } }) =>
     onChange({ ...value, [key]: event.target.value });
@@ -21,6 +21,32 @@ export function AddressFields({ value, onChange, withEmail }: Props) {
     <div className="grid gap-4 sm:grid-cols-2">
       <TextField id="ship-name" label="Full name" required autoComplete="name" value={value.fullName} onChange={set("fullName")} />
       <TextField id="ship-phone" label="Mobile number" type="tel" required inputMode="tel" autoComplete="tel" placeholder="01XXXXXXXXX" value={value.phone} onChange={set("phone")} />
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="ship-city" className="text-sm font-semibold">
+          District
+          <span aria-hidden className="text-red-600">
+            {" "}*
+          </span>
+        </label>
+        <select id="ship-city" required autoComplete="address-level1" value={value.city} onChange={set("city")} className={selectClass}>
+          <option value="">Choose a district</option>
+          {BANGLADESH_DISTRICTS.map((district) => (
+            <option key={district} value={district}>
+              {district}
+            </option>
+          ))}
+        </select>
+      </div>
+      <TextField
+        id="ship-line1"
+        label="Street address"
+        required
+        autoComplete="address-line1"
+        placeholder="House, road, block"
+        value={value.addressLine1}
+        onChange={set("addressLine1")}
+      />
+      {/* Optional fields after the required ones. */}
       {withEmail ? (
         <TextField
           id="ship-email"
@@ -34,19 +60,6 @@ export function AddressFields({ value, onChange, withEmail }: Props) {
           className="sm:col-span-2"
         />
       ) : null}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="ship-city" className="text-sm font-semibold">
-          District
-        </label>
-        <select id="ship-city" required autoComplete="address-level1" value={value.city} onChange={set("city")} className={selectClass}>
-          <option value="">Choose a district</option>
-          {BANGLADESH_DISTRICTS.map((district) => (
-            <option key={district} value={district}>
-              {district}
-            </option>
-          ))}
-        </select>
-      </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="ship-area" className="text-sm font-semibold">
           Area <span className="font-normal text-stone">(optional)</span>
@@ -65,18 +78,8 @@ export function AddressFields({ value, onChange, withEmail }: Props) {
           ))}
         </datalist>
       </div>
-      <TextField
-        id="ship-line1"
-        label="Street address"
-        required
-        autoComplete="address-line1"
-        placeholder="House, road, block"
-        value={value.addressLine1}
-        onChange={set("addressLine1")}
-        className="sm:col-span-2"
-      />
-      <TextField id="ship-line2" label="Apartment, floor, landmark" autoComplete="address-line2" value={value.addressLine2 ?? ""} onChange={set("addressLine2")} />
       <TextField id="ship-postcode" label="Postcode" inputMode="numeric" autoComplete="postal-code" value={value.postalCode ?? ""} onChange={set("postalCode")} />
+      <TextField id="ship-line2" label="Apartment, floor, landmark" autoComplete="address-line2" value={value.addressLine2 ?? ""} onChange={set("addressLine2")} className="sm:col-span-2" />
     </div>
   );
 }

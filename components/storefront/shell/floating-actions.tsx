@@ -6,7 +6,7 @@ import { WhatsappButton } from "./whatsapp-button";
 export function FloatingActions({ phone, shopName }: { phone: string | null; shopName: string }) {
   const href = whatsappHref(phone, `Hi ${shopName}, I have a question.`);
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex flex-col items-center gap-3 md:bottom-6 md:right-6">
+    <div className="fixed bottom-24 right-4 z-40 flex flex-col items-center gap-3 md:bottom-6 md:right-6">
       <ScrollTopButton />
       {href ? (
         <WhatsappButton href={href} />

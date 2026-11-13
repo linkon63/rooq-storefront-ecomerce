@@ -18,6 +18,8 @@ export const FALLBACK_ADDRESS = "Dhaka, Bangladesh";
 /** The shop's website as printed on paper — the invoice letterhead. */
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store").replace(/\/$/, "");
 export const SHOP_WEBSITE = { label: SITE.replace(/^https?:\/\//, ""), href: SITE };
+/** The shop's Facebook page, printed on invoices while Settings → Social has none. */
+export const FALLBACK_FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61594622716963";
 /** Shop WhatsApp line shown in the footer. */
 export const WHATSAPP_NUMBER = "01712508063";
 export const FALLBACK_HOURS = "8:00 AM – 10:00 PM";

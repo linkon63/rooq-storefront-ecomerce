@@ -80,13 +80,18 @@ export function useStitchScroll({ box, thread, reveal, needle }: StitchRefs, pat
       gsap.to(pin, { autoAlpha: show ? 1 : 0, duration: show ? 0.25 : 0.2, ease: "power1.out", overwrite: true });
     };
 
-    const onScroll = () => {
+    const targetLength = () => {
       const y = window.innerHeight * NEEDLE_VIEWPORT_Y - container.getBoundingClientRect().top;
-      const target = y <= 0 ? 0 : (lengths[sampleIndexAtY(reach, y)] ?? total);
+      return y <= 0 ? 0 : (lengths[sampleIndexAtY(reach, y)] ?? total);
+    };
+    const onScroll = () => {
+      const target = targetLength();
       if (target !== state.length) showNeedle(target > state.length);
       sewTo(target);
       if (finished) render();
     };
+    // Start where the scroll already is, so a re-layout (images, rails loading) never re-sews from the top.
+    state.length = targetLength();
     render();
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

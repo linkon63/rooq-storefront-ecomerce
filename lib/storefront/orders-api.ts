@@ -19,6 +19,7 @@ export async function placeOrder(input: {
   items: OrderLineInput[];
   deliveryZone: DeliveryZoneKey;
   couponCode?: string;
+  customerNote?: string;
 }): Promise<Order> {
   return orderFromApi(await apiRequest<unknown>("/orders", { method: "POST", body: input }));
 }
@@ -28,6 +29,7 @@ export async function placeGuestOrder(input: {
   items: OrderLineInput[];
   deliveryZone: DeliveryZoneKey;
   couponCode?: string;
+  customerNote?: string;
 }): Promise<Order> {
   return orderFromApi(await apiRequest<unknown>("/orders/guest", { method: "POST", body: input }));
 }

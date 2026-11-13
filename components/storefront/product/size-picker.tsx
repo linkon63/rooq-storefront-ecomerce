@@ -34,7 +34,7 @@ export function SizePicker() {
           </button>
         ) : null}
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-2" role="radiogroup" aria-label="Size">
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Size">
         {sizes.map((size) => {
           const isSelected = size.id === state.sizeId;
           return (
@@ -45,7 +45,7 @@ export function SizePicker() {
               aria-checked={isSelected}
               aria-label={size.available ? size.label : `${size.label}, sold out`}
               onClick={() => actions.selectSize(size.id)}
-              className={`relative h-11 rounded border text-sm font-medium tabular-nums transition-colors ${
+              className={`relative h-11 min-w-13 whitespace-nowrap rounded border px-3.5 text-sm font-medium tabular-nums transition-colors ${
                 isSelected
                   ? "border-ink bg-ink text-chalk"
                   : size.available

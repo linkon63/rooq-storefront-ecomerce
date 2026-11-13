@@ -7,6 +7,7 @@ import { HeaderActions } from "./header-actions";
 import { MobileNavButton } from "./mobile-nav-button";
 import { Suspense } from "react";
 import { NavLink } from "./nav-link";
+import { StickyHeader } from "./sticky-header";
 import { TopBar } from "./top-bar";
 
 type SiteHeaderProps = {
@@ -35,10 +36,10 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
         {t.header.skip}
       </a>
       <TopBar phone={phone} whatsapp={whatsapp} announcement={announcement} locale={locale} t={t} />
-      <header className="sticky top-0 z-40 border-b border-ink/10 bg-chalk/90 backdrop-blur-md">
-        <div className="page-gutter grid h-[4.5rem] grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-24 lg:gap-8">
+      <StickyHeader>
+        <div className="page-gutter grid h-[calc(4.5rem-1rem*var(--p))] grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-[calc(6rem-2rem*var(--p))] lg:gap-8">
           <div className="flex items-center">
-            <MobileNavButton nav={nav} categories={topCategories} t={t.mobileNav} openLabel={t.header.openMenu} soon={t.nav.soon} />
+            <MobileNavButton nav={nav} categories={topCategories} locale={locale} languageLabels={t.language} t={t.mobileNav} openLabel={t.header.openMenu} soon={t.nav.soon} />
             <nav aria-label="Main" className="hidden lg:block">
               <ul className="flex items-center gap-6">
                 <Suspense fallback={null}>
@@ -52,11 +53,11 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
             </nav>
           </div>
           <Link href="/" aria-label={t.header.home} className="shrink-0" data-stitch-origin>
-            <Logo kechi className="h-14 lg:h-[4.5rem]" />
+            <Logo kechi className="h-[calc(3.5rem-1.25rem*var(--p))] lg:h-[calc(4.5rem-1.75rem*var(--p))]" />
           </Link>
           <HeaderActions t={t.header} />
         </div>
-      </header>
+      </StickyHeader>
     </>
   );
 }

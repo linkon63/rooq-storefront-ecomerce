@@ -1840,3 +1840,35 @@ model HeroSlide {
   @@index([productId])
   @@map("hero_slides")
 }
+
+enum AbandonedCartStatus {
+  OPEN
+  RECOVERED
+}
+
+/// A checkout left before the order was placed: captured once the shopper has
+/// typed a name and a valid phone, so the shop can call them back.
+model AbandonedCart {
+  id          String              @id @default(uuid(7))
+  /// Random id kept in the shopper's browser; one row per checkout attempt.
+  token       String              @unique
+  fullName    String              @map("full_name")
+  phone       String
+  email       String?
+  city        String?
+  /// Cart snapshot as the shopper saw it: [{ variantId, name, sku, image, size, color, price, quantity }].
+  items       Json
+  itemCount   Int                 @map("item_count")
+  subtotal    Decimal             @db.Decimal(12, 2)
+  status      AbandonedCartStatus @default(OPEN)
+  /// The order that recovered it (same phone), once placed.
+  orderNumber String?             @map("order_number")
+  recoveredAt DateTime?           @map("recovered_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([phone])
+  @@index([status, updatedAt])
+  @@map("abandoned_carts")
+}

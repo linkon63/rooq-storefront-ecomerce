@@ -478,6 +478,12 @@ export const ERROR_MESSAGES = {
     notConfigured: "The newsletter is not configured on the server.",
   },
 
+  abandonedCart: {
+    notFound: (id: string) => `Abandoned cart with ID ${id} not found`,
+    invalidPhone: "Enter a valid Bangladeshi mobile number.",
+    loadFailed: "Could not load abandoned carts. Refresh to try again.",
+  },
+
   backInStock: {
     notFound: notFound("Back-in-stock request"),
     alreadyInStock: "This size is in stock — you can add it to your bag now.",
@@ -556,6 +562,8 @@ export const ERROR_MESSAGES = {
     checkoutEmpty: "Your bag is empty. Add something before checking out.",
     addressIncomplete: "Fill in your name, phone, address and city.",
     phoneInvalid: "Enter a valid phone number.",
+    invoiceNotFound: "No order matches that number and phone. Use the phone you ordered with.",
+    invoiceDownloadFailed: "Could not download the invoice. Please try again.",
     ordersLoadFailed: "Could not load your orders. Refresh to try again.",
     orderCancelFailed: "Could not cancel this order. Please try again.",
     returnFailed: "Could not send your return request. Please try again.",

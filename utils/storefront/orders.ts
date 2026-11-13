@@ -1,4 +1,4 @@
-import type { Order, OrderLine, OrderStatus, PaymentStatus, ShippingAddressInput } from "@/types/storefront/commerce";
+import type { DeliveryZoneKey, Order, OrderLine, OrderStatus, PaymentStatus, ShippingAddressInput } from "@/types/storefront/commerce";
 import { toAmount } from "./money";
 
 type UnknownRecord = Record<string, unknown>;
@@ -48,6 +48,9 @@ function shippingAddress(raw: unknown): ShippingAddressInput | null {
   };
 }
 
+const ZONES: readonly DeliveryZoneKey[] = ["inside", "near_city", "outside"];
+const zoneOf = (value: unknown): DeliveryZoneKey | null => ZONES.find((zone) => zone === value) ?? null;
+
 /** Order JSON (Decimals as strings or numbers) → the storefront Order. */
 export function orderFromApi(raw: unknown): Order {
   const order = record(raw);
@@ -63,6 +66,8 @@ export function orderFromApi(raw: unknown): Order {
     shippingCost: toAmount(order.shippingCost),
     total: toAmount(order.total),
     couponCode: text(order.couponCode),
+    customerNote: text(order.customerNote),
+    deliveryZone: zoneOf(order.deliveryZone),
     placedAt: text(order.placedAt) ?? text(order.createdAt) ?? "",
     items: Array.isArray(order.items) ? order.items.map(orderLine) : [],
     shippingAddress: shippingAddress(order.shippingAddress ?? order.address),

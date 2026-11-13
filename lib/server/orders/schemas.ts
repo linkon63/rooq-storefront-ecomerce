@@ -108,3 +108,9 @@ export type CreateGuestOrderInput = z.output<typeof createGuestOrderSchema>;
 export type CreatePosOrderInput = z.output<typeof createPosOrderSchema>;
 export type ListOrdersQuery = z.output<typeof listOrdersQuery>;
 export type UpdateOrderStatusInput = z.output<typeof updateOrderStatusSchema>;
+
+/** GET /orders/invoice — the order number and the phone it was placed with. */
+export const invoiceQuery = z.strictObject({
+  order: z.string().trim().min(1).max(40),
+  phone: z.string().trim().min(6).max(20),
+});

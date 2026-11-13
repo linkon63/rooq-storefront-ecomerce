@@ -67,6 +67,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
           { label: "Returned Orders", href: "/admin/orders/returned", icon: "return" },
           { label: "Returns & Exchanges", href: "/admin/returns", icon: "return" },
           { label: "Completed Orders", href: "/admin/orders/completed", icon: "check" },
+          { label: "Abandoned Carts", href: "/admin/abandoned-carts", icon: "package" },
           { label: "Reviews", href: "/admin/reviews", icon: "reviews" },
         ],
       },

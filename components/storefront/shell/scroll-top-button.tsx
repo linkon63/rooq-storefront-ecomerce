@@ -42,7 +42,7 @@ export function ScrollTopButton() {
       aria-label="Back to top"
       tabIndex={visible ? 0 : -1}
       onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}
-      className={`relative grid size-12 place-items-center rounded-full bg-chalk text-ink shadow-sheet transition-opacity duration-300 ease-(--ease-quiet) ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      className={`relative hidden size-12 md:grid place-items-center rounded-full bg-chalk text-ink shadow-sheet transition-opacity duration-300 ease-(--ease-quiet) ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`}
     >
       <svg aria-hidden viewBox="0 0 48 48" className="absolute inset-0 size-12 -rotate-90">
         <circle cx="24" cy="24" r={RADIUS} fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="2" />

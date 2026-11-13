@@ -23,10 +23,10 @@ const HELP_LINKS = [
 export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFooterProps) {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-24 bg-ink text-chalk">
-      <div className="page-gutter grid gap-12 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-        <div className="flex flex-col gap-5">
-          <Logo kechi variant="light" className="h-auto w-44 self-start" />
+    <footer className="mt-16 bg-ink text-chalk md:mt-24">
+      <div className="page-gutter grid grid-cols-2 gap-x-6 gap-y-9 py-10 md:gap-12 md:py-14 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="col-span-2 flex flex-col gap-4 md:col-span-2 md:gap-5 lg:col-span-1">
+          <Logo kechi variant="light" className="h-auto w-44 self-center lg:self-start" />
           {settings.footerDescription ? <p className="max-w-[42ch] text-sm text-chalk/75">{settings.footerDescription}</p> : null}
           <NewsletterForm t={newsletter} />
         </div>
@@ -67,9 +67,9 @@ export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFoote
             ))}
           </ul>
         </nav>
-        <div>
+        <div className="col-span-2 text-center md:col-span-2 lg:col-span-1 lg:text-left">
           <h2 className="mb-4 text-sm font-semibold">{t.getInTouch}</h2>
-          <address className="flex flex-col gap-2.5 text-sm not-italic text-chalk/80">
+          <address className="flex flex-col items-center gap-2.5 text-sm not-italic text-chalk/80 lg:items-start">
             {settings.phones.map((phone) => (
               <a key={phone.value} href={`tel:${phone.value.replace(/\s/g, "")}`} className="hover:text-chalk">
                 {phone.title ? `${phone.title}: ` : ""}
@@ -89,7 +89,7 @@ export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFoote
           <SocialLinks social={settings.social} />
         </div>
       </div>
-      <div className="page-gutter border-t border-chalk/15 py-8">
+      <div className="page-gutter hidden border-t border-chalk/15 py-8 md:block">
         <FooterPayments title={t.securePayment} />
       </div>
       <div className="border-t border-chalk/15 py-8" aria-hidden>

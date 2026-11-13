@@ -7,14 +7,20 @@ type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   hint?: string;
 };
 
-/** Labelled input with inline error wiring (aria-invalid / aria-describedby). */
+/** Labelled input with inline error wiring (aria-invalid / aria-describedby); required fields get a red asterisk. */
 export function TextField({ label, id, error, hint, className = "", ...input }: TextFieldProps) {
   const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined;
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <label htmlFor={id} className="text-sm font-semibold">
         {label}
-        {input.required ? null : <span className="font-normal text-stone"> (optional)</span>}
+        {input.required ? (
+          <span aria-hidden className="text-red-600">
+            {" "}*
+          </span>
+        ) : (
+          <span className="font-normal text-stone"> (optional)</span>
+        )}
       </label>
       <input
         id={id}

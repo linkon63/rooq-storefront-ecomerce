@@ -28,7 +28,7 @@ const item = "inline-flex items-center gap-1.5 whitespace-nowrap transition-opac
  */
 export function TopBar({ phone, whatsapp, announcement, locale, t }: TopBarProps) {
   return (
-    <div className="bg-ink text-chalk">
+    <div className="hidden bg-ink text-chalk md:block">
       <div className="page-gutter type-label flex h-9 items-center justify-between gap-4 text-[0.6875rem]">
         <div className="flex items-center gap-4">
           {phone ? (

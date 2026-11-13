@@ -16,7 +16,7 @@ export function SocialLinks({ social }: { social: Links }) {
   const links = PLATFORMS.filter((platform) => social[platform.key]);
   if (links.length === 0) return null;
   return (
-    <ul className="mt-5 flex gap-1">
+    <ul className="mt-5 flex justify-center gap-1 lg:justify-start">
       {links.map(({ key, label, Icon }) => (
         <li key={key}>
           <a

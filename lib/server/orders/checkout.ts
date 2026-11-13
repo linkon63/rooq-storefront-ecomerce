@@ -5,6 +5,7 @@ import { DEFAULT_DELIVERY_ZONE, ORDER_NOTES, POS_ADDRESS_LINE, POS_WALK_IN_NAME 
 import type { CurrentUser } from "@/lib/server/auth/current-user";
 import { badRequest, notFound } from "@/lib/server/http-error";
 import { prisma } from "@/lib/server/prisma";
+import { markAbandonedCartsRecovered } from "@/lib/server/abandoned-carts/service";
 import type { OrderAddressRow } from "@/utils/mappers/order";
 import type { OrderResponse } from "@/types/commerce/order";
 import { buildOrderLines } from "./lines";
@@ -13,6 +14,11 @@ import { ORDER_TX_OPTIONS, placeOrder } from "./place";
 import { loadOrder } from "./queries";
 import { loadDeliverySettings } from "./shipping";
 import type { CreateGuestOrderInput, CreateOrderInput, CreatePosOrderInput } from "./schemas";
+
+/** The order is placed: a failure to tidy the abandoned-cart list must not fail checkout. */
+async function closeAbandonedCarts(phone: string, orderNumber: string): Promise<void> {
+  await markAbandonedCartsRecovered(phone, orderNumber).catch((error) => console.error("[abandoned-carts] recover failed", error));
+}
 
 /** Mails go out after the response so checkout never waits on the provider. */
 function mailAfterResponse(order: OrderResponse): void {
@@ -75,6 +81,7 @@ export async function createOrderFromCart(user: CurrentUser, input: CreateOrderI
 
   const order = await loadOrder(orderId);
   mailAfterResponse(order);
+  await closeAbandonedCarts(shippingAddress.phone, order.orderNumber);
   return order;
 }
 
@@ -109,6 +116,7 @@ export async function createGuestOrder(input: CreateGuestOrderInput): Promise<Or
 
   const order = await loadOrder(orderId);
   mailAfterResponse(order);
+  await closeAbandonedCarts(shippingAddress.phone, order.orderNumber);
   return order;
 }
 

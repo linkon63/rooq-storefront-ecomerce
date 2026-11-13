@@ -1,11 +1,10 @@
-import Image from "next/image";
 import Logo from "@/components/storefront/shared/Logo";
 import { SHOP_WEBSITE } from "@/lib/shop-contact";
 
-type Props = { shopName: string; logo?: string | null; address: string; phone: string; details: [string, string][] };
+type Props = { shopName: string; address: string; phone: string; details: [string, string][] };
 
-/** Shop identity and logo, then the invoice title with its details. */
-export function InvoiceLetterhead({ shopName, logo, address, phone, details }: Props) {
+/** Shop identity and the storefront header's logo, then the invoice title with its details. */
+export function InvoiceLetterhead({ shopName, address, phone, details }: Props) {
   return (
     <>
       <div className="flex items-start justify-between gap-6 border-b-2 border-ink pb-5">
@@ -17,11 +16,7 @@ export function InvoiceLetterhead({ shopName, logo, address, phone, details }: P
             {SHOP_WEBSITE.label}
           </a>
         </div>
-        {logo ? (
-          <Image alt={shopName} className="h-12 w-auto max-w-[45%] shrink-0 object-contain" height={48} priority src={logo} unoptimized width={160} />
-        ) : (
-          <Logo className="h-9 shrink-0" />
-        )}
+        <Logo kechi className="h-16 shrink-0" />
       </div>
       <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between print:flex-row print:items-start print:justify-between">
         <h2 className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-ink">Invoice</h2>
