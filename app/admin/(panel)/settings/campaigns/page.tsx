@@ -1,17 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { AdminIcon, PageHeader } from "../../../_components/admin-shell";
 import { ConfirmModal } from "../../../_components/confirm-modal";
 import { useCampaigns } from "../../../_hooks/use-campaigns";
 import { useDiscounts } from "../../../_hooks/use-discounts";
 import { useSections } from "../../../_hooks/use-sections";
+import { HOME_PAGE_KEY, SECTION_TITLES } from "@/lib/constants/content";
+import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import type { Campaign } from "@/types/admin/content";
 import { campaignImageUrls } from "@/utils/admin/content";
 import { campaignToForm, emptyCampaignForm, type CampaignFormState } from "@/utils/mappers/campaign-form";
 import { SaveButton, SettingsCard } from "../_components/settings-ui";
 import { CampaignFormModal } from "./_components/campaign-form-modal";
 import { CampaignTable } from "./_components/campaign-table";
+import { CountdownCard } from "./_components/countdown-card";
 import { SectionsCard } from "./_components/sections-card";
 
 export default function CampaignsPage() {
@@ -28,6 +32,17 @@ export default function CampaignsPage() {
     return campaigns.filter((c) => `${c.title} ${c.section?.title ?? ""}`.toLowerCase().includes(query));
   }, [campaigns, search]);
 
+  const edit = (c: Campaign) => setEditing(campaignToForm(c, campaignImageUrls(c), new Date()));
+
+  async function createCountdownSale() {
+    const section = await sections.ensureSection(SECTION_TITLES.countdown, HOME_PAGE_KEY);
+    if (!section) {
+      toast.error(ERROR_MESSAGES.campaign.countdownSectionFailed);
+      return;
+    }
+    setEditing({ ...emptyCampaignForm(new Date()), sectionId: section.id, linkUrl: "/sale", linkLabel: "Shop the sale" });
+  }
+
   async function confirmDelete() {
     if (toDelete && (await remove(toDelete))) setToDelete(null);
   }
@@ -41,6 +56,8 @@ export default function CampaignsPage() {
       />
 
       <div className="space-y-6">
+        <CountdownCard campaigns={campaigns} onCreate={createCountdownSale} onEdit={edit} />
+
         <SettingsCard title="Campaign list">
           {error && <p className="mb-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -57,7 +74,7 @@ export default function CampaignsPage() {
             campaigns={filtered}
             isLoading={isLoading}
             onDelete={setToDelete}
-            onEdit={(c) => setEditing(campaignToForm(c, campaignImageUrls(c), new Date()))}
+            onEdit={edit}
             onToggle={toggleStatus}
           />
         </SettingsCard>

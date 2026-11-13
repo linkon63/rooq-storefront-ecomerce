@@ -5,15 +5,18 @@ import { HeaderActions } from "./header-actions";
 import { MobileNavButton } from "./mobile-nav-button";
 import { Suspense } from "react";
 import { NavLink } from "./nav-link";
+import { TopBar } from "./top-bar";
 
 type SiteHeaderProps = {
   nav: NavItem[];
   categories: ShopCategoryNode[];
   announcement: string | null;
+  phone: string | null;
+  whatsapp: string;
 };
 
 /** Sticky header: thin, left-aligned, the garment gets the space. */
-export function SiteHeader({ nav: allNav, categories, announcement }: SiteHeaderProps) {
+export function SiteHeader({ nav: allNav, categories, announcement, phone, whatsapp }: SiteHeaderProps) {
   // Coming-soon categories stay out of the header (they remain in the footer and on the home page).
   const nav = allNav.filter((item) => !item.soon);
   const topCategories = categories
@@ -27,9 +30,7 @@ export function SiteHeader({ nav: allNav, categories, announcement }: SiteHeader
       >
         Skip to content
       </a>
-      {announcement ? (
-        <p className="type-label flex h-8 items-center justify-center bg-ink px-4 text-center text-chalk">{announcement}</p>
-      ) : null}
+      <TopBar phone={phone} whatsapp={whatsapp} announcement={announcement} />
       <header className="sticky top-0 z-40 border-b border-ink/10 bg-chalk/90 backdrop-blur-md">
         <div className="page-gutter grid h-[4.5rem] grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-24 lg:gap-8">
           <div className="flex items-center">

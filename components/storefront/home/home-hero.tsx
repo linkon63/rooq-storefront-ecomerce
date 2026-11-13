@@ -7,6 +7,9 @@ import { HeroSlider } from "./hero-slider";
 
 const HEADLINE = ["Wear it", "out."];
 const DEFAULT_COPY = "Handloom cottons and zari borders in colours made for the season.";
+const HERITAGE_BADGE = "100% original handloom tant";
+const HERITAGE_COPY =
+  "Every saree is woven by hand on a real tant loom and brought straight from the weavers of Tangail and Shantipur — no power-loom copies, only the original craft passed down through generations.";
 
 type HomeHeroProps = { returnDays: number; hero: HomeHeroData };
 
@@ -36,17 +39,26 @@ export function HomeHero({ returnDays, hero }: HomeHeroProps) {
             ))}
           </h1>
           <div data-hero-after className="hero-reveal flex flex-col gap-5">
-            <p className="type-lead max-w-[40ch] text-stone">
+            <p className="type-label inline-flex w-fit items-center gap-2 border border-gold/60 bg-selvedge/50 px-3 py-1.5 text-ink">
+              <span aria-hidden className="size-1.5 rounded-full bg-dye" />
+              {HERITAGE_BADGE}
+            </p>
+            <p className="type-lead max-w-[44ch] text-stone">
               {copy} Free returns within {returnDays} days.
             </p>
+            <p className="max-w-[48ch] border-l-2 border-dye pl-4 text-[0.9375rem] leading-relaxed text-ink">{HERITAGE_COPY}</p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={campaign?.linkUrl ?? "/shop?category=women-sarees"}
-                className="type-label inline-flex h-12 items-center bg-ink px-6 text-chalk transition-colors duration-300 hover:bg-ink/80"
+                className="type-label inline-flex h-12 items-center gap-2 bg-dye px-7 text-chalk shadow-lg shadow-dye/25 ring-2 ring-dye/20 ring-offset-2 transition-all duration-300 hover:-translate-y-0.5 hover:bg-dye-deep hover:shadow-xl focus-visible:ring-dye"
               >
-                {campaign?.linkLabel ?? "Shop sarees"}
+                {campaign?.linkLabel ?? "Shop the edit"}
+                <span aria-hidden>→</span>
               </Link>
-              <Link href="/new" className="type-label inline-flex h-12 items-center border border-ink px-6 transition-colors duration-300 hover:bg-ink hover:text-chalk">
+              <Link
+                href="/new"
+                className="type-label inline-flex h-12 items-center border-2 border-ink bg-chalk px-7 text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-ink hover:text-chalk"
+              >
                 New in
               </Link>
             </div>

@@ -4,6 +4,7 @@ import { WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
 import type { NavItem } from "@/types/storefront/catalog";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import Logo from "../shared/Logo";
+import { FooterWeavingArt } from "./footer-art/footer-weaving-art";
 import { FooterPayments } from "./footer-payments";
 import { NewsletterForm } from "./newsletter-form";
 import { SocialLinks } from "./social-links";
@@ -90,10 +91,12 @@ export function SiteFooter({ nav, settings, policies }: SiteFooterProps) {
       <div className="page-gutter border-t border-chalk/15 py-8">
         <FooterPayments />
       </div>
-      <div className="page-gutter overflow-hidden border-t border-chalk/15 pt-6" aria-hidden>
-        <p className="select-none text-center font-display font-expanded text-[clamp(5rem,26vw,22rem)] font-extrabold leading-[0.8] tracking-tight text-white">
-          ROOQ
-        </p>
+      <div className="border-t border-chalk/15 py-8" aria-hidden>
+        <div className="page-gutter">
+          <div className="relative isolate aspect-[112/39] overflow-hidden">
+            <FooterWeavingArt />
+          </div>
+        </div>
       </div>
       <div className="border-t border-chalk/15">
         <p className="page-gutter py-5 text-center text-xs text-chalk/60">

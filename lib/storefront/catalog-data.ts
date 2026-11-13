@@ -24,8 +24,9 @@ import type {
   ShopCategoryNode,
 } from "@/types/storefront/catalog";
 import type { ReviewWithProduct } from "@/types/storefront/commerce";
-import type { HomeHeroData, StorePolicy, StoreSettings } from "@/types/storefront/content";
+import type { HomeHeroData, SaleCountdownCampaign, StorePolicy, StoreSettings } from "@/types/storefront/content";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
+import { toSaleCountdown } from "@/utils/storefront/countdown";
 import { attachProducts, linkedProductIds, toHeroCampaign } from "@/utils/storefront/hero";
 import { EMPTY_SETTINGS, normalisePolicies, normaliseSettings } from "@/utils/storefront/settings";
 import { cachedRead, readOr, readOrNull } from "./server-api";
@@ -62,6 +63,9 @@ const readHero = cachedRead<[], HomeHeroData>("hero", async () => {
     : [];
   return { mode, slides: attachProducts(slides, cards), campaign: toHeroCampaign(campaigns) };
 });
+const readSaleCountdown = cachedRead<[], SaleCountdownCampaign | null>("sale-countdown", async () =>
+  toSaleCountdown(await listCampaigns(), Date.now()),
+);
 const readCollection = cachedRead<[string, number], CollectionDetail>("collection", (slug, page) =>
   findCollectionBySlug(slug, parseValue({ page: String(page), limit: "24" }, collectionDetailQuery)),
 );
@@ -107,4 +111,9 @@ export function recentReviews(limit: number): Promise<ReviewWithProduct[]> {
 /** The home hero: the admin's mode, the active slides (with linked product cards) and the live hero campaign. */
 export const getHomeHero = cache(
   (): Promise<HomeHeroData> => readOr("hero", readHero, { mode: "SLIDER", slides: [], campaign: null }),
+);
+
+/** The live home "Sale Countdown" campaign (end date still ahead), or null. */
+export const getSaleCountdown = cache(
+  (): Promise<SaleCountdownCampaign | null> => readOr("sale-countdown", readSaleCountdown, null),
 );

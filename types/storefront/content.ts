@@ -42,6 +42,18 @@ export type HeroCampaign = {
   images: HeroImage[];
 };
 
+/** The live "Sale Countdown" campaign on the home page; `endAt` is an ISO string in the future when loaded. */
+export type SaleCountdownCampaign = {
+  id: string;
+  title: string;
+  description: string | null;
+  linkUrl: string | null;
+  linkLabel: string | null;
+  endAt: string;
+  image: HeroImage | null;
+  discount: { name: string; type: "percentage" | "fixed"; value: number } | null;
+};
+
 /** One slide of the hero slider; `product` is the linked product's card (its details show in the hero corner). */
 export type HeroSlide = { id: string; image: HeroImage; product: ProductCard | null };
 

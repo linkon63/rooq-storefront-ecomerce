@@ -5,6 +5,7 @@ import { FloatingActions } from "@/components/storefront/shell/floating-actions"
 import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
 import { StoreToaster } from "@/components/storefront/shell/store-toaster";
+import { WHATSAPP_NUMBER } from "@/lib/shop-contact";
 import { getCategoryTree, getStorePolicies, getStoreSettings } from "@/lib/storefront/catalog-data";
 import { buildPrimaryNav } from "@/utils/storefront/nav";
 import { announcementFor } from "@/utils/storefront/settings";
@@ -28,7 +29,13 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
       <GoogleTagManagerNoScript />
       <GoogleTagManagerScript />
       <div className="storefront-root flex min-h-full flex-1 flex-col">
-        <SiteHeader nav={nav} categories={categories} announcement={announcement} />
+        <SiteHeader
+          nav={nav}
+          categories={categories}
+          announcement={announcement}
+          phone={settings.phones[0]?.value ?? null}
+          whatsapp={WHATSAPP_NUMBER}
+        />
         <main id="main" className="flex-1">
           {children}
         </main>
