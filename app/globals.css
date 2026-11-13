@@ -129,9 +129,9 @@
 /* ── Page frame: one header, one spacing scale for every page ───────────── */
 :root {
   --announce-h: 2rem;
-  --header-h: 3.5rem;
+  --header-h: 4.5rem;
   @media (width >= 64rem) {
-    --header-h: 4.5rem;
+    --header-h: 6rem;
   }
 }
 @utility page-head {

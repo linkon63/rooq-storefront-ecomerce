@@ -8,10 +8,17 @@ import Image from "next/image";
 export default function Logo({
   className = "",
   variant = "dark",
+  kechi = false,
 }: {
   className?: string;
   variant?: "dark" | "light";
+  /** Cropped "kechi" mark; `light` is the all-white version for dark surfaces. Storefront header and footer. */
+  kechi?: boolean;
 }) {
+  if (kechi) {
+    const src = variant === "light" ? "/images/logo-kechi-clear-white.png" : "/images/logo-kechi-clear.png";
+    return <Image src={src} alt="Rooq" width={832} height={559} priority className={`${className.includes("w-") ? "" : "w-auto"} ${className}`} />;
+  }
   return (
     <Image
       src="/images/logo-wordmark.png"

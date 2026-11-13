@@ -1,4 +1,4 @@
-import { COMING_SOON_HREF, NAV_LEAD, NAV_TAIL } from "@/lib/constants/storefront";
+import { COMING_SOON_HREF, NAV_LEAD, NAV_SHOP, NAV_TAIL } from "@/lib/constants/storefront";
 import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
 
 /** Where a category links: its shop listing, or the home "coming soon" section while it is announced only. */
@@ -9,7 +9,7 @@ export function categoryHref(category: Pick<ShopCategoryNode, "slug" | "isComing
 const isLive = (category: ShopCategoryNode) => category.isActive !== false;
 
 /**
- * Main navigation from the category tree: New in, each active root category
+ * Main navigation from the category tree: Shop (all products, unfiltered), New in, each active root category
  * (launched roots followed by their sub-categories, e.g. Women, Sarees), Sale.
  * Coming-soon roots keep their place and carry `soon`.
  */
@@ -21,5 +21,5 @@ export function buildPrimaryNav(categories: readonly ShopCategoryNode[]): NavIte
     const children = (root.children ?? []).filter(isLive).map((child) => ({ label: child.name, href: categoryHref(child) }));
     return [self, ...children];
   });
-  return [NAV_LEAD, ...middle, NAV_TAIL];
+  return [NAV_SHOP, NAV_LEAD, ...middle, NAV_TAIL];
 }

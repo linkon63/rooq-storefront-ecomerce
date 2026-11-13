@@ -84,12 +84,12 @@ export const HOME_SHELF_SIZE = 5;
 
 /** The order journey shown on the home page, in order (cash on delivery: payment comes last). */
 export const ORDER_JOURNEY_STEPS = [
-  { key: "placed", title: "Order placed", body: "You check out on the site in a few taps." },
-  { key: "accepted", title: "Order accepted", body: "We confirm your order by phone or message." },
-  { key: "packed", title: "Packed", body: "Your saree is folded, checked and packed." },
-  { key: "delivery", title: "Out for delivery", body: "A courier brings it to your door." },
-  { key: "received", title: "Received", body: "Open the parcel and check it with the rider." },
-  { key: "paid", title: "Paid", body: "Pay on delivery, in cash or by mobile banking." },
+  { key: "placed", title: "Order placed", body: "You check out on the site in a few taps.", action: "Place the order" },
+  { key: "accepted", title: "Order accepted", body: "We confirm your order by phone or message.", action: "Confirm on the call" },
+  { key: "packed", title: "Packed", body: "Your saree is folded, checked and packed.", action: "Hand it to the courier" },
+  { key: "delivery", title: "Out for delivery", body: "A courier brings it to your door.", action: "Ring the doorbell" },
+  { key: "received", title: "Received", body: "Open the parcel and check it with the rider.", action: "Pay the rider" },
+  { key: "paid", title: "Paid", body: "Pay on delivery, in cash or by mobile banking.", action: "Watch it again" },
 ] as const;
 
 /** Home-page anchor that coming-soon categories and the "Soon" tags link to. */
@@ -97,6 +97,7 @@ export const COMING_SOON_ANCHOR = "coming-soon";
 export const COMING_SOON_HREF = `/#${COMING_SOON_ANCHOR}`;
 
 /** Fixed ends of the main navigation; the categories in between come from the database. */
+export const NAV_SHOP = { label: "Shop", href: "/shop" } as const;
 export const NAV_LEAD = { label: "New in", href: "/new" } as const;
 export const NAV_TAIL = { label: "Sale", href: "/sale" } as const;
 

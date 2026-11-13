@@ -1,62 +1,60 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
-import { usePrefersReducedMotion } from "@/hooks/use-media-query";
+import { useRef } from "react";
+import { FiPause, FiPlay } from "react-icons/fi";
+import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { ORDER_JOURNEY_STEPS } from "@/lib/constants/storefront";
-import { canRunWebGL, prefersLowPower } from "@/lib/storefront/device";
+import { JourneyCopy } from "./journey-copy";
+import { JourneyStage } from "./journey-stage";
+import { JourneySteps } from "./journey-steps";
 import { useJourneyProgress } from "./use-journey-progress";
-
-const JourneyScene = dynamic(() => import("./journey-scene"), { ssr: false });
 
 const STEPS = ORDER_JOURNEY_STEPS.length;
 
 /**
- * How an order reaches the shopper, as a 3D road a parcel travels along
- * (three.js, timed by GSAP). The numbered list below is the real content and
- * the whole story without motion: reduced motion, low-power devices and
- * browsers without WebGL see only the list.
+ * How an order reaches the shopper. The illustrated scene for each step runs
+ * full width behind the copy (above it on small screens) and loops through
+ * all six; the copy changes with it, and clicking the scene or the button
+ * moves the story on. With reduced motion the scenes are still pictures.
  */
 export function OrderJourney() {
   const section = useRef<HTMLElement>(null);
   const reduced = usePrefersReducedMotion();
-  const [capable, setCapable] = useState(false);
-  const [ready, setReady] = useState(false);
-  const animate = capable && !reduced;
-  const { progress, active } = useJourneyProgress(section, STEPS, animate);
+  const animate = !reduced;
+  const wide = useMediaQuery("(min-width: 64rem)");
+  const { active, playing, goTo, setPlayback } = useJourneyProgress(section, STEPS, animate);
 
-  useEffect(() => {
-    setCapable(canRunWebGL() && !prefersLowPower());
-  }, []);
+  const advance = () => goTo(active >= STEPS - 1 ? 0 : active + 1);
 
   return (
-    <section ref={section} aria-labelledby="journey-title" className="bg-ink text-chalk">
-      <div className="page-gutter section-y flex flex-col gap-8">
-        <div className="flex flex-col gap-3">
-          <h2 id="journey-title" className="type-h2">
-            From our hands to yours
-          </h2>
-          <p className="type-lead max-w-[52ch] text-chalk/75">Every order follows the same six steps. You pay only when the parcel is in your hands.</p>
-        </div>
-        {animate ? (
-          <div aria-hidden className={`h-56 transition-opacity duration-700 md:h-72 ${ready ? "opacity-100" : "opacity-0"}`}>
-            <JourneyScene steps={STEPS} progress={progress} active onReady={() => setReady(true)} />
+    <section ref={section} aria-labelledby="journey-title" className="relative isolate overflow-hidden bg-ink text-chalk">
+      <div className="aspect-[4/3] w-full sm:aspect-[16/9] lg:absolute lg:inset-0 lg:-z-10 lg:aspect-auto">
+        <JourneyStage active={active} animate={animate} wide={wide} onAction={advance} />
+      </div>
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 -z-10 hidden w-[62%] bg-gradient-to-r from-ink from-35% via-ink/85 via-55% to-transparent lg:block" />
+      <div className="page-gutter pointer-events-none flex flex-col justify-center py-8 lg:min-h-[calc(100svh-var(--header-h))] lg:py-14">
+        <div className="pointer-events-auto flex w-full max-w-md flex-col gap-8 lg:gap-10">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1.5">
+              <h2 id="journey-title" className="type-h2">
+                From our hands to yours
+              </h2>
+              <p className="type-body text-chalk/70">Six steps, and you pay only when the parcel is in your hands.</p>
+            </div>
+            {animate ? (
+              <button
+                type="button"
+                onClick={() => setPlayback(!playing)}
+                aria-label={playing ? "Pause the order journey" : "Play the order journey"}
+                className="grid size-10 shrink-0 place-items-center rounded-full ring-1 ring-chalk/30 transition-colors hover:bg-chalk hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chalk"
+              >
+                {playing ? <FiPause aria-hidden className="size-4" /> : <FiPlay aria-hidden className="size-4" />}
+              </button>
+            ) : null}
           </div>
-        ) : null}
-        <ol className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3 lg:grid-cols-6">
-          {ORDER_JOURNEY_STEPS.map((step, index) => {
-            const lit = !animate || index <= active;
-            return (
-              <li key={step.key} aria-current={animate && index === active ? "step" : undefined} className="flex flex-col gap-2">
-                <span className={`h-px w-full transition-colors duration-500 ${lit ? "bg-dye" : "bg-chalk/20"}`} />
-                <span className={`type-label transition-opacity duration-500 ${lit ? "opacity-100" : "opacity-50"}`}>
-                  {index + 1}. {step.title}
-                </span>
-                <span className="type-body text-chalk/70">{step.body}</span>
-              </li>
-            );
-          })}
-        </ol>
+          <JourneyCopy active={active} animate={animate} onAdvance={advance} />
+          <JourneySteps active={active} onPick={goTo} />
+        </div>
       </div>
     </section>
   );

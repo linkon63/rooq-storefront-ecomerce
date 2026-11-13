@@ -1,0 +1,20 @@
+/** Brand colours for the order-journey SVG scenes. */
+export const JOURNEY_COLORS = {
+  ink: "#1c3934",
+  inkSoft: "#2b514a",
+  chalk: "#ffffff",
+  paper: "#f6ecdc",
+  selvedge: "#f0dfc6",
+  line: "#dccaad",
+  dye: "#9b1a41",
+  dyeDeep: "#7d1434",
+  gold: "#a08c6b",
+  kraft: "#c8a06a",
+  kraftLight: "#d8b37e",
+  kraftShade: "#8f6c3f",
+  tape: "#e2cf9f",
+  skin: "#b97f57",
+  skinWarm: "#d29a72",
+  skinDeep: "#8d5b3c",
+  hair: "#2a1d17",
+} as const;
