@@ -25,7 +25,7 @@ export function JourneyCopy({ active, animate, onAdvance, t }: JourneyCopyProps)
   return (
     <div ref={scope} className="flex flex-col items-start gap-3">
       <p data-copy className="type-meta tabular-nums text-chalk/60">
-        {t.step(active + 1, t.journey.length)}
+        {t.step.replace("{n}", String(active + 1)).replace("{total}", String(t.journey.length))}
       </p>
       <h3 data-copy className="type-display flex items-end text-chalk lg:min-h-[2em]">
         {step.title}

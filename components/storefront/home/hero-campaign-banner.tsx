@@ -21,7 +21,7 @@ export async function HeroCampaignBanner({ campaign, returnDays }: { campaign: H
         </h1>
         {campaign.description ? (
           <p className="type-lead max-w-[42ch] text-stone">
-            {campaign.description} {t.home.freeReturns(returnDays)}
+            {campaign.description} {t.home.freeReturns.replace("{days}", String(returnDays))}
           </p>
         ) : null}
         {campaign.linkUrl ? (

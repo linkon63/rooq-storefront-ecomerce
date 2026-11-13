@@ -40,7 +40,7 @@ export async function HomeHero({ returnDays, hero }: HomeHeroProps) {
               {t.home.heritageBadge}
             </p>
             <p className="type-lead max-w-[44ch] text-stone">
-              {copy} {t.home.freeReturns(returnDays)}
+              {copy} {t.home.freeReturns.replace("{days}", String(returnDays))}
             </p>
             <p className="max-w-[48ch] border-l-2 border-dye pl-4 text-[0.9375rem] leading-relaxed text-ink">{t.home.heritageCopy}</p>
             <div className="flex flex-wrap items-center gap-3">

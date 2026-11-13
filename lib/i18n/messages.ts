@@ -57,7 +57,7 @@ const en = {
     heritageBadge: "100% original handloom tant",
     heritageCopy:
       "Every saree is woven by hand on a real tant loom and brought straight from the weavers of Tangail and Shantipur — no power-loom copies, only the original craft passed down through generations.",
-    freeReturns: (days: number) => `Free returns within ${days} days.`,
+    freeReturns: "Free returns within {days} days.",
     shopNow: "Shop now",
     shopEdit: "Shop the edit",
     pauseShow: "Pause the slideshow",
@@ -70,7 +70,7 @@ const en = {
     journeyLead: "Six steps, and you pay only when the parcel is in your hands.",
     journeyPause: "Pause the order journey",
     journeyPlay: "Play the order journey",
-    step: (n: number, total: number) => `Step ${n} of ${total}`,
+    step: "Step {n} of {total}",
     journey: [
       { title: "Order placed", body: "You check out on the site in a few taps.", action: "Place the order" },
       { title: "Order accepted", body: "We confirm your order by phone or message.", action: "Confirm on the call" },
@@ -142,7 +142,7 @@ const bn: Messages = {
     heritageBadge: "১০০% আসল হ্যান্ডলুম তাঁত",
     heritageCopy:
       "প্রতিটি শাড়ি আসল তাঁতে হাতে বোনা, সরাসরি টাঙ্গাইল ও শান্তিপুরের তাঁতিদের কাছ থেকে আনা — কোনো পাওয়ারলুমের নকল নয়, শুধু প্রজন্ম ধরে চলে আসা আসল কারুশিল্প।",
-    freeReturns: (days) => `${days} দিনের মধ্যে ফ্রি রিটার্ন।`,
+    freeReturns: "{days} দিনের মধ্যে ফ্রি রিটার্ন।",
     shopNow: "এখনই কিনুন",
     shopEdit: "কালেকশন দেখুন",
     pauseShow: "স্লাইডশো থামান",
@@ -155,7 +155,7 @@ const bn: Messages = {
     journeyLead: "ছয় ধাপ, আর টাকা দেবেন পার্সেল হাতে পাওয়ার পর।",
     journeyPause: "অর্ডার যাত্রা থামান",
     journeyPlay: "অর্ডার যাত্রা চালান",
-    step: (n, total) => `ধাপ ${n} / ${total}`,
+    step: "ধাপ {n} / {total}",
     journey: [
       { title: "অর্ডার দেওয়া হয়েছে", body: "সাইটে কয়েকটি ট্যাপেই চেকআউট করুন।", action: "অর্ডার দিন" },
       { title: "অর্ডার গৃহীত", body: "ফোন বা মেসেজে আমরা আপনার অর্ডার নিশ্চিত করি।", action: "কলে নিশ্চিত করুন" },
