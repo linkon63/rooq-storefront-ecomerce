@@ -42,7 +42,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
           nav={nav}
           categories={categories}
           announcement={announcement}
-          phone={settings.phones[0]?.value ?? null}
+          phone={WHATSAPP_NUMBER}
           whatsapp={WHATSAPP_NUMBER}
           locale={locale}
           t={t}

@@ -23,9 +23,10 @@ export function NavLink({ item, soon = "Soon" }: { item: NavItem; soon?: string 
       href={item.href}
       aria-current={active ? "page" : undefined}
       aria-describedby={item.soon ? tipId : undefined}
-      className={`group relative type-label text-[0.9375rem]! inline-flex items-center gap-1.5 py-2 transition-colors duration-200 hover:font-bold hover:text-dye ${tone}`}
+      title={item.label}
+      className={`group relative type-label text-[0.9375rem]! inline-flex whitespace-nowrap items-center gap-1.5 py-2 transition-colors duration-200 hover:font-bold hover:text-dye ${tone}`}
     >
-      <span data-label={item.label} className="after:invisible after:block after:h-0 after:font-bold after:content-[attr(data-label)]">
+      <span data-label={item.label} className="inline-block max-w-[12rem] truncate after:invisible after:block after:h-0 after:font-bold after:content-[attr(data-label)]">
         {item.label}
       </span>
       {item.soon ? (

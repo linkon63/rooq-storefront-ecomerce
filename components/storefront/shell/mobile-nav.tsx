@@ -6,6 +6,7 @@ import { categoryHref } from "@/utils/storefront/nav";
 import type { Messages } from "@/lib/i18n/messages";
 import type { Locale } from "@/lib/i18n/locales";
 import { LanguageSwitch } from "./language-switch";
+import { MobileSignOut } from "./mobile-sign-out";
 import { Modal } from "../shared/modal";
 
 type MobileNavProps = {
@@ -75,6 +76,7 @@ export function MobileNav({ open, onOpenChange, nav, categories, t, soon, locale
               {t.contact}
             </Link>
           </li>
+          <MobileSignOut label={t.signOut} onDone={close} />
         </ul>
       </nav>
     </Modal>

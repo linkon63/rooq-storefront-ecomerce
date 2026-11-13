@@ -9,6 +9,7 @@ import { selectCartCount } from "@/lib/store/slices/cart-slice";
 import { selectCompareCount, selectWishlistCount } from "@/lib/store/slices/product-lists-slice";
 import { setCartDrawerOpen, setSearchOpen } from "@/lib/store/slices/ui-slice";
 import type { Messages } from "@/lib/i18n/messages";
+import { AccountMenu } from "./account-menu";
 import { CountBadge } from "./count-badge";
 
 const iconButton = "relative grid size-10 place-items-center rounded hover:bg-selvedge";
@@ -27,9 +28,7 @@ export function HeaderActions({ t }: { t: Messages["header"] }) {
         <FiSearch aria-hidden className="size-5" />
       </button>
       {isSignedIn ? (
-        <Link href="/profile" className={iconButton} aria-label={t.account}>
-          <FiUser aria-hidden className="size-5" />
-        </Link>
+        <AccountMenu t={t} buttonClassName={iconButton} />
       ) : (
         <button type="button" className={iconButton} aria-label={t.signIn} onClick={() => openAuth("login")}>
           <FiUser aria-hidden className="size-5" />

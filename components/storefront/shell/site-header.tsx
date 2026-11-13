@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { NavLink } from "./nav-link";
 import { StickyHeader } from "./sticky-header";
 import { TopBar } from "./top-bar";
+import { headerNav } from "@/utils/storefront/nav";
 
 type SiteHeaderProps = {
   nav: NavItem[];
@@ -43,7 +44,7 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
             <nav aria-label="Main" className="hidden lg:block">
               <ul className="flex items-center gap-6">
                 <Suspense fallback={null}>
-                  {nav.map((item) => (
+                  {headerNav(nav).map((item) => (
                     <li key={item.label}>
                       <NavLink item={item} soon={t.nav.soon} />
                     </li>

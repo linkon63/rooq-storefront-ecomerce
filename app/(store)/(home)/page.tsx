@@ -12,7 +12,7 @@ import { HomeFaq } from "@/components/storefront/home/home-faq";
 import { ReviewsShowcase } from "@/components/storefront/home/reviews-showcase";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
-import { HOME_SHELF_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
+import { HOME_BEST_SELLERS_SIZE, HOME_SHELF_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
 import { getMessages } from "@/lib/i18n/server";
 import { buildFaqs } from "@/utils/storefront/faqs";
 import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail, recentReviews } from "@/lib/storefront/catalog-data";
@@ -36,7 +36,7 @@ export default async function HomePage() {
     productRail({ new: true, sort: "newest", limit: HOME_SHELF_SIZE }),
     productRail({ sort: "newest", limit: HOME_SHELF_SIZE }),
     productRail({ onSale: true, sort: "newest", limit: OFFERS_LIMIT }),
-    productRail({ tag: PRODUCT_TAGS.bestSeller, sort: "popular", limit: HOME_SHELF_SIZE }),
+    productRail({ tag: PRODUCT_TAGS.bestSeller, sort: "popular", limit: HOME_BEST_SELLERS_SIZE }),
     productRail({ tag: PRODUCT_TAGS.comingSoon, sort: "newest", limit: 4 }),
     recentReviews(REVIEWS_LIMIT),
     listCollections({ type: "LOOKBOOK", featured: true }),
@@ -64,7 +64,12 @@ export default async function HomePage() {
       <ProductRail
         title={t.home.bestSellers}
         products={bestSellers.data}
-        link={{ label: t.home.seeBestSellers, href: `/shop?tag=${PRODUCT_TAGS.bestSeller}` }}
+        layout="grid"
+        link={
+          bestSellers.meta.total > HOME_BEST_SELLERS_SIZE
+            ? { label: t.home.seeBestSellers, href: `/shop?tag=${PRODUCT_TAGS.bestSeller}` }
+            : undefined
+        }
       />
       <Suspense fallback={null}>
         <ProductHighlights fallback={bestSellers.data} />

@@ -81,6 +81,8 @@ export const TAG_TITLES = {
 
 /** How many products each home-page shelf shows. */
 export const HOME_SHELF_SIZE = 5;
+/** Home "Best sellers": four large cards; the rest wait behind "See all". */
+export const HOME_BEST_SELLERS_SIZE = 4;
 
 /** The order journey shown on the home page, in order (cash on delivery: payment comes last). */
 export const ORDER_JOURNEY_STEPS = [
@@ -100,6 +102,8 @@ export const COMING_SOON_HREF = `/#${COMING_SOON_ANCHOR}`;
 export const NAV_SHOP = { label: "Shop", href: "/shop" } as const;
 export const NAV_LEAD = { label: "New in", href: "/new" } as const;
 export const NAV_TAIL = { label: "Sale", href: "/sale" } as const;
+/** Category links in the desktop header bar (the mobile menu and footer list them all). */
+export const HEADER_CATEGORY_LIMIT = 3;
 
 export const ACCOUNT_TABS = [
   { key: "orders", label: "Orders" },

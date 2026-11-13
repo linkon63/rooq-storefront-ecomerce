@@ -1,4 +1,4 @@
-import { COMING_SOON_HREF, NAV_LEAD, NAV_SHOP, NAV_TAIL } from "@/lib/constants/storefront";
+import { COMING_SOON_HREF, HEADER_CATEGORY_LIMIT, NAV_LEAD, NAV_SHOP, NAV_TAIL } from "@/lib/constants/storefront";
 import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
 
 /** Where a category links: its shop listing, or the home "coming soon" section while it is announced only. */
@@ -22,4 +22,12 @@ export function buildPrimaryNav(categories: readonly ShopCategoryNode[]): NavIte
     return [self, ...children];
   });
   return [NAV_SHOP, NAV_LEAD, ...middle, NAV_TAIL];
+}
+
+const FIXED_HREFS = new Set<string>([NAV_SHOP.href, NAV_LEAD.href, NAV_TAIL.href]);
+
+/** The desktop header bar: Shop, New in, Sale, plus only the first few category links. */
+export function headerNav(nav: readonly NavItem[], limit = HEADER_CATEGORY_LIMIT): NavItem[] {
+  let categories = 0;
+  return nav.filter((item) => FIXED_HREFS.has(item.href) || categories++ < limit);
 }

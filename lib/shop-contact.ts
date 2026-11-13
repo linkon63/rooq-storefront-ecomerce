@@ -20,8 +20,8 @@ const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store").replace(
 export const SHOP_WEBSITE = { label: SITE.replace(/^https?:\/\//, ""), href: SITE };
 /** The shop's Facebook page, printed on invoices while Settings → Social has none. */
 export const FALLBACK_FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61594622716963";
-/** Shop WhatsApp line shown in the footer. */
-export const WHATSAPP_NUMBER = "01712508063";
+/** Shop hotline: the header's call and WhatsApp links, and the footer WhatsApp line. */
+export const WHATSAPP_NUMBER = "+8801581980988";
 export const FALLBACK_HOURS = "8:00 AM – 10:00 PM";
 export const FALLBACK_FOOTER_DESCRIPTION =
   "Rooq makes considered clothing, footwear and accessories for women, men and kids, with honest sizing and easy returns.";
