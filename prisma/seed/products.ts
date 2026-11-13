@@ -1,9 +1,11 @@
 import type { SeedDb } from "./db";
 import { stableNumber, storeSvg } from "./db";
+import { saveImage } from "../../lib/server/media/save-image";
 import { garmentSvg } from "./placeholder-art";
 import type { Masters } from "./masters";
 import type { CategoryIds } from "./categories";
 import { PRODUCTS, type ProductSeed } from "./product-data";
+import { readProductPhotos } from "./product-photos";
 
 type Refs = {
   masters: Masters;
@@ -31,7 +33,23 @@ function stockFor(sku: string): number {
   return 8 + stableNumber(sku, 32);
 }
 
+/** Real photos: every file in the product folder, cover first, all tied to the product's colour. */
+async function seedPhotoGallery(db: SeedDb, productId: string, seed: ProductSeed, folder: string, refs: Refs) {
+  const color = refs.masters.colors.get(seed.colors[0])!;
+  const photos = await readProductPhotos(folder);
+  for (const [position, photo] of photos.entries()) {
+    const saved = await saveImage(photo.bytes, { alt: `${seed.name}, photo ${position + 1}`, db });
+    await db.productMedia.upsert({
+      where: { productId_mediaId: { productId, mediaId: saved.id } },
+      update: { position, colorId: color.id, isPrimary: position === 0 },
+      create: { productId, mediaId: saved.id, position, colorId: color.id, isPrimary: position === 0 },
+    });
+  }
+}
+
 async function seedGallery(db: SeedDb, productId: string, seed: ProductSeed, refs: Refs) {
+  if (seed.photos) return seedPhotoGallery(db, productId, seed, seed.photos, refs);
+  if (!seed.kind) throw new Error(`${seed.slug} needs either photos or a kind`);
   let position = 0;
   for (const [colorIndex, colorSlug] of seed.colors.entries()) {
     const color = refs.masters.colors.get(colorSlug)!;
@@ -58,7 +76,7 @@ async function seedVariants(db: SeedDb, productId: string, seed: ProductSeed, re
       const size = refs.masters.sizes.get(sizeSlug)!;
       const sku = `${seed.styleCode}-${color.code}-${sizeCode(sizeSlug)}`;
       const exists = await db.productVariant.findUnique({ where: { sku }, select: { id: true } });
-      const stock = stockFor(sku);
+      const stock = seed.stock ?? stockFor(sku);
       const variant = await db.productVariant.upsert({
         where: { sku },
         update: { colorId: color.id, sizeId: size.id, position: colorIndex * 100 + sizeIndex },

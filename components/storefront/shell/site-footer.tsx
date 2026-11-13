@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { PRIMARY_NAV } from "@/lib/constants/storefront";
+import type { NavItem } from "@/types/storefront/catalog";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import Logo from "../shared/Logo";
 import { NewsletterForm } from "./newsletter-form";
 import { SocialLinks } from "./social-links";
 
-type SiteFooterProps = { settings: StoreSettings; policies: StorePolicy[] };
+type SiteFooterProps = { nav: NavItem[]; settings: StoreSettings; policies: StorePolicy[] };
 
 const HELP_LINKS = [
   { label: "Contact us", href: "/contact" },
@@ -15,7 +15,7 @@ const HELP_LINKS = [
 ];
 
 /** Footer: newsletter, shop and help links, contact and policies from Settings. */
-export function SiteFooter({ settings, policies }: SiteFooterProps) {
+export function SiteFooter({ nav, settings, policies }: SiteFooterProps) {
   const year = new Date().getFullYear();
   return (
     <footer className="mt-24 bg-ink text-chalk">
@@ -28,10 +28,11 @@ export function SiteFooter({ settings, policies }: SiteFooterProps) {
         <nav aria-label="Shop">
           <h2 className="mb-4 text-sm font-semibold">Shop</h2>
           <ul className="flex flex-col gap-2.5 text-sm text-chalk/80">
-            {PRIMARY_NAV.map((item) => (
-              <li key={item.href}>
+            {nav.map((item) => (
+              <li key={item.label}>
                 <Link href={item.href} className="hover:text-chalk hover:underline">
                   {item.label}
+                  {item.soon ? <span className="ml-1.5 text-chalk/50">(soon)</span> : null}
                 </Link>
               </li>
             ))}

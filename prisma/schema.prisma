@@ -499,6 +499,8 @@ model Category {
   description     String?
   sortOrder       Int     @default(0) @map("sort_order")
   isActive        Boolean @default(true) @map("is_active")
+  /// Announced in the storefront as "coming soon" (no products yet). Turn off when it launches.
+  isComingSoon    Boolean @default(false) @map("is_coming_soon")
   metaTitle       String? @map("meta_title")
   metaDescription String? @map("meta_description")
 

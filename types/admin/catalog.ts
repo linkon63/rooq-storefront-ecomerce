@@ -25,6 +25,8 @@ export type Category = {
   parentId?: string | null;
   imageUrl?: string | null;
   sortOrder?: number;
+  /** Shown in the storefront as "coming soon". */
+  isComingSoon?: boolean;
   createdAt?: string;
   children?: Category[];
   /** Products filed directly under this category (toCategoryResponse). */

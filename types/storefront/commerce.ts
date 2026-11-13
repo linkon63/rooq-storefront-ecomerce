@@ -176,6 +176,9 @@ export type Review = {
   photos: Image[];
 };
 
+/** A review shown outside its product page (home showcase): carries the product it is about. */
+export type ReviewWithProduct = Review & { product: { id: string; name: string; slug: string } };
+
 export type ReviewSummary = {
   average: number;
   count: number;

@@ -14,7 +14,7 @@ import { applyCategoryReorder } from "./reorder";
 import type { CategoryCreateInput, CategoryReorderInput, CategoryUpdateInput } from "./schemas";
 
 const categorySelect = {
-  id: true, name: true, slug: true, description: true, sortOrder: true, isActive: true, metaTitle: true, metaDescription: true,
+  id: true, name: true, slug: true, description: true, sortOrder: true, isActive: true, isComingSoon: true, metaTitle: true, metaDescription: true,
   parentId: true, sizeChartId: true, imageMediaId: true, createdAt: true, updatedAt: true,
   imageMedia: { select: mediaRefSelect },
   _count: { select: { products: true, children: true } },

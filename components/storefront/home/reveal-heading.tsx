@@ -32,7 +32,7 @@ export function RevealHeading({ id, children }: { id: string; children: string }
   );
 
   return (
-    <h2 id={id} ref={ref} className="font-display font-expanded text-[clamp(2.25rem,8vw,5rem)] font-extrabold leading-[0.95] tracking-[-0.02em]">
+    <h2 id={id} ref={ref} className="type-display text-[clamp(2.25rem,7vw,4.5rem)]">
       {children}
     </h2>
   );

@@ -58,12 +58,12 @@ export default async function CollectionPage({ params, searchParams }: PageProps
       ) : null}
 
       <section aria-labelledby="all-pieces" className="page-gutter">
-        <h2 id="all-pieces" className="mb-6 font-wide text-2xl font-bold">
+        <h2 id="all-pieces" className="type-h2 section-head">
           {looks.length ? "Every piece" : `${collection.productCount} pieces`}
         </h2>
         {collection.products.length ? (
           <>
-            <ProductGrid products={collection.products} />
+            <ProductGrid products={collection.products} offset={((collection.meta?.page ?? 1) - 1) * (collection.meta?.limit ?? 0)} />
             {collection.meta ? <Pagination meta={collection.meta} hrefFor={(next) => `/collections/${collection.slug}${next > 1 ? `?page=${next}` : ""}`} /> : null}
           </>
         ) : (

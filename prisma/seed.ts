@@ -38,7 +38,7 @@ async function main() {
 
   const collections = await seedCollections(prisma, products);
   const content = await seedContent(prisma);
-  console.log(`✓ ${content.campaigns} campaigns, ${content.news} articles, ${content.reviews} reviews`);
+  console.log(`✓ ${content.campaigns} campaigns, empty Sale discount`);
   const mediaCount = await prisma.media.count();
   console.log(`✓ ${collections} collections · ${mediaCount} media rows · ${((Date.now() - started) / 1000).toFixed(1)}s`);
 }

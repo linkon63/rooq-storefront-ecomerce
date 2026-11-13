@@ -191,7 +191,12 @@ export type ShopCategoryNode = {
   imageUrl?: string | null;
   parentId?: string | null;
   isActive?: boolean;
+  /** Announced but not stocked yet: shown with a "Soon" tag, linked to the home #coming-soon section. */
+  isComingSoon?: boolean;
   children?: ShopCategoryNode[];
 };
+
+/** One main-navigation entry; `soon` marks a category announced as coming soon. */
+export type NavItem = { label: string; href: string; soon?: boolean };
 
 export type ShopBrandRef = { id: string; name: string; slug: string; logoUrl?: string | null };

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { CategoryRow } from "@/utils/admin/category-tree";
 import { slugify } from "@/utils/slug";
+import { CheckboxField } from "../../../_components/checkbox-field";
 import { FormField, INPUT_CLASS } from "../../../_components/form-field";
 import { FormModal } from "../../../_components/form-modal";
 import { ImagePickField } from "../../../_components/image-pick-field";
@@ -58,6 +59,11 @@ export function CategoryFormModal({ initial, rows, busy, error, onClose, onSave 
         onRemove={() => setForm((f) => ({ ...f, image: null, imageUrl: null, removeImage: true }))}
         placeholderIcon="category"
         removed={form.removeImage}
+      />
+      <CheckboxField
+        checked={form.isComingSoon}
+        label="Coming soon (shown in the storefront with a Soon tag)"
+        onChange={(isComingSoon) => setForm((f) => ({ ...f, isComingSoon }))}
       />
     </FormModal>
   );

@@ -9,6 +9,7 @@ import { getProductById as findProductById, getProductDetail } from "@/lib/serve
 import { listProducts } from "@/lib/server/catalog/products/list";
 import { productListQuery } from "@/lib/server/catalog/products/list-schema";
 import { getPolicies } from "@/lib/server/policies/service";
+import { listRecentReviews } from "@/lib/server/reviews/recent";
 import { getSettings } from "@/lib/server/settings/service";
 import { parseValue, searchParamsToObject } from "@/lib/server/validation";
 import type {
@@ -20,6 +21,7 @@ import type {
   ShopBrandRef,
   ShopCategoryNode,
 } from "@/types/storefront/catalog";
+import type { ReviewWithProduct } from "@/types/storefront/commerce";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
 import { EMPTY_SETTINGS, normalisePolicies, normaliseSettings } from "@/utils/storefront/settings";
@@ -48,6 +50,7 @@ const readProductById = cachedRead<[string], ProductDetail>("product-id", (id) =
 const readCollections = cachedRead<[string], CollectionSummary[]>("collections", (qs) =>
   findCollections(parseValue(queryObject(qs), collectionListQuery), false),
 );
+const readRecentReviews = cachedRead<[number], ReviewWithProduct[]>("recent-reviews", (limit) => listRecentReviews(limit));
 const readCollection = cachedRead<[string, number], CollectionDetail>("collection", (slug, page) =>
   findCollectionBySlug(slug, parseValue({ page: String(page), limit: "24" }, collectionDetailQuery)),
 );
@@ -84,3 +87,8 @@ export function listCollections(query: { type?: CollectionType; featured?: boole
 export const getCollectionBySlug = cache(
   (slug: string, page: number): Promise<CollectionDetail | null> => readOrNull(() => readCollection(slug, page)),
 );
+
+/** Newest approved reviews for the home page; empty when none (or on error). */
+export function recentReviews(limit: number): Promise<ReviewWithProduct[]> {
+  return readOr("recent-reviews", () => readRecentReviews(limit), []);
+}

@@ -2,7 +2,7 @@ import { mediaSrc } from "@/utils/media-url";
 import type { MediaRow } from "./catalog-refs";
 
 export type CategoryRow = {
-  id: string; name: string; slug: string; description: string | null; sortOrder: number; isActive: boolean;
+  id: string; name: string; slug: string; description: string | null; sortOrder: number; isActive: boolean; isComingSoon: boolean;
   metaTitle: string | null; metaDescription: string | null; parentId: string | null; sizeChartId: string | null;
   imageMediaId: string | null; imageMedia: MediaRow | null; createdAt: Date; updatedAt: Date;
   _count?: { products: number; children: number };

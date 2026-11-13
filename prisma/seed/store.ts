@@ -119,6 +119,7 @@ export async function seedBrandsAndTags(db: SeedDb) {
     ["new-arrival", "New Arrival"],
     ["best-seller", "Best Seller"],
     ["sustainable", "Sustainable"],
+    ["coming-soon", "Coming Soon"],
   ] as const) {
     const row = await db.tag.upsert({ where: { slug }, update: { name }, create: { slug, name }, select: { id: true } });
     tags.set(slug, row.id);

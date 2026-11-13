@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
-import { Archivo, Hind_Siliguri, Poppins } from "next/font/google";
+import { Hanken_Grotesk, Hind_Siliguri, Newsreader, Poppins } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store/store-provider";
 
 /**
- * Storefront face: Archivo, variable on weight and width. The width axis is
- * the type hierarchy (expanded display, normal body) — see
- * docs/design/storefront-design.md.
+ * Storefront faces (see docs/design/vaara-design-analysis.md): Hanken Grotesk
+ * for UI and body at light weights, Newsreader for editorial headings.
  */
-const archivo = Archivo({
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  axes: ["wdth"],
-  variable: "--font-archivo",
+  variable: "--font-hanken",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  axes: ["opsz"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
   display: "swap",
 });
 
@@ -95,7 +101,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`h-full antialiased scroll-smooth ${archivo.variable} ${poppins.variable} ${hindSiliguri.variable}`}
+      className={`h-full antialiased scroll-smooth ${hanken.variable} ${newsreader.variable} ${poppins.variable} ${hindSiliguri.variable}`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <StoreProvider>{children}</StoreProvider>

@@ -1,6 +1,5 @@
 /**
- * Seeds only the content & marketing demo data (sections, campaigns, sale,
- * journal, reviews). Safe to rerun. Run after `pnpm db:seed`:
+ * Seeds only the content & marketing demo data (sections, campaigns, empty sale). Safe to rerun. Run after `pnpm db:seed`:
  *
  *   pnpm exec tsx --conditions=react-server scripts/seed-content.ts
  */
@@ -9,7 +8,7 @@ import { prisma } from "../lib/server/prisma";
 import { seedContent } from "../prisma/seed/content";
 
 seedContent(prisma)
-  .then((counts) => console.log(`✓ ${counts.campaigns} campaigns, ${counts.news} articles, ${counts.reviews} reviews`))
+  .then((counts) => console.log(`✓ ${counts.campaigns} campaigns, empty Sale discount`))
   .catch((error: unknown) => {
     console.error("Content seed failed:", error);
     process.exitCode = 1;

@@ -3,10 +3,10 @@
 import { FiMenu } from "react-icons/fi";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectIsMobileNavOpen, setMobileNavOpen } from "@/lib/store/slices/ui-slice";
-import type { ShopCategoryNode } from "@/types/storefront/catalog";
+import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
 import { MobileNav } from "./mobile-nav";
 
-export function MobileNavButton({ categories }: { categories: ShopCategoryNode[] }) {
+export function MobileNavButton({ nav, categories }: { nav: NavItem[]; categories: ShopCategoryNode[] }) {
   const dispatch = useAppDispatch();
   const open = useAppSelector(selectIsMobileNavOpen);
   return (
@@ -20,7 +20,7 @@ export function MobileNavButton({ categories }: { categories: ShopCategoryNode[]
       >
         <FiMenu aria-hidden className="size-5" />
       </button>
-      <MobileNav open={open} onOpenChange={(next) => dispatch(setMobileNavOpen(next))} categories={categories} />
+      <MobileNav open={open} onOpenChange={(next) => dispatch(setMobileNavOpen(next))} nav={nav} categories={categories} />
     </>
   );
 }

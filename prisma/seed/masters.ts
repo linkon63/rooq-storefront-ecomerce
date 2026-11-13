@@ -31,6 +31,13 @@ export const COLORS = [
   { name: "Rust", slug: "rust", hex: "#A4502C", family: "Orange", code: "RST" },
   { name: "Burgundy", slug: "burgundy", hex: "#6B2233", family: "Red", code: "BRG" },
   { name: "Blush", slug: "blush", hex: "#E6C3BD", family: "Pink", code: "BLS" },
+  { name: "Mustard", slug: "mustard", hex: "#D39A1F", family: "Yellow", code: "MST" },
+  { name: "Pink", slug: "pink", hex: "#D6336C", family: "Pink", code: "PNK" },
+  { name: "Light Pink", slug: "light-pink", hex: "#F2B8C6", family: "Pink", code: "LPK" },
+  { name: "Red", slug: "red", hex: "#B3202A", family: "Red", code: "RED" },
+  { name: "Lavender", slug: "lavender", hex: "#B7A6D6", family: "Purple", code: "LAV" },
+  { name: "Teal", slug: "teal", hex: "#1F7A80", family: "Green", code: "TEL" },
+  { name: "Magenta", slug: "magenta", hex: "#B0125B", family: "Pink", code: "MGT" },
 ] as const;
 
 export type ColorSlug = (typeof COLORS)[number]["slug"];
