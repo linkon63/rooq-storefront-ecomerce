@@ -3,6 +3,7 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import Image from "next/image";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { FiPause, FiPlay } from "react-icons/fi";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
@@ -76,14 +77,30 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                 aria-hidden={copy || undefined}
                 className="relative aspect-3/4 h-[min(62svh,38rem)] shrink-0"
               >
-                <Image
-                  src={slide.image.url}
-                  alt={copy ? "" : (slide.product?.name ?? slide.image.alt ?? "")}
-                  fill
-                  sizes={SIZES}
-                  priority={index < 3}
-                  className="object-contain"
-                />
+                {(() => {
+                  const photo = (
+                    <Image
+                      src={slide.image.url}
+                      alt={copy ? "" : (slide.product?.name ?? slide.image.alt ?? "")}
+                      fill
+                      sizes={SIZES}
+                      priority={index < 3}
+                      className="object-contain"
+                    />
+                  );
+                  return slide.product ? (
+                    <Link
+                      href={`/product/${slide.product.slug}`}
+                      tabIndex={copy ? -1 : undefined}
+                      aria-label={copy ? undefined : `View details: ${slide.product.name}`}
+                      className="absolute inset-0 block"
+                    >
+                      {photo}
+                    </Link>
+                  ) : (
+                    photo
+                  );
+                })()}
               </li>
             );
           })}
