@@ -3,16 +3,16 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
-import { ORDER_JOURNEY_STEPS } from "@/lib/constants/storefront";
+import type { Messages } from "@/lib/i18n/messages";
 
 gsap.registerPlugin(useGSAP);
 
-type JourneyCopyProps = { active: number; animate: boolean; onAdvance: () => void };
+type JourneyCopyProps = { active: number; animate: boolean; onAdvance: () => void; t: Messages["home"] };
 
 /** The current step in words, swapped in as the scene behind it changes. */
-export function JourneyCopy({ active, animate, onAdvance }: JourneyCopyProps) {
+export function JourneyCopy({ active, animate, onAdvance, t }: JourneyCopyProps) {
   const scope = useRef<HTMLDivElement>(null);
-  const step = ORDER_JOURNEY_STEPS[active] ?? ORDER_JOURNEY_STEPS[0];
+  const step = t.journey[active] ?? t.journey[0];
 
   useGSAP(
     () => {
@@ -25,7 +25,7 @@ export function JourneyCopy({ active, animate, onAdvance }: JourneyCopyProps) {
   return (
     <div ref={scope} className="flex flex-col items-start gap-3">
       <p data-copy className="type-meta tabular-nums text-chalk/60">
-        Step {active + 1} of {ORDER_JOURNEY_STEPS.length}
+        {t.step(active + 1, t.journey.length)}
       </p>
       <h3 data-copy className="type-display flex items-end text-chalk lg:min-h-[2em]">
         {step.title}

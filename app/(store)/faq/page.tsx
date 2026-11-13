@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Disclosure } from "@/components/storefront/shared/disclosure";
 import { getStoreSettings } from "@/lib/storefront/catalog-data";
+import { getMessages } from "@/lib/i18n/server";
 import { buildFaqs } from "@/utils/storefront/faqs";
 
 export const metadata: Metadata = {
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default async function FaqPage() {
-  const faqs = buildFaqs(await getStoreSettings());
+  const [settings, { locale, t }] = await Promise.all([getStoreSettings(), getMessages()]);
+  const faqs = buildFaqs(settings, locale);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -18,7 +20,7 @@ export default async function FaqPage() {
   return (
     <div className="page-gutter grid gap-10 pt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:pt-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <h1 className="font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Questions and answers</h1>
+      <h1 className="font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">{t.home.faqTitle}</h1>
       <div className="border-t border-line">
         {faqs.map((faq) => (
           <Disclosure key={faq.question} title={faq.question}>

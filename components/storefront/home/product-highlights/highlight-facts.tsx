@@ -1,11 +1,12 @@
+import type { Messages } from "@/lib/i18n/messages";
 import type { ProductDetail } from "@/types/storefront/catalog";
 
 /** Material, colours, sizes and up to three features of a spotlight product. */
-export function HighlightFacts({ detail }: { detail: ProductDetail }) {
+export function HighlightFacts({ detail, t }: { detail: ProductDetail; t: Messages["home"] }) {
   const facts = [
-    { label: "Material", value: detail.material ?? detail.composition },
-    { label: "Colours", value: detail.colors.map((color) => color.name).join(", ") || null },
-    { label: "Sizes", value: detail.sizes.map((size) => size.label).join(", ") || null },
+    { label: t.material, value: detail.material ?? detail.composition },
+    { label: t.colours, value: detail.colors.map((color) => color.name).join(", ") || null },
+    { label: t.sizes, value: detail.sizes.map((size) => size.label).join(", ") || null },
   ].filter((fact) => fact.value);
   const features = detail.features.slice(0, 3);
   if (facts.length === 0 && features.length === 0) return null;

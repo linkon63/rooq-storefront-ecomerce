@@ -1,10 +1,15 @@
 import type { StoreSettings } from "@/types/storefront/content";
+import type { Locale } from "@/lib/i18n/locales";
 import { formatMoney } from "./money";
 
 export type Faq = { question: string; answer: string };
 
 /** Help answers that quote the live delivery charges and return window from Settings. */
-export function buildFaqs(settings: StoreSettings): Faq[] {
+export function buildFaqs(settings: StoreSettings, locale: Locale = "en"): Faq[] {
+  return locale === "bn" ? buildFaqsBn(settings) : buildFaqsEn(settings);
+}
+
+function buildFaqsEn(settings: StoreSettings): Faq[] {
   const { delivery, currency } = settings;
   const money = (amount: number) => (amount > 0 ? formatMoney(amount, currency) : "free");
   const threshold = delivery.freeShippingThreshold;
@@ -39,6 +44,45 @@ export function buildFaqs(settings: StoreSettings): Faq[] {
     {
       question: "Can I change or cancel my order?",
       answer: "You can cancel from your account until the order is packed. To change a size after that, wait for delivery and request an exchange.",
+    },
+  ];
+}
+
+function buildFaqsBn(settings: StoreSettings): Faq[] {
+  const { delivery, currency } = settings;
+  const money = (amount: number) => (amount > 0 ? formatMoney(amount, currency) : "ফ্রি");
+  const threshold = delivery.freeShippingThreshold;
+  return [
+    {
+      question: "আমার সাইজ কীভাবে বুঝব?",
+      answer:
+        "প্রতিটি প্রোডাক্ট পেজে সাইজের পাশে একটি সাইজ গাইড আছে, যেখানে শরীরের মাপ সেন্টিমিটার ও ইঞ্চিতে দেওয়া। রিভিউ থেকেও জানতে পারবেন পোশাকটি ছোট, ঠিক মাপের নাকি বড় হয়, আর মডেলের উচ্চতা ও সাইজ Details এ লেখা আছে।",
+    },
+    {
+      question: "ডেলিভারি চার্জ কত এবং কতদিনে পৌঁছায়?",
+      answer: `ঢাকা সিটির ভেতরে ডেলিভারি ${money(delivery.inside)}, ঢাকার আশেপাশে ${money(delivery.nearCity)} এবং বাংলাদেশের বাকি অংশে ${money(delivery.outside)}।${
+        threshold ? ` ${formatMoney(threshold, currency)} এর বেশি অর্ডারে ডেলিভারি ফ্রি।` : ""
+      } ঢাকার অর্ডার সাধারণত ১ থেকে ৩ কর্মদিবসে, দেশের অন্য জায়গায় ৩ থেকে ৭ দিনে পৌঁছায়।`,
+    },
+    {
+      question: "পার্সেল হাতে পেয়ে কি টাকা দিতে পারি?",
+      answer: "হ্যাঁ। সব অর্ডারই ক্যাশ অন ডেলিভারি। রাইডারকে টাকা দেওয়ার আগে দরজাতেই পার্সেল খুলে পণ্য দেখে নিতে পারবেন।",
+    },
+    {
+      question: "রিটার্ন ও এক্সচেঞ্জ কীভাবে কাজ করে?",
+      answer: `ডেলিভারির পর ${delivery.returnWindowDays} দিন সময় পাবেন। আপনার অ্যাকাউন্টে অর্ডারটি খুলে Return or exchange বেছে নিন, পণ্য নির্বাচন করুন এবং কারণ জানান। এক্সচেঞ্জে একই পোশাকের অন্য সাইজ বা রং নেওয়া যায়। পণ্য অব্যবহৃত ও ট্যাগসহ থাকতে হবে।`,
+    },
+    {
+      question: "আমার সাইজটি স্টকে নেই। আবার কি আসবে?",
+      answer: "প্রায়ই আসে। প্রোডাক্ট পেজে স্টকআউট সাইজটি বেছে Notify me এর নিচে আপনার ইমেইল দিন। সাইজটি ফিরে এলে আমরা একবার ইমেইল করব।",
+    },
+    {
+      question: "পোশাক কীভাবে ধোব?",
+      answer: "প্রতিটি পোশাকের যত্নের নিয়ম প্রোডাক্ট পেজের Care অংশে এবং ভেতরে সেলাই করা লেবেলে আছে। নিশ্চিত না হলে ঠান্ডা পানিতে, উল্টো করে ধুয়ে সমতলে শুকান।",
+    },
+    {
+      question: "অর্ডার বদলানো বা বাতিল করা যায়?",
+      answer: "অর্ডার প্যাক হওয়ার আগ পর্যন্ত আপনার অ্যাকাউন্ট থেকে বাতিল করতে পারবেন। এরপর সাইজ বদলাতে চাইলে ডেলিভারির পর এক্সচেঞ্জের অনুরোধ করুন।",
     },
   ];
 }

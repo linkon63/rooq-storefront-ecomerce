@@ -7,12 +7,13 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectCartCount } from "@/lib/store/slices/cart-slice";
 import { selectWishlistCount } from "@/lib/store/slices/product-lists-slice";
 import { setCartDrawerOpen, setSearchOpen } from "@/lib/store/slices/ui-slice";
+import type { Messages } from "@/lib/i18n/messages";
 import { CountBadge } from "./count-badge";
 
 const iconButton = "relative grid size-10 place-items-center rounded hover:bg-selvedge";
 
 /** Search, account, wishlist and bag. Counts come from Redux. */
-export function HeaderActions() {
+export function HeaderActions({ t }: { t: Messages["header"] }) {
   const dispatch = useAppDispatch();
   const cartCount = useAppSelector(selectCartCount);
   const wishlistCount = useAppSelector(selectWishlistCount);
@@ -20,15 +21,15 @@ export function HeaderActions() {
 
   return (
     <div className="ml-auto flex items-center gap-0.5">
-      <button type="button" className={iconButton} aria-label="Search" onClick={() => dispatch(setSearchOpen(true))}>
+      <button type="button" className={iconButton} aria-label={t.search} onClick={() => dispatch(setSearchOpen(true))}>
         <FiSearch aria-hidden className="size-5" />
       </button>
       {isSignedIn ? (
-        <Link href="/profile" className={iconButton} aria-label="Your account">
+        <Link href="/profile" className={iconButton} aria-label={t.account}>
           <FiUser aria-hidden className="size-5" />
         </Link>
       ) : (
-        <button type="button" className={iconButton} aria-label="Sign in" onClick={() => openAuth("login")}>
+        <button type="button" className={iconButton} aria-label={t.signIn} onClick={() => openAuth("login")}>
           <FiUser aria-hidden className="size-5" />
         </button>
       )}

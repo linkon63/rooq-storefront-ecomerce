@@ -1,3 +1,4 @@
+import { getMessages } from "@/lib/i18n/server";
 import { getProductById, productRail } from "@/lib/storefront/catalog-data";
 import type { ProductCard } from "@/types/storefront/catalog";
 import { SectionHeading } from "../../shared/section-heading";
@@ -11,6 +12,7 @@ const HIGHLIGHT_COUNT = 2;
  * pictures beside its story, price and details.
  */
 export async function ProductHighlights({ fallback }: { fallback: ProductCard[] }) {
+  const { t } = await getMessages();
   const featured = await productRail({ featured: true, sort: "popular", limit: HIGHLIGHT_COUNT });
   const cards = [...featured.data, ...fallback.filter((card) => !featured.data.some((f) => f.id === card.id))].slice(
     0,
@@ -20,10 +22,10 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
   const details = await Promise.all(cards.map((card) => getProductById(card.id)));
   return (
     <section aria-labelledby="highlights-title" className="page-gutter">
-      <SectionHeading id="highlights-title" title="In the spotlight" />
+      <SectionHeading id="highlights-title" title={t.home.spotlight} />
       <div className="flex flex-col gap-[3px]">
         {cards.map((card, index) => (
-          <HighlightCard key={card.id} card={card} detail={details[index]} reverse={index % 2 === 1} />
+          <HighlightCard key={card.id} card={card} detail={details[index]} reverse={index % 2 === 1} t={t.home} />
         ))}
       </div>
     </section>

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { FiPause, FiPlay } from "react-icons/fi";
 import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { ORDER_JOURNEY_STEPS } from "@/lib/constants/storefront";
+import type { Messages } from "@/lib/i18n/messages";
 import { JourneyCopy } from "./journey-copy";
 import { JourneyStage } from "./journey-stage";
 import { JourneySteps } from "./journey-steps";
@@ -17,7 +18,7 @@ const STEPS = ORDER_JOURNEY_STEPS.length;
  * all six; the copy changes with it, and clicking the scene or the button
  * moves the story on. With reduced motion the scenes are still pictures.
  */
-export function OrderJourney() {
+export function OrderJourney({ t }: { t: Messages["home"] }) {
   const section = useRef<HTMLElement>(null);
   const reduced = usePrefersReducedMotion();
   const animate = !reduced;
@@ -37,23 +38,23 @@ export function OrderJourney() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1.5">
               <h2 id="journey-title" className="type-h2">
-                From our hands to yours
+                {t.journeyTitle}
               </h2>
-              <p className="type-body text-chalk/70">Six steps, and you pay only when the parcel is in your hands.</p>
+              <p className="type-body text-chalk/70">{t.journeyLead}</p>
             </div>
             {animate ? (
               <button
                 type="button"
                 onClick={() => setPlayback(!playing)}
-                aria-label={playing ? "Pause the order journey" : "Play the order journey"}
+                aria-label={playing ? t.journeyPause : t.journeyPlay}
                 className="grid size-10 shrink-0 place-items-center rounded-full ring-1 ring-chalk/30 transition-colors hover:bg-chalk hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-chalk"
               >
                 {playing ? <FiPause aria-hidden className="size-4" /> : <FiPlay aria-hidden className="size-4" />}
               </button>
             ) : null}
           </div>
-          <JourneyCopy active={active} animate={animate} onAdvance={advance} />
-          <JourneySteps active={active} onPick={goTo} />
+          <JourneyCopy active={active} animate={animate} onAdvance={advance} t={t} />
+          <JourneySteps active={active} onPick={goTo} steps={t.journey} />
         </div>
       </div>
     </section>

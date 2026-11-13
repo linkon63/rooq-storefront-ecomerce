@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getMessages } from "@/lib/i18n/server";
 import type { HeroCampaign } from "@/types/storefront/content";
 
 /**
  * Campaign mode: the live hero campaign as one banner, its first image beside
  * its title, story and call to action (all edited in the admin under Campaigns).
  */
-export function HeroCampaignBanner({ campaign, returnDays }: { campaign: HeroCampaign; returnDays: number }) {
+export async function HeroCampaignBanner({ campaign, returnDays }: { campaign: HeroCampaign; returnDays: number }) {
+  const { t } = await getMessages();
   const image = campaign.images[0];
   return (
     <section aria-labelledby="hero-title" className="grid bg-white md:grid-cols-2">
@@ -19,12 +21,12 @@ export function HeroCampaignBanner({ campaign, returnDays }: { campaign: HeroCam
         </h1>
         {campaign.description ? (
           <p className="type-lead max-w-[42ch] text-stone">
-            {campaign.description} Free returns within {returnDays} days.
+            {campaign.description} {t.home.freeReturns(returnDays)}
           </p>
         ) : null}
         {campaign.linkUrl ? (
           <Link href={campaign.linkUrl} className="type-label inline-flex h-12 w-fit items-center bg-ink px-6 text-chalk transition-colors duration-300 hover:bg-ink/80">
-            {campaign.linkLabel ?? "Shop now"}
+            {campaign.linkLabel ?? t.home.shopNow}
           </Link>
         ) : null}
       </div>

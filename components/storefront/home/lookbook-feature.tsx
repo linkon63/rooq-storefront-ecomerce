@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getMessages } from "@/lib/i18n/server";
 import type { CollectionSummary } from "@/types/storefront/catalog";
 import { RevealHeading } from "./reveal-heading";
 
 /** A featured lookbook, edge to edge: cover on one side, the invitation to shop the look on the other. */
-export function LookbookFeature({ lookbook }: { lookbook: CollectionSummary }) {
+export async function LookbookFeature({ lookbook }: { lookbook: CollectionSummary }) {
+  const { t } = await getMessages();
   return (
     <section aria-labelledby="lookbook-title" className="grid bg-selvedge md:grid-cols-2">
       <div className="relative aspect-[4/5] md:aspect-auto md:min-h-[36rem]">
@@ -21,7 +23,7 @@ export function LookbookFeature({ lookbook }: { lookbook: CollectionSummary }) {
           href={`/collections/${lookbook.slug}`}
           className="type-label inline-flex h-12 w-fit items-center bg-ink px-6 text-chalk transition-colors duration-300 hover:bg-ink/80"
         >
-          Shop the looks
+          {t.home.shopLooks}
         </Link>
       </div>
     </section>

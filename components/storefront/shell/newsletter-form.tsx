@@ -4,10 +4,11 @@ import { useState, type FormEvent } from "react";
 import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { SUCCESS_MESSAGES } from "@/lib/constants/success-messages";
 import { subscribeNewsletter } from "@/lib/storefront-api";
+import type { Messages } from "@/lib/i18n/messages";
 import { isValidEmail } from "@/utils/storefront/forms";
 
 /** One field: "New drops, first." */
-export function NewsletterForm() {
+export function NewsletterForm({ t }: { t: Messages["newsletter"] }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export function NewsletterForm() {
   return (
     <form onSubmit={handleSubmit} noValidate className="flex max-w-sm flex-col gap-2">
       <label htmlFor="newsletter-email" className="text-sm font-semibold">
-        New drops, first. Join the list.
+        {t.label}
       </label>
       <div className="flex gap-2">
         <input
@@ -47,7 +48,7 @@ export function NewsletterForm() {
           className="h-11 min-w-0 flex-1 rounded border border-chalk/30 bg-transparent px-3 text-base text-chalk placeholder:text-chalk/50"
         />
         <button type="submit" disabled={status === "sending"} className="h-11 rounded bg-dye px-4 text-sm font-semibold text-chalk hover:bg-dye-deep disabled:opacity-60">
-          Join
+          {t.join}
         </button>
       </div>
       {error ? (
