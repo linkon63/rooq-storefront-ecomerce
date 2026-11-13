@@ -47,7 +47,7 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
               </ul>
             </nav>
           </div>
-          <Link href="/" aria-label="Rooq home" className="shrink-0">
+          <Link href="/" aria-label="Rooq home" className="shrink-0" data-stitch-origin>
             <Logo kechi className="h-14 lg:h-[4.5rem]" />
           </Link>
           <HeaderActions />

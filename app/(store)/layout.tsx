@@ -1,3 +1,4 @@
+import { HomeStitch } from "@/components/storefront/home/stitch/home-stitch";
 import { StoreSync } from "@/app/_providers/store-sync";
 import { GoogleTagManagerNoScript, GoogleTagManagerScript } from "@/components/analytics/google-tag-manager";
 import { SiteFooter } from "@/components/storefront/shell/site-footer";
@@ -28,7 +29,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
     <>
       <GoogleTagManagerNoScript />
       <GoogleTagManagerScript />
-      <div className="storefront-root flex min-h-full flex-1 flex-col">
+      <div className="storefront-root relative flex min-h-full flex-1 flex-col">
         <SiteHeader
           nav={nav}
           categories={categories}
@@ -40,6 +41,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
           {children}
         </main>
         <SiteFooter nav={nav} settings={settings} policies={policies} />
+        <HomeStitch />
       </div>
       <FloatingActions phone={settings.phones[0]?.value ?? null} shopName={settings.shopName} />
       <StoreSync currency={settings.currency} />

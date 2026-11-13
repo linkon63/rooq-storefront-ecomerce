@@ -9,7 +9,6 @@ import { ProductHighlights } from "@/components/storefront/home/product-highligh
 import { OrderJourney } from "@/components/storefront/home/order-journey/order-journey";
 import { SaleCountdown } from "@/components/storefront/home/sale-countdown/sale-countdown";
 import { HomeFaq } from "@/components/storefront/home/home-faq";
-import { HomeStitch } from "@/components/storefront/home/stitch/home-stitch";
 import { ReviewsShowcase } from "@/components/storefront/home/reviews-showcase";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
@@ -24,8 +23,8 @@ const HOME_FAQ_COUNT = 5;
 /**
  * Home: hero (slider of looks), categories, new in (5), offers, collections (two newest pieces
  * each), best sellers (5), two spotlight products, the order journey (three.js), coming soon,
- * reviews, five common questions, contact and recently viewed, with a
- * needle sewing a thread down the page as it scrolls. Every read starts at once; collections stream in.
+ * reviews, five common questions, contact and recently viewed. The
+ * layout sews a thread down it as it scrolls (HomeStitch). Every read starts at once; collections stream in.
  */
 export default async function HomePage() {
   const [settings, hero, categories, newIn, latest, offers, bestSellers, upcoming, reviews, lookbooks] = await Promise.all([
@@ -45,9 +44,11 @@ export default async function HomePage() {
   const lookbook = lookbooks[0] ?? null;
 
   return (
-    <div className="relative flex flex-col gap-12 lg:gap-20">
-      <HomeStitch />
-      <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} />
+    <div className="flex flex-col gap-12 lg:gap-20">
+      {/* The stitched thread runs straight through the hero and starts its pattern below it. */}
+      <div data-stitch-hero>
+        <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} />
+      </div>
       <CategoryTiles categories={roots} />
       <Suspense fallback={null}>
         <SaleCountdown />
