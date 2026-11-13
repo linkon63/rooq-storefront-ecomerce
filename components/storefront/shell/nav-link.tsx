@@ -10,14 +10,14 @@ import type { NavItem } from "@/types/storefront/catalog";
  * hovering or focusing it shows a tooltip, and the link opens the home
  * page's coming-soon section.
  */
-export function NavLink({ item }: { item: NavItem }) {
+export function NavLink({ item, soon = "Soon" }: { item: NavItem; soon?: string }) {
   const tipId = useId();
   const pathname = usePathname();
   const params = useSearchParams();
   const [path, query = ""] = item.href.split("?");
   const category = new URLSearchParams(query).get("category");
   const active = !item.soon && pathname === path && (category ? params.get("category") === category : path !== "/shop" || !params.get("category"));
-  const tone = item.label === "Sale" ? "text-dye-deep" : active ? "text-dye font-bold" : "";
+  const tone = item.href === "/sale" ? "text-dye-deep" : active ? "text-dye font-bold" : "";
   return (
     <Link
       href={item.href}
@@ -30,7 +30,7 @@ export function NavLink({ item }: { item: NavItem }) {
       </span>
       {item.soon ? (
         <>
-          <span className="bg-ink px-1.5 py-0.5 text-[0.5625rem] leading-none text-chalk">Soon</span>
+          <span className="bg-ink px-1.5 py-0.5 text-[0.5625rem] leading-none text-chalk">{soon}</span>
           <span
             id={tipId}
             role="tooltip"

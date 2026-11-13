@@ -1,18 +1,18 @@
 "use client";
 
-import { ORDER_JOURNEY_STEPS } from "@/lib/constants/storefront";
+import type { Messages } from "@/lib/i18n/messages";
 
-type JourneyStepsProps = { active: number; onPick: (index: number) => void };
+type JourneyStepsProps = { active: number; onPick: (index: number) => void; steps: Messages["home"]["journey"] };
 
 /** The six steps as a segmented bar; each segment shows its scene when picked. */
-export function JourneySteps({ active, onPick }: JourneyStepsProps) {
+export function JourneySteps({ active, onPick, steps }: JourneyStepsProps) {
   return (
     <ol className="grid w-full grid-cols-6 gap-1.5">
-      {ORDER_JOURNEY_STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const current = index === active;
         const reached = index <= active;
         return (
-          <li key={step.key}>
+          <li key={index}>
             <button
               type="button"
               onClick={() => onPick(index)}

@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Messages } from "@/lib/i18n/messages";
 import type { ProductCard, ProductDetail } from "@/types/storefront/catalog";
 import { Price } from "../../shared/price";
 import { StarRating } from "../../shared/star-rating";
 import { HighlightFacts } from "./highlight-facts";
 
-type HighlightCardProps = { card: ProductCard; detail: ProductDetail | null; reverse: boolean };
+type HighlightCardProps = { card: ProductCard; detail: ProductDetail | null; reverse: boolean; t: Messages["home"] };
 
 /** One spotlight product: two pictures side by side, then its name, price, story and details. */
-export function HighlightCard({ card, detail, reverse }: HighlightCardProps) {
+export function HighlightCard({ card, detail, reverse, t }: HighlightCardProps) {
   const pictures = [card.image, card.hoverImage].filter((image) => image !== null);
   const story = detail?.shortDescription ?? detail?.description ?? null;
   const href = `/product/${card.slug}`;
@@ -41,12 +42,12 @@ export function HighlightCard({ card, detail, reverse }: HighlightCardProps) {
         <Price price={card.price} compareAtPrice={card.compareAtPrice} className="text-lg" />
         {card.ratingCount > 0 ? <StarRating rating={card.ratingAvg} /> : null}
         {story ? <p className="line-clamp-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-stone">{story}</p> : null}
-        {detail ? <HighlightFacts detail={detail} /> : null}
+        {detail ? <HighlightFacts detail={detail} t={t} /> : null}
         <Link
           href={href}
           className="type-label inline-flex h-12 w-fit items-center gap-2 bg-ink px-6 text-chalk transition-colors duration-300 hover:bg-dye"
         >
-          View details <span aria-hidden>→</span>
+          {t.viewDetails} <span aria-hidden>→</span>
         </Link>
       </div>
     </article>

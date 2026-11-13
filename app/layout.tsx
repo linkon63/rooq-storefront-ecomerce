@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk, Hind_Siliguri, Newsreader, Poppins } from "next/font/google";
+import { Hanken_Grotesk, Noto_Serif_Bengali, Newsreader, Poppins } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store/store-provider";
 
@@ -37,7 +37,7 @@ const poppins = Poppins({
  * which differs on every platform. Latin still renders in Poppins: the fallback
  * is per-glyph, so only the Bangla reaches this face.
  */
-const hindSiliguri = Hind_Siliguri({
+const notoSerifBengali = Noto_Serif_Bengali({
   subsets: ["bengali"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-bengali",
@@ -101,7 +101,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`h-full antialiased scroll-smooth ${hanken.variable} ${newsreader.variable} ${poppins.variable} ${hindSiliguri.variable}`}
+      className={`h-full antialiased scroll-smooth ${hanken.variable} ${newsreader.variable} ${poppins.variable} ${notoSerifBengali.variable}`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <StoreProvider>{children}</StoreProvider>

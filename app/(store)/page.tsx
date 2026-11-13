@@ -13,6 +13,7 @@ import { ReviewsShowcase } from "@/components/storefront/home/reviews-showcase";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
 import { HOME_SHELF_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
+import { getMessages } from "@/lib/i18n/server";
 import { buildFaqs } from "@/utils/storefront/faqs";
 import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail, recentReviews } from "@/lib/storefront/catalog-data";
 
@@ -27,6 +28,7 @@ const HOME_FAQ_COUNT = 5;
  * layout sews a thread down it as it scrolls (HomeStitch). Every read starts at once; collections stream in.
  */
 export default async function HomePage() {
+  const { locale, t } = await getMessages();
   const [settings, hero, categories, newIn, latest, offers, bestSellers, upcoming, reviews, lookbooks] = await Promise.all([
     getStoreSettings(),
     getHomeHero(),
@@ -53,24 +55,24 @@ export default async function HomePage() {
       <Suspense fallback={null}>
         <SaleCountdown />
       </Suspense>
-      <ProductRail title="New in" products={newIn.data.length ? newIn.data : latest.data} link={{ label: "See all new in", href: "/new" }} />
-      <ProductRail title="Offers" products={offers.data} link={{ label: "See all offers", href: "/sale" }} />
+      <ProductRail title={t.home.newIn} products={newIn.data.length ? newIn.data : latest.data} link={{ label: t.home.seeNewIn, href: "/new" }} />
+      <ProductRail title={t.home.offers} products={offers.data} link={{ label: t.home.seeOffers, href: "/sale" }} />
       <Suspense fallback={null}>
         <FeaturedCollections />
       </Suspense>
       {lookbook ? <LookbookFeature lookbook={lookbook} /> : null}
       <ProductRail
-        title="Best sellers"
+        title={t.home.bestSellers}
         products={bestSellers.data}
-        link={{ label: "See all best sellers", href: `/shop?tag=${PRODUCT_TAGS.bestSeller}` }}
+        link={{ label: t.home.seeBestSellers, href: `/shop?tag=${PRODUCT_TAGS.bestSeller}` }}
       />
       <Suspense fallback={null}>
         <ProductHighlights fallback={bestSellers.data} />
       </Suspense>
-      <OrderJourney />
+      <OrderJourney t={t.home} />
       <ComingSoonSection categories={roots.filter((category) => category.isComingSoon)} products={upcoming.data} />
       <ReviewsShowcase reviews={reviews} />
-      <HomeFaq faqs={buildFaqs(settings).slice(0, HOME_FAQ_COUNT)} />
+      <HomeFaq faqs={buildFaqs(settings, locale).slice(0, HOME_FAQ_COUNT)} />
       <HomeContact settings={settings} />
       <RecentlyViewedRail />
     </div>

@@ -2,11 +2,11 @@ import { FaLock } from "react-icons/fa6";
 import { PAYMENT_METHODS } from "@/utils/storefront/payment-methods";
 
 /** "We accept" strip: gateway names, secured by SSLCommerz. */
-export function FooterPayments() {
+export function FooterPayments({ title }: { title: string }) {
   return (
     <div className="flex flex-col gap-3">
       <h2 className="flex items-center gap-2 text-sm font-semibold">
-        <FaLock aria-hidden className="size-3" /> Secure payment
+        <FaLock aria-hidden className="size-3" /> {title}
       </h2>
       <ul className="flex flex-wrap gap-2">
         {PAYMENT_METHODS.map((name) => (

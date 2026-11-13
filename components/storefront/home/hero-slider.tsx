@@ -23,7 +23,7 @@ const SIZES = "(min-width: 1024px) 30vw, 66vw";
  * button pauses the loop. With reduced motion it is a still row you scroll
  * by hand.
  */
-export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
+export function HeroSlider({ slides, labels }: { slides: HeroSlide[]; labels: { play: string; pause: string } }) {
   const track = useRef<HTMLUListElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const reduced = usePrefersReducedMotion();
@@ -157,7 +157,7 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
         <button
           type="button"
           onClick={toggle}
-          aria-label={paused ? "Play the slideshow" : "Pause the slideshow"}
+          aria-label={paused ? labels.play : labels.pause}
           className="absolute bottom-3 left-3 z-10 grid size-10 place-items-center rounded-full bg-chalk/90 text-ink ring-1 ring-ink/10 transition-colors hover:bg-ink hover:text-chalk lg:bottom-6 lg:left-6"
         >
           {paused ? <FiPlay aria-hidden className="size-4" /> : <FiPause aria-hidden className="size-4" />}
