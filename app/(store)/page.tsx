@@ -10,19 +10,20 @@ import { ReviewsShowcase } from "@/components/storefront/home/reviews-showcase";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
 import { HOME_SHELF_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
-import { getCategoryTree, getStoreSettings, listCollections, productRail, recentReviews } from "@/lib/storefront/catalog-data";
+import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail, recentReviews } from "@/lib/storefront/catalog-data";
 
 const OFFERS_LIMIT = 8;
 const REVIEWS_LIMIT = 6;
 
 /**
- * Home: hero, categories, new in (5), offers, collections (two newest pieces
+ * Home: hero (slider of looks), categories, new in (5), offers, collections (two newest pieces
  * each), best sellers (5), the order journey (three.js), coming soon,
  * reviews and contact. Every read starts at once; collections stream in.
  */
 export default async function HomePage() {
-  const [settings, categories, newIn, latest, offers, bestSellers, upcoming, reviews, lookbooks] = await Promise.all([
+  const [settings, hero, categories, newIn, latest, offers, bestSellers, upcoming, reviews, lookbooks] = await Promise.all([
     getStoreSettings(),
+    getHomeHero(),
     getCategoryTree(),
     productRail({ new: true, sort: "newest", limit: HOME_SHELF_SIZE }),
     productRail({ sort: "newest", limit: HOME_SHELF_SIZE }),
@@ -38,7 +39,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-12 lg:gap-20">
-      <HomeHero returnDays={settings.delivery.returnWindowDays} />
+      <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} />
       <CategoryTiles categories={roots} />
       <ProductRail title="New in" products={newIn.data.length ? newIn.data : latest.data} link={{ label: "See all new in", href: "/new" }} />
       <ProductRail title="Offers" products={offers.data} link={{ label: "See all offers", href: "/sale" }} />

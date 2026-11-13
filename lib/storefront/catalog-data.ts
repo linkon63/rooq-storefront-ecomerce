@@ -10,6 +10,8 @@ import { listProducts } from "@/lib/server/catalog/products/list";
 import { productListQuery } from "@/lib/server/catalog/products/list-schema";
 import { getPolicies } from "@/lib/server/policies/service";
 import { listRecentReviews } from "@/lib/server/reviews/recent";
+import { listCampaigns } from "@/lib/server/campaigns/service";
+import { getHeroMode, listHeroSlides } from "@/lib/server/hero-slides/service";
 import { getSettings } from "@/lib/server/settings/service";
 import { parseValue, searchParamsToObject } from "@/lib/server/validation";
 import type {
@@ -22,8 +24,9 @@ import type {
   ShopCategoryNode,
 } from "@/types/storefront/catalog";
 import type { ReviewWithProduct } from "@/types/storefront/commerce";
-import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
+import type { HomeHeroData, StorePolicy, StoreSettings } from "@/types/storefront/content";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
+import { attachProducts, linkedProductIds, toHeroCampaign } from "@/utils/storefront/hero";
 import { EMPTY_SETTINGS, normalisePolicies, normaliseSettings } from "@/utils/storefront/settings";
 import { cachedRead, readOr, readOrNull } from "./server-api";
 
@@ -51,6 +54,14 @@ const readCollections = cachedRead<[string], CollectionSummary[]>("collections",
   findCollections(parseValue(queryObject(qs), collectionListQuery), false),
 );
 const readRecentReviews = cachedRead<[number], ReviewWithProduct[]>("recent-reviews", (limit) => listRecentReviews(limit));
+const readHero = cachedRead<[], HomeHeroData>("hero", async () => {
+  const [mode, slides, campaigns] = await Promise.all([getHeroMode(), listHeroSlides({ activeOnly: true }), listCampaigns()]);
+  const ids = linkedProductIds(slides);
+  const cards = ids.length
+    ? (await listProducts(parseValue(queryObject(toQueryString({ ids, limit: ids.length, facets: false })), productListQuery), { isStaff: false })).data
+    : [];
+  return { mode, slides: attachProducts(slides, cards), campaign: toHeroCampaign(campaigns) };
+});
 const readCollection = cachedRead<[string, number], CollectionDetail>("collection", (slug, page) =>
   findCollectionBySlug(slug, parseValue({ page: String(page), limit: "24" }, collectionDetailQuery)),
 );
@@ -92,3 +103,8 @@ export const getCollectionBySlug = cache(
 export function recentReviews(limit: number): Promise<ReviewWithProduct[]> {
   return readOr("recent-reviews", () => readRecentReviews(limit), []);
 }
+
+/** The home hero: the admin's mode, the active slides (with linked product cards) and the live hero campaign. */
+export const getHomeHero = cache(
+  (): Promise<HomeHeroData> => readOr("hero", readHero, { mode: "SLIDER", slides: [], campaign: null }),
+);

@@ -339,6 +339,17 @@ export const ERROR_MESSAGES = {
     bannerRemoveFailed: "Could not remove the banner.",
   },
 
+  heroSlide: {
+    notFound: notFound("Hero slide"),
+    imageRequired: "Choose an image for the slide.",
+    productNotFound: notFound("Product"),
+    reorderMismatch: "The slide order is out of date. Refresh and try again.",
+    loadFailed: "Could not load the hero slides. Refresh to try again.",
+    saveFailed: "Could not save the hero slide. Please try again.",
+    deleteFailed: "Could not delete the hero slide. Please try again.",
+    modeFailed: "Could not change what the hero shows. Please try again.",
+  },
+
   discount: {
     notFound: notFound("Product discount"),
     invalidWindow: "End date must be after start date",
