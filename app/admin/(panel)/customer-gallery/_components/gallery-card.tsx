@@ -13,12 +13,13 @@ const STATUS_STYLE: Record<GalleryStatus, string> = {
 type Props = {
   entry: AdminGalleryEntry;
   onStatus: (id: string, status: GalleryStatus) => void;
+  onEdit: (entry: AdminGalleryEntry) => void;
   onDelete: (entry: AdminGalleryEntry) => void;
 };
 
 const BTN = "inline-flex h-8 cursor-pointer items-center rounded-lg border px-3 text-xs font-semibold transition-colors";
 
-export function GalleryCard({ entry, onStatus, onDelete }: Props) {
+export function GalleryCard({ entry, onStatus, onEdit, onDelete }: Props) {
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className={`grid gap-0.5 bg-slate-100 ${entry.images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
@@ -56,7 +57,10 @@ export function GalleryCard({ entry, onStatus, onDelete }: Props) {
               Back to pending
             </button>
           )}
-          <button aria-label="Delete entry" className={`${BTN} ml-auto border-red-200 text-red-600 hover:bg-red-50`} onClick={() => onDelete(entry)} type="button">
+          <button className={`${BTN} ml-auto border-blue-200 text-blue-700 hover:bg-blue-50`} onClick={() => onEdit(entry)} type="button">
+            Edit
+          </button>
+          <button aria-label="Delete entry" className={`${BTN} border-red-200 text-red-600 hover:bg-red-50`} onClick={() => onDelete(entry)} type="button">
             <AdminIcon className="h-4 w-4" name="trash" />
           </button>
         </div>

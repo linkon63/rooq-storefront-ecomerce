@@ -20,7 +20,7 @@ Rules worth knowing:
 
 | Key | Used by | What it is |
 | --- | --- | --- |
-| `DATABASE_URL` | Prisma (`lib/server/prisma-client.ts`, `prisma.config.ts`) | Postgres connection string. For Prisma Postgres use the direct TCP URL (`postgres://…@db.prisma.io:5432/postgres?sslmode=require`). Any Postgres 14+ works. Without it every database call fails with `ERROR_MESSAGES.config.databaseUrlMissing`. |
+| `DATABASE_URL` | Prisma (`lib/server/prisma-client.ts`, `prisma.config.ts`) | Postgres connection string. For Prisma Postgres use the direct TCP URL (`postgres://…@db.prisma.io:5432/postgres?sslmode=verify-full`). Any Postgres 14+ works. Without it every database call fails with `ERROR_MESSAGES.config.databaseUrlMissing`. |
 | `JWT_SECRET` | `lib/server/auth/jwt.ts`, `proxy.ts` | HS256 signing secret for access tokens. Use a long random string, e.g. `openssl rand -base64 48`. Rotating it signs everyone out. |
 | `NEXT_PUBLIC_APP_URL` | password-reset and other e-mail links | Public origin of the app, e.g. `https://<your-domain>`. Locally `http://localhost:3002`. |
 

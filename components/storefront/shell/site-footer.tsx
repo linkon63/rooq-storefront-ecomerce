@@ -31,7 +31,7 @@ export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFoote
           <Logo kechi variant="light" className="h-auto w-44 self-center lg:self-start" />
           {settings.footerDescription ? <p className="max-w-[42ch] text-sm text-chalk/75">{settings.footerDescription}</p> : null}
           <NewsletterForm t={newsletter} />
-          <InstallAppButton t={t} />
+          <InstallAppButton label={t.installApp} hintIos={t.installHintIos} hintOther={t.installHintOther} />
         </div>
         <nav aria-label={t.shop}>
           <h2 className="mb-4 text-sm font-semibold">{t.shop}</h2>

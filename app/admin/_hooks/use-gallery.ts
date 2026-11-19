@@ -64,6 +64,18 @@ export function useGallery() {
   }
 
   /** Returns an error message, or null on success. */
+  async function update(id: string, form: FormData): Promise<string | null> {
+    try {
+      await galleryApi.update(id, form);
+      toast.success(SUCCESS_MESSAGES.gallery.updated);
+      await load();
+      return null;
+    } catch (err) {
+      return messageOf(err, ERROR_MESSAGES.gallery.saveFailed);
+    }
+  }
+
+  /** Returns an error message, or null on success. */
   async function remove(id: string): Promise<string | null> {
     try {
       await galleryApi.remove(id);
@@ -75,5 +87,5 @@ export function useGallery() {
     }
   }
 
-  return { items, isLoading, error, status, setStatus, source, setSource, load, changeStatus, create, remove };
+  return { items, isLoading, error, status, setStatus, source, setSource, load, changeStatus, create, update, remove };
 }

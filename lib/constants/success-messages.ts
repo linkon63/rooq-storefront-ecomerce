@@ -3,6 +3,7 @@ export const SUCCESS_MESSAGES = {
   gallery: {
     submitted: "Thank you! Your photos were received and will appear once our team approves them.",
     added: "Entry added",
+    updated: "Entry updated",
     approved: "Entry approved",
     rejected: "Entry rejected",
     pending: "Entry moved back to pending",

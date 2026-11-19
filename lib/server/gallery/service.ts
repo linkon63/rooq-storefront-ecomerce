@@ -9,7 +9,7 @@ import { releaseMedia } from "@/lib/server/media/release";
 import { notifyStaff, safely } from "@/lib/server/orders/notify";
 import { prisma } from "@/lib/server/prisma";
 import { toAdminGalleryEntry, toPublicGalleryEntry } from "@/utils/mappers/gallery";
-import type { GalleryAdminCreateInput, GalleryAdminQuery, GallerySubmitInput } from "./schemas";
+import type { GalleryAdminCreateInput, GalleryAdminQuery, GalleryAdminUpdateInput, GallerySubmitInput } from "./schemas";
 import type { GallerySource, GalleryStatus } from "@/types/gallery";
 
 const entrySelect = {
@@ -99,6 +99,42 @@ export async function createAdminGalleryEntry(input: GalleryAdminCreateInput, me
     },
     select: entrySelect,
   });
+  return toAdminGalleryEntry(row);
+}
+
+/** Staff fix a customer's data: edit the fields, drop photos (`keep`) and add new ones. Status is unchanged. */
+export async function updateAdminGalleryEntry(id: string, input: GalleryAdminUpdateInput, newMediaIds: readonly string[]) {
+  const current = await prisma.customerGalleryEntry.findUnique({ where: { id }, select: { images: { select: { mediaId: true } } } });
+  if (!current) throw notFound(ERROR_MESSAGES.gallery.notFound(id));
+  const currentIds = new Set(current.images.map((image) => image.mediaId));
+  const keep = [...new Set(input.keep)].filter((mediaId) => currentIds.has(mediaId));
+  assertPhotoCount([...keep, ...newMediaIds]);
+  const removed = [...currentIds].filter((mediaId) => !keep.includes(mediaId));
+  const ordered = [...keep, ...newMediaIds.filter((mediaId) => !keep.includes(mediaId))];
+
+  const row = await prisma.$transaction(async (tx) => {
+    await tx.customerGalleryImage.deleteMany({ where: { entryId: id, mediaId: { in: removed } } });
+    for (const [position, mediaId] of ordered.entries()) {
+      await tx.customerGalleryImage.upsert({
+        where: { entryId_mediaId: { entryId: id, mediaId } },
+        create: { entryId: id, mediaId, position },
+        update: { position },
+      });
+    }
+    return tx.customerGalleryEntry.update({
+      where: { id },
+      data: {
+        name: input.name,
+        city: input.city ?? null,
+        rating: input.rating,
+        feedback: input.feedback,
+        contactPhone: input.contactPhone ?? null,
+        source: input.source,
+      },
+      select: entrySelect,
+    });
+  });
+  await releaseMedia(removed);
   return toAdminGalleryEntry(row);
 }
 

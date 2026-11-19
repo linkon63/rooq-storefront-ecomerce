@@ -9,7 +9,7 @@ is no object storage to configure.
 
 1. Create a **Prisma Postgres** database (console.prisma.io, or Vercel →
    Storage → Prisma Postgres), in the region closest to your Vercel functions.
-2. Copy its **direct TCP connection string** (`postgres://…@db.prisma.io:5432/postgres?sslmode=require`).
+2. Copy its **direct TCP connection string** (`postgres://…@db.prisma.io:5432/postgres?sslmode=verify-full`).
    Rooq connects through the `pg` driver adapter (`@prisma/adapter-pg`), so the
    standard Postgres URL is what it needs. An Accelerate `prisma+postgres://` URL is not used.
 3. Create a second database for Preview deployments. Previews must never write to production.

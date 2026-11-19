@@ -16,6 +16,8 @@ export const galleryApi = {
   },
   create: (body: FormData) =>
     apiRequest<AdminGalleryEntry>("/gallery/admin", { method: "POST", body, timeoutMs: UPLOAD_TIMEOUT_MS }),
+  update: (id: string, body: FormData) =>
+    apiRequest<AdminGalleryEntry>(`/gallery/${id}`, { method: "PUT", body, timeoutMs: UPLOAD_TIMEOUT_MS }),
   setStatus: (id: string, status: GalleryStatus) => apiRequest<AdminGalleryEntry>(`/gallery/${id}`, jsonInit("PATCH", { status })),
   remove: (id: string) => apiRequest<{ message: string }>(`/gallery/${id}`, { method: "DELETE" }),
 };

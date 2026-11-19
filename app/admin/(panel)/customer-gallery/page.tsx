@@ -10,8 +10,9 @@ import { GalleryFilters } from "./_components/gallery-filters";
 import { GalleryFormModal } from "./_components/gallery-form-modal";
 
 export default function CustomerGalleryPage() {
-  const { items, isLoading, error, status, setStatus, source, setSource, load, changeStatus, create, remove } = useGallery();
+  const { items, isLoading, error, status, setStatus, source, setSource, load, changeStatus, create, update, remove } = useGallery();
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<AdminGalleryEntry | null>(null);
   const [toDelete, setToDelete] = useState<AdminGalleryEntry | null>(null);
   const [deleteError, setDeleteError] = useState("");
 
@@ -64,6 +65,7 @@ export default function CustomerGalleryPage() {
                 setDeleteError("");
                 setToDelete(row);
               }}
+              onEdit={setEditing}
               onStatus={(id, next) => void changeStatus(id, next)}
             />
           ))}
@@ -71,6 +73,7 @@ export default function CustomerGalleryPage() {
       )}
 
       {adding && <GalleryFormModal onClose={() => setAdding(false)} onSave={create} />}
+      {editing && <GalleryFormModal entry={editing} key={editing.id} onClose={() => setEditing(null)} onSave={(form) => update(editing.id, form)} />}
 
       <ConfirmModal
         cancelText="Keep"
