@@ -15,6 +15,7 @@ type SiteFooterProps = { nav: NavItem[]; settings: StoreSettings; policies: Stor
 const HELP_LINKS = [
   { key: "contactUs", href: "/contact" },
   { key: "faq", href: "/faq" },
+  { key: "customerGallery", href: "/customer-gallery" },
   { key: "trackOrder", href: "/profile?tab=orders" },
   { key: "startReturn", href: "/profile?tab=returns" },
 ] as const;

@@ -342,6 +342,23 @@ export const ERROR_MESSAGES = {
     bannerRemoveFailed: "Could not remove the banner.",
   },
 
+  gallery: {
+    notFound: notFound("Gallery entry"),
+    nameRequired: "Enter your name.",
+    nameTooLong: (max: number) => `Name must be ${max} characters or fewer.`,
+    feedbackRequired: "Write a few words about your experience.",
+    feedbackTooLong: (max: number) => `Feedback must be ${max} characters or fewer.`,
+    ratingInvalid: "Choose a rating from 1 to 5.",
+    consentRequired: "Please confirm we may show your photo and name.",
+    photoRequired: "Add at least one photo.",
+    tooManyPhotos: (max: number) => `You can add up to ${max} photos.`,
+    submitFailed: "Could not send your photos. Please try again.",
+    loadFailed: "Could not load the customer gallery. Refresh to try again.",
+    saveFailed: "Could not save this entry. Please try again.",
+    statusFailed: "Could not update this entry. Please try again.",
+    deleteFailed: "Could not delete this entry. Please try again.",
+  },
+
   heroSlide: {
     notFound: notFound("Hero slide"),
     imageRequired: "Choose an image for the slide.",

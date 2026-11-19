@@ -1,5 +1,13 @@
 /** Success messages returned by the API ({ message }) and shown in toasts. */
 export const SUCCESS_MESSAGES = {
+  gallery: {
+    submitted: "Thank you! Your photos were received and will appear once our team approves them.",
+    added: "Entry added",
+    approved: "Entry approved",
+    rejected: "Entry rejected",
+    pending: "Entry moved back to pending",
+    deleted: "Entry deleted",
+  },
   heroSlide: {
     added: (count: number) => (count === 1 ? "Slide added" : `${count} slides added`),
     saved: "Slide saved",

@@ -126,6 +126,11 @@ enum FitFeedback {
   RUNS_LARGE
 }
 
+enum GallerySource {
+  WEBSITE
+  FACEBOOK
+}
+
 enum ReviewStatus {
   PENDING
   APPROVED
@@ -457,21 +462,22 @@ model Media {
   /// Bytes live in their own table so list queries never drag them along.
   blob MediaBlob?
 
-  userAvatars          User[]           @relation("UserAvatar")
-  categoryImages       Category[]       @relation("CategoryImage")
-  brandLogos           Brand[]          @relation("BrandLogo")
+  userAvatars          User[]                 @relation("UserAvatar")
+  categoryImages       Category[]             @relation("CategoryImage")
+  brandLogos           Brand[]                @relation("BrandLogo")
   productMedia         ProductMedia[]
   reviewMedia          ReviewMedia[]
-  collectionCovers     Collection[]     @relation("CollectionCover")
-  lookImages           CollectionLook[] @relation("LookImage")
+  collectionCovers     Collection[]           @relation("CollectionCover")
+  lookImages           CollectionLook[]       @relation("LookImage")
   campaignMedia        CampaignMedia[]
   heroSlides           HeroSlide[]
-  newsCovers           News[]           @relation("NewsCover")
-  settingLogos         Setting[]        @relation("SettingLogo")
-  settingIcons         Setting[]        @relation("SettingIcon")
-  settingFavicons      Setting[]        @relation("SettingFavicon")
-  settingYoutubeThumbs Setting[]        @relation("SettingYoutubeThumb")
-  orderItemImages      OrderItem[]      @relation("OrderItemImage")
+  newsCovers           News[]                 @relation("NewsCover")
+  settingLogos         Setting[]              @relation("SettingLogo")
+  settingIcons         Setting[]              @relation("SettingIcon")
+  settingFavicons      Setting[]              @relation("SettingFavicon")
+  settingYoutubeThumbs Setting[]              @relation("SettingYoutubeThumb")
+  orderItemImages      OrderItem[]            @relation("OrderItemImage")
+  galleryImages        CustomerGalleryImage[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1631,9 +1637,9 @@ model Setting {
   currency          String  @default("BDT")
   language          String  @default("en")
 
-  showCertifications Boolean @default(false) @map("show_certifications")
-  isTopBarVisible    Boolean @default(true) @map("is_top_bar_visible")
-  hideOutOfStock     Boolean @default(false) @map("hide_out_of_stock")
+  showCertifications Boolean  @default(false) @map("show_certifications")
+  isTopBarVisible    Boolean  @default(true) @map("is_top_bar_visible")
+  hideOutOfStock     Boolean  @default(false) @map("hide_out_of_stock")
   /// Home hero: the slider of hero slides, or the live hero campaign.
   heroMode           HeroMode @default(SLIDER) @map("hero_mode")
 
@@ -1871,4 +1877,49 @@ model AbandonedCart {
   @@index([phone])
   @@index([status, updatedAt])
   @@map("abandoned_carts")
+}
+
+// ======================================================================
+// 18. CUSTOMER GALLERY
+// ======================================================================
+
+/// A customer's photo + feedback (WEBSITE, submitted by the shopper) or a Facebook
+/// review screenshot (FACEBOOK, added by staff). Nothing shows until APPROVED.
+model CustomerGalleryEntry {
+  id           String        @id @default(uuid(7))
+  name         String
+  city         String?
+  /// 1–5, validated by the API.
+  rating       Int
+  feedback     String
+  source       GallerySource @default(WEBSITE)
+  status       ReviewStatus  @default(PENDING)
+  /// Private — for staff follow-up only, never sent to the storefront.
+  contactPhone String?       @map("contact_phone")
+  /// When the customer agreed to show their photo and name (staff ticks it for Facebook entries).
+  consentAt    DateTime      @map("consent_at")
+
+  images CustomerGalleryImage[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status, source, createdAt])
+  @@map("customer_gallery_entries")
+}
+
+model CustomerGalleryImage {
+  position Int @default(0)
+
+  entryId String               @map("entry_id")
+  entry   CustomerGalleryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  mediaId String @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([entryId, mediaId])
+  @@index([mediaId])
+  @@map("customer_gallery_images")
 }

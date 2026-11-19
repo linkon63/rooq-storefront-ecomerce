@@ -28,6 +28,7 @@ const referenceCount = {
   settingFavicons: true,
   settingYoutubeThumbs: true,
   orderItemImages: true,
+  galleryImages: true,
 } satisfies Prisma.MediaCountOutputTypeSelect;
 
 /**

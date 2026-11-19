@@ -33,7 +33,7 @@ Rooq stores everything in one PostgreSQL database, accessed through Prisma 7. Th
 | [Inventory](#inventory) | `stock_movements`, `back_in_stock_requests` | #F9A825 |
 | [Commerce (cart, orders, payments, pricing, wholesale)](#commerce-cart-orders-payments-pricing-wholesale) | `carts`, `cart_items`, `wishlists`, `orders`, `order_addresses`, `order_items`, `order_status_logs`, `invoice_counters`, `payments`, `shipments`, `coupons`, `product_discounts`, `discount_products`, `wholesale_order_requests`, `wholesale_order_request_items` | #4527A0 |
 | [Returns & Exchanges](#returns--exchanges) | `return_requests`, `return_items` | #C62828 |
-| [Content & Marketing](#content--marketing) | `reviews`, `review_media`, `sections`, `campaigns`, `campaign_media`, `news`, `policies`, `newsletter_subscribers` | #00838F |
+| [Content & Marketing](#content--marketing) | `reviews`, `review_media`, `customer_gallery_entries`, `customer_gallery_images`, `sections`, `campaigns`, `campaign_media`, `news`, `policies`, `newsletter_subscribers` | #00838F |
 | [Platform (settings, notifications, audit)](#platform-settings-notifications-audit) | `settings`, `store_contacts`, `store_social_links`, `notifications`, `activity_logs` | #455A64 |
 
 How the domains connect, in one paragraph: **users** own carts, wishlists, addresses, orders, reviews, returns and notifications. A **product** belongs to a brand and a category, has many **variants** (colour × size) and an ordered gallery of **media**. Carts, orders, reviews, back-in-stock requests, returns and stock movements all point at the **variant** (the SKU), not the product. An **order** has one frozen address, many lines, payments, shipments and status logs. A **return** points at the order and at the specific order lines, and its stock effects go through **stock_movements**. Every image anywhere is a row in **media**.
@@ -912,6 +912,31 @@ Join table: customer photos attached to a review (many-to-many with media, order
 | `media_id` → [`media`](#media) | N:1 (required) | CASCADE | Reviews ↔ media (photos) many-to-many (side 2). |
 
 **Keys and indexes:** PK (`review_id`, `media_id`) · INDEX (`media_id`)
+
+### `customer_gallery_entries`
+
+A customer's photo + name + rating + feedback (`source` WEBSITE, submitted from the storefront) or a Facebook review screenshot (`source` FACEBOOK, added by staff). Shows on `/customer-gallery` only when `status` is APPROVED; website submissions start PENDING. *(Prisma model `CustomerGalleryEntry`.)*
+
+**Key columns:** `name`, `city`, `rating` (1–5, API-validated), `feedback`, `source` (`GallerySource`), `status` (`ReviewStatus`), `contact_phone` (private, never sent to the storefront), `consent_at` (when the customer agreed to show their photo and name).
+
+| Relationship | Cardinality | ON DELETE | Why |
+| --- | --- | --- | --- |
+| ← [`customer_gallery_images`](#customer_gallery_images)`.entry_id` | 1:N | CASCADE | An entry owns its photos. |
+
+**Keys and indexes:** PK (`id`) · INDEX (`status`, `source`, `created_at`)
+
+### `customer_gallery_images`
+
+Join table: photos or screenshots of a gallery entry (ordered). *(Prisma model `CustomerGalleryImage`.)*
+
+**Key columns:** Composite PK (`entry_id`, `media_id`), `position`.
+
+| Relationship | Cardinality | ON DELETE | Why |
+| --- | --- | --- | --- |
+| `entry_id` → [`customer_gallery_entries`](#customer_gallery_entries) | N:1 (required) | CASCADE | Removing an entry removes its links. |
+| `media_id` → [`media`](#media) | N:1 (required) | RESTRICT | Bytes are freed with `releaseMedia()` after the link is removed. |
+
+**Keys and indexes:** PK (`entry_id`, `media_id`) · INDEX (`media_id`)
 
 ### `sections`
 

@@ -3,7 +3,7 @@ import { craftBn, craftEn } from "./messages-craft";
 /** Static storefront copy per language. English is the source of truth for the keys. */
 const en = {
   topBar: { call: "Call", trackOrder: "Track order", delivery: "Delivery", aboutUs: "About us", help: "Help" },
-  header: { skip: "Skip to content", home: "Rooq home", search: "Search", account: "Your account", signIn: "Sign in", openMenu: "Open menu", compare: "Compare", myAccount: "My account", signOut: "Sign out" },
+  header: { skip: "Skip to content", home: "Rooq home", search: "Search", reviews: "Customer reviews", account: "Your account", signIn: "Sign in", openMenu: "Open menu", compare: "Compare", myAccount: "My account", signOut: "Sign out" },
   language: { label: "Language", en: "English", bn: "বাংলা", switchTo: "Switch language" },
   nav: { shop: "Shop", newIn: "New in", sale: "Sale", soon: "Soon" },
   mobileNav: { menu: "Menu", byCategory: "Shop by category", account: "Account and orders", wishlist: "Wishlist", compare: "Compare", contact: "Help and contact", signOut: "Sign out" },
@@ -12,6 +12,7 @@ const en = {
     help: "Help",
     contactUs: "Contact us",
     faq: "Questions and answers",
+    customerGallery: "Customer gallery",
     trackOrder: "Track an order",
     startReturn: "Start a return",
     cookiePolicy: "Cookie policy",
@@ -89,7 +90,7 @@ export type Messages = typeof en;
 
 const bn: Messages = {
   topBar: { call: "কল করুন", trackOrder: "অর্ডার ট্র্যাক করুন", delivery: "ডেলিভারি", aboutUs: "আমাদের সম্পর্কে", help: "সহায়তা" },
-  header: { skip: "মূল অংশে যান", home: "রুক হোম", search: "খুঁজুন", account: "আপনার অ্যাকাউন্ট", signIn: "সাইন ইন", openMenu: "মেনু খুলুন", compare: "তুলনা", myAccount: "আমার অ্যাকাউন্ট", signOut: "সাইন আউট" },
+  header: { skip: "মূল অংশে যান", home: "রুক হোম", search: "খুঁজুন", reviews: "কাস্টমার রিভিউ", account: "আপনার অ্যাকাউন্ট", signIn: "সাইন ইন", openMenu: "মেনু খুলুন", compare: "তুলনা", myAccount: "আমার অ্যাকাউন্ট", signOut: "সাইন আউট" },
   language: { label: "ভাষা", en: "English", bn: "বাংলা", switchTo: "ভাষা পরিবর্তন করুন" },
   nav: { shop: "শপ", newIn: "নতুন সংগ্রহ", sale: "সেল", soon: "শীঘ্রই" },
   mobileNav: { menu: "মেনু", byCategory: "ক্যাটাগরি অনুযায়ী কিনুন", account: "অ্যাকাউন্ট ও অর্ডার", wishlist: "উইশলিস্ট", compare: "তুলনা", contact: "সহায়তা ও যোগাযোগ", signOut: "সাইন আউট" },
@@ -98,6 +99,7 @@ const bn: Messages = {
     help: "সহায়তা",
     contactUs: "যোগাযোগ করুন",
     faq: "প্রশ্ন ও উত্তর",
+    customerGallery: "কাস্টমার গ্যালারি",
     trackOrder: "অর্ডার ট্র্যাক করুন",
     startReturn: "রিটার্ন শুরু করুন",
     cookiePolicy: "কুকি নীতি",

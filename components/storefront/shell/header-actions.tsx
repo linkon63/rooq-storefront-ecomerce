@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiHeart, FiSearch, FiShoppingBag, FiUser } from "react-icons/fi";
+import { FiHeart, FiSearch, FiShoppingBag, FiStar, FiUser } from "react-icons/fi";
 import { LuGitCompareArrows } from "react-icons/lu";
 import { useSession } from "@/hooks/use-session";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -27,6 +27,9 @@ export function HeaderActions({ t }: { t: Messages["header"] }) {
       <button type="button" className={iconButton} aria-label={t.search} onClick={() => dispatch(setSearchOpen(true))}>
         <FiSearch aria-hidden className="size-5" />
       </button>
+      <Link href="/customer-gallery" className={iconButton} aria-label={t.reviews} title={t.reviews}>
+        <FiStar aria-hidden className="size-5" />
+      </Link>
       {isSignedIn ? (
         <AccountMenu t={t} buttonClassName={iconButton} />
       ) : (

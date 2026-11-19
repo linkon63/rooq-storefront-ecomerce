@@ -71,6 +71,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
           { label: "Reviews", href: "/admin/reviews", icon: "reviews" },
         ],
       },
+      { label: "Customer Gallery", href: "/admin/customer-gallery", icon: "image" },
       { label: "News & Journal", href: "/admin/news", icon: "report" },
     ],
   },
