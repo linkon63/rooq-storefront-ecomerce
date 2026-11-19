@@ -2,21 +2,27 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FiMaximize2 } from "react-icons/fi";
+import { FabricLens } from "./fabric-lens";
 import { useProductSelection } from "./selection-context";
+import { useColourRipple } from "./use-colour-ripple";
 
 const GalleryZoom = dynamic(() => import("./gallery-zoom").then((module) => module.GalleryZoom), { ssr: false });
 
 /**
  * Gallery for the selected colour. Phones: a swipeable strip with dots.
- * Desktop: a two-column stack. Any image opens the zoom viewer.
+ * Desktop: a two-column stack with a weave magnifier under the mouse. Any
+ * image opens the zoom viewer; a colour change pours the new photos out from
+ * the swatch.
  */
 export function ProductGallery() {
   const { meta } = useProductSelection();
   const { gallery, product, color } = meta;
   const [zoomIndex, setZoomIndex] = useState<number | null>(null);
   const [active, setActive] = useState(0);
+  const box = useRef<HTMLDivElement>(null);
+  useColourRipple(box, color?.id ?? null);
   const altBase = color ? `${product.name} in ${color.name}` : product.name;
 
   if (gallery.length === 0) {
@@ -24,7 +30,7 @@ export function ProductGallery() {
   }
 
   return (
-    <div key={color?.id ?? "all"} className="animate-[fade-in_.35s_ease-out]">
+    <div ref={box} key={color?.id ?? "all"} className="animate-[fade-in_.35s_ease-out]">
       <ul
         className="rail-scroll -mx-4 flex overflow-x-auto md:mx-0 md:grid md:grid-cols-2 md:gap-2 md:overflow-visible"
         onScroll={(event) => {
@@ -48,7 +54,8 @@ export function ProductGallery() {
                 sizes={index === 0 ? "(min-width: 1024px) 55vw, 100vw" : "(min-width: 1024px) 27vw, 100vw"}
                 className="object-cover"
               />
-              <span className="absolute bottom-3 right-3 grid size-9 place-items-center rounded-full bg-paper/90 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <FabricLens image={image} />
+              <span className="pointer-events-none absolute bottom-3 right-3 grid size-9 place-items-center rounded-full bg-paper/90 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                 <FiMaximize2 aria-hidden className="size-4" />
               </span>
             </button>

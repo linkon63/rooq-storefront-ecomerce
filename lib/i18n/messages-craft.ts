@@ -1,5 +1,5 @@
 /**
- * Copy for the home page's craft moments (saree unfold, colour story, made-by-hand line).
+ * Copy for the home page's craft moments (saree unfold, made-by-hand line).
  * Plain strings only: `t.home` is passed to client components.
  */
 export const craftEn = {
@@ -8,10 +8,6 @@ export const craftEn = {
     "A tant saree leaves the loom folded, its border and aanchal tucked inside. Here is one opened out, the way you will first see yours.",
   unfoldCta: "Find your saree",
   unfoldAria: "A handloom saree with a gold border and striped aanchal, unfolding",
-  coloursTitle: "Shop by colour",
-  coloursLead: "Choose a colour to see the sarees dyed in it.",
-  coloursPick: "Colours",
-  seeAllIn: "See all {colour}",
   madeByHand: "Made by hand",
   stats: {
     pieces: "{n} handwoven pieces in the shop",
@@ -30,10 +26,6 @@ export const craftBn: CraftMessages = {
     "তাঁত থেকে শাড়ি নামে ভাঁজ করা অবস্থায়, পাড় আর আঁচল থাকে ভেতরে। এখানে একটি খুলে দেখানো হলো, ঠিক যেভাবে আপনি প্রথম আপনারটি দেখবেন।",
   unfoldCta: "আপনার শাড়ি খুঁজুন",
   unfoldAria: "সোনালি পাড় আর ডোরাকাটা আঁচলের একটি তাঁতের শাড়ি খুলে যাচ্ছে",
-  coloursTitle: "রং অনুযায়ী কিনুন",
-  coloursLead: "একটি রং বেছে নিন, সেই রঙে রাঙানো শাড়িগুলো দেখুন।",
-  coloursPick: "রং",
-  seeAllIn: "সব {colour} দেখুন",
   madeByHand: "হাতে বোনা",
   stats: {
     pieces: "শপে {n}টি হাতে বোনা শাড়ি ও পোশাক",

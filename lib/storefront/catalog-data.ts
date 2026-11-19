@@ -124,12 +124,3 @@ export const getSaleCountdown = cache(
 
 /** Shop numbers for the home "made by hand" line, or null when they cannot be read. */
 export const getHomeStats = cache((): Promise<HomeStats | null> => readOr("home-stats", readHomeStats, null));
-
-/** The most stocked colours (by product count) for the home colour story. */
-export const getTopColours = cache(async (limit: number) => {
-  const list = await readOr("colour facets", () => readProducts(toQueryString({ limit: 1, facets: true })), EMPTY_LIST);
-  return (list.facets?.colors ?? [])
-    .filter((colour) => colour.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
-});

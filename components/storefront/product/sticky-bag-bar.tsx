@@ -6,9 +6,9 @@ import { Price } from "../shared/price";
 import { AddToBag } from "./add-to-bag";
 import { useProductSelection } from "./selection-context";
 
-/** Phone-only bottom bar that appears once the main "Add to bag" has scrolled above the viewport. */
+/** Phone-only bottom bar that springs up once the main "Add to bag" has scrolled above the viewport; its button pulses once when a size is picked. */
 export function StickyBagBar({ anchorId, image }: { anchorId: string; image: string | null }) {
-  const { meta } = useProductSelection();
+  const { state, meta } = useProductSelection();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function StickyBagBar({ anchorId, image }: { anchorId: string; image: str
   return (
     <div
       inert={!visible}
-      className={`fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-selvedge bg-paper/95 px-4 py-3 backdrop-blur transition-transform duration-300 lg:hidden ${
+      className={`fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-selvedge bg-paper/95 px-4 py-3 backdrop-blur transition-transform duration-500 ease-[linear(0,0.55,0.95,1.08,1.03,0.99,1)] motion-reduce:duration-150 lg:hidden ${
         visible ? "translate-y-0" : "pointer-events-none translate-y-full"
       }`}
     >
@@ -34,7 +34,9 @@ export function StickyBagBar({ anchorId, image }: { anchorId: string; image: str
         <p className="truncate text-sm font-medium">{meta.product.name}</p>
         <Price price={price} compareAtPrice={compareAtPrice} className="text-sm" />
       </div>
-      <AddToBag image={image} className="w-44 shrink-0" />
+      <div key={state.sizeId ?? "none"} className="bag-pulse w-44 shrink-0">
+        <AddToBag image={image} className="w-full" />
+      </div>
     </div>
   );
 }

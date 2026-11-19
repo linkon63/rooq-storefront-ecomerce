@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { CategoryTiles } from "@/components/storefront/home/category-tiles";
-import { ColourStory } from "@/components/storefront/home/colour-story/colour-story";
 import { MadeByHand } from "@/components/storefront/home/made-by-hand/made-by-hand";
 import { SareeUnfold } from "@/components/storefront/home/saree-unfold/saree-unfold";
 import { ComingSoonSection } from "@/components/storefront/home/coming-soon-section";
@@ -26,12 +25,12 @@ const HOME_FAQ_COUNT = 5;
 
 /**
  * Home: hero (slider of looks, woven headline), the 3D saree unfold,
- * categories (unrolling bolts), new in (5), offers, shop by colour,
+ * categories (unrolling bolts), new in (5), offers,
  * collections (two newest pieces each), lookbook (parallax), best sellers (5),
  * two spotlight products, the made-by-hand numbers, the order journey, coming
  * soon, reviews (stitched notes), five common questions, contact and recently
  * viewed. The layout sews a thread down it as it scrolls (HomeStitch). Every
- * read starts at once; collections, colours and numbers stream in.
+ * read starts at once; collections and numbers stream in.
  */
 export default async function HomePage() {
   const { locale, t } = await getMessages();
@@ -64,9 +63,6 @@ export default async function HomePage() {
       </Suspense>
       <ProductRail title={t.home.newIn} products={newIn.data.length ? newIn.data : latest.data} link={{ label: t.home.seeNewIn, href: "/new" }} />
       <ProductRail title={t.home.offers} products={offers.data} link={{ label: t.home.seeOffers, href: "/sale" }} />
-      <Suspense fallback={null}>
-        <ColourStory />
-      </Suspense>
       <Suspense fallback={null}>
         <FeaturedCollections />
       </Suspense>

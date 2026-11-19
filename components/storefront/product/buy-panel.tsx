@@ -16,6 +16,7 @@ import { useProductSelection } from "./selection-context";
 import { SizeGuideDialog } from "./size-guide-dialog";
 import { SizePicker } from "./size-picker";
 import { StickyBagBar } from "./sticky-bag-bar";
+import { StockSpool } from "./stock-spool";
 
 /** Name, price, colour and size pickers, and the bag/wishlist actions. */
 export function BuyPanel() {
@@ -47,11 +48,7 @@ export function BuyPanel() {
       <ColorPicker />
       <SizePicker />
 
-      {lowStock !== null ? (
-        <p className="text-sm font-semibold text-dye-deep" role="status">
-          Only {lowStock} left in this size
-        </p>
-      ) : null}
+      {lowStock !== null ? <StockSpool left={lowStock} /> : null}
 
       <div id="buy-actions" className="flex gap-2">
         <AddToBag image={leadImage} className="flex-1" />

@@ -34,11 +34,13 @@ Each idea has a tag:
 - Home: chapter **reveal headings**, **sale countdown** clock, hero slider/campaign.
 - Footer: **handloom + charkha scene** weaving a tant saree (`shell/footer-art`).
 - Product grids: below-the-fold **fade-in in batches** (`product-card/grid-reveal`).
-- Product: full-screen **gallery zoom** with pan.
+- Product: full-screen **gallery zoom** with pan, weave **lens**,
+  colour **ripple**, stitched **size ring**, **spool** for low stock, springy
+  sticky bar.
 - Listings (section 3): **filter shuffle**, **colour preview**, second photo on
   hover, **price cut** line, sliding **New** label, **empty loom**.
 - Home (built from section 2): **3D saree unfold**, **woven headline**, category
-  tiles **unrolling like bolts**, **shop by colour** with dye flood, lookbook
+  tiles **unrolling like bolts**, lookbook
   **parallax** with a stitched fabric close-up, **review notes** with cross
   stitches, **split-flap** sale clock, **made-by-hand** live numbers.
 
@@ -79,7 +81,6 @@ Built. How it differs from the first sketch below:
 - The saree unfold is its own section right after the hero (folded → open as it
   scrolls in), with a woven paar/buti/aanchal texture drawn in code, not a photo.
 - Category bolts unroll on scroll; there is no hover unroll yet.
-- The colour band switches on tap (swatches are tabs), not on scroll.
 - "Made by hand" uses real numbers only: pieces on sale, delivered orders and the
   review average. No invented weaving hours.
 
@@ -92,7 +93,7 @@ Built. How it differs from the first sketch below:
   bolts of cloth. On hover/tap a bolt unrolls a little to show the fabric.
 - [x] **Lookbook parallax depth** — `GSAP ScrollTrigger` `S`. The model photo, the
   fabric close-up and the text move at three different speeds.
-- [x] **Colour story band** — `GSAP` `M`. A horizontal strip of dye swatches
+- [ ] **Colour story band** (built, then removed) — `GSAP` `M`. A horizontal strip of dye swatches
   (indigo, lal, haldi, sobuj). Scrolling through it recolours the section's
   background, and products in that colour slide up.
 - [x] **Reviews as stitched notes** — `CSS` `S`. Review cards are pinned with a
@@ -137,21 +138,25 @@ show the plain version). "Clear filters" keeps the page's own preset
 
 ## 5. Product page
 
-- [ ] **Drape view in 3D** — `3D` `L`. A "See it draped" button opens a cloth
+Built, except **Weaver's note** (needs a new admin field for the story; not
+started) and the **3D drape** (built, then removed). Notes: the lens is
+mouse-only; the colour ripple needs a product with 2+ colours to be seen.
+
+- [ ] ~~**Drape view in 3D**~~ (removed) — `3D` `L`. A "See it draped" button opens a cloth
   simulation of the saree on a simple dress form, using the product image as the
   texture. Drag to rotate. This is the second biggest wow moment after the home hero.
-- [ ] **Fabric close-up lens** — `CSS` `S`. A magnifier that follows the finger or
+- [x] **Fabric close-up lens** — `CSS` `S`. A magnifier that follows the finger or
   cursor and shows the weave. Reuse the zoom image from `gallery-zoom`.
-- [ ] **Colour change ripple** — `GSAP` `S`. When you pick a colour, the new image
+- [x] **Colour change ripple** — `GSAP` `S`. When you pick a colour, the new image
   is revealed with a dye-ripple mask spreading from the swatch you tapped.
-- [ ] **Size pick feedback** — `CSS` `S`. The selected size chip gets a stitched
+- [ ] **Size pick feedback** (built, then removed) — `CSS` `S`. The selected size chip gets a stitched
   border that is drawn around it.
 - [ ] **Weaver's note** — `CSS` `S`. A small card that looks like a handwritten
   note ("Woven in Tangail by …, 9 days"), with a handwriting-reveal animation.
   Only if the admin fills in the data.
-- [ ] **Sticky bag bar spring** — `CSS` `S`. The existing `sticky-bag-bar` slides in
+- [x] **Sticky bag bar spring** — `CSS` `S`. The existing `sticky-bag-bar` slides in
   with a soft spring, and its button pulses once when a size gets chosen.
-- [ ] **Low stock thread** — `SVG` `S`. "Only 3 left" shows a thread spool that is
+- [x] **Low stock thread** — `SVG` `S`. "Only 3 left" shows a thread spool that is
   almost empty.
 
 ## 6. Quick view, search, cart drawer

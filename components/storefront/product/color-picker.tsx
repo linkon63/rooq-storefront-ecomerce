@@ -2,6 +2,7 @@
 
 import { isLightColor } from "@/utils/color";
 import { colorHasStock } from "@/utils/storefront/variant-selection";
+import { announceColourRipple } from "./colour-ripple";
 import { useProductSelection } from "./selection-context";
 
 /** Round fabric swatches; sold-out colours stay pickable but are struck through. */
@@ -27,7 +28,10 @@ export function ColorPicker() {
               role="radio"
               aria-checked={selected}
               aria-label={soldOut ? `${entry.name}, sold out` : entry.name}
-              onClick={() => actions.selectColor(entry.id)}
+              onClick={(event) => {
+                if (!selected) announceColourRipple(event.currentTarget, entry.hex);
+                actions.selectColor(entry.id);
+              }}
               className={`relative grid size-11 place-items-center rounded-full transition-shadow ${
                 selected ? "ring-2 ring-ink ring-offset-2 ring-offset-paper" : "hover:ring-1 hover:ring-stone hover:ring-offset-2"
               }`}

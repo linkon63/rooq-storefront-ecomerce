@@ -218,3 +218,17 @@
     transform: rotate(9deg);
   }
 }
+
+/* Product page ---------------------------------------------------------- */
+
+/* Sticky bar button: one pulse when the size changes. */
+@media (prefers-reduced-motion: no-preference) {
+  .bag-pulse {
+    animation: bag-pulse 0.6s var(--ease-cloth) 0.1s both;
+  }
+}
+@keyframes bag-pulse {
+  40% {
+    transform: scale(1.06);
+  }
+}
