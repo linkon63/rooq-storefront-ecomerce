@@ -13,6 +13,7 @@ import { listRecentReviews } from "@/lib/server/reviews/recent";
 import { listCampaigns } from "@/lib/server/campaigns/service";
 import { getHeroMode, listHeroSlides } from "@/lib/server/hero-slides/service";
 import { getSettings } from "@/lib/server/settings/service";
+import { getHomeStats as readLiveHomeStats } from "@/lib/server/home/stats";
 import { parseValue, searchParamsToObject } from "@/lib/server/validation";
 import type {
   CollectionDetail,
@@ -24,7 +25,7 @@ import type {
   ShopCategoryNode,
 } from "@/types/storefront/catalog";
 import type { ReviewWithProduct } from "@/types/storefront/commerce";
-import type { HomeHeroData, SaleCountdownCampaign, StorePolicy, StoreSettings } from "@/types/storefront/content";
+import type { HomeHeroData, HomeStats, SaleCountdownCampaign, StorePolicy, StoreSettings } from "@/types/storefront/content";
 import { activeTree } from "@/utils/catalog/category-tree";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
 import { toSaleCountdown } from "@/utils/storefront/countdown";
@@ -64,6 +65,7 @@ const readHero = cachedRead<[], HomeHeroData>("hero", async () => {
     : [];
   return { mode, slides: attachProducts(slides, cards), campaign: toHeroCampaign(campaigns) };
 });
+const readHomeStats = cachedRead<[], HomeStats>("home-stats", () => readLiveHomeStats());
 const readSaleCountdown = cachedRead<[], SaleCountdownCampaign | null>("sale-countdown", async () =>
   toSaleCountdown(await listCampaigns(), Date.now()),
 );
@@ -119,3 +121,15 @@ export const getHomeHero = cache(
 export const getSaleCountdown = cache(
   (): Promise<SaleCountdownCampaign | null> => readOr("sale-countdown", readSaleCountdown, null),
 );
+
+/** Shop numbers for the home "made by hand" line, or null when they cannot be read. */
+export const getHomeStats = cache((): Promise<HomeStats | null> => readOr("home-stats", readHomeStats, null));
+
+/** The most stocked colours (by product count) for the home colour story. */
+export const getTopColours = cache(async (limit: number) => {
+  const list = await readOr("colour facets", () => readProducts(toQueryString({ limit: 1, facets: true })), EMPTY_LIST);
+  return (list.facets?.colors ?? [])
+    .filter((colour) => colour.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
+});

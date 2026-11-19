@@ -35,6 +35,10 @@ Each idea has a tag:
 - Footer: **handloom + charkha scene** weaving a tant saree (`shell/footer-art`).
 - Product grids: below-the-fold **fade-in in batches** (`product-card/grid-reveal`).
 - Product: full-screen **gallery zoom** with pan.
+- Home (built from section 2): **3D saree unfold**, **woven headline**, category
+  tiles **unrolling like bolts**, **shop by colour** with dye flood, lookbook
+  **parallax** with a stitched fabric close-up, **review notes** with cross
+  stitches, **split-flap** sale clock, **made-by-hand** live numbers.
 
 ---
 
@@ -68,23 +72,32 @@ Each idea has a tag:
 
 ## 2. Home
 
-- [ ] **Saree unfold hero** — `3D` `L`. A saree lies folded; as the page loads (or on
+Built. How it differs from the first sketch below:
+
+- The saree unfold is its own section right after the hero (folded → open as it
+  scrolls in), with a woven paar/buti/aanchal texture drawn in code, not a photo.
+- Category bolts unroll on scroll; there is no hover unroll yet.
+- The colour band switches on tap (swatches are tabs), not on scroll.
+- "Made by hand" uses real numbers only: pieces on sale, delivered orders and the
+  review average. No invented weaving hours.
+
+- [x] **Saree unfold hero** — `3D` `L`. A saree lies folded; as the page loads (or on
   scroll) the aanchal unfolds and drapes, showing the featured print as a real
   texture. Static photo fallback. This would be the "wow, who built this" moment.
-- [ ] **Hero text woven in** — `GSAP + SVG` `M`. The headline letters appear as if
+- [x] **Hero text woven in** — `GSAP + SVG` `M`. The headline letters appear as if
   woven, with horizontal weft lines filling each glyph row by row.
-- [ ] **Category tiles as fabric bolts** — `GSAP` `M`. Category tiles look like rolled
+- [x] **Category tiles as fabric bolts** — `GSAP` `M`. Category tiles look like rolled
   bolts of cloth. On hover/tap a bolt unrolls a little to show the fabric.
-- [ ] **Lookbook parallax depth** — `GSAP ScrollTrigger` `S`. The model photo, the
+- [x] **Lookbook parallax depth** — `GSAP ScrollTrigger` `S`. The model photo, the
   fabric close-up and the text move at three different speeds.
-- [ ] **Colour story band** — `GSAP` `M`. A horizontal strip of dye swatches
+- [x] **Colour story band** — `GSAP` `M`. A horizontal strip of dye swatches
   (indigo, lal, haldi, sobuj). Scrolling through it recolours the section's
   background, and products in that colour slide up.
-- [ ] **Reviews as stitched notes** — `CSS` `S`. Review cards are pinned with a
+- [x] **Reviews as stitched notes** — `CSS` `S`. Review cards are pinned with a
   cross-stitch at the top corner, and each one hangs at a slightly different angle.
-- [ ] **Sale countdown flip digits** — `CSS` `S`. Upgrade the clock to split-flap
+- [x] **Sale countdown flip digits** — `CSS` `S`. Upgrade the clock to split-flap
   digits. Extend the existing `sale-countdown`, don't build a new one.
-- [ ] **"Made by hand" counter** — `GSAP` `S`. "12,480 hours of weaving in this
+- [x] **"Made by hand" counter** — `GSAP` `S`. "12,480 hours of weaving in this
   collection" counts up once, with the loom footer art echoed small beside it.
 
 ## 3. Shop / New / Sale (product listing)

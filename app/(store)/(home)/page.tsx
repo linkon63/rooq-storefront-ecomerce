@@ -1,5 +1,8 @@
 import { Suspense } from "react";
 import { CategoryTiles } from "@/components/storefront/home/category-tiles";
+import { ColourStory } from "@/components/storefront/home/colour-story/colour-story";
+import { MadeByHand } from "@/components/storefront/home/made-by-hand/made-by-hand";
+import { SareeUnfold } from "@/components/storefront/home/saree-unfold/saree-unfold";
 import { ComingSoonSection } from "@/components/storefront/home/coming-soon-section";
 import { FeaturedCollections } from "@/components/storefront/home/featured-collections";
 import { HomeContact } from "@/components/storefront/home/home-contact";
@@ -22,10 +25,13 @@ const REVIEWS_LIMIT = 6;
 const HOME_FAQ_COUNT = 5;
 
 /**
- * Home: hero (slider of looks), categories, new in (5), offers, collections (two newest pieces
- * each), best sellers (5), two spotlight products, the order journey (three.js), coming soon,
- * reviews, five common questions, contact and recently viewed. The
- * layout sews a thread down it as it scrolls (HomeStitch). Every read starts at once; collections stream in.
+ * Home: hero (slider of looks, woven headline), the 3D saree unfold,
+ * categories (unrolling bolts), new in (5), offers, shop by colour,
+ * collections (two newest pieces each), lookbook (parallax), best sellers (5),
+ * two spotlight products, the made-by-hand numbers, the order journey, coming
+ * soon, reviews (stitched notes), five common questions, contact and recently
+ * viewed. The layout sews a thread down it as it scrolls (HomeStitch). Every
+ * read starts at once; collections, colours and numbers stream in.
  */
 export default async function HomePage() {
   const { locale, t } = await getMessages();
@@ -51,12 +57,16 @@ export default async function HomePage() {
       <div data-stitch-hero>
         <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} />
       </div>
+      <SareeUnfold />
       <CategoryTiles categories={roots} />
       <Suspense fallback={null}>
         <SaleCountdown />
       </Suspense>
       <ProductRail title={t.home.newIn} products={newIn.data.length ? newIn.data : latest.data} link={{ label: t.home.seeNewIn, href: "/new" }} />
       <ProductRail title={t.home.offers} products={offers.data} link={{ label: t.home.seeOffers, href: "/sale" }} />
+      <Suspense fallback={null}>
+        <ColourStory />
+      </Suspense>
       <Suspense fallback={null}>
         <FeaturedCollections />
       </Suspense>
@@ -73,6 +83,9 @@ export default async function HomePage() {
       />
       <Suspense fallback={null}>
         <ProductHighlights fallback={bestSellers.data} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <MadeByHand />
       </Suspense>
       <OrderJourney t={t.home} />
       <ComingSoonSection categories={roots.filter((category) => category.isComingSoon)} products={upcoming.data} />

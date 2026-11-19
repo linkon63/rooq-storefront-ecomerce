@@ -1,3 +1,5 @@
+import { craftBn, craftEn } from "./messages-craft";
+
 /** Static storefront copy per language. English is the source of truth for the keys. */
 const en = {
   topBar: { call: "Call", trackOrder: "Track order", delivery: "Delivery", aboutUs: "About us", help: "Help" },
@@ -79,6 +81,7 @@ const en = {
       { title: "Received", body: "Open the parcel and check it with the rider.", action: "Pay the rider" },
       { title: "Paid", body: "Pay on delivery, in cash or by mobile banking.", action: "Watch it again" },
     ],
+    craft: craftEn,
   },
 };
 
@@ -164,6 +167,7 @@ const bn: Messages = {
       { title: "হাতে পেয়েছেন", body: "পার্সেল খুলে রাইডারের সামনেই দেখে নিন।", action: "রাইডারকে টাকা দিন" },
       { title: "পরিশোধিত", body: "ডেলিভারির সময় নগদে বা মোবাইল ব্যাংকিংয়ে দিন।", action: "আবার দেখুন" },
     ],
+    craft: craftBn,
   },
 };
 

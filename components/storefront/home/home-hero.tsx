@@ -28,8 +28,13 @@ export async function HomeHero({ returnDays, hero }: HomeHeroProps) {
           <h1 id="hero-title" className="type-display text-[clamp(3rem,9vw,6.5rem)] leading-[0.95]">
             {t.home.headline.map((line) => (
               <span key={line} className="block overflow-hidden pb-[0.06em]">
-                <span data-hero-line className="hero-reveal block">
-                  {line}
+                <span data-hero-line className="hero-reveal weft-done relative block">
+                  <span data-weft="a" className="weft-a block">
+                    {line}
+                  </span>
+                  <span data-weft="b" aria-hidden className="weft-b absolute inset-0 block">
+                    {line}
+                  </span>
                 </span>
               </span>
             ))}

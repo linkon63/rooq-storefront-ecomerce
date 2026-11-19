@@ -45,7 +45,7 @@ export async function SaleCountdown() {
           </h2>
           {sale.description ? <p className="type-lead max-w-[44ch] text-chalk/80">{sale.description}</p> : null}
 
-          <CountdownClock endAt={sale.endAt} labels={t.home.clock} />
+          <CountdownClock endAt={sale.endAt} labels={t.home.clock} endedLabel={t.home.craft.saleEnded} />
 
           <div className="flex flex-wrap items-center gap-3">
             <Link

@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { getMessages } from "@/lib/i18n/server";
 import type { ReviewWithProduct } from "@/types/storefront/commerce";
+import { CrossStitch } from "../shared/cross-stitch";
 import { SectionHeading } from "../shared/section-heading";
 import { StarRating } from "../shared/star-rating";
 
-/** Newest approved reviews across the shop, each linking to its product. */
+/** Each note hangs at its own slight angle (degrees), repeating down the list. */
+const TILTS = [-1.4, 0.9, -0.6, 1.2, -1, 0.5];
+
+/**
+ * Newest approved reviews across the shop, each linking to its product,
+ * shown as paper notes sewn to the page with a cross stitch. A note
+ * straightens and lifts when pointed at.
+ */
 export async function ReviewsShowcase({ reviews }: { reviews: ReviewWithProduct[] }) {
   const { t } = await getMessages();
   return (
@@ -15,9 +23,15 @@ export async function ReviewsShowcase({ reviews }: { reviews: ReviewWithProduct[
           {t.home.reviewsEmpty}
         </p>
       ) : (
-        <ul className="grid gap-[3px] md:grid-cols-2 lg:grid-cols-3">
-          {reviews.map((review) => (
-            <li key={review.id} className="flex flex-col gap-3 bg-selvedge/30 p-6">
+        <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          {reviews.map((review, index) => (
+            <li
+              key={review.id}
+              style={{ rotate: `${TILTS[index % TILTS.length]}deg` }}
+              className="review-note relative flex flex-col gap-3 p-6 pt-8"
+            >
+              <CrossStitch className="absolute left-3 top-3 size-4" />
+              <CrossStitch className="absolute right-3 top-3 size-4" />
               <StarRating rating={review.rating} />
               {review.title ? <h3 className="type-h3">{review.title}</h3> : null}
               {review.comment ? <p className="type-body line-clamp-5 whitespace-pre-line">{review.comment}</p> : null}

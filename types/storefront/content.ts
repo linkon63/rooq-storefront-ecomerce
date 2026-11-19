@@ -77,3 +77,6 @@ export type ShopperNotification = {
   isRead: boolean;
   createdAt: string;
 };
+
+/** Live numbers behind the home "made by hand" line. */
+export type HomeStats = { pieces: number; delivered: number; reviewCount: number; averageRating: number | null };
