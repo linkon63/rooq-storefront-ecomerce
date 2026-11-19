@@ -1,6 +1,7 @@
 import "server-only";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { prisma } from "../prisma";
+import { evictMediaCache } from "./memory-cache";
 
 type MediaDb = Pick<Prisma.TransactionClient, "media">;
 
@@ -49,5 +50,7 @@ export async function releaseMedia(
   const unused = rows
     .filter((row) => Object.values(row._count).every((count) => count === 0))
     .map((row) => row.id);
-  if (unused.length > 0) await db.media.deleteMany({ where: { id: { in: unused } } });
+  if (unused.length === 0) return;
+  await db.media.deleteMany({ where: { id: { in: unused } } });
+  unused.forEach(evictMediaCache);
 }

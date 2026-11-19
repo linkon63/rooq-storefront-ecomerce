@@ -89,7 +89,7 @@ Image uploads are processed with [sharp](https://sharp.pixelplumbing.com)
 ## Media caching
 
 `GET /api/v1/media/[id]` answers with
-`Cache-Control: public, max-age=31536000, immutable` and an `ETag` (the sha256
+`Cache-Control: public, max-age=31536000, s-maxage=31536000, immutable` and an `ETag` (the sha256
 checksum), and returns `304` for a matching `If-None-Match`. An id's bytes never
 change (a new upload gets a new id), so this is safe to cache forever.
 
@@ -97,11 +97,13 @@ change (a new upload gets a new id), so this is safe to cache forever.
 - **`next/image`** fetches `/api/v1/media/**` (allowed in `images.localPatterns`)
   and caches the resized variants it generates. On Vercel that is the Image
   Optimization cache, which is billed per source image.
-- **Vercel's CDN** caches function responses only when they carry `s-maxage`
-  (or a `CDN-Cache-Control` / `Vercel-CDN-Cache-Control` header). Adding
-  `s-maxage=31536000` to `MEDIA_CACHE_CONTROL` lets the edge serve repeat
-  requests without invoking the function or reading the database. This is a
-  recommended production tweak.
+- **Vercel's CDN** caches the response (`s-maxage`), so repeat requests are
+  served from the edge without invoking the function or reading the database.
+- **Each function instance** keeps recently served bytes in a 64 MB memory LRU
+  (`MEDIA_MEMORY_CACHE_BYTES`); a cache miss costs one database round trip.
+- Stored images are capped at 250 KB (`IMAGE_MAX_BYTES`). Older, larger rows
+  can be re-encoded in place with
+  `pnpm exec tsx --conditions=react-server scripts/compress-media.ts [--dry-run]`.
 
 Database size grows by roughly 100–250 KB per uploaded image. Watch the
 Prisma Postgres storage quota, and keep regular backups (Prisma Postgres
