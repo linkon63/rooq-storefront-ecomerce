@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Noto_Serif_Bengali, Newsreader, Poppins } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store/store-provider";
@@ -50,7 +50,11 @@ const siteTitle = "Rooq — Modern Fashion for Men, Women & Kids";
 const siteDescription =
   "Rooq is a modern fashion label: considered clothing, footwear and accessories for men, women and kids. New arrivals every week, easy size guides and free returns.";
 
+export const viewport: Viewport = { themeColor: "#1c3934" };
+
 export const metadata: Metadata = {
+  applicationName: "Rooq",
+  appleWebApp: { capable: true, title: "Rooq", statusBarStyle: "default" },
   metadataBase: new URL(siteUrl),
   title: {
     default: siteTitle,

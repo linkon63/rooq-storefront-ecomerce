@@ -6,6 +6,7 @@ import type { NavItem } from "@/types/storefront/catalog";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import Logo from "../shared/Logo";
 import { FooterWeavingArt } from "./footer-art/footer-weaving-art";
+import { InstallAppButton } from "./install-app-button";
 import { FooterPayments } from "./footer-payments";
 import { NewsletterForm } from "./newsletter-form";
 import { SocialLinks } from "./social-links";
@@ -30,6 +31,7 @@ export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFoote
           <Logo kechi variant="light" className="h-auto w-44 self-center lg:self-start" />
           {settings.footerDescription ? <p className="max-w-[42ch] text-sm text-chalk/75">{settings.footerDescription}</p> : null}
           <NewsletterForm t={newsletter} />
+          <InstallAppButton t={t} />
         </div>
         <nav aria-label={t.shop}>
           <h2 className="mb-4 text-sm font-semibold">{t.shop}</h2>
