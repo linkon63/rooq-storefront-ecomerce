@@ -4,16 +4,19 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, type ReactNode } from "react";
+import { useGridFlip } from "./use-grid-flip";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
  * Product grid wrapper. Cards already on screen are left alone (no flash);
  * cards below the fold fade in, in batches, as they scroll into view.
- * Opacity only, on the quiet easing. Reduced motion: nothing runs.
+ * Opacity only, on the quiet easing. When the filters change, cards that stay
+ * glide to their new places (useGridFlip). Reduced motion: nothing runs.
  */
 export function GridReveal({ children, className }: { children: ReactNode; className?: string }) {
   const list = useRef<HTMLUListElement>(null);
+  useGridFlip(list);
 
   useGSAP(
     () => {

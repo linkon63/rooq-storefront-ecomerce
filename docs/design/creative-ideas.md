@@ -35,6 +35,8 @@ Each idea has a tag:
 - Footer: **handloom + charkha scene** weaving a tant saree (`shell/footer-art`).
 - Product grids: below-the-fold **fade-in in batches** (`product-card/grid-reveal`).
 - Product: full-screen **gallery zoom** with pan.
+- Listings (section 3): **filter shuffle**, **colour preview**, second photo on
+  hover, **price cut** line, sliding **New** label, **empty loom**.
 - Home (built from section 2): **3D saree unfold**, **woven headline**, category
   tiles **unrolling like bolts**, **shop by colour** with dye flood, lookbook
   **parallax** with a stitched fabric close-up, **review notes** with cross
@@ -102,17 +104,23 @@ Built. How it differs from the first sketch below:
 
 ## 3. Shop / New / Sale (product listing)
 
-- [ ] **Filter shuffle** — `GSAP Flip` `M`. When filters or the sort order change,
+Built. Notes: the colour preview works on hover (mouse), focus and tap (tap
+pins the colour; tap again to clear). The price cut and the "New" label play as
+the card scrolls into view (CSS scroll-driven animation; browsers without it
+show the plain version). "Clear filters" keeps the page's own preset
+(Sale / New).
+
+- [x] **Filter shuffle** — `GSAP Flip` `M`. When filters or the sort order change,
   cards slide to their new positions instead of the grid re-rendering in one jump.
-- [ ] **Second image on hover** — `CSS` `S`. The card crossfades to the second photo
+- [x] **Second image on hover** — `CSS` `S`. The card crossfades to the second photo
   (back or drape view). On touch: swipe the card image.
-- [ ] **Colour dots preview** — `CSS` `S`. Hovering a colour dot swaps the card image
+- [x] **Colour dots preview** — `CSS` `S`. Hovering a colour dot swaps the card image
   to that colour.
-- [ ] **Sale page "price cut"** — `SVG` `S`. The old price gets a strike-through
+- [x] **Sale page "price cut"** — `SVG` `S`. The old price gets a strike-through
   that is cut like scissors through thread, then the new price drops in.
-- [ ] **New arrivals "fresh off the loom"** — `CSS` `S`. A small woven "New" label
+- [x] **New arrivals "fresh off the loom"** — `CSS` `S`. A small woven "New" label
   slides out from behind the card the first time it scrolls into view.
-- [ ] **Empty results** — `SVG` `S`. An empty loom with a single loose thread and the
+- [x] **Empty results** — `SVG` `S`. An empty loom with a single loose thread and the
   line "Nothing woven here yet". The thread tugs when you hover "Clear filters".
 
 ## 4. Collections (index + detail)

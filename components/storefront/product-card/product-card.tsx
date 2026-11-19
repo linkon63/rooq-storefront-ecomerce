@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import type { ProductCard as ProductCardData } from "@/types/storefront/catalog";
+import { useState } from "react";
+import type { ColorRef, ProductCard as ProductCardData } from "@/types/storefront/catalog";
 import { snapshotFromCard } from "@/utils/storefront/snapshots";
 import { Price } from "../shared/price";
 import { CardActions } from "./card-actions";
@@ -18,15 +21,26 @@ type ProductCardProps = {
   feature?: boolean;
 };
 
+type Preview = { color: ColorRef; pinned: boolean };
+
 /**
  * Grid and rail card. No box, no radius: just the photo. On devices with a
  * mouse the name, price and swatches fade up over the photo on hover or
- * keyboard focus; on touch they sit under it. The second photo cross-fades.
+ * keyboard focus; on touch they sit under it. The second photo cross-fades,
+ * and pointing at (or tapping) a colour chip shows the piece in that colour.
  */
 export function ProductCard({ product, priority = false, feature = false }: ProductCardProps) {
   const href = `/product/${product.slug}`;
   const alt = product.image?.alt ?? product.name;
   const sizes = feature ? FEATURE_IMAGE_SIZES : CARD_IMAGE_SIZES;
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const previewImage = preview ? (product.colors.find((c) => c.id === preview.color.id)?.image ?? null) : null;
+  const onPreview = (color: ColorRef | null, pinned: boolean) =>
+    setPreview((current) => {
+      if (!color) return current?.pinned ? current : null;
+      if (pinned && current?.pinned && current.color.id === color.id) return null;
+      return { color, pinned };
+    });
   return (
     <article className="group relative flex h-full flex-col">
       <div
@@ -44,7 +58,19 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
               alt=""
               fill
               sizes={sizes}
-              className="object-cover opacity-0 transition-opacity duration-300 ease-(--ease-quiet) [@media(hover:hover)]:group-hover:opacity-100"
+              className={`object-cover opacity-0 transition-opacity duration-300 ease-(--ease-quiet) ${
+                previewImage ? "" : "[@media(hover:hover)]:group-hover:opacity-100"
+              }`}
+            />
+          ) : null}
+          {previewImage ? (
+            <Image
+              key={previewImage.url}
+              src={previewImage.url}
+              alt=""
+              fill
+              sizes={sizes}
+              className="card-colour-in object-cover"
             />
           ) : null}
         </Link>
@@ -61,8 +87,8 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
             {product.name}
           </Link>
         </h3>
-        <Price price={product.price} compareAtPrice={product.compareAtPrice} className="type-meta" />
-        <CardSwatches colors={product.colors} />
+        <Price price={product.price} compareAtPrice={product.compareAtPrice} className="type-meta" cut />
+        <CardSwatches colors={product.colors} activeId={preview?.color.id ?? null} onPreview={onPreview} />
       </div>
     </article>
   );

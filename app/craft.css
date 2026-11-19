@@ -121,3 +121,100 @@
     #9b1a41;
   box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.6);
 }
+
+/* Listing cards ------------------------------------------------------- */
+
+/* Colour preview: the chosen colour's photo fades in over the card. */
+@media (prefers-reduced-motion: no-preference) {
+  .card-colour-in {
+    animation: card-colour-in 0.35s var(--ease-quiet) both;
+  }
+}
+@keyframes card-colour-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* "New" label: slides out from behind the card's left edge as it scrolls in. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .label-slide {
+      animation: label-slide linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 70%;
+    }
+  }
+}
+@keyframes label-slide {
+  from {
+    transform: translateX(-130%);
+  }
+}
+
+/* Sale price: a cut line is drawn through the old price, then the new one drops in. */
+.price-cut {
+  position: relative;
+  text-decoration: none;
+}
+.price-cut::after {
+  content: "";
+  position: absolute;
+  inset-inline: -2px;
+  top: 52%;
+  height: 1.5px;
+  background: var(--color-dye-deep);
+  transform-origin: left center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .price-cut::after {
+      animation: price-cut-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 40% entry 100%;
+    }
+    .price-now {
+      animation: price-now-drop linear both;
+      animation-timeline: view();
+      animation-range: entry 70% entry 120%;
+    }
+  }
+}
+@keyframes price-cut-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes price-now-drop {
+  from {
+    opacity: 0.2;
+    transform: translateY(-5px);
+  }
+}
+
+/* Empty results: a loose weft thread on an empty loom that tugs on hover. */
+.empty-thread {
+  transform-origin: 160px 40px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .empty-thread {
+    animation: thread-sway 5s ease-in-out infinite;
+  }
+  .empty-actions:hover ~ svg .empty-thread,
+  .empty-actions:focus-within ~ svg .empty-thread {
+    animation: thread-tug 0.7s ease-in-out infinite;
+  }
+}
+@keyframes thread-sway {
+  50% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes thread-tug {
+  25% {
+    transform: rotate(-9deg);
+  }
+  75% {
+    transform: rotate(9deg);
+  }
+}

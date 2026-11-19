@@ -21,7 +21,7 @@ export function ProductGrid({ products, eagerCount = 4, offset = 0 }: ProductGri
       {products.map((product, index) => {
         const feature = isFeatureTile(offset + index);
         return (
-          <li key={product.id} data-grid-item className={feature ? "lg:col-span-2 lg:row-span-2" : undefined}>
+          <li key={product.id} data-grid-item data-flip-id={product.id} className={feature ? "lg:col-span-2 lg:row-span-2" : undefined}>
             <ProductCard product={product} priority={index < eagerCount} feature={feature} />
           </li>
         );

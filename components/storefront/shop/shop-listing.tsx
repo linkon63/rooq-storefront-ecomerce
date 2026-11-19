@@ -6,6 +6,7 @@ import { withQuery } from "@/utils/query-string";
 import { activeFilterCount, parseShopFilters, toProductQuery, toShopQuery, type RawSearchParams, type ShopFilters } from "@/utils/storefront/shop-query";
 import { ProductGrid } from "../product-card/product-grid";
 import { EmptyState } from "../shared/empty-state";
+import { EmptyLoom } from "./empty-loom";
 import { FilterControls } from "./filter-controls";
 import { Pagination } from "./pagination";
 import { PendingResults } from "./pending-results";
@@ -60,10 +61,10 @@ export async function ShopListing({ title, intro, basePath, searchParams, preset
               {list === null ? (
                 <EmptyState tone="error" title="Products did not load" body={ERROR_MESSAGES.storefront.productsLoadFailed} />
               ) : list.data.length === 0 ? (
-                <EmptyState
-                  title="Nothing matches yet"
-                  body={activeFilterCount(filters, preset) > 0 ? "Try removing a filter or two." : "New pieces land every week. Check back soon."}
-                  action={{ label: "See everything", href: "/shop" }}
+                <EmptyLoom
+                  title="Nothing woven here yet"
+                  body={activeFilterCount(filters, preset) > 0 ? "No piece matches these filters. Clear them to see everything." : "New pieces land every week. Check back soon."}
+                  action={activeFilterCount(filters, preset) > 0 ? { label: "Clear filters", href: basePath } : { label: "See everything", href: "/shop" }}
                 />
               ) : (
                 <>
