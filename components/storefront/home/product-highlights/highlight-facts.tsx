@@ -11,21 +11,21 @@ export function HighlightFacts({ detail, t }: { detail: ProductDetail; t: Messag
   const features = detail.features.slice(0, 3);
   if (facts.length === 0 && features.length === 0) return null;
   return (
-    <div className="flex flex-col gap-3 border-t border-line pt-4 text-sm">
+    <div className="flex flex-col gap-3 border-t border-gold/35 pt-4 text-sm">
       {facts.length ? (
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+        <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-1.5">
           {facts.map((fact) => (
             <div key={fact.label} className="contents">
-              <dt className="text-stone">{fact.label}</dt>
-              <dd className="font-medium">{fact.value}</dd>
+              <dt className="type-label self-center text-stone">{fact.label}</dt>
+              <dd className="font-medium text-ink">{fact.value}</dd>
             </div>
           ))}
         </dl>
       ) : null}
       {features.length ? (
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2 pt-0.5">
           {features.map((feature) => (
-            <li key={feature} className="type-label border border-line px-2 py-1">
+            <li key={feature} className="type-label border border-gold/45 bg-chalk/70 px-2.5 py-1 text-ink">
               {feature}
             </li>
           ))}
