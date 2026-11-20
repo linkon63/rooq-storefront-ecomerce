@@ -38,10 +38,10 @@ const NUDGE_GAP = 75 * SECOND;
 const MAX_NUDGES_PER_VISIT = 5;
 /** "Need help?" bubbles skip the nudge budget but not this gap. */
 const HELP_GAP = 2 * 60 * SECOND;
-const SAY_FOR = 10 * SECOND;
-const HELP_SAY_FOR = 18 * SECOND;
-const SHORT_SAY_FOR = 4 * SECOND;
-const DANCE_FOR = 4.5 * SECOND;
+const SAY_FOR = 2 * SECOND;
+const HELP_SAY_FOR = 4 * SECOND;
+const SHORT_SAY_FOR = 2 * SECOND;
+const DANCE_FOR = 4 * SECOND;
 const PEEK_EVERY_MIN = 45 * SECOND;
 const PEEK_EVERY_MAX = 90 * SECOND;
 const SLEEP_FOR = 24 * 60 * 60 * SECOND;
@@ -220,7 +220,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
       if (nextMood === "dance") {
         moodTimer.current = setTimeout(() => setMood("idle"), DANCE_FOR);
       } else if (nextMood === "talk" || nextMood === "happy") {
-        moodTimer.current = setTimeout(() => setMood("idle"), 2600);
+        moodTimer.current = setTimeout(() => setMood("idle"), SAY_FOR);
       }
       armHide(opts.ms ?? (kind === "help" ? HELP_SAY_FOR : SAY_FOR));
       return true;
@@ -265,7 +265,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     say("user", t.added, {
       mood: "dance",
       hop: true,
-      ms: DANCE_FOR + 1200,
+      ms: DANCE_FOR,
       actions: [{ type: "bag", label: t.actions.openBag }],
     });
   }, [say, spawnHearts, t]);
@@ -591,7 +591,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
           }}
           onPointerLeave={() => {
             live.current.hovering = false;
-            armHide(4 * SECOND);
+            armHide(SAY_FOR);
           }}
         >
           <span aria-hidden className="absolute -right-[5px] bottom-3 size-2 rotate-45 border-r border-t border-line bg-chalk" />
