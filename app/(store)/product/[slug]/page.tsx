@@ -4,6 +4,7 @@ import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
 import { ProductDetails } from "@/components/storefront/product/product-details";
 import { ProductView } from "@/components/storefront/product/product-view";
+import { SutiAlponaBackdrop } from "@/components/storefront/product/suti-alpona-backdrop";
 import { ReviewsSection } from "@/components/storefront/reviews/reviews-section";
 import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
 import { SITE_URL } from "@/lib/constants/storefront";
@@ -52,7 +53,8 @@ export default async function ProductPage({ params }: PageProps) {
   ];
 
   return (
-    <div className="flex flex-col gap-20 pb-8">
+    <div className="suti-saree-surface flex flex-col gap-20 pb-16 md:pb-24">
+      <SutiAlponaBackdrop />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, SITE_URL, settings.currency)).replace(/</g, "\\u003c") }}
