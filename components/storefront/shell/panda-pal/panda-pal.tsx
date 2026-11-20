@@ -19,6 +19,7 @@ import {
 import { PANDA_COPY } from "./panda-copy";
 import {
   PANDA_ADD_BUTTON_SELECTOR,
+  PANDA_CARD_SELECTOR,
   PANDA_CUE_EVENT,
   takePendingPandaCue,
   type PandaCueDetail,
@@ -38,9 +39,9 @@ const NUDGE_GAP = 75 * SECOND;
 const MAX_NUDGES_PER_VISIT = 5;
 /** "Need help?" bubbles skip the nudge budget but not this gap. */
 const HELP_GAP = 2 * 60 * SECOND;
-const SAY_FOR = 2 * SECOND;
+const SAY_FOR = 4 * SECOND;
 const HELP_SAY_FOR = 4 * SECOND;
-const SHORT_SAY_FOR = 2 * SECOND;
+const SHORT_SAY_FOR = 4 * SECOND;
 const DANCE_FOR = 4 * SECOND;
 const PEEK_EVERY_MIN = 45 * SECOND;
 const PEEK_EVERY_MAX = 90 * SECOND;
@@ -138,6 +139,8 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     nextPeek: 0,
     dancingUntil: 0,
     lastDanceAt: 0,
+    cardHovers: 0,
+    cardMsgIndex: 0,
     taps: 0,
   });
 
@@ -245,13 +248,25 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     return [...helpActions(), shop, { type: "sleep", label: t.actions.sleep }];
   }, [helpActions, newInAction, t]);
 
-  /* ---- Cheer on hover over Add-to-bag, dance on click / bag addition ---- */
+  /* ---- Cheer on hover over Add-to-bag, emotional nudge every 2 product cards, dance on bag addition ---- */
   const cheerHover = useCallback(() => {
     const l = live.current;
     if (Date.now() < l.dancingUntil) return;
     l.asleep = false;
     spawnHearts(2);
     say("user", t.hoverAdd, { mood: "happy", hop: true, ms: SHORT_SAY_FOR });
+  }, [say, spawnHearts, t]);
+
+  const nudgeCardHover = useCallback(() => {
+    const l = live.current;
+    if (Date.now() < l.dancingUntil || l.blocked || l.asleep) return;
+    l.cardHovers += 1;
+    if (l.cardHovers % 2 !== 0) return;
+    const list = t.cardHoverMessages;
+    const message = list[l.cardMsgIndex % list.length] ?? t.idlePlay;
+    l.cardMsgIndex += 1;
+    spawnHearts(1);
+    say("user", message, { mood: "happy", hop: true, ms: SAY_FOR });
   }, [say, spawnHearts, t]);
 
   const celebrateAdd = useCallback(() => {
@@ -378,6 +393,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     };
     let clicks: { x: number; y: number; at: number }[] = [];
     let hoveredAddBtn: Element | null = null;
+    let hoveredCard: Element | null = null;
 
     const isUsableButton = (el: Element | null): el is HTMLElement => {
       if (!el) return false;
@@ -388,10 +404,22 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
 
     const onPointerOver = (event: PointerEvent) => {
       if (event.pointerType === "touch") return;
-      const btn = (event.target as Element | null)?.closest?.(PANDA_ADD_BUTTON_SELECTOR) ?? null;
-      if (btn === hoveredAddBtn) return;
-      hoveredAddBtn = btn;
-      if (isUsableButton(btn)) cheerHover();
+      const target = event.target as Element | null;
+      const btn = target?.closest?.(PANDA_ADD_BUTTON_SELECTOR) ?? null;
+      if (btn !== hoveredAddBtn) {
+        hoveredAddBtn = btn;
+        if (isUsableButton(btn)) {
+          cheerHover();
+          return;
+        }
+      }
+      if (hoveredAddBtn) return;
+
+      const card = target?.closest?.(PANDA_CARD_SELECTOR) ?? null;
+      if (card !== hoveredCard) {
+        hoveredCard = card;
+        if (card) nudgeCardHover();
+      }
     };
 
     const onFocusIn = (event: FocusEvent) => {
@@ -448,7 +476,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
       document.removeEventListener("mouseout", onLeave);
       window.removeEventListener(PANDA_CUE_EVENT, onCue);
     };
-  }, [celebrateAdd, cheerHover, handleCue, helpActions, say, t]);
+  }, [celebrateAdd, cheerHover, handleCue, helpActions, nudgeCardHover, say, t]);
 
   /* ---- The heartbeat: idle play, bag reminder, checkout help, random peeks ---- */
   useEffect(() => {
@@ -570,7 +598,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
   const shown: Pose = overlayOpen ? "away" : onCheckout && pose === "peek" ? "away" : pose;
   const visibleBubble = shown === "away" ? null : bubble;
   const chip =
-    "pointer-events-auto inline-flex h-5.5 items-center gap-1 rounded-full px-2 text-[10px] font-semibold leading-none transition-colors";
+    "pointer-events-auto inline-flex h-6 items-center gap-1 rounded-full px-2.5 text-[12px] font-semibold leading-none transition-colors";
 
   return (
     <div
@@ -585,7 +613,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
       {visibleBubble ? (
         <div
           key={visibleBubble.id}
-          className="panda-bubble pointer-events-auto absolute bottom-8 right-[62px] w-[min(196px,calc(100vw-80px))] rounded-xl border border-line bg-chalk px-2.5 py-2 pr-6 text-ink shadow-sheet"
+          className="panda-bubble pointer-events-auto absolute bottom-8 right-[62px] w-[min(220px,calc(100vw-80px))] rounded-xl border border-line bg-chalk px-3 py-2.5 pr-6 text-ink shadow-sheet"
           onPointerEnter={() => {
             live.current.hovering = true;
           }}
@@ -603,7 +631,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
           >
             <FiX aria-hidden className="size-2.5" />
           </button>
-          <p className="text-[10px] font-medium leading-[1.45] tracking-[0.01em] text-ink antialiased">
+          <p className="text-[12px] font-medium leading-[1.45] tracking-[0.01em] text-ink antialiased">
             <span className="font-bold text-dye-deep">{t.name}: </span>
             {visibleBubble.text}
           </p>
@@ -612,7 +640,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
             <a
               href={contact.tel}
               onClick={rest}
-              className="mt-1.5 flex items-center gap-1 rounded-md bg-selvedge/60 px-2 py-1 text-[10px] font-semibold leading-none text-ink transition-colors hover:bg-selvedge"
+              className="mt-1.5 flex items-center gap-1 rounded-md bg-selvedge/60 px-2 py-1 text-[12px] font-semibold leading-none text-ink transition-colors hover:bg-selvedge"
             >
               <FiPhone aria-hidden className="size-2.5 shrink-0" />
               <span className="sr-only">{t.actions.callUs}: </span>
