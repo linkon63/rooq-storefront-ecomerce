@@ -14,6 +14,8 @@ export const PANDA_CUE_EVENT = "rooq:panda-cue";
 export const PANDA_PAL_SELECTOR = "[data-panda-pal]";
 /** Any Add to bag / Add to cart button across product cards, quick view and product pages. */
 export const PANDA_ADD_BUTTON_SELECTOR = "[data-panda-add-to-bag]";
+/** Any product card in a grid, rail or spotlight section. */
+export const PANDA_CARD_SELECTOR = "[data-panda-card]";
 /** A cue older than this is stale by the time the panda mounts. */
 export const PANDA_CUE_TTL_MS = 10_000;
 

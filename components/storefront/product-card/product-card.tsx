@@ -41,7 +41,7 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
       return { color, pinned };
     });
   return (
-    <article className="group relative flex h-full flex-col">
+    <article data-panda-card={product.id} className="group relative flex h-full flex-col">
       <div
         className={`relative aspect-[3/4] overflow-hidden bg-selvedge/40 ${feature ? "lg:aspect-auto lg:flex-1" : ""}`}
       >

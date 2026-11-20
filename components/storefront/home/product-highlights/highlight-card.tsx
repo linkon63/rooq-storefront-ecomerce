@@ -44,6 +44,7 @@ export function HighlightCard({ card, detail, index, reverse, t }: HighlightCard
 
   return (
     <article
+      data-panda-card={card.id}
       className={`group/card relative isolate flex flex-col overflow-hidden border border-line/80 bg-[color-mix(in_oklab,var(--color-selvedge)_32%,var(--color-chalk))] md:flex-row ${
         reverse ? "md:flex-row-reverse" : ""
       }`}
