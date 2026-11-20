@@ -1,12 +1,12 @@
 import { getMessages } from "@/lib/i18n/server";
 import type { StoreSettings } from "@/types/storefront/content";
-import { ContactForm } from "../contact/contact-form";
+import { CollapsibleContactForm } from "./collapsible-contact-form";
 
 /** Contact block at the foot of the home page: how to reach us, and the form. */
 export async function HomeContact({ settings }: { settings: StoreSettings }) {
   const { t } = await getMessages();
   return (
-    <section aria-labelledby="contact-title" className="page-gutter grid gap-10 md:grid-cols-2">
+    <section aria-labelledby="contact-title" className="page-gutter grid gap-10 md:grid-cols-2 md:items-center">
       <div className="flex flex-col gap-4">
         <h2 id="contact-title" className="type-h2">
           {t.home.contactTitle}
@@ -27,7 +27,7 @@ export async function HomeContact({ settings }: { settings: StoreSettings }) {
           ))}
         </address>
       </div>
-      <ContactForm />
+      <CollapsibleContactForm />
     </section>
   );
 }
