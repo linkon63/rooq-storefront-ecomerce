@@ -14,6 +14,7 @@ import { SocialLinks } from "./social-links";
 type SiteFooterProps = { nav: NavItem[]; settings: StoreSettings; policies: StorePolicy[]; t: Messages["footer"]; newsletter: Messages["newsletter"] };
 
 const HELP_LINKS = [
+  { key: "aboutUs", href: "/about" },
   { key: "contactUs", href: "/contact" },
   { key: "faq", href: "/faq" },
   { key: "customerGallery", href: "/customer-gallery" },

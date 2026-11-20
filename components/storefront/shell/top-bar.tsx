@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LanguageSwitch } from "./language-switch";
 import { FaWhatsapp } from "react-icons/fa6";
-import { FiInfo, FiPackage, FiPhone, FiTruck } from "react-icons/fi";
+import { FiPackage, FiPhone, FiTruck } from "react-icons/fi";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Messages } from "@/lib/i18n/messages";
 import { telHref, whatsappChatHref } from "@/lib/shop-contact";
@@ -17,7 +17,6 @@ type TopBarProps = {
 const LINKS = [
   { key: "trackOrder", href: "/profile?tab=orders", Icon: FiPackage },
   { key: "delivery", href: "/policies/delivery", Icon: FiTruck },
-  { key: "aboutUs", href: "/about", Icon: FiInfo },
 ] as const;
 
 const item = "inline-flex items-center gap-1.5 whitespace-nowrap transition-opacity hover:opacity-70";
