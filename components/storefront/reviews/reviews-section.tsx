@@ -65,13 +65,13 @@ export function ReviewsSection({ product }: Props) {
   return (
     <section id="reviews" aria-labelledby="reviews-title" className="scroll-mt-24">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <h2 id="reviews-title" className="font-wide text-[1.375rem] font-bold md:text-3xl">
+        <h2 id="reviews-title" className="type-h2">
           Reviews
         </h2>
         <button
           type="button"
           onClick={() => (isSignedIn ? setWriting(true) : openAuth("login"))}
-          className="h-11 rounded border border-ink px-5 text-sm font-semibold hover:bg-ink hover:text-chalk"
+          className="type-ui h-11 rounded border border-ink px-5 transition-colors hover:bg-ink hover:text-chalk"
         >
           Write a review
         </button>
@@ -107,10 +107,10 @@ export function ReviewsSection({ product }: Props) {
         </>
       ) : null}
       {!loading && page && page.data.length === 0 && !error ? (
-        <p className="text-stone">No reviews yet. Bought this? Tell others how it fits.</p>
+        <p className="type-body text-stone">No reviews yet. Bought this? Tell others how it fits.</p>
       ) : null}
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-dye-deep">
+        <p role="alert" className="type-ui mt-4 text-dye-deep">
           {error}
         </p>
       ) : null}
@@ -119,7 +119,7 @@ export function ReviewsSection({ product }: Props) {
           type="button"
           disabled={loading}
           onClick={() => page && void load(page.meta.page + 1, true)}
-          className="mt-6 h-11 rounded border border-line px-5 text-sm font-semibold hover:border-ink disabled:opacity-60"
+          className="type-ui mt-6 h-11 rounded border border-line px-5 transition-colors hover:border-ink disabled:opacity-60"
         >
           Show more reviews
         </button>

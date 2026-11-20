@@ -13,8 +13,8 @@ const STITCH = { strokeWidth: 1.8, strokeLinecap: "round", strokeDasharray: "7 5
  * A needle that sews a running stitch (kantha-style) down the home page and
  * on through the footer as the shopper scrolls, under the sticky header:
  * from the top of the hero (in line with the logo), over the hero,
- * through straight runs, sweeps and circles, ending in the footer by the
- * WhatsApp button, which it points to. The thread is magenta over the page
+ * through straight runs, sweeps and circles, ending in the footer near the
+ * bottom, where the needle turns to point at Tulo the panda. The thread is magenta over the page
  * and gold over the dark footer. Laid out in pixels from the measured page,
  * so the stitches keep their length.
  */

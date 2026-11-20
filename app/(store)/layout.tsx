@@ -8,8 +8,9 @@ import { FloatingActions } from "@/components/storefront/shell/floating-actions"
 import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
 import { StoreToaster } from "@/components/storefront/shell/store-toaster";
+import { WishlistFlyLayer } from "@/components/storefront/shell/wishlist-fly-layer";
 import { getMessages } from "@/lib/i18n/server";
-import { WHATSAPP_NUMBER } from "@/lib/shop-contact";
+import { telHref, WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
 import { getCategoryTree, getStorePolicies, getStoreSettings } from "@/lib/storefront/catalog-data";
 import { buildPrimaryNav } from "@/utils/storefront/nav";
 import { announcementFor } from "@/utils/storefront/settings";
@@ -54,9 +55,15 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
         <SiteFooter nav={nav} settings={settings} policies={policies} t={t.footer} newsletter={t.newsletter} />
         <HomeStitch />
       </div>
-      <FloatingActions phone={settings.phones[0]?.value ?? null} shopName={settings.shopName} />
+      <FloatingActions
+        locale={locale}
+        phone={WHATSAPP_NUMBER}
+        telHref={telHref(WHATSAPP_NUMBER)}
+        whatsappHref={whatsappChatHref(WHATSAPP_NUMBER)}
+      />
       <StoreSync currency={settings.currency} />
       <StoreOverlays delivery={settings.delivery} />
+      <WishlistFlyLayer />
       <StoreToaster />
       <RoutePrefetch />
       <PwaRegister />

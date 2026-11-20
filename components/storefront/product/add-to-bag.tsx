@@ -17,6 +17,7 @@ export function AddToBag({ image, className = "", onAdded }: AddToBagProps) {
     <div className={className}>
       <button
         type="button"
+        data-panda-add-to-bag=""
         onClick={async () => {
           if (await addToBag()) onAdded?.();
         }}

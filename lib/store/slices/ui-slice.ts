@@ -9,7 +9,7 @@ export type UiState = {
   quickViewProductId: string | null;
   /** Product id whose size guide is open, or null. */
   sizeGuideProductId: string | null;
-  /** The home page's stitched thread has reached the end and points at the WhatsApp button. */
+  /** The home page's stitched thread has reached the end and points at Tulo the panda. */
   isWhatsappHighlighted: boolean;
 };
 

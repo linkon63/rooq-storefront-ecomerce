@@ -14,8 +14,8 @@ export function FooterWeavingArt() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
       <LoomScene>
-        <div className="absolute inset-0 bg-linear-to-b from-ink/70 via-ink/10 to-ink/85" />
-        <div className="absolute inset-0 bg-[radial-gradient(75%_75%_at_50%_45%,transparent_0%,var(--color-ink)_100%)] opacity-50" />
+        <div className="absolute inset-0 bg-linear-to-b from-ink/30 via-transparent to-ink/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(75%_75%_at_50%_45%,transparent_0%,var(--color-ink)_100%)] opacity-20" />
       </LoomScene>
     </div>
   );

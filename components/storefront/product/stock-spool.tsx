@@ -8,7 +8,7 @@ export function StockSpool({ left }: { left: number }) {
   const fill = Math.max(0.12, Math.min(1, left / FULL_AT));
   const height = 24 * fill;
   return (
-    <p className="flex items-center gap-2.5 text-sm font-semibold text-dye-deep" role="status">
+    <p className="flex items-center gap-2.5 text-sm font-semibold text-dye-deep" role="status" data-panda-low-stock={left}>
       <svg aria-hidden viewBox="0 0 28 36" className="h-9 w-7 shrink-0">
         <rect x={2} y={2} width={24} height={4} rx={1.5} fill="var(--color-ink)" />
         <rect x={2} y={30} width={24} height={4} rx={1.5} fill="var(--color-ink)" />

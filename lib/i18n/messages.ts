@@ -10,6 +10,7 @@ const en = {
   footer: {
     shop: "Shop",
     help: "Help",
+    aboutUs: "About us",
     contactUs: "Contact us",
     faq: "Questions and answers",
     installApp: "Install the app", installHintIos: "Tap the Share button, then choose Add to Home Screen.", installHintOther: "Open your browser menu and choose Install app or Add to Home screen.", customerGallery: "Customer gallery",
@@ -84,6 +85,127 @@ const en = {
     ],
     craft: craftEn,
   },
+  faq: {
+    home: "Home",
+    eyebrow: "Help & care",
+    title: "Questions and answers",
+    lead: "Sizing, delivery, cash on delivery, returns and handloom care — everything shoppers ask us most.",
+    searchLabel: "Search questions and answers",
+    searchPlaceholder: "Search questions (e.g. delivery, return, blouse, wash)...",
+    clearSearch: "Clear search",
+    allCategories: "All",
+    categories: {
+      delivery: "Delivery & COD",
+      orders: "Orders & returns",
+      sizing: "Sizing & fit",
+      craft: "Handloom & care",
+    },
+    emptyTitle: "No matching questions",
+    emptyBody: "Try another keyword, clear your filter, or send your question straight to us.",
+    resetFilters: "Show all questions",
+    quickFactsTitle: "At a glance",
+    dhakaDelivery: "Inside Dhaka",
+    nearDhakaDelivery: "Near Dhaka",
+    outsideDelivery: "Rest of Bangladesh",
+    freeOver: "Free delivery over",
+    returnWindow: "Return window",
+    days: "{days} days",
+    free: "Free",
+    stillNeedHelp: "Still have a question?",
+    stillNeedHelpBody: "Write to us or message on WhatsApp — we reply within a working day.",
+    contactUs: "Contact us",
+    whatsappUs: "Message on WhatsApp",
+    callUs: "Call",
+  },
+  about: {
+    home: "Home",
+    title: "About Rooq",
+    eyebrow: "Our story",
+    lead: "Rooq started with a simple observation: finding authentic, high-quality handloom sarees at a fair price — designed for how the new generation actually dresses — shouldn't be rare.",
+    sliderEyebrow: "Heritage weaves",
+    sliderPrev: "Previous saree",
+    sliderNext: "Next saree",
+    sliderDots: "Famous saree slides",
+    famousSarees: [
+      {
+        name: "Dhakai Jamdani",
+        origin: "Sonargaon & Narayanganj",
+        details: "Hand-woven muslin with supplementary weft motifs floated onto the loom by master weavers — recognized by UNESCO as Intangible Cultural Heritage.",
+      },
+      {
+        name: "Tangail Tant",
+        origin: "Pathrail, Tangail",
+        details: "Crisp, breathable handloom cotton with signature temple and zari borders, woven on pit looms for everyday grace and festive wear.",
+      },
+      {
+        name: "Rajshahi Silk",
+        origin: "Rajshahi",
+        details: "Luminous mulberry, endi, and matka silk prized for its natural drape, lightweight warmth, and timeless sheen.",
+      },
+      {
+        name: "Shantipuri Tant",
+        origin: "Shantipur",
+        details: "Fine-count cotton weave celebrated for delicate nilambari indigo tones and intricate geometric aanchal borders.",
+      },
+      {
+        name: "Benarasi Katan",
+        origin: "Mirpur Benarasi Palli, Dhaka",
+        details: "Richly brocaded silk woven with gold and silver zari threads, treasured for weddings and heirloom wardrobes.",
+      },
+    ],
+    pillarsTitle: "What we stand for",
+    pillars: [
+      {
+        title: "Quality at a fair price for the new generation",
+        body: "We saw a clear gap: authentic quality was either overpriced or disconnected from younger shoppers. We study what the new generation wants to wear and deliver lasting craft at honest prices.",
+      },
+      {
+        title: "Custom designs shaped by original thinking",
+        body: "Instead of repeating generic market patterns, we develop custom colourways, borders, and motifs from thoughtful design concepts tailored to modern wardrobes.",
+      },
+      {
+        title: "Collected directly from real tant groups",
+        body: "Every tant saree is sourced straight from genuine weaving communities so we can protect real handloom tant against power-loom imitations and ensure fair returns for weavers.",
+      },
+      {
+        title: "Handmade craft comes first",
+        body: "We prioritize true handmade work — honoring the hand-thrown shuttle, patient loom hours, and the subtle irregularities that prove a human hand made it.",
+      },
+    ],
+    journeyTitle: "Our journey",
+    journey: [
+      {
+        year: "2024",
+        title: "Tracing the roots across Bangladesh",
+        body: "Began by traveling across Bangladesh to search for authentic source materials and uncover the full history of traditional weaving.",
+      },
+      {
+        year: "2025",
+        title: "Choosing sarees & testing 20+ tant groups",
+        body: "Selected sarees as our focus, connected with more than 20 real tant groups, checked quality in person, and collected and tested samples.",
+      },
+      {
+        year: "2026",
+        title: "Launch & 300+ first-month sales",
+        body: "Started our official journey and reached over 300 sales in the very first month through organic marketing.",
+      },
+    ],
+    speechesTitle: "From the founders",
+    founder: {
+      role: "Founder",
+      name: "Sadia Liva",
+      speech:
+        "We built Rooq because we wanted our generation to fall in love with real handloom without compromising on quality or fair pricing. Every saree we bring from the tant clusters carries the dignity of the weaver's hands and the thoughtfulness of modern design.",
+    },
+    coFounder: {
+      role: "Co-Founder",
+      name: "Raghib Shahriar",
+      speech:
+        "Protecting real tant means standing beside the weaving groups who keep this craft alive. By combining direct sourcing, custom design thinking, and honest value, we are building a home where handmade work always comes first.",
+    },
+    shopCta: "Shop the collection",
+    contactCta: "Contact us",
+  },
 };
 
 export type Messages = typeof en;
@@ -97,6 +219,7 @@ const bn: Messages = {
   footer: {
     shop: "শপ",
     help: "সহায়তা",
+    aboutUs: "আমাদের সম্পর্কে",
     contactUs: "যোগাযোগ করুন",
     faq: "প্রশ্ন ও উত্তর",
     installApp: "অ্যাপ ইনস্টল করুন", installHintIos: "শেয়ার বাটনে ট্যাপ করে \"Add to Home Screen\" বেছে নিন।", installHintOther: "ব্রাউজার মেনু খুলে \"Install app\" বা \"Add to Home screen\" বেছে নিন।", customerGallery: "কাস্টমার গ্যালারি",
@@ -170,6 +293,127 @@ const bn: Messages = {
       { title: "পরিশোধিত", body: "ডেলিভারির সময় নগদে বা মোবাইল ব্যাংকিংয়ে দিন।", action: "আবার দেখুন" },
     ],
     craft: craftBn,
+  },
+  faq: {
+    home: "হোম",
+    eyebrow: "সহায়তা ও যত্ন",
+    title: "প্রশ্ন ও উত্তর",
+    lead: "সাইজ, ডেলিভারি, ক্যাশ অন ডেলিভারি, রিটার্ন ও তাঁতের যত্ন — ক্রেতারা আমাদের সবচেয়ে বেশি যা জিজ্ঞেস করেন।",
+    searchLabel: "প্রশ্ন ও উত্তর খুঁজুন",
+    searchPlaceholder: "প্রশ্ন খুঁজুন (যেমন: ডেলিভারি, রিটার্ন, ব্লাউজ, ধোয়া)...",
+    clearSearch: "খোঁজা মুছুন",
+    allCategories: "সব",
+    categories: {
+      delivery: "ডেলিভারি ও পেমেন্ট",
+      orders: "অর্ডার ও রিটার্ন",
+      sizing: "সাইজ ও মাপ",
+      craft: "তাঁত ও যত্ন",
+    },
+    emptyTitle: "কোনো প্রশ্ন পাওয়া যায়নি",
+    emptyBody: "অন্য কোনো শব্দ দিয়ে খুঁজুন বা ফিল্টার সরান, অথবা সরাসরি আমাদের মেসেজ করুন।",
+    resetFilters: "সব প্রশ্ন দেখান",
+    quickFactsTitle: "এক নজরে",
+    dhakaDelivery: "ঢাকার ভেতরে",
+    nearDhakaDelivery: "ঢাকার আশেপাশে",
+    outsideDelivery: "সারা বাংলাদেশে",
+    freeOver: "ফ্রি ডেলিভারি",
+    returnWindow: "রিটার্ন সময়সীমা",
+    days: "{days} দিন",
+    free: "ফ্রি",
+    stillNeedHelp: "আরও কোনো প্রশ্ন আছে?",
+    stillNeedHelpBody: "আমাদের লিখুন অথবা হোয়াটসঅ্যাপে মেসেজ করুন — এক কর্মদিবসের মধ্যে উত্তর দেব।",
+    contactUs: "যোগাযোগ করুন",
+    whatsappUs: "হোয়াটসঅ্যাপে মেসেজ",
+    callUs: "কল করুন",
+  },
+  about: {
+    home: "হোম",
+    title: "রুক সম্পর্কে",
+    eyebrow: "আমাদের গল্প",
+    lead: "রুক-এর যাত্রা শুরু একটি সহজ উপলব্ধি থেকে: নতুন প্রজন্মের রুচি ও বাজেটের সাথে মানানসই খাঁটি, মানসম্মত হ্যান্ডলুম শাড়ি খুঁজে পাওয়া কঠিন হওয়া উচিত নয়।",
+    sliderEyebrow: "ঐতিহ্যবাহী বুনন",
+    sliderPrev: "আগের শাড়ি",
+    sliderNext: "পরের শাড়ি",
+    sliderDots: "বিখ্যাত শাড়ির স্লাইড",
+    famousSarees: [
+      {
+        name: "ঢাকাই জামদানি",
+        origin: "সোনারগাঁ ও নারায়ণগঞ্জ",
+        details: "মসলিন জমিনে হাতে বোনা সূক্ষ্ম নকশার জামদানি — ইউনেস্কো স্বীকৃত বিশ্ব ঐতিহ্যের অমূল্য কারুকাজ।",
+      },
+      {
+        name: "টাঙ্গাইল তাঁত",
+        origin: "পাথরাইল, টাঙ্গাইল",
+        details: "আরামদায়ক হ্যান্ডলুম সুতি ও ঐতিহ্যবাহী পাড়-জরির বুনন, যা প্রতিদিনের ব্যবহার ও উৎসবের জন্য অনন্য।",
+      },
+      {
+        name: "রাজশাহী সিল্ক",
+        origin: "রাজশাহী",
+        details: "মালবেরি, এন্ডি ও মটকা সিল্কের স্বাভাবিক উজ্জ্বলতা ও আরামদায়ক ড্রেপের জন্য যুগ যুগ ধরে সমাদৃত।",
+      },
+      {
+        name: "শান্তিপুরী তাঁত",
+        origin: "শান্তিপুর",
+        details: "সূক্ষ্ম কাউন্টের সুতি বুনন, নীলাম্বরী রঙের গভীরতা ও জ্যামিতিক আঁচলের নকশার জন্য পরিচিত।",
+      },
+      {
+        name: "বেনারসি কাতান",
+        origin: "মিরপুর বেনারসি পল্লী, ঢাকা",
+        details: "সোনালি ও রুপালি জরির কারুকাজে বোনা অভিজাত সিল্ক, বিয়ে ও বিশেষ আয়োজনের চিরন্তন সংগ্রহ।",
+      },
+    ],
+    pillarsTitle: "আমাদের মূল ভাবনা",
+    pillars: [
+      {
+        title: "নতুন প্রজন্মের পছন্দ ও সাধ্যের মধ্যে সেরা মান",
+        body: "মানসম্মত পণ্য কম দামে পাওয়া এবং নতুন প্রজন্মের পছন্দ বোঝা ছিল আমাদের প্রথম লক্ষ্য। তরুণদের রুচি অনুযায়ী আমরা টেকসই হ্যান্ডলুম তৈরি ও সংগ্রহ করি।",
+      },
+      {
+        title: "ভাবনা থেকে নিজস্ব কাস্টম ডিজাইন",
+        body: "বাজারের গতানুগতিক নকশা অনুকরণ না করে, নিজস্ব চিন্তা ও আধুনিক স্টাইলিং থেকে আমরা প্রতিটি রঙ, পাড় ও মোটিফ ডিজাইন করি।",
+      },
+      {
+        title: "আসল তাঁত গোষ্ঠী থেকে সরাসরি সংগ্রহ",
+        body: "পাওয়ারলুমের নকল থেকে প্রকৃত তাঁতশিল্পকে রক্ষা করতে আমরা সরাসরি আসল তাঁতি গোষ্ঠী থেকে শাড়ি সংগ্রহ করি, যেন ন্যায্য মূল্য তাঁতির হাতেই পৌঁছায়।",
+      },
+      {
+        title: "হাতের কাজকে সর্বোচ্চ অগ্রাধিকার",
+        body: "হাতে চালানো মাকু, সময়ের শ্রম এবং বুননের স্বাভাবিক সূক্ষ্মতার মধ্য দিয়ে প্রতিটি হ্যান্ডমেড পোশাককে আমরা অগ্রাধিকার দিই।",
+      },
+    ],
+    journeyTitle: "আমাদের যাত্রা",
+    journey: [
+      {
+        year: "২০২৪",
+        title: "সারা বাংলাদেশে কাঁচামাল ও ইতিহাস অনুসন্ধান",
+        body: "খাঁটি কাঁচামাল ও উপকরণের খোঁজে বাংলাদেশজুড়ে ঘুরে দেখা এবং ঐতিহ্যবাহী তাঁতশিল্পের পুরো ইতিহাস খুঁজে বের করা।",
+      },
+      {
+        year: "২০২৫",
+        title: "শাড়ি নির্বাচন ও ২০+ তাঁতির স্যাম্পল পরীক্ষা",
+        body: "শাড়িকে মূল বিষয় হিসেবে বেছে নিয়ে ২০টিরও বেশি আসল তাঁত গোষ্ঠীর সাথে যোগাযোগ, মান যাচাই এবং স্যাম্পল সংগ্রহ ও পরীক্ষা করা।",
+      },
+      {
+        year: "২০২৬",
+        title: "যাত্রা শুরু ও প্রথম মাসেই ৩০০+ বিক্রি",
+        body: "রুক-এর আনুষ্ঠানিক যাত্রা শুরু এবং কেবল অর্গানিক মার্কেটিংয়ের মাধ্যমেই প্রথম মাসে ৩০০টির বেশি বিক্রি অর্জন।",
+      },
+    ],
+    speechesTitle: "উদ্যোক্তাদের কথা",
+    founder: {
+      role: "প্রতিষ্ঠাতা",
+      name: "সাদিয়া লিভা",
+      speech:
+        "আমাদের প্রজন্ম যেন মান বা সাধ্যের সাথে আপস না করেই আসল হ্যান্ডলুমকে ভালোবাসতে পারে — এই ভাবনা থেকেই রুকের জন্ম। প্রতিটি শাড়িতে তাঁতির হাতের মর্যাদা ও আধুনিক ডিজাইনের যত্ন মিশে আছে।",
+    },
+    coFounder: {
+      role: "সহ-প্রতিষ্ঠাতা",
+      name: "রাগিব শাহরিয়ার",
+      speech:
+        "আসল তাঁতকে বাঁচিয়ে রাখতে হলে তাঁতি গোষ্ঠীর পাশে দাঁড়াতে হবে। সরাসরি সংগ্রহ, নিজস্ব ডিজাইন ভাবনা আর ন্যায্য মূল্যের মাধ্যমে আমরা এমন একটি জায়গা গড়ছি যেখানে হাতের কাজই সবার আগে।",
+    },
+    shopCta: "কালেকশন দেখুন",
+    contactCta: "যোগাযোগ করুন",
   },
 };
 

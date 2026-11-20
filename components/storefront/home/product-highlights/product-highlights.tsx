@@ -21,11 +21,18 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
   if (cards.length === 0) return null;
   const details = await Promise.all(cards.map((card) => getProductById(card.id)));
   return (
-    <section aria-labelledby="highlights-title" className="page-gutter">
+    <section aria-labelledby="highlights-title" className="page-gutter relative">
       <SectionHeading id="highlights-title" title={t.home.spotlight} />
-      <div className="flex flex-col gap-[3px]">
+      <div className="flex flex-col gap-5 lg:gap-6">
         {cards.map((card, index) => (
-          <HighlightCard key={card.id} card={card} detail={details[index]} reverse={index % 2 === 1} t={t.home} />
+          <HighlightCard
+            key={card.id}
+            card={card}
+            detail={details[index]}
+            index={index}
+            reverse={index % 2 === 1}
+            t={t.home}
+          />
         ))}
       </div>
     </section>

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { ColorRef, ProductCard as ProductCardData } from "@/types/storefront/catalog";
-import { snapshotFromCard } from "@/utils/storefront/snapshots";
 import { Price } from "../shared/price";
 import { CardActions } from "./card-actions";
 import { CardLabel } from "./card-label";
@@ -77,7 +76,7 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
         <div className="pointer-events-none absolute left-2 top-2">
           <CardLabel product={product} />
         </div>
-        <CardActions productId={product.id} snapshot={snapshotFromCard(product)} />
+        <CardActions product={product} activeColor={preview?.color ?? null} />
       </div>
       <div
         className="flex flex-col gap-1 px-2 pb-1 pt-2 [@media(pointer:fine)]:pointer-events-none [@media(pointer:fine)]:absolute [@media(pointer:fine)]:inset-x-0 [@media(pointer:fine)]:bottom-0 [@media(pointer:fine)]:bg-chalk/90 [@media(pointer:fine)]:p-3 [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:transition-opacity [@media(pointer:fine)]:duration-300 [@media(pointer:fine)]:ease-(--ease-quiet) [@media(pointer:fine)]:group-focus-within:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"

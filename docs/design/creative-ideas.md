@@ -31,6 +31,10 @@ Each idea has a tag:
 
 - Home: scroll-sewn **needle and thread** across the page (`home/stitch`).
 - Home: six-scene **order journey** story (`home/order-journey`).
+- Site-wide: **Tulo the panda** pet in a woven basket, bottom-left (`shell/panda-pal`).
+  Peeks, plays when tapped, nudges (low stock, waiting bag) and offers the phone /
+  WhatsApp when a shopper looks stuck (rage clicks, error page, idle at checkout).
+  Pages can cue him with `<PandaCue kind="empty" | "error" />`.
 - Home: chapter **reveal headings**, **sale countdown** clock, hero slider/campaign.
 - Footer: **handloom + charkha scene** weaving a tant saree (`shell/footer-art`).
 - Product grids: below-the-fold **fade-in in batches** (`product-card/grid-reveal`).
