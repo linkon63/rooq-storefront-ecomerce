@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { useEffect, type RefObject } from "react";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { setWhatsappHighlighted } from "@/lib/store/slices/ui-slice";
-import { WHATSAPP_FAB_SELECTOR } from "@/components/storefront/shell/whatsapp-button";
+import { PANDA_PAL_SELECTOR } from "@/components/storefront/shell/panda-pal/panda-events";
 import { runningMax, sampleIndexAtY } from "@/utils/storefront/stitch-path";
 
 type StitchRefs = {
@@ -27,8 +27,8 @@ const degrees = (dx: number, dy: number) => (Math.atan2(dy, dx) * 180) / Math.PI
  * NEEDLE_VIEWPORT_Y of the screen, and the needle sits there, turned along
  * the thread. The length eases (gsap.quickTo) so it sews rather than jumps.
  * Scrolling back up hides the needle and the stitches come out on their own.
- * At the end the needle turns to the WhatsApp button and the button is
- * flagged (Redux) to blink. Re-measures whenever `pathKey` (the d) changes.
+ * At the end the needle turns to Tulo the panda, and the end is flagged
+ * (Redux) so he pops out to offer help. Re-measures whenever `pathKey` (the d) changes.
  */
 export function useStitchScroll({ box, thread, reveal, needle }: StitchRefs, pathKey: string) {
   const dispatch = useAppDispatch();
@@ -59,7 +59,7 @@ export function useStitchScroll({ box, thread, reveal, needle }: StitchRefs, pat
       const at = path.getPointAtLength(state.length);
       const done = state.length >= total - END_PX;
       let angle = degrees(...aheadOf(path, state.length, total, at));
-      const fab = done ? document.querySelector(WHATSAPP_FAB_SELECTOR) : null;
+      const fab = done ? document.querySelector(PANDA_PAL_SELECTOR) : null;
       if (fab) {
         const [target, origin] = [fab.getBoundingClientRect(), container.getBoundingClientRect()];
         angle = degrees(target.left + target.width / 2 - origin.left - at.x, target.top + target.height / 2 - origin.top - at.y);

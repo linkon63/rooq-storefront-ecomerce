@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { PandaCue } from "../shell/panda-pal/panda-cue";
 
 type EmptyStateProps = {
   title: string;
@@ -13,6 +14,7 @@ type EmptyStateProps = {
 export function EmptyState({ title, body, action, children, tone = "empty" }: EmptyStateProps) {
   return (
     <div role={tone === "error" ? "alert" : undefined} className="flex flex-col items-start gap-3 py-16">
+      <PandaCue kind={tone} />
       <h2 className="type-h2">{title}</h2>
       {body ? <p className="type-body max-w-[52ch] text-stone">{body}</p> : null}
       {children}
