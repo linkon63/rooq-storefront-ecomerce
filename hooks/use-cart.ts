@@ -12,6 +12,7 @@ import {
 } from "@/lib/store/slices/cart-slice";
 import { addToBag, changeLineQuantity, removeFromBag } from "@/lib/store/slices/cart-thunks";
 import { setCartDrawerOpen } from "@/lib/store/slices/ui-slice";
+import { pandaCue } from "@/components/storefront/shell/panda-pal/panda-events";
 import type { CartLineInput } from "@/types/storefront/commerce";
 import { errorText } from "@/utils/api-error";
 import { summariseCart } from "@/utils/storefront/cart";
@@ -28,6 +29,7 @@ export function useCart() {
     async (input: CartLineInput, options: { openDrawer?: boolean } = { openDrawer: true }) => {
       try {
         await dispatch(addToBag(input));
+        pandaCue("added");
         toast.success(SUCCESS_MESSAGES.storefront.addedToBag);
         if (options.openDrawer) dispatch(setCartDrawerOpen(true));
         return true;

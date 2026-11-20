@@ -11,15 +11,18 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectCartCount, selectCartHydrated } from "@/lib/store/slices/cart-slice";
 import { selectAuthOpen } from "@/lib/store/slices/session-slice";
 import {
-  selectIsCartDrawerOpen,
   selectIsMobileNavOpen,
   selectIsSearchOpen,
   selectIsWhatsappHighlighted,
-  selectQuickViewProductId,
   setCartDrawerOpen,
 } from "@/lib/store/slices/ui-slice";
 import { PANDA_COPY } from "./panda-copy";
-import { PANDA_CUE_EVENT, takePendingPandaCue, type PandaCueDetail } from "./panda-events";
+import {
+  PANDA_ADD_BUTTON_SELECTOR,
+  PANDA_CUE_EVENT,
+  takePendingPandaCue,
+  type PandaCueDetail,
+} from "./panda-events";
 import { PandaBasket, PandaFigure, type PandaMood } from "./panda-figure";
 
 /* ---- Tuning: how often Tulo may speak. Keep him a helper, not a nag. ---- */
@@ -37,7 +40,8 @@ const MAX_NUDGES_PER_VISIT = 5;
 const HELP_GAP = 2 * 60 * SECOND;
 const SAY_FOR = 10 * SECOND;
 const HELP_SAY_FOR = 18 * SECOND;
-const SHORT_SAY_FOR = 3.5 * SECOND;
+const SHORT_SAY_FOR = 4 * SECOND;
+const DANCE_FOR = 4.5 * SECOND;
 const PEEK_EVERY_MIN = 45 * SECOND;
 const PEEK_EVERY_MAX = 90 * SECOND;
 const SLEEP_FOR = 24 * 60 * 60 * SECOND;
@@ -55,7 +59,7 @@ const KEY = {
 } as const;
 
 type Pose = "away" | "peek" | "out" | "sleep";
-/** user = he was tapped; help = trouble spotted; nudge = unprompted sales talk; event = reaction to what just happened. */
+/** user = he was tapped or direct add-to-bag interaction; help = trouble spotted; nudge = unprompted sales talk; event = reaction to what just happened. */
 type SayKind = "user" | "help" | "nudge" | "event";
 type BubbleAction =
   | { type: "link"; label: string; href: string }
@@ -87,14 +91,11 @@ const randomBetween = (min: number, max: number) => min + Math.random() * (max -
 
 /**
  * Tulo, the virtual panda. He hides in a woven basket in the bottom-left
- * corner, peeks out now and then, plays when tapped, nudges gently towards
- * buying (low stock, a waiting bag) and, when a shopper seems stuck (rage
- * clicks, an error page, a long pause at checkout), offers the shop's phone
- * number and WhatsApp.
- *
- * Rules he follows: never on screen while a drawer or dialog is open, never
- * resting over the checkout form, at most a handful of unprompted messages a
- * visit, and "Hide Tulo" puts him to sleep for a day.
+ * corner, peeks out now and then, plays when tapped, cheers when the shopper
+ * hovers "Add to bag", dances when an item is added to the bag, nudges gently
+ * towards buying (low stock, a waiting bag) and, when a shopper seems stuck
+ * (rage clicks, an error page, a long pause at checkout), offers the shop's
+ * phone number and WhatsApp.
  */
 export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps) {
   const t = PANDA_COPY[locale] ?? PANDA_COPY.en;
@@ -105,12 +106,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
   const cartHydrated = useAppSelector(selectCartHydrated);
   const threadFinished = useAppSelector(selectIsWhatsappHighlighted);
   const overlayOpen = useAppSelector(
-    (state) =>
-      selectIsCartDrawerOpen(state) ||
-      selectIsSearchOpen(state) ||
-      selectAuthOpen(state) ||
-      selectIsMobileNavOpen(state) ||
-      selectQuickViewProductId(state) !== null,
+    (state) => selectIsSearchOpen(state) || selectAuthOpen(state) || selectIsMobileNavOpen(state),
   );
 
   const [pose, setPose] = useState<Pose>("away");
@@ -140,6 +136,8 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     lastHelp: 0,
     lastCartChange: 0,
     nextPeek: 0,
+    dancingUntil: 0,
+    lastDanceAt: 0,
     taps: 0,
   });
 
@@ -158,6 +156,20 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     }, ms);
     timers.current.add(id);
   }, []);
+
+  const spawnHearts = useCallback(
+    (count = 1) => {
+      for (let i = 0; i < count; i += 1) {
+        later(() => {
+          const id = Date.now() + Math.random();
+          const dx = Math.round(randomBetween(-20, 20));
+          setHearts((list) => [...list.slice(-7), { id, dx }]);
+          later(() => setHearts((list) => list.filter((h) => h.id !== id)), 1200);
+        }, i * 130);
+      }
+    },
+    [later],
+  );
 
   const rest = useCallback(() => {
     clearTimeout(hideTimer.current);
@@ -205,8 +217,10 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
       setMood(nextMood);
       if (opts.hop) setHop((h) => h + 1);
       clearTimeout(moodTimer.current);
-      if (nextMood === "talk" || nextMood === "happy") {
-        moodTimer.current = setTimeout(() => setMood("idle"), 2200);
+      if (nextMood === "dance") {
+        moodTimer.current = setTimeout(() => setMood("idle"), DANCE_FOR);
+      } else if (nextMood === "talk" || nextMood === "happy") {
+        moodTimer.current = setTimeout(() => setMood("idle"), 2600);
       }
       armHide(opts.ms ?? (kind === "help" ? HELP_SAY_FOR : SAY_FOR));
       return true;
@@ -231,17 +245,46 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     return [...helpActions(), shop, { type: "sleep", label: t.actions.sleep }];
   }, [helpActions, newInAction, t]);
 
+  /* ---- Cheer on hover over Add-to-bag, dance on click / bag addition ---- */
+  const cheerHover = useCallback(() => {
+    const l = live.current;
+    if (Date.now() < l.dancingUntil) return;
+    l.asleep = false;
+    spawnHearts(2);
+    say("user", t.hoverAdd, { mood: "happy", hop: true, ms: SHORT_SAY_FOR });
+  }, [say, spawnHearts, t]);
+
+  const celebrateAdd = useCallback(() => {
+    const l = live.current;
+    const now = Date.now();
+    if (now - l.lastDanceAt < 450) return;
+    l.lastDanceAt = now;
+    l.dancingUntil = now + DANCE_FOR;
+    l.asleep = false;
+    spawnHearts(6);
+    say("user", t.added, {
+      mood: "dance",
+      hop: true,
+      ms: DANCE_FOR + 1200,
+      actions: [{ type: "bag", label: t.actions.openBag }],
+    });
+  }, [say, spawnHearts, t]);
+
   const handleCue = useCallback(
     (cue: PandaCueDetail) => {
       const l = live.current;
-      if (cue.kind === "error") {
+      if (cue.kind === "added") {
+        celebrateAdd();
+      } else if (cue.kind === "add-hover") {
+        cheerHover();
+      } else if (cue.kind === "error") {
         later(() => say("help", t.error, { actions: helpActions(), showPhone: true }), 1200);
       } else if (!l.page.has("empty")) {
         l.page.add("empty");
         later(() => say("nudge", t.empty, { actions: [newInAction()] }), 1200);
       }
     },
-    [helpActions, later, newInAction, say, t],
+    [celebrateAdd, cheerHover, helpActions, later, newInAction, say, t],
   );
 
   /* ---- Arrival: slide the basket in, greet once per visit ---- */
@@ -256,7 +299,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     later(() => {
       setPose(l.asleep ? "sleep" : "peek");
       setMood(l.asleep ? "sleep" : "idle");
-    }, 900);
+    }, 300);
 
     later(() => {
       if (read("session", KEY.greeted) || l.pathname.startsWith("/checkout")) return;
@@ -309,15 +352,15 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     return () => local.forEach(clearTimeout);
   }, [pathname, say, helpActions, t]);
 
-  /* ---- Something landed in the bag: a happy hop ---- */
+  /* ---- Something landed in the bag: happy dance ---- */
   useEffect(() => {
     if (!cartHydrated) return;
     const prev = prevCartCount.current;
     prevCartCount.current = cartCount;
     if (prev === null || prev === cartCount) return;
     live.current.lastCartChange = Date.now();
-    if (cartCount > prev) say("event", t.added, { mood: "happy", hop: true, ms: SHORT_SAY_FOR });
-  }, [cartCount, cartHydrated, say, t]);
+    if (cartCount > prev) celebrateAdd();
+  }, [cartCount, cartHydrated, celebrateAdd]);
 
   /* ---- The home page's thread has been sewn all the way to Tulo ---- */
   useEffect(() => {
@@ -327,17 +370,46 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     say("event", t.stitchEnd, { actions: helpActions(), showPhone: true, mood: "happy", hop: true });
   }, [threadFinished, say, helpActions, t]);
 
-  /* ---- Watching the shopper: activity, rage clicks, exit intent, page cues ---- */
+  /* ---- Watching the shopper: hover/click on Add-to-bag, rage clicks, exit intent, page cues ---- */
   useEffect(() => {
     const l = live.current;
     const mark = () => {
       l.lastActivity = Date.now();
     };
     let clicks: { x: number; y: number; at: number }[] = [];
+    let hoveredAddBtn: Element | null = null;
+
+    const isUsableButton = (el: Element | null): el is HTMLElement => {
+      if (!el) return false;
+      if ((el as HTMLButtonElement).disabled) return false;
+      if (el.getAttribute("aria-disabled") === "true") return false;
+      return true;
+    };
+
+    const onPointerOver = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      const btn = (event.target as Element | null)?.closest?.(PANDA_ADD_BUTTON_SELECTOR) ?? null;
+      if (btn === hoveredAddBtn) return;
+      hoveredAddBtn = btn;
+      if (isUsableButton(btn)) cheerHover();
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      const btn = (event.target as Element | null)?.closest?.(PANDA_ADD_BUTTON_SELECTOR) ?? null;
+      if (btn && btn !== hoveredAddBtn && isUsableButton(btn)) {
+        hoveredAddBtn = btn;
+        cheerHover();
+      }
+    };
 
     const onClick = (event: MouseEvent) => {
       mark();
       if (rootRef.current?.contains(event.target as Node)) return;
+      const addBtn = (event.target as Element | null)?.closest?.(PANDA_ADD_BUTTON_SELECTOR) ?? null;
+      if (isUsableButton(addBtn)) {
+        celebrateAdd();
+        return;
+      }
       const now = Date.now();
       clicks = clicks.filter(
         (c) => now - c.at < RAGE_WINDOW && Math.hypot(c.x - event.clientX, c.y - event.clientY) < 40,
@@ -361,6 +433,8 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     window.addEventListener("pointerdown", mark, { passive: true });
     window.addEventListener("keydown", mark);
     window.addEventListener("scroll", mark, { passive: true });
+    document.addEventListener("pointerover", onPointerOver, { passive: true });
+    document.addEventListener("focusin", onFocusIn);
     document.addEventListener("click", onClick, true);
     document.addEventListener("mouseout", onLeave);
     window.addEventListener(PANDA_CUE_EVENT, onCue);
@@ -368,11 +442,13 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
       window.removeEventListener("pointerdown", mark);
       window.removeEventListener("keydown", mark);
       window.removeEventListener("scroll", mark);
+      document.removeEventListener("pointerover", onPointerOver);
+      document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("mouseout", onLeave);
       window.removeEventListener(PANDA_CUE_EVENT, onCue);
     };
-  }, [handleCue, helpActions, say, t]);
+  }, [celebrateAdd, cheerHover, handleCue, helpActions, say, t]);
 
   /* ---- The heartbeat: idle play, bag reminder, checkout help, random peeks ---- */
   useEffect(() => {
@@ -449,11 +525,9 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
   }, []);
 
   /* ---- Playing with Tulo ---- */
-  const onTap = () => {
+  const onTap = useCallback(() => {
     const l = live.current;
-    const id = Date.now();
-    setHearts((list) => [...list.slice(-4), { id, dx: Math.round(randomBetween(-14, 14)) }]);
-    later(() => setHearts((list) => list.filter((h) => h.id !== id)), 1200);
+    spawnHearts(1);
 
     if (l.asleep) {
       l.asleep = false;
@@ -468,7 +542,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     l.taps += 1;
     if (l.taps % 5 === 0) say("user", t.tickle, { mood: "happy", hop: true, ms: SHORT_SAY_FOR });
     else setHop((h) => h + 1);
-  };
+  }, [menuActions, say, spawnHearts, t]);
 
   const goToSleep = useCallback(() => {
     const l = live.current;
@@ -477,29 +551,32 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
     say("user", t.sleepAck, { mood: "sleep", ms: SHORT_SAY_FOR });
   }, [say, t]);
 
-  const runAction = (action: BubbleAction) => {
-    if (action.type === "bag") {
-      rest();
-      dispatch(setCartDrawerOpen(true));
-    } else if (action.type === "sleep") {
-      goToSleep();
-    } else {
-      rest();
-    }
-  };
+  const runAction = useCallback(
+    (action: BubbleAction) => {
+      if (action.type === "bag") {
+        rest();
+        dispatch(setCartDrawerOpen(true));
+      } else if (action.type === "sleep") {
+        goToSleep();
+      } else {
+        rest();
+      }
+    },
+    [dispatch, goToSleep, rest],
+  );
 
-  /* Off screen while a drawer or dialog is open; at checkout he only comes out to help. */
+  /* Off screen while search/auth/mobile-nav is open; at checkout he only comes out to help. */
   const onCheckout = pathname.startsWith("/checkout");
   const shown: Pose = overlayOpen ? "away" : onCheckout && pose === "peek" ? "away" : pose;
   const visibleBubble = shown === "away" ? null : bubble;
   const chip =
-    "pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors";
+    "pointer-events-auto inline-flex h-5.5 items-center gap-1 rounded-full px-2 text-[10px] font-semibold leading-none transition-colors";
 
   return (
     <div
       ref={rootRef}
       data-pose={shown}
-      className="panda-pal pointer-events-none fixed bottom-24 left-3 z-40 w-24 origin-bottom-left max-md:scale-90 md:bottom-6 md:left-6"
+      className="panda-pal pointer-events-none relative w-14 origin-bottom-right"
     >
       <p className="sr-only" aria-live="polite">
         {visibleBubble?.text ?? ""}
@@ -508,7 +585,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
       {visibleBubble ? (
         <div
           key={visibleBubble.id}
-          className="panda-bubble pointer-events-auto absolute bottom-16 left-[100px] w-[min(264px,calc(100vw-128px))] rounded-2xl border border-line bg-chalk p-3.5 pr-9 text-ink shadow-sheet"
+          className="panda-bubble pointer-events-auto absolute bottom-8 right-[62px] w-[min(196px,calc(100vw-80px))] rounded-xl border border-line bg-chalk px-2.5 py-2 pr-6 text-ink shadow-sheet"
           onPointerEnter={() => {
             live.current.hovering = true;
           }}
@@ -517,17 +594,17 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
             armHide(4 * SECOND);
           }}
         >
-          <span aria-hidden className="absolute -left-[7px] bottom-5 size-3 rotate-45 border-b border-l border-line bg-chalk" />
+          <span aria-hidden className="absolute -right-[5px] bottom-3 size-2 rotate-45 border-r border-t border-line bg-chalk" />
           <button
             type="button"
             onClick={rest}
             aria-label={t.actions.close}
-            className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full text-stone transition-colors hover:bg-selvedge"
+            className="absolute right-1 top-1 grid size-4 place-items-center rounded-full text-stone transition-colors hover:bg-selvedge"
           >
-            <FiX aria-hidden className="size-4" />
+            <FiX aria-hidden className="size-2.5" />
           </button>
-          <p className="text-sm leading-snug">
-            <span className="font-semibold text-dye-deep">{t.name}: </span>
+          <p className="text-[10px] font-medium leading-[1.45] tracking-[0.01em] text-ink antialiased">
+            <span className="font-bold text-dye-deep">{t.name}: </span>
             {visibleBubble.text}
           </p>
 
@@ -535,16 +612,16 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
             <a
               href={contact.tel}
               onClick={rest}
-              className="mt-2.5 flex items-center gap-2 rounded-lg bg-selvedge/60 px-3 py-2 text-sm font-semibold text-ink transition-colors hover:bg-selvedge"
+              className="mt-1.5 flex items-center gap-1 rounded-md bg-selvedge/60 px-2 py-1 text-[10px] font-semibold leading-none text-ink transition-colors hover:bg-selvedge"
             >
-              <FiPhone aria-hidden className="size-4 shrink-0" />
+              <FiPhone aria-hidden className="size-2.5 shrink-0" />
               <span className="sr-only">{t.actions.callUs}: </span>
               <span dir="ltr">{phone}</span>
             </a>
           ) : null}
 
           {visibleBubble.actions.length ? (
-            <div className="mt-2.5 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {visibleBubble.actions.map((action) =>
                 action.type === "link" ? (
                   <Link key={action.label} href={action.href} onClick={rest} className={`${chip} bg-ink text-chalk hover:bg-ink/85`}>
@@ -559,7 +636,7 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
                     onClick={rest}
                     className={`${chip} bg-[#25D366] text-white hover:bg-[#1ebe5a]`}
                   >
-                    <FaWhatsapp aria-hidden className="size-3.5" />
+                    <FaWhatsapp aria-hidden className="size-2.5" />
                     {action.label}
                   </a>
                 ) : (
@@ -574,9 +651,9 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
                     }
                   >
                     {action.type === "bag" ? (
-                      <FiShoppingBag aria-hidden className="size-3.5" />
+                      <FiShoppingBag aria-hidden className="size-2.5" />
                     ) : (
-                      <FiMoon aria-hidden className="size-3.5" />
+                      <FiMoon aria-hidden className="size-2.5" />
                     )}
                     {action.label}
                   </button>
@@ -589,10 +666,10 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
 
       <div
         data-panda-pal=""
-        className="panda-stage relative h-[156px] w-24 overflow-hidden"
+        className="panda-stage relative h-[92px] w-14 overflow-hidden"
         inert={shown === "away"}
       >
-        <div className="panda-body absolute bottom-[6px] left-[6px] w-[84px]">
+        <div className="panda-body absolute bottom-[4px] left-[4px] w-[48px]">
           <div key={hop} className={hop ? "panda-hop" : undefined}>
             <button
               type="button"
@@ -609,19 +686,19 @@ export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps
           <span
             key={heart.id}
             aria-hidden
-            className="panda-heart pointer-events-none absolute bottom-[92px] left-[40px] text-dye"
+            className="panda-heart pointer-events-none absolute bottom-[54px] left-[23px] text-dye"
             style={{ "--panda-dx": `${heart.dx}px` } as React.CSSProperties}
           >
-            <svg viewBox="0 0 16 14" className="size-4" fill="currentColor">
+            <svg viewBox="0 0 16 14" className="size-2.5" fill="currentColor">
               <path d="M8 13.5 1.6 7.4A3.9 3.9 0 0 1 8 2.6a3.9 3.9 0 0 1 6.4 4.8Z" />
             </svg>
           </span>
         ))}
 
         {shown === "sleep" ? (
-          <span aria-hidden className="pointer-events-none absolute bottom-[60px] right-1 flex gap-1 font-semibold text-stone">
-            <span className="panda-z text-xs">z</span>
-            <span className="panda-z text-sm">z</span>
+          <span aria-hidden className="pointer-events-none absolute bottom-[35px] right-0.5 flex gap-0.5 font-semibold text-stone">
+            <span className="panda-z text-[8px]">z</span>
+            <span className="panda-z text-[9px]">z</span>
           </span>
         ) : null}
 

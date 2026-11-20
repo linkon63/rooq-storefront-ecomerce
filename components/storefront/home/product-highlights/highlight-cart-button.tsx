@@ -67,6 +67,7 @@ export function HighlightCartButton({ card, detail }: HighlightCartButtonProps) 
     <>
       <button
         type="button"
+        data-panda-add-to-bag=""
         onClick={() => void handleAdd(false)}
         disabled={pending || soldOut}
         className={`type-label relative inline-flex h-11 items-center gap-2.5 px-5 transition-colors duration-300 ${

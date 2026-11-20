@@ -1,6 +1,6 @@
 import type { Ref } from "react";
 
-export type PandaMood = "idle" | "talk" | "happy" | "sleep" | "look" | "play";
+export type PandaMood = "idle" | "talk" | "happy" | "dance" | "sleep" | "look" | "play";
 
 const FUR = "#24211f";
 const FUR_SOFT = "#4a423c";
@@ -22,8 +22,9 @@ export function PandaFigure({
   pupilsRef?: Ref<SVGGElement>;
 }) {
   const check = `${uid}-gamchha`;
-  const eyesOpen = mood !== "happy" && mood !== "sleep";
-  const mouthOpen = mood === "talk" || mood === "happy";
+  const isHappy = mood === "happy" || mood === "dance";
+  const eyesOpen = !isHappy && mood !== "sleep";
+  const mouthOpen = mood === "talk" || isHappy;
 
   return (
     <svg aria-hidden viewBox="0 0 120 132" className={`panda-figure panda-mood-${mood} block h-auto w-full`}>
@@ -46,17 +47,21 @@ export function PandaFigure({
         <path d="M30 94 L24 114 L31 116 L37 96 Z" fill={`url(#${check})`} stroke="var(--color-dye-deep)" strokeWidth="1" />
 
         {/* Left arm */}
-        <ellipse cx="32" cy="108" rx="9" ry="14" transform="rotate(18 32 108)" fill={FUR} />
+        <g className="panda-arm-left">
+          <ellipse cx="32" cy="108" rx="9" ry="14" transform="rotate(18 32 108)" fill={FUR} />
+        </g>
 
         {/* Thread spool in the right paw */}
-        <g className="panda-spool">
-          <path d="M106 104 q10 8 4 18 q-3 6 6 8" fill="none" stroke="var(--color-gold)" strokeWidth="1.3" strokeLinecap="round" />
-          <rect x="92" y="93" width="16" height="3.5" rx="1.5" fill="var(--color-ink)" />
-          <rect x="94" y="96.5" width="12" height="13" fill="var(--color-gold)" />
-          <path d="M94 100h12M94 103.5h12M94 107h12" stroke="#7a6748" strokeWidth="0.7" />
-          <rect x="92" y="109.5" width="16" height="3.5" rx="1.5" fill="var(--color-ink)" />
+        <g className="panda-arm-right">
+          <g className="panda-spool">
+            <path d="M106 104 q10 8 4 18 q-3 6 6 8" fill="none" stroke="var(--color-gold)" strokeWidth="1.3" strokeLinecap="round" />
+            <rect x="92" y="93" width="16" height="3.5" rx="1.5" fill="var(--color-ink)" />
+            <rect x="94" y="96.5" width="12" height="13" fill="var(--color-gold)" />
+            <path d="M94 100h12M94 103.5h12M94 107h12" stroke="#7a6748" strokeWidth="0.7" />
+            <rect x="92" y="109.5" width="16" height="3.5" rx="1.5" fill="var(--color-ink)" />
+          </g>
+          <ellipse cx="88" cy="107" rx="8" ry="12" transform="rotate(-30 88 107)" fill={FUR} />
         </g>
-        <ellipse cx="88" cy="107" rx="8" ry="12" transform="rotate(-30 88 107)" fill={FUR} />
 
         {/* Head */}
         <g className="panda-head">
@@ -79,17 +84,17 @@ export function PandaFigure({
                 <circle cx="76.6" cy="54.2" r="1.1" fill="#fff" />
               </g>
             </g>
-          ) : mood === "happy" ? (
+          ) : isHappy ? (
             <path d="M39.5 57 Q45 50 50.5 57 M69.5 57 Q75 50 80.5 57" stroke="#fff" strokeWidth="2.6" fill="none" strokeLinecap="round" />
           ) : (
             <path d="M39.5 54 Q45 59 50.5 54 M69.5 54 Q75 59 80.5 54" stroke="#fff" strokeWidth="2.2" fill="none" strokeLinecap="round" />
           )}
 
-          <circle cx="33" cy="71" r="6" fill="var(--color-dye)" opacity="0.2" />
-          <circle cx="87" cy="71" r="6" fill="var(--color-dye)" opacity="0.2" />
+          <circle cx="33" cy="71" r="6" fill="var(--color-dye)" opacity={isHappy ? "0.38" : "0.2"} />
+          <circle cx="87" cy="71" r="6" fill="var(--color-dye)" opacity={isHappy ? "0.38" : "0.2"} />
           <ellipse cx="60" cy="67" rx="5" ry="3.6" fill={FUR} />
           {mouthOpen ? (
-            <ellipse className="panda-mouth" cx="60" cy="76" rx="4" ry="4" fill="var(--color-dye-deep)" />
+            <ellipse className="panda-mouth" cx="60" cy="76" rx="4.5" ry="4.5" fill="var(--color-dye-deep)" />
           ) : (
             <path
               d="M60 70.5v3.5M60 74c-1.5 3-5.5 3.5-7.5 1.5M60 74c1.5 3 5.5 3.5 7.5 1.5"
@@ -100,6 +105,15 @@ export function PandaFigure({
             />
           )}
         </g>
+
+        {mood === "dance" ? (
+          <g className="panda-notes" fill="var(--color-gold)">
+            <path d="M12 22 l2.5 -5 l2.5 5 l5 2.5 l-5 2.5 l-2.5 5 l-2.5 -5 l-5 -2.5 z" />
+            <path d="M104 16 l2 -4 l2 4 l4 2 l-4 2 l-2 4 l-2 -4 l-4 -2 z" fill="var(--color-dye)" />
+            <circle cx="16" cy="44" r="2.2" fill="var(--color-dye)" />
+            <circle cx="106" cy="40" r="2.2" />
+          </g>
+        ) : null}
       </g>
     </svg>
   );
@@ -124,4 +138,3 @@ export function PandaBasket() {
     </svg>
   );
 }
-

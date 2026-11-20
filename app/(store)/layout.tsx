@@ -5,7 +5,6 @@ import { SiteFooter } from "@/components/storefront/shell/site-footer";
 import { PwaRegister } from "@/components/storefront/shell/pwa-register";
 import { RoutePrefetch } from "@/components/storefront/shell/route-prefetch";
 import { FloatingActions } from "@/components/storefront/shell/floating-actions";
-import { PandaPalLoader } from "@/components/storefront/shell/panda-pal/panda-pal-loader";
 import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
 import { StoreToaster } from "@/components/storefront/shell/store-toaster";
@@ -56,8 +55,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
         <SiteFooter nav={nav} settings={settings} policies={policies} t={t.footer} newsletter={t.newsletter} />
         <HomeStitch />
       </div>
-      <FloatingActions />
-      <PandaPalLoader
+      <FloatingActions
         locale={locale}
         phone={WHATSAPP_NUMBER}
         telHref={telHref(WHATSAPP_NUMBER)}

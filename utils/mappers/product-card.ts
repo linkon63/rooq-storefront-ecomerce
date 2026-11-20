@@ -105,7 +105,12 @@ function uniqueBy<T, K>(items: readonly T[], key: (item: T) => K): T[] {
 
 export function toProductCard(row: ProductCardSource, now: Date): ProductCard {
   const variants = row.variants.filter((variant) => variant.isActive);
-  const defaultVariant = variants.find((variant) => variant.isDefault) ?? variants[0] ?? null;
+  const defaultVariant =
+    variants.find((variant) => variant.isDefault && variant.stock > 0) ??
+    variants.find((variant) => variant.stock > 0) ??
+    variants.find((variant) => variant.isDefault) ??
+    variants[0] ??
+    null;
   const basePrice = toNum(row.price);
   const discount = pickDiscount(basePrice, row.discounts);
   const pricing = salePricing(basePrice, toNumOrNull(row.compareAtPrice), discount);

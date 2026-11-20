@@ -3,7 +3,6 @@ import { getProductById, productRail } from "@/lib/storefront/catalog-data";
 import type { ProductCard } from "@/types/storefront/catalog";
 import { SectionHeading } from "../../shared/section-heading";
 import { HighlightCard } from "./highlight-card";
-import { SpotlightSareeHost } from "./spotlight-saree-host";
 
 const HIGHLIGHT_COUNT = 2;
 
@@ -36,7 +35,6 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
           />
         ))}
       </div>
-      <SpotlightSareeHost card={cards[0]} detail={details[0] ?? null} />
     </section>
   );
 }

@@ -14,16 +14,16 @@
   transition: transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .panda-pal[data-pose="out"] .panda-body {
-  transform: translateY(-30px);
+  transform: translateY(-17px);
 }
 .panda-pal[data-pose="peek"] .panda-body {
-  transform: translateY(12px);
+  transform: translateY(7px);
 }
 .panda-pal[data-pose="sleep"] .panda-body {
-  transform: translateY(40px);
+  transform: translateY(23px);
 }
 .panda-pal[data-pose="away"] .panda-body {
-  transform: translateY(70px);
+  transform: translateY(42px);
 }
 
 .panda-hop {
@@ -37,6 +37,9 @@
 }
 .panda-figure.panda-mood-sleep .panda-breathe {
   animation-duration: 5s;
+}
+.panda-figure.panda-mood-dance .panda-breathe {
+  animation: panda-dance-boogie 0.56s ease-in-out infinite;
 }
 .panda-figure .panda-eyes {
   transform-box: fill-box;
@@ -53,20 +56,50 @@
 .panda-figure.panda-mood-play .panda-head {
   animation: panda-look 2.2s ease-in-out infinite;
 }
+.panda-figure.panda-mood-happy .panda-head {
+  animation: panda-look 1.4s ease-in-out infinite;
+}
+.panda-figure.panda-mood-dance .panda-head {
+  animation: panda-dance-head 0.56s ease-in-out infinite;
+}
+.panda-figure .panda-arm-left {
+  transform-box: fill-box;
+  transform-origin: 80% 25%;
+}
+.panda-figure .panda-arm-right {
+  transform-box: fill-box;
+  transform-origin: 20% 25%;
+}
+.panda-figure.panda-mood-dance .panda-arm-left {
+  animation: panda-wave-left 0.28s ease-in-out infinite alternate;
+}
+.panda-figure.panda-mood-dance .panda-arm-right {
+  animation: panda-wave-right 0.28s ease-in-out infinite alternate;
+}
+.panda-figure.panda-mood-happy .panda-arm-left {
+  animation: panda-wave-left 0.45s ease-in-out 4 alternate;
+}
 .panda-figure .panda-spool {
   transform-box: fill-box;
   transform-origin: 30% 50%;
 }
 .panda-figure.panda-mood-play .panda-spool,
-.panda-figure.panda-mood-happy .panda-spool {
-  animation: panda-spin 0.9s ease-in-out infinite;
+.panda-figure.panda-mood-happy .panda-spool,
+.panda-figure.panda-mood-dance .panda-spool {
+  animation: panda-spin 0.65s ease-in-out infinite;
 }
 .panda-figure .panda-mouth {
   transform-box: fill-box;
   transform-origin: 50% 0%;
 }
-.panda-figure.panda-mood-talk .panda-mouth {
-  animation: panda-talk 0.28s ease-in-out 7 alternate;
+.panda-figure.panda-mood-talk .panda-mouth,
+.panda-figure.panda-mood-dance .panda-mouth {
+  animation: panda-talk 0.26s ease-in-out 10 alternate;
+}
+.panda-figure .panda-notes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: panda-notes-bob 0.42s ease-in-out infinite alternate;
 }
 
 .panda-heart {
@@ -79,7 +112,7 @@
   animation-delay: 1.2s;
 }
 .panda-bubble {
-  transform-origin: 0% 100%;
+  transform-origin: 100% 100%;
   animation: panda-bubble-in 320ms var(--ease-cloth);
 }
 
@@ -93,6 +126,29 @@
 @keyframes panda-breathe {
   0%, 100% { transform: scaleY(1); }
   50% { transform: scaleY(1.025); }
+}
+@keyframes panda-dance-boogie {
+  0% { transform: translateY(0) translateX(-4px) rotate(-8deg) scale(1.03, 0.97); }
+  25% { transform: translateY(-11px) translateX(0) rotate(0deg) scale(0.97, 1.05); }
+  50% { transform: translateY(0) translateX(4px) rotate(8deg) scale(1.03, 0.97); }
+  75% { transform: translateY(-11px) translateX(0) rotate(0deg) scale(0.97, 1.05); }
+  100% { transform: translateY(0) translateX(-4px) rotate(-8deg) scale(1.03, 0.97); }
+}
+@keyframes panda-dance-head {
+  0%, 100% { transform: rotate(10deg) translateY(-2px); }
+  50% { transform: rotate(-10deg) translateY(-2px); }
+}
+@keyframes panda-wave-left {
+  from { transform: rotate(0deg) translateY(0); }
+  to { transform: rotate(38deg) translateY(-8px); }
+}
+@keyframes panda-wave-right {
+  from { transform: rotate(-34deg) translateY(-8px); }
+  to { transform: rotate(8deg) translateY(0); }
+}
+@keyframes panda-notes-bob {
+  from { transform: translateY(2px) scale(0.9); opacity: 0.75; }
+  to { transform: translateY(-5px) scale(1.12); opacity: 1; }
 }
 @keyframes panda-blink {
   0%, 93%, 100% { transform: scaleY(1); }
@@ -135,4 +191,3 @@
     transition-duration: 1ms !important;
   }
 }
-

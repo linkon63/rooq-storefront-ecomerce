@@ -15,7 +15,8 @@ const en = {
   productHelp: "Not sure about the size or colour? Call us. A real person will help you choose.",
   bagWaiting: (count: number) =>
     `You have ${count} ${count === 1 ? "piece" : "pieces"} waiting in your bag. Shall we finish up?`,
-  added: "Great pick! 💛",
+  hoverAdd: "Click for add to bag! 🐼",
+  added: "Yay! Added to your bag! Happy dance! 🐼🎉",
   stitchEnd: "You followed the thread all the way to me! Need help choosing? Chat with us.",
   rage: "Is something not working? Sorry about that! Call us and we'll sort it out.",
   exit: "Leaving already? If anything went wrong, just give us a call.",
@@ -50,7 +51,8 @@ const bn: PandaCopy = {
   lowStock: (left: number) => `শুনুন… এই সাইজে আর মাত্র ${left}টি বাকি। অন্য কেউ নেওয়ার আগে নিয়ে নিন!`,
   productHelp: "সাইজ বা রং নিয়ে দ্বিধা? আমাদের কল করুন, একজন মানুষ বেছে নিতে সাহায্য করবে।",
   bagWaiting: (count: number) => `আপনার ব্যাগে ${count}টি পণ্য অপেক্ষা করছে। অর্ডারটা শেষ করবেন?`,
-  added: "দারুণ পছন্দ! 💛",
+  hoverAdd: "ব্যাগে যোগ করতে ক্লিক করুন! 🐼",
+  added: "ইয়াহু! ব্যাগে যোগ হয়েছে! খুশির নাচ! 🐼🎉",
   stitchEnd: "সুতা ধরে একদম আমার কাছে চলে এসেছেন! বেছে নিতে সাহায্য লাগবে? আমাদের সাথে চ্যাট করুন।",
   rage: "কিছু কি কাজ করছে না? দুঃখিত! আমাদের কল করুন, আমরা ঠিক করে দেব।",
   exit: "এখনই চলে যাচ্ছেন? কোনো সমস্যা হলে একটা কল দিন।",
@@ -71,4 +73,3 @@ const bn: PandaCopy = {
 };
 
 export const PANDA_COPY: Record<Locale, PandaCopy> = { en, bn };
-
