@@ -8,6 +8,7 @@ import { FloatingActions } from "@/components/storefront/shell/floating-actions"
 import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
 import { StoreToaster } from "@/components/storefront/shell/store-toaster";
+import { WishlistFlyLayer } from "@/components/storefront/shell/wishlist-fly-layer";
 import { getMessages } from "@/lib/i18n/server";
 import { WHATSAPP_NUMBER } from "@/lib/shop-contact";
 import { getCategoryTree, getStorePolicies, getStoreSettings } from "@/lib/storefront/catalog-data";
@@ -57,6 +58,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
       <FloatingActions phone={settings.phones[0]?.value ?? null} shopName={settings.shopName} />
       <StoreSync currency={settings.currency} />
       <StoreOverlays delivery={settings.delivery} />
+      <WishlistFlyLayer />
       <StoreToaster />
       <RoutePrefetch />
       <PwaRegister />
