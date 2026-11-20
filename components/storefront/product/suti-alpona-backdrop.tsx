@@ -7,9 +7,13 @@
  */
 export function SutiAlponaBackdrop() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      style={{ color: "var(--saree-thread, var(--color-gold))" }}
+    >
       {/* Subtle all-over Dhakai Jamdani diamond & phool (flower) lattice on the saree jomi */}
-      <svg className="absolute inset-0 h-full w-full text-gold/[0.11]" preserveAspectRatio="none">
+      <svg className="absolute inset-0 h-full w-full opacity-[0.13]" preserveAspectRatio="none">
         <defs>
           <pattern id="jamdani-jomi" width="96" height="96" patternUnits="userSpaceOnUse">
             {/* Subtle diagonal Jamdani diamond grid */}
@@ -20,7 +24,7 @@ export function SutiAlponaBackdrop() {
               fill="currentColor"
               fillOpacity="0.45"
             />
-            <circle cx="48" cy="48" r="1.6" className="text-dye/30" fill="currentColor" />
+            <circle cx="48" cy="48" r="1.6" fill="currentColor" fillOpacity="0.45" />
             {/* Corner kalka-dot */}
             <circle cx="0" cy="0" r="1.5" fill="currentColor" />
             <circle cx="96" cy="0" r="1.5" fill="currentColor" />
@@ -53,17 +57,17 @@ export function SutiAlponaBackdrop() {
               stroke="currentColor"
               strokeWidth="1.05"
             />
-            <circle cx="38" cy="34" r="1.6" className="text-dye/35" fill="currentColor" />
+            <circle cx="38" cy="34" r="1.6" fill="currentColor" fillOpacity="0.45" />
             <path
               d="M24 98 C36 92, 42 102, 34 112 C28 116, 22 110, 24 98 Z"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.05"
             />
-            <circle cx="30" cy="104" r="1.6" className="text-dye/35" fill="currentColor" />
+            <circle cx="30" cy="104" r="1.6" fill="currentColor" fillOpacity="0.45" />
             {/* Alpona dots */}
             <circle cx="44" cy="14" r="1.4" fill="currentColor" />
-            <circle cx="46" cy="70" r="2" className="text-dye/30" fill="currentColor" />
+            <circle cx="46" cy="70" r="2" fill="currentColor" fillOpacity="0.4" />
             <circle cx="44" cy="126" r="1.4" fill="currentColor" />
           </pattern>
 
@@ -72,8 +76,8 @@ export function SutiAlponaBackdrop() {
             <line x1="0" y1="3" x2="72" y2="3" stroke="currentColor" strokeWidth="0.9" />
             <line x1="0" y1="33" x2="72" y2="33" stroke="currentColor" strokeWidth="0.9" />
             <path d="M0 18 L18 7 L36 18 L54 7 L72 18 L54 29 L36 18 L18 29 Z" fill="none" stroke="currentColor" strokeWidth="0.95" />
-            <circle cx="18" cy="18" r="2" className="text-dye/35" fill="currentColor" />
-            <circle cx="54" cy="18" r="2" className="text-dye/35" fill="currentColor" />
+            <circle cx="18" cy="18" r="2" fill="currentColor" fillOpacity="0.45" />
+            <circle cx="54" cy="18" r="2" fill="currentColor" fillOpacity="0.45" />
             <circle cx="36" cy="7" r="1.2" fill="currentColor" />
             <circle cx="36" cy="29" r="1.2" fill="currentColor" />
           </pattern>
@@ -83,36 +87,36 @@ export function SutiAlponaBackdrop() {
       </svg>
 
       {/* Left & Right Bangladeshi Paar (Temple + Kalka + Lata-Pata) */}
-      <svg className="absolute inset-y-0 left-2 hidden h-full w-14 text-ink/[0.13] sm:block lg:left-4" preserveAspectRatio="none">
+      <svg className="absolute inset-y-0 left-2 hidden h-full w-14 opacity-[0.14] sm:block lg:left-4" preserveAspectRatio="none">
         <rect width="100%" height="100%" fill="url(#bangladeshi-paar)" />
       </svg>
-      <svg className="absolute inset-y-0 right-2 hidden h-full w-14 -scale-x-100 text-ink/[0.13] sm:block lg:right-4" preserveAspectRatio="none">
+      <svg className="absolute inset-y-0 right-2 hidden h-full w-14 -scale-x-100 opacity-[0.14] sm:block lg:right-4" preserveAspectRatio="none">
         <rect width="100%" height="100%" fill="url(#bangladeshi-paar)" />
       </svg>
 
       {/* Horizontal Jamdani Anchal strips separating saree sections */}
-      <svg className="absolute inset-x-0 top-[36%] h-9 w-full text-gold/[0.18]" preserveAspectRatio="none">
+      <svg className="absolute inset-x-0 top-[36%] h-9 w-full opacity-[0.16]" preserveAspectRatio="none">
         <rect width="100%" height="100%" fill="url(#anchal-band)" />
       </svg>
-      <svg className="absolute inset-x-0 top-[72%] h-9 w-full text-ink/[0.1]" preserveAspectRatio="none">
+      <svg className="absolute inset-x-0 top-[72%] h-9 w-full opacity-[0.11]" preserveAspectRatio="none">
         <rect width="100%" height="100%" fill="url(#anchal-band)" />
       </svg>
 
       {/* Top-left subtle Kalka-Padma Alpona corner */}
-      <AlponaMandala className="-left-36 -top-20 size-[300px] text-ink/[0.075] sm:size-[360px] lg:-left-28 lg:size-[420px]" />
+      <AlponaMandala className="-left-36 -top-20 size-[300px] opacity-[0.08] sm:size-[360px] lg:-left-28 lg:size-[420px]" />
 
       {/* Top-right Padma (lotus) & Kalka Alpona mandala behind the upper product showcase */}
-      <AlponaMandala className="-right-28 top-6 size-[360px] text-dye/[0.095] sm:size-[460px] lg:-right-20 lg:size-[540px]" />
+      <AlponaMandala className="-right-28 top-6 size-[360px] opacity-[0.1] sm:size-[460px] lg:-right-20 lg:size-[540px]" />
 
       {/* Mid-left Alpona mandala along the saree body */}
-      <AlponaMandala className="-left-32 top-[40%] size-[340px] text-ink/[0.085] sm:size-[440px] lg:-left-24 lg:size-[500px]" />
+      <AlponaMandala className="-left-32 top-[40%] size-[340px] opacity-[0.09] sm:size-[440px] lg:-left-24 lg:size-[500px]" />
 
       {/* Mid-right smaller Kalka-Alpona accent */}
-      <AlponaMandala className="-right-24 top-[58%] size-[260px] text-dye/[0.075] sm:size-[320px]" />
+      <AlponaMandala className="-right-24 top-[58%] size-[260px] opacity-[0.08] sm:size-[320px]" />
 
       {/* Lower-left & Lower-right Alpona medallions near reviews & related rails */}
-      <AlponaMandala className="-left-28 bottom-16 size-[280px] text-gold/[0.16] sm:size-[340px]" />
-      <AlponaMandala className="-right-28 bottom-20 size-[320px] text-gold/[0.17] sm:size-[400px] lg:-right-20 lg:size-[460px]" />
+      <AlponaMandala className="-left-28 bottom-16 size-[280px] opacity-[0.14] sm:size-[340px]" />
+      <AlponaMandala className="-right-28 bottom-20 size-[320px] opacity-[0.15] sm:size-[400px] lg:-right-20 lg:size-[460px]" />
     </div>
   );
 }

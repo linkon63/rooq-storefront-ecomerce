@@ -237,34 +237,35 @@
 .suti-saree-surface {
   position: relative;
   isolation: isolate;
-  box-shadow: inset 0 0 72px rgb(28 57 52 / 0.045);
-  background-color: color-mix(in oklab, var(--color-selvedge) 24%, var(--color-chalk));
+  transition: background-color 0.45s var(--ease-cloth);
+  box-shadow: inset 0 0 72px color-mix(in oklab, var(--saree-thread, var(--color-ink)) 6%, transparent);
+  background-color: var(--saree-bg, color-mix(in oklab, var(--color-selvedge) 24%, var(--color-chalk)));
   background-image:
     /* Sparse woven buti micro-dots */
-    radial-gradient(circle, color-mix(in oklab, var(--color-gold) 32%, transparent) 1px, transparent 1.4px),
-    radial-gradient(circle, color-mix(in oklab, var(--color-dye) 18%, transparent) 0.9px, transparent 1.3px),
+    radial-gradient(circle, color-mix(in oklab, var(--saree-thread, var(--color-gold)) 26%, transparent) 1px, transparent 1.4px),
+    radial-gradient(circle, color-mix(in oklab, var(--saree-thread, var(--color-dye)) 16%, transparent) 0.9px, transparent 1.3px),
     /* Organic cotton slub threads */
     repeating-linear-gradient(
       0deg,
       transparent 0 17px,
-      rgb(160 140 107 / 0.045) 17px 18px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 7%, transparent) 17px 18px,
       transparent 18px 29px
     ),
     repeating-linear-gradient(
       90deg,
       transparent 0 21px,
-      rgb(28 57 52 / 0.03) 21px 22px,
+      color-mix(in oklab, var(--saree-thread, var(--color-ink)) 5%, transparent) 21px 22px,
       transparent 22px 37px
     ),
     /* Fine suti cotton warp & weft weave */
     repeating-linear-gradient(
       0deg,
-      rgb(160 140 107 / 0.085) 0 1px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 9%, transparent) 0 1px,
       transparent 1px 4px
     ),
     repeating-linear-gradient(
       90deg,
-      rgb(28 57 52 / 0.05) 0 1px,
+      color-mix(in oklab, var(--saree-thread, var(--color-ink)) 6%, transparent) 0 1px,
       transparent 1px 5px
     );
   background-size:
@@ -304,18 +305,18 @@
   background-image:
     linear-gradient(
       to right,
-      rgb(28 57 52 / 0.22) 0 3px,
-      rgb(160 140 107 / 0.3) 3px 5px,
-      rgb(155 26 65 / 0.24) 5px 8px,
-      rgb(160 140 107 / 0.24) 8px 9px,
+      color-mix(in oklab, var(--saree-thread, var(--color-ink)) 24%, transparent) 0 3px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 30%, transparent) 3px 5px,
+      color-mix(in oklab, var(--saree-thread, var(--color-dye)) 24%, transparent) 5px 8px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 22%, transparent) 8px 9px,
       transparent 9px
     ),
     linear-gradient(
       to left,
-      rgb(28 57 52 / 0.22) 0 3px,
-      rgb(160 140 107 / 0.3) 3px 5px,
-      rgb(155 26 65 / 0.24) 5px 8px,
-      rgb(160 140 107 / 0.24) 8px 9px,
+      color-mix(in oklab, var(--saree-thread, var(--color-ink)) 24%, transparent) 0 3px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 30%, transparent) 3px 5px,
+      color-mix(in oklab, var(--saree-thread, var(--color-dye)) 24%, transparent) 5px 8px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 22%, transparent) 8px 9px,
       transparent 9px
     );
 }
@@ -325,20 +326,20 @@
     background-image:
       linear-gradient(
         to right,
-        rgb(28 57 52 / 0.24) 0 5px,
-        rgb(160 140 107 / 0.34) 5px 8px,
-        rgb(155 26 65 / 0.26) 8px 13px,
-        rgb(160 140 107 / 0.28) 13px 15px,
-        rgb(28 57 52 / 0.14) 15px 18px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 26%, transparent) 0 5px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 34%, transparent) 5px 8px,
+        color-mix(in oklab, var(--saree-thread, var(--color-dye)) 26%, transparent) 8px 13px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 28%, transparent) 13px 15px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 14%, transparent) 15px 18px,
         transparent 24px
       ),
       linear-gradient(
         to left,
-        rgb(28 57 52 / 0.24) 0 5px,
-        rgb(160 140 107 / 0.34) 5px 8px,
-        rgb(155 26 65 / 0.26) 8px 13px,
-        rgb(160 140 107 / 0.28) 13px 15px,
-        rgb(28 57 52 / 0.14) 15px 18px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 26%, transparent) 0 5px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 34%, transparent) 5px 8px,
+        color-mix(in oklab, var(--saree-thread, var(--color-dye)) 26%, transparent) 8px 13px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 28%, transparent) 13px 15px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 14%, transparent) 15px 18px,
         transparent 24px
       );
   }
@@ -347,12 +348,17 @@
 /* Match sticky header & footer to the suti saree texture on product details pages. */
 .storefront-root:has(.suti-saree-surface) > header {
   isolation: isolate;
-  background-color: color-mix(in oklab, color-mix(in oklab, var(--color-selvedge) 24%, var(--color-chalk)) 94%, transparent);
+  transition: background-color 0.45s var(--ease-cloth);
+  background-color: color-mix(
+    in oklab,
+    var(--saree-bg, color-mix(in oklab, var(--color-selvedge) 24%, var(--color-chalk))) 94%,
+    transparent
+  );
   background-image:
-    radial-gradient(circle, color-mix(in oklab, var(--color-gold) 32%, transparent) 1px, transparent 1.4px),
-    radial-gradient(circle, color-mix(in oklab, var(--color-dye) 18%, transparent) 0.9px, transparent 1.3px),
-    repeating-linear-gradient(0deg, rgb(160 140 107 / 0.085) 0 1px, transparent 1px 4px),
-    repeating-linear-gradient(90deg, rgb(28 57 52 / 0.05) 0 1px, transparent 1px 5px);
+    radial-gradient(circle, color-mix(in oklab, var(--saree-thread, var(--color-gold)) 26%, transparent) 1px, transparent 1.4px),
+    radial-gradient(circle, color-mix(in oklab, var(--saree-thread, var(--color-dye)) 16%, transparent) 0.9px, transparent 1.3px),
+    repeating-linear-gradient(0deg, color-mix(in oklab, var(--saree-thread, var(--color-gold)) 9%, transparent) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, color-mix(in oklab, var(--saree-thread, var(--color-ink)) 6%, transparent) 0 1px, transparent 1px 5px);
   background-size: 56px 56px, 56px 56px, 100% 100%, 100% 100%;
   background-position: 0 0, 28px 28px, 0 0, 0 0;
 }
@@ -366,18 +372,18 @@
   background-image:
     linear-gradient(
       to right,
-      rgb(28 57 52 / 0.22) 0 3px,
-      rgb(160 140 107 / 0.3) 3px 5px,
-      rgb(155 26 65 / 0.24) 5px 8px,
-      rgb(160 140 107 / 0.24) 8px 9px,
+      color-mix(in oklab, var(--saree-thread, var(--color-ink)) 24%, transparent) 0 3px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 30%, transparent) 3px 5px,
+      color-mix(in oklab, var(--saree-thread, var(--color-dye)) 24%, transparent) 5px 8px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 22%, transparent) 8px 9px,
       transparent 9px
     ),
     linear-gradient(
       to left,
-      rgb(28 57 52 / 0.22) 0 3px,
-      rgb(160 140 107 / 0.3) 3px 5px,
-      rgb(155 26 65 / 0.24) 5px 8px,
-      rgb(160 140 107 / 0.24) 8px 9px,
+      color-mix(in oklab, var(--saree-thread, var(--color-ink)) 24%, transparent) 0 3px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 30%, transparent) 3px 5px,
+      color-mix(in oklab, var(--saree-thread, var(--color-dye)) 24%, transparent) 5px 8px,
+      color-mix(in oklab, var(--saree-thread, var(--color-gold)) 22%, transparent) 8px 9px,
       transparent 9px
     );
 }
@@ -437,20 +443,20 @@
     background-image:
       linear-gradient(
         to right,
-        rgb(28 57 52 / 0.24) 0 5px,
-        rgb(160 140 107 / 0.34) 5px 8px,
-        rgb(155 26 65 / 0.26) 8px 13px,
-        rgb(160 140 107 / 0.28) 13px 15px,
-        rgb(28 57 52 / 0.14) 15px 18px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 26%, transparent) 0 5px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 34%, transparent) 5px 8px,
+        color-mix(in oklab, var(--saree-thread, var(--color-dye)) 26%, transparent) 8px 13px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 28%, transparent) 13px 15px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 14%, transparent) 15px 18px,
         transparent 24px
       ),
       linear-gradient(
         to left,
-        rgb(28 57 52 / 0.24) 0 5px,
-        rgb(160 140 107 / 0.34) 5px 8px,
-        rgb(155 26 65 / 0.26) 8px 13px,
-        rgb(160 140 107 / 0.28) 13px 15px,
-        rgb(28 57 52 / 0.14) 15px 18px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 26%, transparent) 0 5px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 34%, transparent) 5px 8px,
+        color-mix(in oklab, var(--saree-thread, var(--color-dye)) 26%, transparent) 8px 13px,
+        color-mix(in oklab, var(--saree-thread, var(--color-gold)) 28%, transparent) 13px 15px,
+        color-mix(in oklab, var(--saree-thread, var(--color-ink)) 14%, transparent) 15px 18px,
         transparent 24px
       );
   }
