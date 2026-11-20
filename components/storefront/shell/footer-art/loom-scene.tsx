@@ -58,7 +58,8 @@ export default function LoomScene({ children }: { children?: ReactNode }) {
         gsap.set(targets.clip, still.clip);
         gsap.set(targets.fell, still.fell);
         gsap.set(targets.shuttle, { x: SHUTTLE.travel * 0.6 });
-        gsap.set([targets.messages, targets.sharees], { autoAlpha: (i: number) => (i % targets.messages.length === 0 ? 1 : 0) });
+        gsap.set(targets.messages, { autoAlpha: (i: number) => (i === 0 ? 1 : 0) });
+        gsap.set(targets.sharees, { autoAlpha: (i: number) => (i === 0 ? 1 : 0) });
       });
 
       media.add("(prefers-reduced-motion: no-preference)", () => {
@@ -86,7 +87,7 @@ export default function LoomScene({ children }: { children?: ReactNode }) {
 
   return (
     <div ref={scope} className="absolute inset-0">
-      <div className={`${LAYER} opacity-95`}>
+      <div className={LAYER}>
         <svg viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid meet" className="h-full w-full" focusable="false" aria-hidden>
           <LoomFrame />
           <g data-cloth-layer>

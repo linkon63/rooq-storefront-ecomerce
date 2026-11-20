@@ -28,20 +28,20 @@ export type ShareePalette = {
 /** The sharees the loom weaves, in turn with the messages: off-white cotton for "ROOQ", red for the thank-you. */
 export const SHAREES: readonly ShareePalette[] = [
   {
-    body: "fill-selvedge/30",
-    weft: "stroke-chalk/20",
-    border: "fill-dye/55",
+    body: "fill-selvedge/50",
+    weft: "stroke-chalk/35",
+    border: "fill-dye/85",
     borderLine: "stroke-gold",
-    motif: "fill-gold/80",
-    pallu: { line: "fill-gold/80", band: "fill-dye/55" },
+    motif: "fill-gold",
+    pallu: { line: "fill-gold", band: "fill-dye/85" },
   },
   {
-    body: "fill-red-700/75",
-    weft: "stroke-ink/25",
-    border: "fill-gold/60",
-    borderLine: "stroke-chalk/80",
-    motif: "fill-chalk/85",
-    pallu: { line: "fill-chalk/80", band: "fill-gold/65" },
+    body: "fill-red-700/95",
+    weft: "stroke-ink/30",
+    border: "fill-gold/90",
+    borderLine: "stroke-chalk/95",
+    motif: "fill-chalk/95",
+    pallu: { line: "fill-chalk/90", band: "fill-gold/90" },
   },
 ];
 

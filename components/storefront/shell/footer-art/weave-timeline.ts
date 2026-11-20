@@ -66,7 +66,8 @@ export function weaveTimeline(t: Targets): gsap.core.Timeline {
     master
       .set(t.clip, start.clip)
       .set(t.fell, start.fell)
-      .set([t.messages, t.sharees], { autoAlpha: (i: number) => (i % t.messages.length === index ? 1 : 0) })
+      .set(t.messages, { autoAlpha: (i: number) => (i === index ? 1 : 0) })
+      .set(t.sharees, { autoAlpha: (i: number) => (i === index ? 1 : 0) })
       .set(t.cloth, { opacity: 1 });
     for (let step = 1; step <= PASSES; step += 1) {
       const outward = pass % 2 === 0;
