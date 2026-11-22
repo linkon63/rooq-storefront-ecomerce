@@ -55,7 +55,7 @@ export function DiscountProductPicker({ products, filtered, selected, search, is
                     <input checked={checked} className="h-4 w-4 rounded border-slate-300 text-blue-600" onChange={() => onToggle(product.id)} type="checkbox" />
                     <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">{product.name}</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" className="h-8 w-8 shrink-0 rounded border border-slate-200 object-cover" height={32} loading="lazy" src={image ?? "/images/no-image-icon-6.png"} width={32} />
+                    <img alt="" className="h-8 w-8 shrink-0 rounded border border-slate-200 object-cover" height={32} loading="lazy" src={image ?? "/images/no-image.svg"} width={32} />
                   </label>
                 );
               })}

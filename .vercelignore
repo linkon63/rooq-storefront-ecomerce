@@ -1,0 +1,8 @@
+# Never upload local secrets with `vercel` CLI deploys; Vercel env vars are the source of truth.
+.env
+.env.*
+!.env.example
+# Seed-only photos and local references are not needed at runtime.
+data
+references
+*.tsbuildinfo

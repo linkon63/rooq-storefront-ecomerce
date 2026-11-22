@@ -20,7 +20,7 @@ Rules worth knowing:
 
 | Key | Used by | What it is |
 | --- | --- | --- |
-| `DATABASE_URL` | Prisma (`lib/server/prisma-client.ts`, `prisma.config.ts`) | Postgres connection string. For Prisma Postgres use the direct TCP URL (`postgres://…@db.prisma.io:5432/postgres?sslmode=verify-full`). Any Postgres 14+ works. Without it every database call fails with `ERROR_MESSAGES.config.databaseUrlMissing`. |
+| `DATABASE_URL` | Prisma (`lib/server/prisma-client.ts`) | Postgres URL for app queries: the Supabase **transaction pooler** as the `rooq` role, in the `rooq` schema (`rooq.<ref>:…@…pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true&schema=rooq`). There is no fallback; without it every database call fails with `ERROR_MESSAGES.config.databaseUrlMissing`. |
 | `JWT_SECRET` | `lib/server/auth/jwt.ts`, `proxy.ts` | HS256 signing secret for access tokens. Use a long random string, e.g. `openssl rand -base64 48`. Rotating it signs everyone out. |
 | `NEXT_PUBLIC_APP_URL` | password-reset and other e-mail links | Public origin of the app, e.g. `https://<your-domain>`. Locally `http://localhost:3002`. |
 
@@ -28,6 +28,10 @@ Rules worth knowing:
 
 | Key | Default | What it is |
 | --- | --- | --- |
+| `DIRECT_URL` | `DATABASE_URL` | Session pooler / direct URL (port 5432) for `prisma.config.ts` (migrate, studio), `pnpm db:migrate:pg` and `pnpm db:copy`. |
+| `SOURCE_DATABASE_URL` | unset | Only for `pnpm db:copy`: the database to copy every row from (e.g. the old Prisma Postgres). |
+| `DATABASE_POOL_MAX` | `3` | `pg` pool size per function instance. |
+| `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`, `POSTGRES_URL`, `SUPABASE_*`, `NEXT_PUBLIC_SUPABASE_*` | set by the integration | Injected by the Vercel ↔ Supabase integration. **Not read by the app**: they log in as the admin `postgres` role and target `public`; Rooq uses its own `rooq` role and schema. |
 | `JWT_EXPIRES_IN` | `7d` | Access-token lifetime (any `jose` duration: `12h`, `7d`, …). |
 | `NEXT_PUBLIC_SITE_URL` | `https://rooq.store` | Canonical site URL for metadata, `sitemap.xml`, `robots.txt` and back-in-stock e-mail links. Set it to the production domain. |
 | `SEED_ADMIN_EMAIL` | `admin@rooq.local` | E-mail of the staff account `pnpm db:seed` creates. |
@@ -45,9 +49,9 @@ Rules worth knowing:
 
 | Environment | Notes |
 | --- | --- |
-| Local | `cp .env.example .env`, fill `DATABASE_URL` and `JWT_SECRET`, keep the localhost URLs. |
+| Local | `cp .env.example .env`, fill `DATABASE_URL`, `DIRECT_URL` and `JWT_SECRET`, keep the localhost URLs. |
 | Vercel Production | All required keys plus `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL` set to the real domain, Resend keys for real mail. |
-| Vercel Preview | Point `DATABASE_URL` at a **separate** database (or a Prisma Postgres preview database), never at production. Use a different `JWT_SECRET` too. |
+| Vercel Preview | Point `DATABASE_URL` at a **separate** Supabase project or branch, never at production. Use a different `JWT_SECRET` too. |
 
 Adding a new variable? Add the key with a placeholder to `.env.example`, a row
 here, and a row in the README's Installation table, all in the same change.

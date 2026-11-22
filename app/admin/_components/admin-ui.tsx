@@ -59,7 +59,7 @@ export function ProductThumb({ src, alt }: { src?: string; alt?: string }) {
       <img
         alt={alt ?? ''}
         className="h-full w-full object-cover object-center"
-        src={src ?? '/images/no-image-icon-6.png'}
+        src={src ?? '/images/no-image.svg'}
       />
     </div>
   );

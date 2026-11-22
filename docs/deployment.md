@@ -1,18 +1,43 @@
-# Deployment (Vercel + Prisma Postgres)
+# Deployment (Vercel + Supabase Postgres)
 
 Rooq is a single Next.js 16 app: the storefront, `/admin` and `/api/v1`. It
 deploys as one Vercel project. The only external dependency is a Postgres
-database (Prisma Postgres recommended). Images live in that database, so there
-is no object storage to configure.
+database (Supabase). Images live in that database, so there is no object
+storage to configure. Prisma stays the ORM; Supabase is just the Postgres host.
 
-## 1. Database
+## 1. Database (Supabase)
 
-1. Create a **Prisma Postgres** database (console.prisma.io, or Vercel →
-   Storage → Prisma Postgres), in the region closest to your Vercel functions.
-2. Copy its **direct TCP connection string** (`postgres://…@db.prisma.io:5432/postgres?sslmode=verify-full`).
-   Rooq connects through the `pg` driver adapter (`@prisma/adapter-pg`), so the
-   standard Postgres URL is what it needs. An Accelerate `prisma+postgres://` URL is not used.
-3. Create a second database for Preview deployments. Previews must never write to production.
+1. Create a Supabase project (supabase.com, or Vercel → Storage → Supabase), in
+   the region closest to your Vercel functions. Make sure it is **active**
+   (not paused or suspended).
+2. Connection strings (Supabase → Connect):
+   - `DATABASE_URL` = **transaction pooler**, port `6543`
+     (`postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true`).
+     Serverless functions open many short connections; the pooler keeps them
+     under the database limit.
+   - `DIRECT_URL` = **session pooler** (or direct host), port `5432`, used by
+     `prisma migrate`, `pnpm db:migrate:pg` and `pnpm db:copy`.
+   - Both use the `rooq` role (`rooq.<ref>`) and end in `&schema=rooq`. The
+     integration's `POSTGRES_*` URLs are never read.
+3. `sslmode=require` keeps the connection encrypted. node-postgres would treat
+   it as `verify-full` and reject Supabase's own CA, so the app adds
+   `uselibpqcompat=true` (libpq semantics) for you.
+4. **Own role + schema.** Rooq lives in schema `rooq`, owned by role `rooq`
+   (`search_path = rooq`), not in `public`: Supabase's Data API exposes
+   `public` to the anon key, and the app does not need the admin `postgres`
+   role. One-off setup, as the `postgres` role:
+
+   ```sql
+   CREATE ROLE rooq LOGIN PASSWORD '<strong password>';
+   GRANT rooq TO postgres;
+   CREATE SCHEMA rooq AUTHORIZATION rooq;
+   ALTER ROLE rooq SET search_path = rooq;
+   GRANT CREATE ON DATABASE postgres TO rooq; -- the init migration runs CREATE SCHEMA IF NOT EXISTS
+   ```
+
+   `?schema=rooq` makes Prisma's generated queries target `rooq`
+   (`lib/server/prisma-client.ts`); the role's `search_path` covers raw SQL.
+5. Use a separate project (or branch) for Preview deployments. Previews must never write to production.
 
 ## 2. Vercel project
 
@@ -27,10 +52,14 @@ is no object storage to configure.
 | Function region | same region as the database |
 
 Set the environment variables from [environment-variables.md](environment-variables.md)
-for **Production** and **Preview** separately. At minimum set `DATABASE_URL`,
+for **Production** and **Preview** separately. At minimum set `DATABASE_URL`
+and `DIRECT_URL` (the `rooq` role URLs),
 `JWT_SECRET`, `NEXT_PUBLIC_APP_URL` and
 `NEXT_PUBLIC_SITE_URL`. `NEXT_PUBLIC_*` values are baked in at build time, so
 redeploy after changing them.
+
+CLI deploys (`vercel --prod`) skip `.env`, `data/` and `references/` via
+`.vercelignore`, so local secrets and seed photos are never uploaded.
 
 The generated Prisma client (`lib/generated/prisma`) is git-ignored and is
 rebuilt on every install/build, so a schema change only needs a new migration.
@@ -42,7 +71,7 @@ Migrations live in `prisma/migrations` and are applied with
 `prisma migrate deploy`, which only runs migrations that are not applied yet and never resets data:
 
 ```bash
-DATABASE_URL="<production url>" pnpm db:migrate:deploy
+DIRECT_URL="<session pooler url>" pnpm db:migrate:deploy
 ```
 
 Recommended: run it as a **release step** before (or right after) promoting a
@@ -56,6 +85,18 @@ If Prisma's schema engine cannot reach the database from your network (error
 `pg` driver and records them in `_prisma_migrations` exactly like `migrate deploy`.
 
 Never run `prisma migrate dev` or `prisma db push` against production.
+
+## 3b. Moving data from another Postgres (e.g. the old Prisma Postgres)
+
+```bash
+pnpm db:migrate:pg                # schema on the new database first
+SOURCE_DATABASE_URL="<old url>" pnpm db:copy
+```
+
+`db:copy` copies every table (images in `media_blobs` included) into
+`DIRECT_URL` in one transaction, then compares row counts before it commits.
+It refuses a target that already has rows; `--truncate` replaces them. Media
+ids do not change, so every `/api/v1/media/<id>` URL keeps working.
 
 ## 4. Seed (first deploy only)
 
@@ -94,9 +135,11 @@ checksum), and returns `304` for a matching `If-None-Match`. An id's bytes never
 change (a new upload gets a new id), so this is safe to cache forever.
 
 - **Browsers** cache each image for a year.
-- **`next/image`** fetches `/api/v1/media/**` (allowed in `images.localPatterns`)
-  and caches the resized variants it generates. On Vercel that is the Image
-  Optimization cache, which is billed per source image.
+- **`next/image`** does not use `/_next/image`. A custom loader
+  (`utils/image-loader.ts`) turns each srcset entry into
+  `/api/v1/media/<id>?w=<width>`; the route resizes with sharp (WebP, q75,
+  never upscaled) and the CDN caches every width. No Image Optimization quota,
+  no extra function hop.
 - **Vercel's CDN** caches the response (`s-maxage`), so repeat requests are
   served from the edge without invoking the function or reading the database.
 - **Each function instance** keeps recently served bytes in a 64 MB memory LRU
@@ -106,8 +149,8 @@ change (a new upload gets a new id), so this is safe to cache forever.
   `pnpm exec tsx --conditions=react-server scripts/compress-media.ts [--dry-run]`.
 
 Database size grows by roughly 100–250 KB per uploaded image. Watch the
-Prisma Postgres storage quota, and keep regular backups (Prisma Postgres
-backups, or `pg_dump`; the dump includes every image).
+Supabase database size quota (500 MB on the free plan), and keep backups
+(Supabase backups, or `pg_dump`; the dump includes every image).
 
 ## 6. Connection handling
 
@@ -115,17 +158,18 @@ backups, or `pg_dump`; the dump includes every image).
 - Serverless functions can scale out to many instances. Each holds its own small
   pool, so keep an eye on the database connection limit. If you hit it, cap the
   pool size (the `pg` pool `max` option passed to `PrismaPg` in
-  `lib/server/prisma-client.ts`), or put a connection pooler in front of the database.
+  `lib/server/prisma-client.ts`, `DATABASE_POOL_MAX`). In production `DATABASE_URL`
+  must be Supabase's transaction pooler (port 6543), never the direct host.
 - Long work belongs in a single transaction (`prisma.$transaction`). Do not hold
   connections across awaits on slow third-party calls.
 
 ## 7. Checklist
 
-- [ ] Production and Preview databases created; `DATABASE_URL` set per environment
+- [ ] Supabase project active; `DATABASE_URL` (pooler 6543) and `DIRECT_URL` (5432) set per environment
 - [ ] `JWT_SECRET` set (different per environment)
 - [ ] `NEXT_PUBLIC_SITE_URL` / `NEXT_PUBLIC_APP_URL` set to the real domain
 - [ ] `pnpm db:migrate:deploy` run against production
-- [ ] `pnpm db:seed` run once; staff password changed
+- [ ] Data copied with `pnpm db:copy` (or `pnpm db:seed` run once on a fresh database); staff password changed
 - [ ] Resend domain verified and `RESEND_*` / `STORE_EMAIL` set (otherwise mail is a logged dry run)
 - [ ] Google OAuth origins include the production domain (if `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is set)
 - [ ] Upload a test image in the admin and open its `/api/v1/media/<id>` URL; check the `Cache-Control` and `ETag` headers

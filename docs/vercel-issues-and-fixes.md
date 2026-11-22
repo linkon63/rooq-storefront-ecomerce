@@ -1,5 +1,10 @@
 # Vercel Deployment Observations: Broken Images & Slow Load Times
 
+> **Status (2026-11-21):** done — custom `next/image` loader (`utils/image-loader.ts`)
+> resizes via `/api/v1/media/:id?w=` instead of `/_next/image`; `hoverImage` loads on
+> first hover; admin fallback is `/images/no-image.svg`; the app runs on Supabase's
+> transaction pooler. Still open: #2, #4, #5 and the long-term blob move.
+
 This document summarizes why some images intermittently fail to load and why page loads on Vercel can be slow, ordered as a step-by-step checklist so each issue can be fixed one by one.
 
 ---
@@ -24,8 +29,8 @@ This document summarizes why some images intermittently fail to load and why pag
   - Combined with SSR page queries, this can exceed the hosted Postgres `max_connections` limit (`P2037`) or time out during `withConnectRetry` (4 retries × up to `10s` `connectionTimeoutMillis`).
   - When `/api/v1/media/[id]` fails or times out, `/_next/image` returns an error (`500`/`502`), rendering a **broken image**. Images that happen to get a connection—or are already cached in `lib/server/media/memory-cache.ts` or Vercel's CDN—load normally.
 - **How to fix (1 by 1):**
-  - [ ] **Bypass Next.js Image Optimization for already-optimized DB media:** Since `processImage()` already converts uploads to WebP under `250KB`, set `images: { unoptimized: true }` in `next.config.ts` (or pass `unoptimized` to `<Image>` for `/api/v1/media/...`). This removes the `/_next/image` proxy hop and lets Vercel's Edge CDN cache `/api/v1/media/[id]` directly via `MEDIA_CACHE_CONTROL` (`public, max-age=31536000, s-maxage=31536000, immutable`).
-  - [ ] **Avoid eager-loading `hoverImage` on `ProductCard`:** In `components/storefront/product-card/product-card.tsx`, only render/load `product.hoverImage` on hover/focus instead of mounting it on initial page load.
+  - [x] **Bypass Next.js Image Optimization for already-optimized DB media:** Since `processImage()` already converts uploads to WebP under `250KB`, set `images: { unoptimized: true }` in `next.config.ts` (or pass `unoptimized` to `<Image>` for `/api/v1/media/...`). This removes the `/_next/image` proxy hop and lets Vercel's Edge CDN cache `/api/v1/media/[id]` directly via `MEDIA_CACHE_CONTROL` (`public, max-age=31536000, s-maxage=31536000, immutable`).
+  - [x] **Avoid eager-loading `hoverImage` on `ProductCard`:** In `components/storefront/product-card/product-card.tsx`, only render/load `product.hoverImage` on hover/focus instead of mounting it on initial page load.
   - [ ] **(Long-term) Move `media_blobs` out of PostgreSQL:** Store binary image blobs in object storage (e.g., Vercel Blob, Cloudflare R2, or S3) so image traffic never touches database connections.
 
 ### 2. `EXTERNAL` Media Redirects in `/api/v1/media/[id]`
@@ -40,7 +45,7 @@ This document summarizes why some images intermittently fail to load and why pag
 - **What happens:**
   - `app/admin/_components/admin-ui.tsx` and `app/admin/(panel)/discounts/discount-product-picker.tsx` fall back to `/images/no-image-icon-6.png`, which does not exist in `public/images/`.
 - **How to fix:**
-  - [ ] Add `public/images/no-image-icon-6.png` or replace the fallback with an existing asset / inline placeholder.
+  - [x] Add `public/images/no-image-icon-6.png` or replace the fallback with an existing asset / inline placeholder.
 
 ---
 
@@ -68,7 +73,7 @@ This document summarizes why some images intermittently fail to load and why pag
   - `docs/environment-variables.md` documents using a direct TCP `DATABASE_URL` (`:5432`).
   - In serverless environments (Vercel), direct TCP connections incur full TCP + TLS handshake overhead on cold starts and hit Postgres connection limits much faster than a pooled endpoint.
 - **How to fix:**
-  - [ ] Use a pooled connection string (e.g., PgBouncer / Prisma Accelerate / Neon or Supabase transaction pooler) for `DATABASE_URL` in Vercel's environment variables, while keeping a direct URL only for migrations if needed.
+  - [x] Use a pooled connection string (e.g., PgBouncer / Prisma Accelerate / Neon or Supabase transaction pooler) for `DATABASE_URL` in Vercel's environment variables, while keeping a direct URL only for migrations if needed.
 
 ---
 

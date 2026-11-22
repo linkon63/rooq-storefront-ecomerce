@@ -19,7 +19,7 @@ Prisma; product images are stored in the database and served by
 
 - Node.js 20+ (24 recommended)
 - pnpm
-- A PostgreSQL database (any Postgres 14+; Prisma Postgres works)
+- A PostgreSQL database — Supabase in production (any Postgres 14+ works locally)
 
 ### 1. Install dependencies
 
@@ -35,7 +35,9 @@ cp .env.example .env
 
 | Variable | Required | What it is |
 | --- | --- | --- |
-| `DATABASE_URL` | Yes | Postgres connection string |
+| `DATABASE_URL` | Yes | Postgres URL the app queries through — Supabase transaction pooler (port 6543), role `rooq.<ref>`, `&schema=rooq` |
+| `DIRECT_URL` | No | Session/direct URL (port 5432) for migrations, studio and `db:copy`. Falls back to `DATABASE_URL` |
+| `SOURCE_DATABASE_URL` | No | Only for `pnpm db:copy`: the old database to copy all data from |
 | `JWT_SECRET` | Yes | Secret that signs access tokens — a long random string |
 | `JWT_EXPIRES_IN` | No | Token lifetime, e.g. `7d` (default) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app origin, used in e-mail links (password reset), e.g. `http://localhost:3002` |
@@ -52,15 +54,16 @@ The API is served by this app at `/api/v1` (same origin), so there is no API URL
 ### 3. Database
 
 ```bash
-pnpm db:migrate:deploy   # apply prisma/migrations to DATABASE_URL (or: pnpm db:migrate:pg — see below)
+pnpm db:migrate:deploy   # apply prisma/migrations to DIRECT_URL (or: pnpm db:migrate:pg — see below)
 pnpm db:seed             # roles, admin account, sizes, colours, categories, demo fashion catalogue, images (~3 min on a remote DB)
 ```
 
 - `pnpm db:migrate` — create a new migration while developing (`prisma migrate dev`).
 - `pnpm db:migrate:pg` — fallback that applies pending migrations through the `pg` driver, for networks where Prisma's schema engine cannot connect (P1001). It records them in `_prisma_migrations` like `migrate deploy` does.
+- `pnpm db:copy` — copy every row (images included) from `SOURCE_DATABASE_URL` into the migrated target, in one transaction with row-count checks; `--truncate` replaces existing rows. See `docs/deployment.md`.
 - `pnpm db:studio` — browse the data. `pnpm db:generate` — regenerate the client into `lib/generated/prisma` (git-ignored).
 - The seed is idempotent; rerunning it updates the demo data instead of duplicating it.
-- Images are stored in Postgres (`media` + `media_blobs`, WebP, max 1600 px) and served by `GET /api/v1/media/:id`; nothing is written to `public/`, so no S3 bucket or writable disk is needed.
+- Images are stored in Postgres (`media` + `media_blobs`, WebP, max 1600 px) and served by `GET /api/v1/media/:id` (`?w=` resizes for `next/image` srcsets); nothing is written to `public/`, so no S3 bucket or writable disk is needed.
 - Schema reference: `docs/database/` — `rooq-erd.drawio` (open in diagrams.net), `schema.dbml` (paste into dbdiagram.io) and `README.md` (every table and relation).
 
 ### 4. Run

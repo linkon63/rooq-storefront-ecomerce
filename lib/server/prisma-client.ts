@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/lib/generated/prisma/client";
 import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
+import { databaseSchema, runtimeDatabaseUrl, withLibpqSslMode } from "@/utils/database-url";
 
 export type AppPrismaClient = PrismaClient;
 
@@ -9,18 +10,20 @@ export type AppPrismaClient = PrismaClient;
  * so scripts (seed, smoke tests) can share it; app code imports `prisma` from
  * lib/server/prisma instead.
  */
-export function createPrismaClient(connectionString = process.env.DATABASE_URL): PrismaClient {
+export function createPrismaClient(connectionString = runtimeDatabaseUrl(process.env)): PrismaClient {
   if (!connectionString) {
     throw new Error(ERROR_MESSAGES.config.databaseUrlMissing);
   }
+  // Generated queries are schema-qualified (default "public"); `?schema=` moves them.
+  const schema = databaseSchema(connectionString);
   const adapter = new PrismaPg({
-    connectionString,
-    // Small pool: the hosted Postgres caps connections (P2037), and every
+    connectionString: withLibpqSslMode(connectionString),
+    // Small pool: Supabase's transaction pooler multiplexes these, and every
     // serverless instance plus local dev opens its own pool.
     max: Number(process.env.DATABASE_POOL_MAX ?? 3),
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 10_000,
-  });
+  }, schema ? { schema } : undefined);
   const client = new PrismaClient({ adapter }).$extends({
     query: {
       $allOperations: async ({ args, query }) => withConnectRetry(() => query(args)),
