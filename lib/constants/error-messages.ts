@@ -80,6 +80,13 @@ export const ERROR_MESSAGES = {
 
   config: {
     databaseUrlMissing: "DATABASE_URL is not set",
+    sourceDatabaseUrlMissing: "SOURCE_DATABASE_URL is not set",
+    copyTargetNotEmpty: (tables: string) =>
+      `Target database already has rows in: ${tables}. Re-run with --truncate to replace them.`,
+    copyTargetMissingTable: (table: string) =>
+      `Table "${table}" is missing in the target database. Run the migrations first.`,
+    copyCountMismatch: (table: string, source: number, target: number) =>
+      `Row count mismatch in "${table}": source ${source}, target ${target}`,
     jwtSecretMissing: "JWT_SECRET is not set",
   },
 

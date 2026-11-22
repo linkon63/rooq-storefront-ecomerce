@@ -31,5 +31,14 @@ export const MEDIA_ROUTE_PREFIX = "/api/v1/media";
  */
 export const MEDIA_CACHE_CONTROL = "public, max-age=31536000, s-maxage=31536000, immutable";
 
+/**
+ * Widths `GET /api/v1/media/:id?w=` resizes to — Next's default device and
+ * image sizes, so every srcset entry is cacheable and nothing else is.
+ */
+export const MEDIA_RESIZE_WIDTHS: readonly number[] = [
+  32, 48, 64, 96, 128, 256, 384, 640, 750, 828, 1080, 1200, 1920, 2048, 3840,
+];
+export const MEDIA_RESIZE_QUALITY = 75;
+
 /** Per-instance memory budget for recently served image bytes. */
 export const MEDIA_MEMORY_CACHE_BYTES = 64 * 1024 * 1024;

@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:pg": "tsx scripts/apply-migrations.ts",
+    "db:copy": "tsx scripts/copy-database.ts",
     "db:seed": "tsx --conditions=react-server prisma/seed.ts",
     "db:studio": "prisma studio"
   },

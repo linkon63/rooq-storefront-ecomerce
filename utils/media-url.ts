@@ -1,4 +1,4 @@
-import { MEDIA_ROUTE_PREFIX } from "@/lib/constants/media";
+import { IMAGE_MAX_EDGE_PX, MEDIA_RESIZE_WIDTHS, MEDIA_ROUTE_PREFIX } from "@/lib/constants/media";
 
 /** Minimal media shape needed to build a src — matches `mediaRefSelect`. */
 export type MediaRef = {
@@ -40,4 +40,20 @@ export function etagMatches(ifNoneMatch: string | null, etag: string): boolean {
     .split(",")
     .map((value) => value.trim().replace(/^W\//, ""))
     .some((value) => value === etag || value === "*");
+}
+
+/**
+ * `?w=` of the media route → a width to resize to, or null for the stored
+ * original (no/unknown width, or one at least as wide as the stored image).
+ */
+export function parseMediaWidth(value: string | null): number | null {
+  if (!value) return null;
+  const width = Number(value);
+  if (!MEDIA_RESIZE_WIDTHS.includes(width) || width >= IMAGE_MAX_EDGE_PX) return null;
+  return width;
+}
+
+/** True for a src served by the media route ("/api/v1/media/<id>"). */
+export function isMediaRouteSrc(src: string): boolean {
+  return src.startsWith(`${MEDIA_ROUTE_PREFIX}/`);
 }

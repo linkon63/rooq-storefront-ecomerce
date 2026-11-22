@@ -33,6 +33,9 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
   const alt = product.image?.alt ?? product.name;
   const sizes = feature ? FEATURE_IMAGE_SIZES : CARD_IMAGE_SIZES;
   const [preview, setPreview] = useState<Preview | null>(null);
+  // The second photo is fetched on first hover/focus, not with the grid.
+  const [hoverArmed, setHoverArmed] = useState(false);
+  const armHover = () => setHoverArmed(true);
   const previewImage = preview ? (product.colors.find((c) => c.id === preview.color.id)?.image ?? null) : null;
   const onPreview = (color: ColorRef | null, pinned: boolean) =>
     setPreview((current) => {
@@ -41,7 +44,12 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
       return { color, pinned };
     });
   return (
-    <article data-panda-card={product.id} className="group relative flex h-full flex-col">
+    <article
+      data-panda-card={product.id}
+      className="group relative flex h-full flex-col"
+      onPointerEnter={armHover}
+      onFocus={armHover}
+    >
       <div
         className={`relative aspect-[3/4] overflow-hidden bg-selvedge/40 ${feature ? "lg:aspect-auto lg:flex-1" : ""}`}
       >
@@ -51,7 +59,7 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
           ) : (
             <span className="type-h2 absolute inset-0 grid place-items-center text-ink/15">rooq</span>
           )}
-          {product.hoverImage ? (
+          {product.hoverImage && hoverArmed ? (
             <Image
               src={product.hoverImage.url}
               alt=""

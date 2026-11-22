@@ -12,17 +12,10 @@ const nextConfig: NextConfig = {
   // Native / Node-only server deps stay out of the server bundle.
   serverExternalPackages: ["sharp", "pdfkit", "@prisma/client", "@prisma/adapter-pg", "pg", "bcryptjs"],
   images: {
-    // Same-origin images next/image may optimise. Database images are served
-    // by the API route below; the rest are static files in /public.
-    localPatterns: [
-      { pathname: "/api/v1/media/**" },
-      { pathname: "/images/**" },
-    ],
-    remotePatterns: [
-      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
-      // Google account profile pictures (OAuth avatars)
-      { protocol: "https", hostname: "lh3.googleusercontent.com", pathname: "/**" },
-    ],
+    // No /_next/image: database images are resized by GET /api/v1/media/:id?w=
+    // and cached by the CDN (see utils/image-loader.ts); the rest load as is.
+    loader: "custom",
+    loaderFile: "./utils/image-loader.ts",
   },
   async headers() {
     return [

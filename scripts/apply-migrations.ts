@@ -1,7 +1,7 @@
 /**
  * Fallback migration runner for hosts where Prisma's schema engine cannot
- * connect (seen with Prisma Postgres behind some networks: P1001 while the
- * `pg` driver connects fine). Applies every pending folder in
+ * connect (P1001 while the `pg` driver connects fine). Uses DIRECT_URL (the
+ * Supabase session pooler), falling back to DATABASE_URL. Applies every pending folder in
  * prisma/migrations inside its own transaction and records it in
  * `_prisma_migrations` exactly like `prisma migrate deploy` would, so the two
  * stay interchangeable.
@@ -13,6 +13,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
+import { ERROR_MESSAGES } from "../lib/constants/error-messages";
+import { directDatabaseUrl, withLibpqSslMode } from "../utils/database-url";
 
 const MIGRATIONS_DIR = join(process.cwd(), "prisma", "migrations");
 
@@ -28,10 +30,10 @@ const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
 )`;
 
 async function main(): Promise<void> {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL is not set");
+  const connectionString = directDatabaseUrl(process.env);
+  if (!connectionString) throw new Error(ERROR_MESSAGES.config.databaseUrlMissing);
 
-  const client = new pg.Client({ connectionString });
+  const client = new pg.Client({ connectionString: withLibpqSslMode(connectionString) });
   await client.connect();
   try {
     await client.query(CREATE_TABLE);

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
+import { directDatabaseUrl } from "./utils/database-url";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -8,6 +9,8 @@ export default defineConfig({
     seed: "tsx --conditions=react-server prisma/seed.ts",
   },
   datasource: {
-    url: process.env.DATABASE_URL ?? "",
+    // CLI work (migrate, studio) needs a session connection, not the
+    // transaction pooler the app queries through.
+    url: directDatabaseUrl(process.env) ?? "",
   },
 });
