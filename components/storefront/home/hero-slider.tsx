@@ -47,6 +47,7 @@ export function HeroSlider({ slides, labels }: { slides: HeroSlide[]; labels: { 
         repeat: -1,
         onUpdate() {
           const half = list.scrollWidth / 2;
+          if (!half) return; // hidden (phones show the product slider instead)
           const centre = this.progress() * half + (list.parentElement?.clientWidth ?? 0) / 2;
           const next = Math.floor((centre % half) / (half / count)) % count;
           setActive((current) => (current === next ? current : next));
