@@ -16,7 +16,7 @@ import { SAREE_PRODUCTS } from "../prisma/seed/saree-data";
 
 const KEEP_PRODUCTS = SAREE_PRODUCTS.map((product) => product.slug);
 const KEEP_COLLECTIONS = ["saree-edit"];
-const KEEP_CATEGORIES = ["women", "women-sarees", "men", "kids", "jewellery"];
+const KEEP_CATEGORIES = ["women", "women-sarees", "women-jamdani", "women-manipuri", "men"];
 const OLD_CAMPAIGNS = ["The Summer Edit", "City Layers", "City Layers — AW Lookbook"];
 const OLD_SALE_NAME = "Summer Sale — 20% off";
 

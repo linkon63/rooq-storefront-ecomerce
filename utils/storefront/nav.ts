@@ -11,14 +11,14 @@ const isLive = (category: ShopCategoryNode) => category.isActive !== false;
 /**
  * Main navigation from the category tree: Shop (all products, unfiltered), New in, each active root category
  * (launched roots followed by their sub-categories, e.g. Women, Sarees), Sale.
- * Coming-soon roots keep their place and carry `soon`.
+ * Coming-soon categories keep their place and carry `soon`.
  */
 export function buildPrimaryNav(categories: readonly ShopCategoryNode[]): NavItem[] {
   const roots = categories.filter((category) => !category.parentId && isLive(category));
   const middle = roots.flatMap((root): NavItem[] => {
     const self: NavItem = { label: root.name, href: categoryHref(root), soon: Boolean(root.isComingSoon) };
     if (root.isComingSoon) return [self];
-    const children = (root.children ?? []).filter(isLive).map((child) => ({ label: child.name, href: categoryHref(child) }));
+    const children = (root.children ?? []).filter(isLive).map((child) => ({ label: child.name, href: categoryHref(child), soon: Boolean(child.isComingSoon) }));
     return [self, ...children];
   });
   return [NAV_SHOP, NAV_LEAD, ...middle, NAV_TAIL];
