@@ -1,0 +1,104 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Phone app shell (below 768px). See docs/design/mobile-app-ui.md.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --tab-bar-h: calc(3.5rem + env(safe-area-inset-bottom));
+  --action-bar-h: calc(4.5rem + env(safe-area-inset-bottom));
+  /* Space the tab bar takes; 0 on screens that hide it. */
+  --tab-offset: 0px;
+}
+:root:has([data-tab-bar]) {
+  --tab-offset: var(--tab-bar-h);
+}
+
+@media (width < 48rem) {
+  :root {
+    --header-h: 3.5rem;
+  }
+  .mobile-tab-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-app-bar {
+    padding-top: env(safe-area-inset-top);
+  }
+  body {
+    padding-bottom: var(--tab-offset);
+  }
+  body:has([data-action-bar="solo"]) {
+    padding-bottom: var(--action-bar-h);
+  }
+  body:has([data-tab-bar]):has([data-action-bar="stacked"]) {
+    padding-bottom: calc(var(--tab-bar-h) + 4rem);
+  }
+  /* The footer (loom art, end of the home stitch) shows on the home screen only;
+     elsewhere its links live in the Me tab. */
+  .storefront-root:not(:has([data-home])) > .site-footer {
+    display: none;
+  }
+  /* Tulo sits just above whichever bars are on screen. */
+  /* `--float-y` is where the shopper dragged him; the bars set the lowest spot. */
+  .floating-actions {
+    --float-min: calc(var(--tab-offset) + 0.5rem);
+    bottom: max(var(--float-y, 0px), var(--float-min));
+  }
+  body:has([data-action-bar="solo"]) .floating-actions {
+    --float-min: calc(var(--action-bar-h) + 0.5rem);
+  }
+  body:has([data-tab-bar]):has([data-action-bar="stacked"]) .floating-actions {
+    --float-min: calc(var(--tab-bar-h) + 4.5rem);
+  }
+  /* A drag on him moves him instead of scrolling the page. */
+  .floating-actions * {
+    touch-action: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .floating-actions[data-side="left"] {
+    right: auto;
+    left: 0.75rem;
+  }
+  /* On the left edge the speech bubble opens to his right. */
+  .floating-actions[data-side="left"] .panda-bubble {
+    right: auto;
+    left: 62px;
+    transform-origin: 0 100%;
+  }
+  .floating-actions[data-side="left"] .panda-bubble > span[aria-hidden] {
+    right: auto;
+    left: -5px;
+    rotate: 180deg;
+  }
+  /* A bar of buttons above the tab bar, or at the screen edge without one. */
+  .mobile-action-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: var(--tab-offset);
+    z-index: 30;
+    border-top: 1px solid var(--color-selvedge);
+    background: var(--color-paper);
+    padding: 0.625rem 1rem;
+  }
+  .mobile-action-bar[data-action-bar="solo"] {
+    padding-bottom: calc(0.625rem + env(safe-area-inset-bottom));
+  }
+  /* iOS zooms into any field set smaller than 16px. */
+  .storefront-root :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
+    font-size: 1rem;
+  }
+  .page-enter {
+    animation: fade-in 0.22s ease-out;
+  }
+  [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(var(--tab-offset) + 5rem) !important;
+  }
+}
+
+/* Instant press feedback for thumbs. */
+.press {
+  -webkit-tap-highlight-color: transparent;
+  transition: scale 0.1s ease-out, translate 0.3s;
+}
+.press:active {
+  scale: 0.96;
+}

@@ -1,3 +1,5 @@
+import { InstallSheet } from "@/components/storefront/mobile/install-sheet";
+import { MobileTabBar } from "@/components/storefront/mobile/mobile-tab-bar";
 import { HomeStitch } from "@/components/storefront/home/stitch/home-stitch";
 import { StoreSync } from "@/app/_providers/store-sync";
 import { GoogleTagManagerNoScript, GoogleTagManagerScript } from "@/components/analytics/google-tag-manager";
@@ -9,7 +11,7 @@ import { SiteHeader } from "@/components/storefront/shell/site-header";
 import { StoreOverlays } from "@/components/storefront/shell/store-overlays";
 import { StoreToaster } from "@/components/storefront/shell/store-toaster";
 import { WishlistFlyLayer } from "@/components/storefront/shell/wishlist-fly-layer";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { telHref, WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
 import { getCategoryTree, getStorePolicies, getStoreSettings } from "@/lib/storefront/catalog-data";
 import { buildPrimaryNav } from "@/utils/storefront/nav";
@@ -20,11 +22,11 @@ import { announcementFor } from "@/utils/storefront/settings";
  * each falls back to an empty value, so a slow API never blanks the shell.
  */
 export default async function StoreLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [settings, categories, policies, { locale, t }] = await Promise.all([
+  const t = COPY;
+  const [settings, categories, policies] = await Promise.all([
     getStoreSettings(),
     getCategoryTree(),
     getStorePolicies(),
-    getMessages(),
   ]);
   const announcement = announcementFor(
     settings.delivery.freeShippingThreshold,
@@ -39,14 +41,13 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
     <>
       <GoogleTagManagerNoScript />
       <GoogleTagManagerScript />
-      <div lang={locale} className="storefront-root relative flex min-h-full flex-1 flex-col">
+      <div className="storefront-root relative flex min-h-full flex-1 flex-col">
         <SiteHeader
           nav={nav}
           categories={categories}
           announcement={announcement}
           phone={WHATSAPP_NUMBER}
           whatsapp={WHATSAPP_NUMBER}
-          locale={locale}
           t={t}
         />
         <main id="main" className="flex-1">
@@ -56,12 +57,13 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
         <HomeStitch />
       </div>
       <FloatingActions
-        locale={locale}
         phone={WHATSAPP_NUMBER}
         telHref={telHref(WHATSAPP_NUMBER)}
         whatsappHref={whatsappChatHref(WHATSAPP_NUMBER)}
       />
       <StoreSync currency={settings.currency} />
+      <MobileTabBar />
+      <InstallSheet t={{ installApp: t.footer.installApp, installHintIos: t.footer.installHintIos }} />
       <StoreOverlays delivery={settings.delivery} />
       <WishlistFlyLayer />
       <StoreToaster />

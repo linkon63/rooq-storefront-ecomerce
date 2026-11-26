@@ -3,8 +3,9 @@ import { ShopListing } from "@/components/storefront/shop/shop-listing";
 import type { RawSearchParams } from "@/utils/storefront/shop-query";
 
 export const metadata: Metadata = {
-  title: "New in",
-  description: "The latest arrivals at Rooq, newest first.",
+  title: "New Saree Collection in BD",
+  description: "New saree (sharee) arrivals at Rooq, newest first. Shop the latest BD sharee online.",
+  alternates: { canonical: "/new" },
 };
 
 const PRESET = { isNew: true } as const;

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { ReviewWithProduct } from "@/types/storefront/commerce";
 import { CrossStitch } from "../shared/cross-stitch";
 import { SectionHeading } from "../shared/section-heading";
@@ -14,7 +14,7 @@ const TILTS = [-1.4, 0.9, -0.6, 1.2, -1, 0.5];
  * straightens and lifts when pointed at.
  */
 export async function ReviewsShowcase({ reviews }: { reviews: ReviewWithProduct[] }) {
-  const { t } = await getMessages();
+  const t = COPY;
   return (
     <section aria-labelledby="reviews-title" className="page-gutter">
       <SectionHeading id="reviews-title" title={t.home.reviewsTitle} />

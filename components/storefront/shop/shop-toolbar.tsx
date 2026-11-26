@@ -7,6 +7,8 @@ import type { ProductSort } from "@/types/storefront/catalog";
 import { activeFilterCount } from "@/utils/storefront/shop-query";
 import { Modal } from "../shared/modal";
 import { ActiveFilters } from "./active-filters";
+import { CategoryChips } from "./category-chips";
+import { ShopPhoneBar } from "./shop-phone-bar";
 import { FilterControls } from "./filter-controls";
 import { useShopNavigation } from "./shop-navigation";
 
@@ -18,6 +20,7 @@ export function ShopToolbar() {
 
   return (
     <div className="flex flex-col gap-3">
+      <CategoryChips />
       <div className="flex items-center gap-2">
         <p className="mr-auto text-sm text-stone" aria-live="polite">
           {meta.isPending ? "Updating…" : `${state.total} ${state.total === 1 ? "piece" : "pieces"}`}
@@ -25,7 +28,7 @@ export function ShopToolbar() {
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="inline-flex h-10 items-center gap-2 rounded border border-line bg-paper px-3 text-sm font-semibold lg:hidden"
+          className="hidden h-10 items-center gap-2 rounded border border-line bg-paper px-3 text-sm font-semibold md:inline-flex lg:hidden"
         >
           <FiSliders aria-hidden className="size-4" />
           Filter{count > 0 ? ` (${count})` : ""}
@@ -37,7 +40,7 @@ export function ShopToolbar() {
           id="shop-sort"
           value={state.filters.sort}
           onChange={(event) => actions.apply({ sort: event.target.value as ProductSort })}
-          className="h-10 rounded border border-line bg-paper px-2 text-sm font-semibold"
+          className="h-10 rounded border border-line bg-paper px-2 text-sm font-semibold max-md:hidden"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -47,8 +50,9 @@ export function ShopToolbar() {
         </select>
       </div>
       <ActiveFilters />
+      <ShopPhoneBar filterCount={count} onFilter={() => setSheetOpen(true)} />
       <Modal open={sheetOpen} onOpenChange={setSheetOpen} title="Filter" placement="bottom">
-        <div className="px-4 pb-24">
+        <div className="px-4 pb-4">
           <FilterControls />
         </div>
         <div className="sticky bottom-0 border-t border-selvedge bg-paper p-4">

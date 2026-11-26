@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Rooq — Modern Fashion",
+    name: "Rooq — Saree Shop BD",
     short_name: "Rooq",
-    description: "Considered clothing, footwear and accessories for men, women and kids.",
+    description: "Handloom tant and cotton saree (sharee) online shop in Bangladesh.",
     id: "/",
     start_url: "/",
     scope: "/",

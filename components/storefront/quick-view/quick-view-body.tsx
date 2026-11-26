@@ -21,7 +21,7 @@ export function QuickViewBody({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="grid gap-6 p-4 md:grid-cols-2 md:p-6">
-      <div key={color?.id} className="relative aspect-[3/4] overflow-hidden bg-selvedge animate-[fade-in_.3s_ease-out]">
+      <div key={color?.id} className="relative aspect-[3/4] overflow-hidden bg-selvedge max-md:hidden animate-[fade-in_.3s_ease-out]">
         {lead ? (
           <Image src={lead.url} alt={lead.alt ?? product.name} fill sizes="(min-width: 768px) 420px, 90vw" className="object-cover" />
         ) : null}

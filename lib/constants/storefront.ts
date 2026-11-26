@@ -5,8 +5,12 @@ import type { OrderStatus, ReturnReason, ReturnStatus } from "@/types/storefront
 export const API_PREFIX = "/api/v1";
 /** Client request timeout. */
 export const API_TIMEOUT_MS = 12_000;
-/** Public catalog reads on the server are cached this long (seconds). */
-export const CATALOG_REVALIDATE_SECONDS = 60;
+/**
+ * Public catalog reads and the static pages built from them are cached this long
+ * (seconds). Admin writes revalidate at once; this only bounds time-based changes
+ * such as a discount or campaign starting.
+ */
+export const CATALOG_REVALIDATE_SECONDS = 300;
 
 /** localStorage keys; bump the version when the stored shape changes. */
 export const STORAGE_KEYS = {
@@ -86,7 +90,7 @@ export const HOME_HERO_PRODUCTS = 3;
 /** Phone hero: seconds per product. */
 export const HOME_HERO_INTERVAL_MS = 3000;
 /** Spotlight slider: seconds per piece. */
-export const SPOTLIGHT_INTERVAL_MS = 5000;
+export const SPOTLIGHT_INTERVAL_MS = 3000;
 /** Home "Best sellers": four large cards; the rest wait behind "See all". */
 export const HOME_BEST_SELLERS_SIZE = 4;
 
@@ -120,7 +124,7 @@ export const ACCOUNT_TABS = [
 ] as const;
 export type AccountTab = (typeof ACCOUNT_TABS)[number]["key"];
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooqbd.com";
 
 /** Data-cache tag of every storefront catalogue read (lib/storefront/server-api.ts). */
 export const CATALOG_CACHE_TAG = "storefront-catalog";

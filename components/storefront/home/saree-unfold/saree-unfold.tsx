@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { SareeStage } from "./saree-stage";
 
 /**
@@ -8,7 +8,7 @@ import { SareeStage } from "./saree-stage";
  * sends shoppers to the sarees. Large screens only (three.js never loads on phones).
  */
 export async function SareeUnfold() {
-  const { t } = await getMessages();
+  const t = COPY;
   const copy = t.home.craft;
   return (
     <section aria-labelledby="saree-unfold-title" className="hidden overflow-hidden bg-ink text-chalk lg:block">

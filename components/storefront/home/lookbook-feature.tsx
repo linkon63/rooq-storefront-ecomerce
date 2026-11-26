@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { CollectionSummary } from "@/types/storefront/catalog";
 import { CrossStitch } from "../shared/cross-stitch";
 import { ParallaxLayers } from "./parallax-layers";
@@ -13,7 +13,7 @@ import { RevealHeading } from "./reveal-heading";
  * the copy (slightly slow).
  */
 export async function LookbookFeature({ lookbook }: { lookbook: CollectionSummary }) {
-  const { t } = await getMessages();
+  const t = COPY;
   const cover = lookbook.coverImageUrl;
   return (
     <ParallaxLayers>

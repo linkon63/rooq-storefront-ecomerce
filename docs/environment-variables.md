@@ -33,7 +33,7 @@ Rules worth knowing:
 | `DATABASE_POOL_MAX` | `3` | `pg` pool size per function instance. |
 | `POSTGRES_PRISMA_URL`, `POSTGRES_URL_NON_POOLING`, `POSTGRES_URL`, `SUPABASE_*`, `NEXT_PUBLIC_SUPABASE_*` | set by the integration | Injected by the Vercel ↔ Supabase integration. **Not read by the app**: they log in as the admin `postgres` role and target `public`; Rooq uses its own `rooq` role and schema. |
 | `JWT_EXPIRES_IN` | `7d` | Access-token lifetime (any `jose` duration: `12h`, `7d`, …). |
-| `NEXT_PUBLIC_SITE_URL` | `https://rooq.store` | Canonical site URL for metadata, `sitemap.xml`, `robots.txt` and back-in-stock e-mail links. Set it to the production domain. |
+| `NEXT_PUBLIC_SITE_URL` | `https://rooqbd.com` | Canonical site URL for metadata, `sitemap.xml`, `robots.txt` and back-in-stock e-mail links. Set it to the production domain. |
 | `SEED_ADMIN_EMAIL` | `admin@rooq.local` | E-mail of the staff account `pnpm db:seed` creates. |
 | `SEED_ADMIN_PASSWORD` | a placeholder (see `.env.example`) | First password of that account. **Always set your own** for any shared or production database, and change it after the first sign-in. |
 | `RESEND_API_KEY` | unset = dry run | [Resend](https://resend.com) API key for transactional mail (password reset, order alerts, back-in-stock, contact form, newsletter). Without it, mail is logged instead of sent (`lib/server/mail/client.ts`). |

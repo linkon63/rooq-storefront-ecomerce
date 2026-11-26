@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
@@ -20,6 +21,7 @@ import { summariseCart } from "@/utils/storefront/cart";
 /** The bag, its totals and its actions, with toasts. Thin over the cart slice. */
 export function useCart() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const lines = useAppSelector(selectCartLines);
   const hydrated = useAppSelector(selectCartHydrated);
   const pending = useAppSelector(selectCartPending);
@@ -30,15 +32,18 @@ export function useCart() {
       try {
         await dispatch(addToBag(input));
         pandaCue("added");
-        toast.success(SUCCESS_MESSAGES.storefront.addedToBag);
-        if (options.openDrawer) dispatch(setCartDrawerOpen(true));
+        const isPhone = window.matchMedia("(width < 48rem)").matches;
+        toast.success(SUCCESS_MESSAGES.storefront.addedToBag, {
+          action: isPhone ? { label: "View", onClick: () => router.push("/cart") } : undefined,
+        });
+        if (options.openDrawer && !isPhone) dispatch(setCartDrawerOpen(true));
         return true;
       } catch (error) {
         toast.error(errorText(error, ERROR_MESSAGES.storefront.addToBagFailed));
         return false;
       }
     },
-    [dispatch],
+    [dispatch, router],
   );
 
   const setQuantity = useCallback(

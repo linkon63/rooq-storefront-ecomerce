@@ -1,10 +1,9 @@
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { getProductById, productRail } from "@/lib/storefront/catalog-data";
 import { SPOTLIGHT_INTERVAL_MS } from "@/lib/constants/storefront";
 import type { ProductCard } from "@/types/storefront/catalog";
-import { SectionHeading } from "../../shared/section-heading";
-import { SnapSlider } from "../../shared/snap-slider";
 import { HighlightCard } from "./highlight-card";
+import { SpotlightCarousel } from "./spotlight-carousel";
 
 const HIGHLIGHT_COUNT = 2;
 
@@ -14,7 +13,7 @@ const HIGHLIGHT_COUNT = 2;
  * pictures beside its story, price and details, one per slide.
  */
 export async function ProductHighlights({ fallback }: { fallback: ProductCard[] }) {
-  const { t } = await getMessages();
+  const t = COPY;
   const featured = await productRail({ featured: true, sort: "popular", limit: HIGHLIGHT_COUNT });
   const cards = [...featured.data, ...fallback.filter((card) => !featured.data.some((f) => f.id === card.id))].slice(
     0,
@@ -24,8 +23,13 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
   const details = await Promise.all(cards.map((card) => getProductById(card.id)));
   return (
     <section aria-labelledby="highlights-title" className="page-gutter relative">
-      <SectionHeading id="highlights-title" title={t.home.spotlight} />
-      <SnapSlider label={t.home.spotlight} dotLabel={t.home.goToSlide} interval={SPOTLIGHT_INTERVAL_MS}>
+      <SpotlightCarousel
+        titleId="highlights-title"
+        title={t.home.spotlight}
+        previousLabel={t.home.previousSlide}
+        nextLabel={t.home.nextSlide}
+        interval={SPOTLIGHT_INTERVAL_MS}
+      >
         {cards.map((card, index) => (
           <HighlightCard
             key={card.id}
@@ -36,7 +40,7 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
             t={t.home}
           />
         ))}
-      </SnapSlider>
+      </SpotlightCarousel>
     </section>
   );
 }

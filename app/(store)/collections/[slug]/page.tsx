@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: collection.metaTitle ?? collection.name,
     description: collection.metaDescription ?? collection.description ?? undefined,
+    alternates: { canonical: `/collections/${collection.slug}` },
     openGraph: collection.coverImageUrl ? { images: [{ url: collection.coverImageUrl }] } : undefined,
   };
 }

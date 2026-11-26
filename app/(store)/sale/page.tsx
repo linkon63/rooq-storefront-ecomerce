@@ -3,8 +3,9 @@ import { ShopListing } from "@/components/storefront/shop/shop-listing";
 import type { RawSearchParams } from "@/utils/storefront/shop-query";
 
 export const metadata: Metadata = {
-  title: "Sale",
-  description: "Reduced pieces at Rooq while sizes last.",
+  title: "Saree Sale and Offers in BD",
+  description: "Saree (sharee) offers at Rooq: reduced prices in Bangladesh while stock lasts.",
+  alternates: { canonical: "/sale" },
 };
 
 const PRESET = { onSale: true } as const;

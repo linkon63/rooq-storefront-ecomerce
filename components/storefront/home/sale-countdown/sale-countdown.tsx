@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { getSaleCountdown, getStoreSettings } from "@/lib/storefront/catalog-data";
 import { discountLabel } from "@/utils/storefront/countdown";
 import { CountdownClock } from "./countdown-clock";
@@ -11,7 +11,8 @@ import { CountdownClock } from "./countdown-clock";
  * offer and a ticking clock. Renders nothing when no such sale is running.
  */
 export async function SaleCountdown() {
-  const [sale, settings, { t }] = await Promise.all([getSaleCountdown(), getStoreSettings(), getMessages()]);
+  const [sale, settings] = await Promise.all([getSaleCountdown(), getStoreSettings()]);
+  const t = COPY;
   if (!sale) return null;
   const offer = discountLabel(sale.discount, settings.currency);
 

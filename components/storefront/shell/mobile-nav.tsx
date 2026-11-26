@@ -3,9 +3,7 @@
 import Link from "next/link";
 import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
 import { categoryHref } from "@/utils/storefront/nav";
-import type { Messages } from "@/lib/i18n/messages";
-import type { Locale } from "@/lib/i18n/locales";
-import { LanguageSwitch } from "./language-switch";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { MobileSignOut } from "./mobile-sign-out";
 import { Modal } from "../shared/modal";
 
@@ -16,17 +14,14 @@ type MobileNavProps = {
   categories: ShopCategoryNode[];
   t: Messages["mobileNav"];
   soon: string;
-  locale: Locale;
-  languageLabels: Messages["language"];
 };
 
 /** Left sheet with the main views and the top-level categories. */
-export function MobileNav({ open, onOpenChange, nav, categories, t, soon, locale, languageLabels }: MobileNavProps) {
+export function MobileNav({ open, onOpenChange, nav, categories, t, soon }: MobileNavProps) {
   const close = () => onOpenChange(false);
   return (
     <Modal open={open} onOpenChange={onOpenChange} title={t.menu} placement="left">
       <nav aria-label="Mobile" className="flex flex-col gap-8 px-4 py-6">
-        <LanguageSwitch locale={locale} labels={languageLabels} tone="light" />
         <ul className="flex flex-col">
           {nav.map((item) => (
             <li key={item.label}>

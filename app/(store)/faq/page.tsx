@@ -4,7 +4,7 @@ import { FaWhatsapp } from "react-icons/fa6";
 import { FiArrowRight, FiPhone } from "react-icons/fi";
 import { FaqExplorer } from "@/components/storefront/faq/faq-explorer";
 import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { WHATSAPP_NUMBER, telHref, whatsappChatHref } from "@/lib/shop-contact";
 import { getStoreSettings } from "@/lib/storefront/catalog-data";
 import { buildFaqs } from "@/utils/storefront/faqs";
@@ -16,8 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default async function FaqPage() {
-  const [settings, { locale, t }] = await Promise.all([getStoreSettings(), getMessages()]);
-  const faqs = buildFaqs(settings, locale);
+  const [settings] = await Promise.all([getStoreSettings()]);
+  const t = COPY;
+  const faqs = buildFaqs(settings);
   const { delivery, currency } = settings;
   const formatCharge = (amount: number) => (amount > 0 ? formatMoney(amount, currency) : t.faq.free);
   const primaryPhone = settings.phones[0]?.value ?? null;

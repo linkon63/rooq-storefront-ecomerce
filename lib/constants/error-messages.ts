@@ -609,6 +609,7 @@ export const ERROR_MESSAGES = {
     newsletterFailed: "Could not sign you up. Please try again.",
     contactFailed: "Could not send your message. Please try again.",
     searchFailed: "Search is not responding. Try again in a moment.",
+    shareFailed: "Could not share this page. Please try again.",
     pageNotFound: "We could not find that page. It may have moved or sold out.",
   },
 

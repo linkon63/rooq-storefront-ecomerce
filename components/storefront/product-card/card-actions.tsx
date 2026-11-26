@@ -9,6 +9,7 @@ import { useAppDispatch } from "@/lib/store/hooks";
 import { openQuickView } from "@/lib/store/slices/ui-slice";
 import type { ColorRef, ProductCard as ProductCardData } from "@/types/storefront/catalog";
 import type { CartLineInput } from "@/types/storefront/commerce";
+import { CardPhoneActions } from "./card-phone-actions";
 
 type CardActionsProps = {
   product: ProductCardData;
@@ -95,7 +96,9 @@ export function CardActions({ product, activeColor = null }: CardActionsProps) {
     "grid size-9 place-items-center rounded-full shadow-xs backdrop-blur-xs transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-45 md:size-10";
 
   return (
-    <div className="absolute right-2 top-2 z-10 flex flex-col items-end gap-1.5">
+    <>
+    <CardPhoneActions product={product} />
+    <div className="absolute right-2 top-2 z-10 hidden flex-col items-end gap-1.5 md:flex">
       <button
         type="button"
         data-panda-add-to-bag=""
@@ -128,5 +131,6 @@ export function CardActions({ product, activeColor = null }: CardActionsProps) {
         <FiZap aria-hidden className="size-4" />
       </button>
     </div>
+    </>
   );
 }

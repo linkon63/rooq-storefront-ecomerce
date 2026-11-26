@@ -1,4 +1,4 @@
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import type { ProductDetail } from "@/types/storefront/catalog";
 
 /** Material, colours, sizes and up to three features of a spotlight product. */

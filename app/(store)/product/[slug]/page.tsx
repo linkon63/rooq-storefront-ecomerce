@@ -6,14 +6,18 @@ import { ProductDetails } from "@/components/storefront/product/product-details"
 import { ProductView } from "@/components/storefront/product/product-view";
 import { SareeSurface } from "@/components/storefront/product/saree-surface";
 import { ProductSelectionProvider } from "@/components/storefront/product/selection-context";
-import { ReviewsSection } from "@/components/storefront/reviews/reviews-section";
 import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
 import { SITE_URL } from "@/lib/constants/storefront";
 import { getProductById, getProductBySlug, getStoreSettings } from "@/lib/storefront/catalog-data";
-import { leadImageUrl, looksLikeId, productJsonLd } from "@/utils/storefront/product-seo";
+import { leadImageUrl, looksLikeId, productJsonLd, productSeoCopy } from "@/utils/storefront/product-seo";
 import { clientProduct } from "@/utils/storefront/product-view";
 
 type PageProps = { params: Promise<{ slug: string }> };
+
+/** Nothing at build time: each product page is rendered on its first visit, then served from cache. */
+export function generateStaticParams() {
+  return [];
+}
 
 async function loadProduct(slug: string) {
   return looksLikeId(slug) ? getProductById(slug) : getProductBySlug(slug);
@@ -23,12 +27,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const product = await loadProduct((await params).slug);
   if (!product) return { title: "Not found" };
   const image = leadImageUrl(product);
-  const description = product.seo.metaDescription ?? product.shortDescription ?? `${product.name} by ${product.brand.name} at Rooq.`;
+  const { title, description, keywords } = productSeoCopy(product);
   return {
-    title: product.seo.metaTitle ?? product.name,
+    // A title typed in the admin may already carry the shop name.
+    title: title.includes("Rooq") ? { absolute: title } : title,
     description,
+    keywords,
     alternates: { canonical: `/product/${product.slug}` },
-    openGraph: { title: product.name, description, images: image ? [{ url: image }] : undefined },
+    openGraph: { title, description, url: `/product/${product.slug}`, siteName: "Rooq", images: image ? [{ url: image }] : undefined },
   };
 }
 
@@ -39,14 +45,6 @@ export default async function ProductPage({ params }: PageProps) {
   if (product.slug !== slug) permanentRedirect(`/product/${product.slug}`);
 
   const viewProduct = clientProduct(product);
-  const reviewProduct = {
-    id: product.id,
-    name: product.name,
-    colors: product.colors.map(({ id, name }) => ({ id, name })),
-    sizes: product.sizes,
-    variants: product.variants,
-  };
-
   const crumbs = [
     { label: "Home", href: "/" },
     ...product.breadcrumbs.map((crumb) => ({ label: crumb.name, href: `/shop?category=${encodeURIComponent(crumb.slug)}` })),
@@ -61,15 +59,12 @@ export default async function ProductPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, SITE_URL, settings.currency)).replace(/</g, "\\u003c") }}
         />
         <div className="page-gutter pt-4 md:pt-6">
-          <div className="mb-4 md:mb-6">
+          <div className="mb-4 max-md:hidden md:mb-6">
             <Breadcrumbs items={crumbs} />
           </div>
           <ProductView product={viewProduct} details={<ProductDetails product={product} currency={settings.currency} />} />
         </div>
         <ProductRail title="Complete the look" products={product.completeTheLook} />
-        <div className="page-gutter">
-          <ReviewsSection product={reviewProduct} />
-        </div>
         <ProductRail title="You may also like" products={product.related} />
         <RecentlyViewedRail excludeId={product.id} />
       </SareeSurface>

@@ -1,13 +1,16 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 type SectionHeadingProps = {
   title: string;
   id?: string;
   link?: { label: string; href: string };
+  /** Controls shown on the right of the title. */
+  action?: ReactNode;
 };
 
 /** Section title with an optional "See all" link on the same baseline. */
-export function SectionHeading({ title, id, link }: SectionHeadingProps) {
+export function SectionHeading({ title, id, link, action }: SectionHeadingProps) {
   return (
     <div className="section-head flex items-end justify-between gap-4">
       <h2 id={id} className="type-h2">
@@ -18,6 +21,7 @@ export function SectionHeading({ title, id, link }: SectionHeadingProps) {
           {link.label}
         </Link>
       ) : null}
+      {action}
     </div>
   );
 }

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
+import { CategoryCircles } from "@/components/storefront/home/category-circles";
 import { CategoryTiles } from "@/components/storefront/home/category-tiles";
 import { MadeByHand } from "@/components/storefront/home/made-by-hand/made-by-hand";
 import { SareeUnfold } from "@/components/storefront/home/saree-unfold/saree-unfold";
 import { ComingSoonSection } from "@/components/storefront/home/coming-soon-section";
+import { FacebookReviews } from "@/components/storefront/home/facebook-reviews";
 import { FeaturedCollections } from "@/components/storefront/home/featured-collections";
 import { HomeContact } from "@/components/storefront/home/home-contact";
 import { HomeHero } from "@/components/storefront/home/home-hero";
@@ -12,11 +15,16 @@ import { OrderJourney } from "@/components/storefront/home/order-journey/order-j
 import { SaleCountdown } from "@/components/storefront/home/sale-countdown/sale-countdown";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
-import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
-import { getMessages } from "@/lib/i18n/server";
+import { SareeAbout } from "@/components/storefront/home/saree-about";
+import { SEO_ALTERNATE_NAMES, SEO_SITE_DESCRIPTION } from "@/lib/constants/seo";
+import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS, SITE_URL } from "@/lib/constants/storefront";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail } from "@/lib/storefront/catalog-data";
+import { siteJsonLd } from "@/utils/storefront/site-seo";
 
 const OFFERS_LIMIT = 8;
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /**
  * Home: hero (slider of looks, woven headline; the newest three on phones),
@@ -29,7 +37,7 @@ const OFFERS_LIMIT = 8;
  * stream in.
  */
 export default async function HomePage() {
-  const { t } = await getMessages();
+  const t = COPY;
   const [settings, hero, categories, newIn, latest, offers, bestSellers, upcoming, lookbooks] = await Promise.all([
     getStoreSettings(),
     getHomeHero(),
@@ -50,13 +58,22 @@ export default async function HomePage() {
   const lookbook = lookbooks[0] ?? null;
 
   return (
-    <div className="flex flex-col gap-12 lg:gap-20">
+    <div data-home className="flex flex-col gap-8 md:gap-12 lg:gap-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(siteJsonLd(SITE_URL.replace(/\/$/, ""), SEO_SITE_DESCRIPTION, SEO_ALTERNATE_NAMES)).replace(/</g, "\\u003c"),
+        }}
+      />
+      <CategoryCircles categories={tiles} />
       {/* The stitched thread runs straight through the hero and starts its pattern below it. */}
       <div data-stitch-hero>
         <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} latest={latest.data.slice(0, HOME_HERO_PRODUCTS)} />
       </div>
       <SareeUnfold />
-      <CategoryTiles categories={tiles} />
+      <div className="max-md:hidden md:contents">
+        <CategoryTiles categories={tiles} />
+      </div>
       <Suspense fallback={null}>
         <SaleCountdown />
       </Suspense>
@@ -82,16 +99,23 @@ export default async function HomePage() {
             : undefined
         }
       />
-      <Suspense fallback={null}>
-        <ProductHighlights fallback={bestSellers.data} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <MadeByHand />
-      </Suspense>
-      <OrderJourney t={t.home} />
-      <ComingSoonSection categories={tiles.filter((category) => category.isComingSoon)} products={upcoming.data} />
-      <HomeContact settings={settings} />
+      {/* Left out of the phone home screen to keep it short. */}
+      <div className="max-md:hidden md:contents">
+        <Suspense fallback={null}>
+          <FacebookReviews />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ProductHighlights fallback={bestSellers.data} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <MadeByHand />
+        </Suspense>
+        <OrderJourney t={t.home} />
+        <ComingSoonSection categories={tiles.filter((category) => category.isComingSoon)} products={upcoming.data} />
+        <HomeContact settings={settings} />
+      </div>
       <RecentlyViewedRail />
+      <SareeAbout copy={t.home.sareeAbout} />
     </div>
   );
 }

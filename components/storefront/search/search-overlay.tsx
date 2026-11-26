@@ -11,6 +11,8 @@ import { useAppDispatch } from "@/lib/store/hooks";
 import { setSearchOpen } from "@/lib/store/slices/ui-slice";
 import type { ProductCard } from "@/types/storefront/catalog";
 import { Modal } from "../shared/modal";
+import { rememberSearch } from "@/lib/storefront/recent-searches";
+import { RecentSearches } from "./recent-searches";
 import { SearchResults } from "./search-results";
 
 const SUGGESTIONS = ["Linen shirt", "Wide-leg trousers", "Sneakers", "Denim jacket", "Kurta", "Tote bag"];
@@ -42,6 +44,7 @@ export function SearchOverlay() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!term.trim()) return;
+    rememberSearch(term.trim());
     close();
     router.push(`/shop?q=${encodeURIComponent(term.trim())}`);
   }
@@ -71,6 +74,7 @@ export function SearchOverlay() {
           <SearchResults results={results} error={error} term={debounced} onNavigate={close} />
         ) : (
           <div>
+            <RecentSearches onPick={setTerm} />
             <p className="mb-3 text-sm text-stone">Popular searches</p>
             <ul className="flex flex-wrap gap-2">
               {SUGGESTIONS.map((suggestion) => (

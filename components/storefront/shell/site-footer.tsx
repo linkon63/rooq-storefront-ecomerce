@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa6";
 import { WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import type { NavItem } from "@/types/storefront/catalog";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import Logo from "../shared/Logo";
@@ -26,7 +26,7 @@ const HELP_LINKS = [
 export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFooterProps) {
   const year = new Date().getFullYear();
   return (
-    <footer className="mt-16 bg-ink text-chalk md:mt-24">
+    <footer className="site-footer mt-16 bg-ink text-chalk md:mt-24">
       <div className="page-gutter grid grid-cols-2 gap-x-6 gap-y-9 py-10 md:gap-12 md:py-14 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="col-span-2 flex flex-col gap-4 md:col-span-2 md:gap-5 lg:col-span-1">
           <Logo kechi variant="light" className="h-auto w-44 self-center lg:self-start" />

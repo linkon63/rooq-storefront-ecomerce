@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ShopCategoryNode } from "@/types/storefront/catalog";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { categoryHref } from "@/utils/storefront/nav";
 import { BoltReveal } from "./bolt-reveal";
 import { MoreCategoriesTile } from "./more-categories-tile";
@@ -16,7 +16,7 @@ const HOME_CATEGORY_LIMIT = 5;
  * Tiles below the fold unroll like bolts of cloth as they come into view.
  */
 export async function CategoryTiles({ categories }: { categories: ShopCategoryNode[] }) {
-  const { t } = await getMessages();
+  const t = COPY;
   if (categories.length === 0) return null;
   const shown = categories.slice(0, HOME_CATEGORY_LIMIT);
   const hidden = categories.length - shown.length;

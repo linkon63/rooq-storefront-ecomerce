@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 
 /** Last category tile when the home page hides some: opens the shop to choose from all of them. */
 export function MoreCategoriesTile({ count, t }: { count: number; t: Messages["home"] }) {

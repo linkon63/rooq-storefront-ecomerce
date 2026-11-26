@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { ProductCard } from "@/types/storefront/catalog";
 import type { HomeHeroData } from "@/types/storefront/content";
 import { heroVariant } from "@/utils/storefront/hero";
@@ -18,7 +18,7 @@ type HomeHeroProps = { returnDays: number; hero: HomeHeroData; latest: ProductCa
  * - campaign: the live hero campaign as one banner.
  */
 export async function HomeHero({ returnDays, hero, latest }: HomeHeroProps) {
-  const { t } = await getMessages();
+  const t = COPY;
   const variant = heroVariant(hero);
   const { campaign } = hero;
   if (variant === "campaign" && campaign) return <HeroCampaignBanner campaign={campaign} returnDays={returnDays} />;

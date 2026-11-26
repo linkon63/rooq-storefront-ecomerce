@@ -34,6 +34,7 @@ export function QuickViewDialog({ productId }: { productId: string }) {
       onOpenChange={(open) => (open ? null : close())}
       title={product ? product.name : "Quick view"}
       hideTitle={Boolean(product)}
+      placement="adaptive"
       className="md:!max-w-4xl"
     >
       {error ? (
@@ -46,7 +47,7 @@ export function QuickViewDialog({ productId }: { productId: string }) {
         </ProductSelectionProvider>
       ) : (
         <div className="grid gap-6 p-6 md:grid-cols-2" aria-busy="true" aria-label="Loading product">
-          <div className="aspect-[3/4] animate-pulse bg-selvedge" />
+          <div className="aspect-[3/4] animate-pulse bg-selvedge max-md:hidden" />
           <div className="flex flex-col gap-3">
             <div className="h-7 w-3/4 animate-pulse rounded bg-selvedge" />
             <div className="h-5 w-1/3 animate-pulse rounded bg-selvedge" />

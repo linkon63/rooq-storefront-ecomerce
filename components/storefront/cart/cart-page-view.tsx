@@ -4,6 +4,7 @@ import { useCart } from "@/hooks/use-cart";
 import type { StoreSettings } from "@/types/storefront/content";
 import { EmptyState } from "../shared/empty-state";
 import { CartLineItem } from "./cart-line-item";
+import { CartPhoneBar } from "./cart-phone-bar";
 import { CartSummary } from "./cart-summary";
 import { FreeShippingNote } from "./free-shipping-note";
 
@@ -29,6 +30,7 @@ export function CartPageView({ delivery }: { delivery: StoreSettings["delivery"]
           ))}
         </ul>
       </div>
+      <CartPhoneBar total={summary.subtotal} blocked={blocked} />
       <div className="lg:sticky lg:top-20 lg:self-start">
         <CartSummary summary={summary} total={summary.subtotal} checkoutHref="/checkout" blocked={blocked}>
           <p className="text-xs text-stone">Delivery and coupons are added at checkout. Pay cash on delivery.</p>

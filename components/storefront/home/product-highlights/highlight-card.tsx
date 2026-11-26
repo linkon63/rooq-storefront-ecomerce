@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import type { ProductCard, ProductDetail } from "@/types/storefront/catalog";
 import { Price } from "../../shared/price";
 import { StarRating } from "../../shared/star-rating";

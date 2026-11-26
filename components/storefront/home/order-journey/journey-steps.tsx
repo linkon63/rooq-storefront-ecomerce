@@ -1,6 +1,6 @@
 "use client";
 
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 
 type JourneyStepsProps = { active: number; onPick: (index: number) => void; steps: Messages["home"]["journey"] };
 

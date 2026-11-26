@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { HeroCampaign } from "@/types/storefront/content";
 
 /**
@@ -8,7 +8,7 @@ import type { HeroCampaign } from "@/types/storefront/content";
  * its title, story and call to action (all edited in the admin under Campaigns).
  */
 export async function HeroCampaignBanner({ campaign, returnDays }: { campaign: HeroCampaign; returnDays: number }) {
-  const { t } = await getMessages();
+  const t = COPY;
   const image = campaign.images[0];
   return (
     <section aria-labelledby="hero-title" className="grid bg-white md:grid-cols-2">

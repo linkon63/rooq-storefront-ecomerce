@@ -1,10 +1,10 @@
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { StoreSettings } from "@/types/storefront/content";
 import { CollapsibleContactForm } from "./collapsible-contact-form";
 
 /** Contact block at the foot of the home page: how to reach us, and the form. */
 export async function HomeContact({ settings }: { settings: StoreSettings }) {
-  const { t } = await getMessages();
+  const t = COPY;
   return (
     <section aria-labelledby="contact-title" className="page-gutter grid gap-10 md:grid-cols-2 md:items-center">
       <div className="flex flex-col gap-4">

@@ -89,12 +89,12 @@ export function ProductCard({ product, priority = false, feature = false }: Prod
       <div
         className="flex flex-col gap-1 px-2 pb-1 pt-2 [@media(pointer:fine)]:pointer-events-none [@media(pointer:fine)]:absolute [@media(pointer:fine)]:inset-x-0 [@media(pointer:fine)]:bottom-0 [@media(pointer:fine)]:bg-chalk/90 [@media(pointer:fine)]:p-3 [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:transition-opacity [@media(pointer:fine)]:duration-300 [@media(pointer:fine)]:ease-(--ease-quiet) [@media(pointer:fine)]:group-focus-within:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
       >
-        <h3 className="type-meta uppercase">
+        <h3 className="type-meta uppercase max-md:text-[0.8125rem]">
           <Link href={href} className="pointer-events-auto hover:underline hover:underline-offset-4">
             {product.name}
           </Link>
         </h3>
-        <Price price={product.price} compareAtPrice={product.compareAtPrice} className="type-meta" cut />
+        <Price price={product.price} compareAtPrice={product.compareAtPrice} className="type-meta max-md:text-sm" cut />
         <CardSwatches colors={product.colors} activeId={preview?.color.id ?? null} onPreview={onPreview} />
       </div>
     </article>

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./animations.css";
 @import "./craft.css";
+@import "./mobile.css";
 
 @source "../node_modules/react-tailwindcss-datepicker/dist";
 
@@ -295,6 +296,19 @@ input:disabled {
 @keyframes hero-failsafe {
   to {
     opacity: 1;
+  }
+}
+
+/* Spotlight timer: the bar fills, then the carousel moves on. */
+.spotlight-progress {
+  animation: spotlight-progress linear forwards;
+}
+@keyframes spotlight-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 
