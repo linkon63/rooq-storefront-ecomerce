@@ -819,6 +819,7 @@ model Product {
   tags            Tag[]                       @relation("product_tags")
   collections     CollectionProduct[]
   heroSlides      HeroSlide[]
+  reels           Reel[]
   lookItems       CollectionLookItem[]
   wishlists       Wishlist[]
   reviews         Review[]
@@ -1922,4 +1923,34 @@ model CustomerGalleryImage {
   @@id([entryId, mediaId])
   @@index([mediaId])
   @@map("customer_gallery_images")
+}
+
+/// A short silent video on the home page, linked to the product it shows.
+model Reel {
+  id       String  @id @default(uuid(7))
+  position Int     @default(0)
+  isActive Boolean @default(true) @map("is_active")
+
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  mimeType  String @map("mime_type")
+  sizeBytes Int    @map("size_bytes")
+  /// Bytes live in their own table so list queries never drag them along.
+  blob      ReelBlob?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, position])
+  @@index([productId])
+  @@map("reels")
+}
+
+model ReelBlob {
+  reelId String @id @map("reel_id")
+  reel   Reel   @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  data   Bytes
+
+  @@map("reel_blobs")
 }

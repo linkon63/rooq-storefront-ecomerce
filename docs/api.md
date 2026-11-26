@@ -325,3 +325,14 @@ These route groups belong to the API but had no route file when this page was ge
 | --- | --- | --- | --- |
 | `POST` | `/api/contact` | P | Contact form → e-mail to `STORE_EMAIL` (Resend). |
 | `POST` | `/api/resend/newsletter` | P | Newsletter sign-up → e-mail to `RESEND_TO_EMAIL`. |
+
+## Reels
+
+| Method | Path | Access | Notes |
+|---|---|---|---|
+| GET | `/api/v1/reels` | staff | every reel in order |
+| POST | `/api/v1/reels` | staff | multipart: `video` (MP4, ≤4 MB), `productId` |
+| PATCH | `/api/v1/reels/:id` | staff | `productId`, `isActive` |
+| DELETE | `/api/v1/reels/:id` | staff | removes the reel and its video |
+| PUT | `/api/v1/reels/reorder` | staff | `{ ids }` |
+| GET | `/api/v1/reels/:id/video` | public | MP4, supports `Range` |

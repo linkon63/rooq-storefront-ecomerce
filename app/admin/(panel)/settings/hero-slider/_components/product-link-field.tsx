@@ -51,7 +51,7 @@ export function ProductLinkField({ value, disabled, onChange }: Props) {
         value={term}
         onChange={(e) => setTerm(e.target.value)}
         aria-label="Search a product to link"
-        placeholder="Link a product (optional): search by name"
+        placeholder="Link a product: search by name"
         className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
       />
       {term.trim().length >= 2 && results.length ? (

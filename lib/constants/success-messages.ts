@@ -16,6 +16,12 @@ export const SUCCESS_MESSAGES = {
     reordered: "Slide order saved",
     modeSaved: "Hero updated",
   },
+  reel: {
+    added: "Reel added",
+    saved: "Reel saved",
+    deleted: "Reel deleted",
+    reordered: "Reel order saved",
+  },
   auth: {
     loggedOut: "Logged out successfully",
     passwordChanged: "Password changed successfully",

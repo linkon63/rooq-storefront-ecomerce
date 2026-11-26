@@ -148,6 +148,7 @@ export const CATALOG_WRITE_PREFIXES = [
   "/api/v1/settings",
   "/api/v1/campaigns",
   "/api/v1/hero-slides",
+  "/api/v1/reels",
   "/api/v1/policies",
   "/api/v1/tags",
   "/api/v1/orders",

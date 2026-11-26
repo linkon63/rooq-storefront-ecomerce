@@ -1132,3 +1132,8 @@ When `prisma/schema.prisma` changes (new migration), regenerate `rooq-erd.drawio
 xmllint --noout docs/database/rooq-erd.drawio
 npx -y -p @dbml/cli dbml2sql docs/database/schema.dbml --postgres > /dev/null
 ```
+
+## Reels
+
+- `reels` — a short home page video linked to one product (`product_id`, cascade delete): `position`, `is_active`, `mime_type`, `size_bytes`. *(Prisma model `Reel`.)*
+- `reel_blobs` — the MP4 bytes, one row per reel (cascade delete). Served by `GET /api/v1/reels/:id/video`. *(Prisma model `ReelBlob`.)*
