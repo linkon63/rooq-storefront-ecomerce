@@ -40,5 +40,17 @@ export const MEDIA_RESIZE_WIDTHS: readonly number[] = [
 ];
 export const MEDIA_RESIZE_QUALITY = 75;
 
+/** ROOQ logo stamped on product photos as they are served (sizes relative to the image width). */
+export const WATERMARK = {
+  widthRatio: 0.22,
+  marginRatio: 0.03,
+  opacity: 0.6,
+  minImageWidth: 200,
+  fullQuality: 85,
+} as const;
+
+/** Bump when served pixels change, so browsers and the CDN fetch images again. */
+export const MEDIA_URL_VERSION = "2";
+
 /** Per-instance memory budget for recently served image bytes. */
 export const MEDIA_MEMORY_CACHE_BYTES = 64 * 1024 * 1024;

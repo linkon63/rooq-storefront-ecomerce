@@ -1,6 +1,7 @@
 "use client";
 
 import type { ImageLoaderProps } from "next/image";
+import { MEDIA_URL_VERSION } from "@/lib/constants/media";
 import { isMediaRouteSrc } from "@/utils/media-url";
 
 const UNSPLASH = "https://images.unsplash.com/";
@@ -12,7 +13,7 @@ const UNSPLASH = "https://images.unsplash.com/";
  * Unsplash resizes itself; everything else is served as is.
  */
 export default function imageLoader({ src, width, quality }: ImageLoaderProps): string {
-  if (isMediaRouteSrc(src)) return `${src}?w=${width}`;
+  if (isMediaRouteSrc(src)) return `${src}?w=${width}&v=${MEDIA_URL_VERSION}`;
   if (src.startsWith(UNSPLASH)) {
     const url = new URL(src);
     url.searchParams.set("w", String(width));

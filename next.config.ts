@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   },
   // Native / Node-only server deps stay out of the server bundle.
   serverExternalPackages: ["sharp", "pdfkit", "@prisma/client", "@prisma/adapter-pg", "pg", "bcryptjs"],
+  // The watermark logo is read from disk by the media route.
+  outputFileTracingIncludes: { "/api/v1/media/*": ["./public/images/logo-kechi-clear.png"] },
   images: {
     // No /_next/image: database images are resized by GET /api/v1/media/:id?w=
     // and cached by the CDN (see utils/image-loader.ts); the rest load as is.

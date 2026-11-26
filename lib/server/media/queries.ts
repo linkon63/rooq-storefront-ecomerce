@@ -10,6 +10,8 @@ export type ServableMedia = {
   checksum: string | null;
   provider: "DATABASE" | "EXTERNAL";
   externalUrl: string | null;
+  /** Product photos are served with the logo watermark. */
+  isProductPhoto: boolean;
   data: Uint8Array<ArrayBuffer>;
 };
 
@@ -19,6 +21,7 @@ type MediaRow = {
   provider: "DATABASE" | "EXTERNAL";
   external_url: string | null;
   data: Uint8Array | null;
+  is_product_photo: boolean;
 };
 
 const uuid = z.uuid();
@@ -33,13 +36,14 @@ export async function getMediaForServing(id: string): Promise<ServableMedia> {
   if (cached) return cached;
 
   const [row] = await prisma.$queryRaw<MediaRow[]>`
-    SELECT m.mime_type, m.checksum, m.provider::text AS provider, m.external_url, b.data
+    SELECT m.mime_type, m.checksum, m.provider::text AS provider, m.external_url, b.data,
+      EXISTS (SELECT 1 FROM product_media p WHERE p.media_id = m.id) AS is_product_photo
     FROM media m LEFT JOIN media_blobs b ON b.media_id = m.id
     WHERE m.id = ${id}
     LIMIT 1`;
   if (!row) throw notFound(ERROR_MESSAGES.media.notFound);
 
-  const base = { mimeType: row.mime_type, checksum: row.checksum, provider: row.provider };
+  const base = { mimeType: row.mime_type, checksum: row.checksum, provider: row.provider, isProductPhoto: row.is_product_photo };
   if (row.provider === "EXTERNAL") {
     return { ...base, externalUrl: row.external_url, data: new Uint8Array(new ArrayBuffer(0)) };
   }
