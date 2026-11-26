@@ -4,7 +4,6 @@ import type { ProductCard } from "@/types/storefront/catalog";
 import type { HomeHeroData } from "@/types/storefront/content";
 import { heroVariant } from "@/utils/storefront/hero";
 import { HeroCampaignBanner } from "./hero-campaign-banner";
-import { HeroIntro } from "./hero-intro";
 import { HeroMobileProducts } from "./hero-mobile-products";
 import { HeroSlider } from "./hero-slider";
 
@@ -28,7 +27,11 @@ export async function HomeHero({ returnDays, hero, latest }: HomeHeroProps) {
       {variant === "slider" ? (
         <>
           <div className={latest.length ? "hidden lg:block" : undefined}>
-            <HeroSlider slides={hero.slides} labels={{ play: t.home.playShow, pause: t.home.pauseShow }} />
+            <HeroSlider
+              slides={hero.slides}
+              labels={{ play: t.home.playShow, pause: t.home.pauseShow }}
+              hiddenOn={latest.length ? "(max-width: 1023px)" : undefined}
+            />
           </div>
           {latest.length ? (
             <HeroMobileProducts
@@ -39,23 +42,22 @@ export async function HomeHero({ returnDays, hero, latest }: HomeHeroProps) {
           ) : null}
         </>
       ) : null}
-      <HeroIntro>
         <div className="page-gutter grid items-end gap-6 pb-8 pt-6 lg:grid-cols-[1.3fr_1fr] lg:pb-12 lg:pt-10">
           <h1 id="hero-title" className="type-display text-[clamp(3rem,9vw,6.5rem)] leading-[0.95]">
-            {t.home.headline.map((line) => (
+            {t.home.headline.map((line, index) => (
               <span key={line} className="block overflow-hidden pb-[0.06em]">
-                <span data-hero-line className="hero-reveal weft-done relative block">
-                  <span data-weft="a" className="weft-a block">
+                <span className="relative block">
+                  <span className="weft-a block" style={{ animationDelay: `${index * 0.16}s` }}>
                     {line}
                   </span>
-                  <span data-weft="b" aria-hidden className="weft-b absolute inset-0 block">
+                  <span aria-hidden className="weft-b absolute inset-0 block" style={{ animationDelay: `${index * 0.16}s` }}>
                     {line}
                   </span>
                 </span>
               </span>
             ))}
           </h1>
-          <div data-hero-after className="hero-reveal flex flex-col gap-5">
+          <div className="hero-rise flex flex-col gap-5">
             <p className="type-label inline-flex w-fit items-center gap-2 border border-gold/60 bg-selvedge/50 px-3 py-1.5 text-ink">
               <span aria-hidden className="size-1.5 rounded-full bg-dye" />
               {t.home.heritageBadge}
@@ -81,7 +83,6 @@ export async function HomeHero({ returnDays, hero, latest }: HomeHeroProps) {
             </div>
           </div>
         </div>
-      </HeroIntro>
     </section>
   );
 }

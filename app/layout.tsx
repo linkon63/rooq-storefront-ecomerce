@@ -17,10 +17,10 @@ const hanken = Hanken_Grotesk({
 
 const newsreader = Newsreader({
   subsets: ["latin"],
-  axes: ["opsz"],
   style: ["normal", "italic"],
   variable: "--font-newsreader",
   display: "swap",
+  preload: false,
 });
 
 /** Admin panel face (not preloaded: the storefront never renders it). */
@@ -108,7 +108,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <StoreProvider>{children}</StoreProvider>
-        <SpeedInsights />
+        {/* The script only exists on Vercel; elsewhere it is a 404. */}
+        {process.env.VERCEL ? <SpeedInsights /> : null}
       </body>
     </html>
   );
