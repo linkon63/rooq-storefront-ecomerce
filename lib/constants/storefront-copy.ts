@@ -34,7 +34,7 @@ export const COPY = {
     comingSoonLead: "New departments and pieces we are working on right now.",
     moreSuffix: "more",
     allCategories: "All categories",
-    chooseInShop: "Choose in the shop",
+    viewAll: "View all",
     collections: "Collections",
     allCollections: "All collections",
     newestInEdit: "Newest in the edit",

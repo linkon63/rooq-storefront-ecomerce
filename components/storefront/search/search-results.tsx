@@ -24,7 +24,7 @@ export function SearchResults({ results, error, term, onNavigate }: Props) {
   if (results.length === 0) {
     return (
       <p className="text-sm text-stone" aria-live="polite">
-        Nothing matches “{term}”. Try a broader word, like “shirt” or “dress”.
+        Nothing matches “{term}”. Try a broader word, like “cotton” or “saree”.
       </p>
     );
   }

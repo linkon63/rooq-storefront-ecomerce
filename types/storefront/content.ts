@@ -42,7 +42,7 @@ export type HeroCampaign = {
   images: HeroImage[];
 };
 
-/** The live "Sale Countdown" campaign on the home page; `endAt` is an ISO string in the future when loaded. */
+/** A live "Sale Countdown" campaign on the home page; `endAt` is an ISO string in the future when loaded. */
 export type SaleCountdownCampaign = {
   id: string;
   title: string;

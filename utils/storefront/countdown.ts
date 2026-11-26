@@ -56,20 +56,25 @@ type CountdownCampaignLike = {
   discount: { name: string; type: "percentage" | "fixed"; value: number } | null;
 };
 
-/** First live countdown campaign (the list is already live-only) whose end is still ahead. */
-export function toSaleCountdown(campaigns: readonly CountdownCampaignLike[], now: number): SaleCountdownCampaign | null {
-  const match = campaigns.find(
-    (campaign) => isCountdownSection(campaign.section) && campaign.endAt && new Date(campaign.endAt).getTime() > now,
-  );
-  if (!match?.endAt) return null;
-  return {
-    id: match.id,
-    title: match.title,
-    description: match.description,
-    linkUrl: match.linkUrl,
-    linkLabel: match.linkLabel,
-    endAt: new Date(match.endAt).toISOString(),
-    image: match.media[0] ?? null,
-    discount: match.discount ? { name: match.discount.name, type: match.discount.type, value: match.discount.value } : null,
-  };
+/** Every live countdown campaign (the list is already live-only) whose end is still ahead, ending soonest first. */
+export function toSaleCountdowns(campaigns: readonly CountdownCampaignLike[], now: number): SaleCountdownCampaign[] {
+  return campaigns
+    .flatMap((campaign) => {
+      const end = campaign.endAt ? new Date(campaign.endAt) : null;
+      if (!isCountdownSection(campaign.section) || !end || end.getTime() <= now) return [];
+      const { discount } = campaign;
+      return [
+        {
+          id: campaign.id,
+          title: campaign.title,
+          description: campaign.description,
+          linkUrl: campaign.linkUrl,
+          linkLabel: campaign.linkLabel,
+          endAt: end.toISOString(),
+          image: campaign.media[0] ?? null,
+          discount: discount ? { name: discount.name, type: discount.type, value: discount.value } : null,
+        },
+      ];
+    })
+    .sort((a, b) => a.endAt.localeCompare(b.endAt));
 }

@@ -5,8 +5,8 @@ import { useSheetDrag } from "@/hooks/use-sheet-drag";
 import type { ReactNode } from "react";
 import { FiX } from "react-icons/fi";
 
-/** `adaptive`: a bottom sheet on phones, a centred dialog from md. */
-type Placement = "center" | "right" | "bottom" | "left" | "adaptive";
+/** `adaptive`: bottom sheet on phones, centred dialog from md. `search`: 80% bottom sheet on phones, right panel from md. */
+type Placement = "center" | "right" | "bottom" | "left" | "adaptive" | "search";
 
 const PANEL: Record<Placement, string> = {
   center:
@@ -15,6 +15,8 @@ const PANEL: Record<Placement, string> = {
   left: "left-0 top-0 h-dvh w-[86%] max-w-sm data-[state=open]:animate-[sheet-in-left_.32s_var(--ease-cloth)]",
   bottom:
     "bottom-0 left-0 w-full max-h-[88dvh] rounded-t-lg data-[state=open]:animate-[sheet-in-up_.32s_var(--ease-cloth)]",
+  search:
+    "bottom-0 left-0 h-[80dvh] w-full rounded-t-lg max-md:data-[state=open]:animate-[sheet-in-up_.32s_var(--ease-cloth)] md:left-auto md:right-0 md:h-dvh md:max-w-md md:rounded-none md:data-[state=open]:animate-[sheet-in-right_.32s_var(--ease-cloth)]",
   adaptive:
     "bottom-0 left-0 w-full max-h-[88dvh] rounded-t-lg max-md:data-[state=open]:animate-[sheet-in-up_.32s_var(--ease-cloth)] md:bottom-auto md:left-1/2 md:top-1/2 md:w-[calc(100%-2rem)] md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:max-h-[calc(100dvh-2rem)] md:rounded",
 };
@@ -46,7 +48,7 @@ export function Modal({
   className = "",
 }: ModalProps) {
   const { panel, handle } = useSheetDrag(() => onOpenChange(false));
-  const draggable = placement === "bottom" || placement === "adaptive";
+  const draggable = placement === "bottom" || placement === "adaptive" || placement === "search";
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>

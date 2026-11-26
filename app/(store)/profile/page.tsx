@@ -9,7 +9,7 @@ export default function ProfilePage() {
   return (
     <div className="page-gutter pt-4 md:pt-12">
       <div className="mx-auto w-full max-w-3xl">
-        <h1 className="max-md:sr-only mb-6 font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Your account</h1>
+        <h1 className="max-md:pt-4 max-md:!mb-4 mb-6 font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Your account</h1>
         <Suspense fallback={null}>
           <AccountView phoneMenu={<PhoneMenu />} />
         </Suspense>

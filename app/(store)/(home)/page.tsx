@@ -29,7 +29,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 /**
  * Home: hero (slider of looks, woven headline; the newest three on phones),
  * the 3D saree unfold (lg+), categories (unrolling bolts), new in (8; slides
- * of four on phones), offers,
+ * of four on phones), running offers with countdowns, offers,
  * collections (two newest pieces each), lookbook (parallax), best sellers (5),
  * two spotlight products, the made-by-hand numbers, the order journey, coming
  * soon, contact and recently viewed. The layout sews a thread down it as it
@@ -74,9 +74,6 @@ export default async function HomePage() {
       <div className="max-md:hidden md:contents">
         <CategoryTiles categories={tiles} />
       </div>
-      <Suspense fallback={null}>
-        <SaleCountdown />
-      </Suspense>
       <ProductRail
         title={t.home.newIn}
         products={newIn.data.length ? newIn.data : latest.data}
@@ -84,6 +81,9 @@ export default async function HomePage() {
         layout="pages"
         dotLabel={t.home.goToSlide}
       />
+      <Suspense fallback={null}>
+        <SaleCountdown />
+      </Suspense>
       <ProductRail title={t.home.offers} products={offers.data} link={{ label: t.home.seeOffers, href: "/sale" }} />
       <Suspense fallback={null}>
         <FeaturedCollections />

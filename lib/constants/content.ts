@@ -21,6 +21,27 @@ export const SECTION_TITLES = {
   countdown: "Sale Countdown",
 } as const;
 
+/**
+ * The sections the website actually renders, with what the admin is told about
+ * each. Only these can be added in Campaigns; any other title shows nowhere.
+ */
+export const SECTION_GUIDE = [
+  {
+    title: SECTION_TITLES.countdown,
+    where: "Home page, just below New In, with a ticking countdown.",
+    howTo: "Add a photo and an end date. Every running sale gets its own slide, the one ending soonest first.",
+  },
+  {
+    title: SECTION_TITLES.hero,
+    where: "Top of the home page.",
+    howTo:
+      "Add a photo. With Settings → Hero Slider set to Campaign, the newest live one shows as a large banner; in Slider mode only its description and button are used.",
+  },
+] as const;
+
+/** Shown for a section that is not in SECTION_GUIDE. */
+export const SECTION_HIDDEN_NOTE = "Not shown on the website. Campaigns filed here will not appear anywhere.";
+
 /** Page key of the home page sections. */
 export const HOME_PAGE_KEY = "home";
 

@@ -13,7 +13,7 @@ import { CountBadge } from "../shell/count-badge";
 
 const ICONS: Record<MobileTabKey, { idle: IconType; active: IconType }> = {
   home: { idle: FiHome, active: FaHouse },
-  categories: { idle: FiGrid, active: FaTableCellsLarge },
+  shop: { idle: FiGrid, active: FaTableCellsLarge },
   bag: { idle: FiShoppingBag, active: FaBagShopping },
   wishlist: { idle: FiHeart, active: FaHeart },
   me: { idle: FiUser, active: FaUser },
