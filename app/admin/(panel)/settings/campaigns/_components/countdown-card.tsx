@@ -41,7 +41,7 @@ export function CountdownCard({ campaigns, onCreate, onEdit }: Props) {
           {busy ? "Preparing…" : "Create countdown sale"}
         </button>
       }
-      description="A sale with an end date shows on the home page with a live countdown. Link an offer to show its discount; the banner hides itself when the sale ends."
+      description="Each sale with an end date shows below New In on the home page with a live countdown; several running sales slide one after another, ending soonest first. Link an offer to show its discount; a sale hides itself when it ends."
       title="Sale countdown"
     >
       {sales.length === 0 ? (

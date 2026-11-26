@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { Messages } from "@/lib/constants/storefront-copy";
-import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
+import type { NavItem } from "@/types/storefront/catalog";
 import Logo from "../shared/Logo";
 import { HeaderActions } from "./header-actions";
 import { MobileNavButton } from "./mobile-nav-button";
+import { MobileNavSheet } from "./mobile-nav-sheet";
 import { Suspense } from "react";
 import { MobileAppBar } from "../mobile/mobile-app-bar";
 import { NavLink } from "./nav-link";
@@ -13,7 +14,7 @@ import { headerNav } from "@/utils/storefront/nav";
 
 type SiteHeaderProps = {
   nav: NavItem[];
-  categories: ShopCategoryNode[];
+  logo: string | null;
   announcement: string | null;
   phone: string | null;
   whatsapp: string;
@@ -21,12 +22,10 @@ type SiteHeaderProps = {
 };
 
 /** Sticky header: thin, left-aligned, the garment gets the space. */
-export function SiteHeader({ nav: allNav, categories, announcement, phone, whatsapp, t }: SiteHeaderProps) {
+export function SiteHeader({ nav: allNav, logo, announcement, phone, whatsapp, t }: SiteHeaderProps) {
   // Coming-soon categories stay out of the header (they remain in the footer and on the home page).
   const nav = allNav.filter((item) => !item.soon);
-  const topCategories = categories
-    .filter((category) => !category.parentId && category.isActive !== false && !category.isComingSoon)
-    .slice(0, 8);
+  const menuNav = headerNav(nav, 0);
   return (
     <>
       <a
@@ -36,12 +35,13 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
         {t.header.skip}
       </a>
       {/* No Suspense: hydrating late would clash with the bag count already loaded into Redux. */}
-      <MobileAppBar />
+      <MobileAppBar logo={logo} menuLabel={t.header.openMenu} />
+      <MobileNavSheet nav={menuNav} t={t.mobileNav} />
       <TopBar phone={phone} whatsapp={whatsapp} announcement={announcement} t={t} />
       <StickyHeader>
         <div className="page-gutter grid h-[calc(4.5rem-1rem*var(--p))] grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-[calc(6rem-2rem*var(--p))] lg:gap-8">
           <div className="flex items-center">
-            <MobileNavButton nav={nav} categories={topCategories} t={t.mobileNav} openLabel={t.header.openMenu} soon={t.nav.soon} />
+            <MobileNavButton openLabel={t.header.openMenu} />
             <nav aria-label="Main" className="hidden lg:block">
               <ul className="flex items-center gap-6">
                 <Suspense fallback={null}>
@@ -55,7 +55,7 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
             </nav>
           </div>
           <Link href="/" prefetch aria-label={t.header.home} className="shrink-0" data-stitch-origin>
-            <Logo kechi className="h-[calc(3.5rem-1.25rem*var(--p))] lg:h-[calc(4.5rem-1.75rem*var(--p))]" />
+            <Logo kechi src={logo} className="h-[calc(3.5rem-1.25rem*var(--p))] lg:h-[calc(4.5rem-1.75rem*var(--p))]" />
           </Link>
           <HeaderActions t={t.header} />
         </div>

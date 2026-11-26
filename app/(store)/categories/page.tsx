@@ -13,7 +13,7 @@ export default async function CategoriesPage() {
   const roots = categories.filter((category) => !category.parentId && category.isActive !== false);
   return (
     <div className="page-gutter max-md:px-0 md:pt-12">
-      <h1 className="type-h1 max-md:sr-only md:mb-8">Categories</h1>
+      <h1 className="type-h1 max-md:px-4 max-md:py-4 md:mb-8">Categories</h1>
       <CategoryBrowser roots={roots} />
     </div>
   );

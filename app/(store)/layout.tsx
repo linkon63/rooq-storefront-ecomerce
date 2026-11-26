@@ -44,7 +44,7 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
       <div className="storefront-root relative flex min-h-full flex-1 flex-col">
         <SiteHeader
           nav={nav}
-          categories={categories}
+          logo={settings.logoUrl}
           announcement={announcement}
           phone={WHATSAPP_NUMBER}
           whatsapp={WHATSAPP_NUMBER}

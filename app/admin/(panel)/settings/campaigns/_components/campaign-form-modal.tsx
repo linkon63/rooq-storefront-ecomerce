@@ -11,6 +11,7 @@ import { isCountdownSection } from "@/utils/storefront/countdown";
 import { FieldLabel, Input, StatusToggle, Textarea } from "../../_components/settings-ui";
 import { CampaignDiscountField } from "./campaign-discount-field";
 import { CampaignImagesField } from "./campaign-images-field";
+import { SectionHint } from "./section-hint";
 
 type Props = {
   initial: CampaignFormState;
@@ -28,7 +29,8 @@ export function CampaignFormModal({ initial, sections, discounts, onClose, onSav
   const [saving, setSaving] = useState(false);
   const set = (patch: Partial<CampaignFormState>) => setForm((p) => ({ ...p, ...patch }));
 
-  const isCountdown = isCountdownSection(sections.find((s) => s.id === form.sectionId));
+  const section = sections.find((s) => s.id === form.sectionId);
+  const isCountdown = isCountdownSection(section);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -63,7 +65,7 @@ export function CampaignFormModal({ initial, sections, discounts, onClose, onSav
                 <option value="">Select a section</option>
                 {sections.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.title} ({s.page})
+                    {s.title}
                   </option>
                 ))}
               </select>
@@ -76,6 +78,7 @@ export function CampaignFormModal({ initial, sections, discounts, onClose, onSav
               </div>
             </div>
           </div>
+          {section ? <SectionHint section={section} /> : null}
           <div>
             <FieldLabel required>Title</FieldLabel>
             <Input onChange={(title) => set({ title })} placeholder="The Summer Edit" required value={form.title} />

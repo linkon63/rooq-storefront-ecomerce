@@ -52,7 +52,7 @@ export function SearchOverlay() {
   const showResults = debounced.length >= 2;
 
   return (
-    <Modal open onOpenChange={(open) => (open ? null : close())} title="Search" placement="right">
+    <Modal open onOpenChange={(open) => (open ? null : close())} title="Search" placement="search">
       <div className="flex flex-col gap-6 px-4 py-5">
         <form role="search" onSubmit={submit} className="relative">
           <label htmlFor="site-search" className="sr-only">

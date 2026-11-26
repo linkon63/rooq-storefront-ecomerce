@@ -29,7 +29,7 @@ export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFoote
     <footer className="site-footer mt-16 bg-ink text-chalk md:mt-24">
       <div className="page-gutter grid grid-cols-2 gap-x-6 gap-y-9 py-10 md:gap-12 md:py-14 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="col-span-2 flex flex-col gap-4 md:col-span-2 md:gap-5 lg:col-span-1">
-          <Logo kechi variant="light" className="h-auto w-44 self-center lg:self-start" />
+          <Logo kechi variant="light"className="h-auto w-44 self-center lg:self-start" />
           {settings.footerDescription ? <p className="max-w-[42ch] text-sm text-chalk/75">{settings.footerDescription}</p> : null}
           <NewsletterForm t={newsletter} />
           <InstallAppButton label={t.installApp} hintIos={t.installHintIos} hintOther={t.installHintOther} />

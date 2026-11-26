@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { ShopCategoryNode } from "@/types/storefront/catalog";
 import { categoryHref } from "@/utils/storefront/nav";
 
@@ -8,6 +9,12 @@ export function CategoryCircles({ categories }: { categories: ShopCategoryNode[]
   if (categories.length === 0) return null;
   return (
     <nav aria-label="Categories" className="-mb-5 pt-3 md:hidden">
+      <div className="flex items-center justify-between px-4 pb-1">
+        <h2 className="text-base font-semibold">{COPY.home.categories}</h2>
+        <Link href="/categories" className="press py-2 text-sm font-semibold underline underline-offset-4">
+          {COPY.home.viewAll}
+        </Link>
+      </div>
       <ul className="rail-scroll flex gap-3 overflow-x-auto px-4">
         {categories.map((category) => (
           <li key={category.id} className="w-[4.5rem] shrink-0">

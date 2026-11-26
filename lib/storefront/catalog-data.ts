@@ -28,7 +28,7 @@ import type { ReviewWithProduct } from "@/types/storefront/commerce";
 import type { HomeHeroData, HomeStats, SaleCountdownCampaign, StorePolicy, StoreSettings } from "@/types/storefront/content";
 import { activeTree } from "@/utils/catalog/category-tree";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
-import { toSaleCountdown } from "@/utils/storefront/countdown";
+import { toSaleCountdowns } from "@/utils/storefront/countdown";
 import { attachProducts, linkedProductIds, toHeroCampaign } from "@/utils/storefront/hero";
 import { EMPTY_SETTINGS, normalisePolicies, normaliseSettings } from "@/utils/storefront/settings";
 import { cachedRead, readOr, readOrNull } from "./server-api";
@@ -69,8 +69,8 @@ const readHero = cachedRead<[], HomeHeroData>("hero", async () => {
   return { mode, slides: attachProducts(slides, cards), campaign: toHeroCampaign(campaigns) };
 });
 const readHomeStats = cachedRead<[], HomeStats>("home-stats", () => readLiveHomeStats());
-const readSaleCountdown = cachedRead<[], SaleCountdownCampaign | null>("sale-countdown", async () =>
-  toSaleCountdown(await listCampaigns(), Date.now()),
+const readSaleCountdowns = cachedRead<[], SaleCountdownCampaign[]>("sale-countdowns", async () =>
+  toSaleCountdowns(await listCampaigns(), Date.now()),
 );
 const readCollection = cachedRead<[string, number], CollectionDetail>("collection", (slug, page) =>
   findCollectionBySlug(slug, parseValue({ page: String(page), limit: "24" }, collectionDetailQuery)),
@@ -120,9 +120,9 @@ export const getHomeHero = cache(
   (): Promise<HomeHeroData> => readOr("hero", readHero, { mode: "SLIDER", slides: [], campaign: null }),
 );
 
-/** The live home "Sale Countdown" campaign (end date still ahead), or null. */
-export const getSaleCountdown = cache(
-  (): Promise<SaleCountdownCampaign | null> => readOr("sale-countdown", readSaleCountdown, null),
+/** The live home "Sale Countdown" campaigns (end date still ahead), ending soonest first. */
+export const getSaleCountdowns = cache(
+  (): Promise<SaleCountdownCampaign[]> => readOr("sale-countdowns", readSaleCountdowns, []),
 );
 
 /** Shop numbers for the home "made by hand" line, or null when they cannot be read. */
