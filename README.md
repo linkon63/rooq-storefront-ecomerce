@@ -58,6 +58,7 @@ pnpm db:migrate:deploy   # apply prisma/migrations to DIRECT_URL (or: pnpm db:mi
 pnpm db:seed             # roles, admin account, sizes, colours, categories, demo fashion catalogue, images (~3 min on a remote DB)
 pnpm db:seed:categories  # optional: only update categories from data/category-photos
 pnpm db:seed:reviews     # optional: publish the screenshots in data/review to the customer gallery
+pnpm db:seed:reels       # optional: add the videos in data/reels to the home page (needs the products)
 pnpm db:seed:products    # optional: only update products from data/product-photos (README.md + photos)
 ```
 

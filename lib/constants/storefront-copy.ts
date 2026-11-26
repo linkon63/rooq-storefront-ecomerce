@@ -58,6 +58,7 @@ export const COPY = {
     allQuestions: "All questions",
     askUs: "Ask us",
     headline: ["Woven by hand.", "Worn with pride."],
+    reels: { title: "Reels", play: "Play the {name} video", pause: "Pause the {name} video" },
     sareeAbout: {
       title: "Buy saree online in Bangladesh",
       body: [

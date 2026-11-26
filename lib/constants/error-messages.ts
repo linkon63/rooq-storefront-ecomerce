@@ -382,6 +382,19 @@ export const ERROR_MESSAGES = {
     modeFailed: "Could not change what the hero shows. Please try again.",
   },
 
+  reel: {
+    notFound: notFound("Reel"),
+    videoRequired: "Choose a video for the reel.",
+    productRequired: "Choose the product this reel shows.",
+    notMp4: "Upload an MP4 video.",
+    tooLarge: (maxMb: number) => `The video must be ${maxMb} MB or smaller.`,
+    productNotFound: notFound("Product"),
+    reorderMismatch: "The reel order is out of date. Refresh and try again.",
+    loadFailed: "Could not load the reels. Refresh to try again.",
+    saveFailed: "Could not save the reel. Please try again.",
+    deleteFailed: "Could not delete the reel. Please try again.",
+  },
+
   discount: {
     notFound: notFound("Product discount"),
     invalidWindow: "End date must be after start date",

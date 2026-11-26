@@ -80,3 +80,6 @@ export type ShopperNotification = {
 
 /** Live numbers behind the home "made by hand" line. */
 export type HomeStats = { pieces: number; delivered: number; reviewCount: number; averageRating: number | null };
+
+/** A home page video and the product it opens. */
+export type HomeReel = { id: string; videoUrl: string; product: ProductCard };

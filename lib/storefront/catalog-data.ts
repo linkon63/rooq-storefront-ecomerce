@@ -12,9 +12,12 @@ import { getPolicies } from "@/lib/server/policies/service";
 import { listRecentReviews } from "@/lib/server/reviews/recent";
 import { listCampaigns } from "@/lib/server/campaigns/service";
 import { getHeroMode, listHeroSlides } from "@/lib/server/hero-slides/service";
+import { listReels } from "@/lib/server/reels/service";
+import { HOME_REEL_LIMIT } from "@/lib/constants/reels";
 import { getSettings } from "@/lib/server/settings/service";
 import { getHomeStats as readLiveHomeStats } from "@/lib/server/home/stats";
 import { parseValue, searchParamsToObject } from "@/lib/server/validation";
+import type { HomeReel } from "@/types/storefront/content";
 import type {
   CollectionDetail,
   CollectionSummary,
@@ -67,6 +70,16 @@ const readHero = cachedRead<[], HomeHeroData>("hero", async () => {
     ? (await listProducts(parseValue(queryObject(toQueryString({ ids, limit: ids.length, facets: false })), productListQuery), { isStaff: false })).data
     : [];
   return { mode, slides: attachProducts(slides, cards), campaign: toHeroCampaign(campaigns) };
+});
+const readHomeReels = cachedRead<[], HomeReel[]>("home-reels", async () => {
+  const reels = await listReels({ activeOnly: true, limit: HOME_REEL_LIMIT });
+  if (reels.length === 0) return [];
+  const ids = [...new Set(reels.map((reel) => reel.product.id))];
+  const cards = (await listProducts(parseValue(queryObject(toQueryString({ ids, limit: ids.length, facets: false })), productListQuery), { isStaff: false })).data;
+  return reels.flatMap((reel) => {
+    const product = cards.find((card) => card.id === reel.product.id);
+    return product ? [{ id: reel.id, videoUrl: reel.videoUrl, product }] : [];
+  });
 });
 const readHomeStats = cachedRead<[], HomeStats>("home-stats", () => readLiveHomeStats());
 const readSaleCountdowns = cachedRead<[], SaleCountdownCampaign[]>("sale-countdowns", async () =>
@@ -131,4 +144,9 @@ export const getHomeStats = cache((): Promise<HomeStats | null> => readOr("home-
 /** Newest approved Facebook reviews for the home page; empty when they cannot be read. */
 export function getFacebookReviews(limit: number): Promise<PublicGalleryEntry[]> {
   return readOr("facebook reviews", async () => (await readFacebookReviews()).slice(0, limit), []);
+}
+
+/** The home page reels with their product cards; empty when none (or on error). */
+export function getHomeReels(): Promise<HomeReel[]> {
+  return readOr("reels", readHomeReels, []);
 }

@@ -15,6 +15,7 @@ import { OrderJourney } from "@/components/storefront/home/order-journey/order-j
 import { SaleCountdown } from "@/components/storefront/home/sale-countdown/sale-countdown";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
+import { ReelsSection } from "@/components/storefront/home/reels/reels-section";
 import { SareeAbout } from "@/components/storefront/home/saree-about";
 import { SEO_ALTERNATE_NAMES, SEO_SITE_DESCRIPTION } from "@/lib/constants/seo";
 import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS, SITE_URL } from "@/lib/constants/storefront";
@@ -31,7 +32,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
  * the 3D saree unfold (lg+), categories (unrolling bolts), new in (8; slides
  * of four on phones), running offers with countdowns, offers,
  * collections (two newest pieces each), lookbook (parallax), best sellers (5),
- * two spotlight products, the made-by-hand numbers, the order journey, coming
+ * two spotlight products, product reels, the made-by-hand numbers, the order journey, coming
  * soon, contact and recently viewed. The layout sews a thread down it as it
  * scrolls (HomeStitch). Every read starts at once; collections and numbers
  * stream in.
@@ -107,6 +108,11 @@ export default async function HomePage() {
         <Suspense fallback={null}>
           <ProductHighlights fallback={bestSellers.data} />
         </Suspense>
+      </div>
+      <Suspense fallback={null}>
+        <ReelsSection />
+      </Suspense>
+      <div className="max-md:hidden md:contents">
         <Suspense fallback={null}>
           <MadeByHand />
         </Suspense>
