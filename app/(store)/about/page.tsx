@@ -5,7 +5,8 @@ import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
 import { getMessages } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
-  title: "About us",
+  title: "About our handmade sarees",
+  alternates: { canonical: "/about" },
   description: "Rooq brings custom-designed, handmade tant sarees straight from real weaving groups at fair prices for the new generation.",
 };
 

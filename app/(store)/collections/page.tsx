@@ -4,8 +4,9 @@ import { EmptyState } from "@/components/storefront/shared/empty-state";
 import { listCollections } from "@/lib/storefront/catalog-data";
 
 export const metadata: Metadata = {
-  title: "Collections and lookbooks",
-  description: "Curated Rooq collections and lookbooks. Shop a whole look in one go.",
+  title: "Saree Collections and Lookbooks",
+  description: "Curated Rooq saree (sharee) collections and lookbooks. Shop BD sharee for every occasion.",
+  alternates: { canonical: "/collections" },
 };
 
 export default async function CollectionsPage() {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CategoryCircles } from "@/components/storefront/home/category-circles";
 import { CategoryTiles } from "@/components/storefront/home/category-tiles";
@@ -14,11 +15,16 @@ import { OrderJourney } from "@/components/storefront/home/order-journey/order-j
 import { SaleCountdown } from "@/components/storefront/home/sale-countdown/sale-countdown";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
-import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
+import { SareeAbout } from "@/components/storefront/home/saree-about";
+import { SEO_ALTERNATE_NAMES, SEO_SITE_DESCRIPTION } from "@/lib/constants/seo";
+import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS, SITE_URL } from "@/lib/constants/storefront";
 import { getMessages } from "@/lib/i18n/server";
 import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail } from "@/lib/storefront/catalog-data";
+import { siteJsonLd } from "@/utils/storefront/site-seo";
 
 const OFFERS_LIMIT = 8;
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /**
  * Home: hero (slider of looks, woven headline; the newest three on phones),
@@ -53,6 +59,12 @@ export default async function HomePage() {
 
   return (
     <div data-home className="flex flex-col gap-8 md:gap-12 lg:gap-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(siteJsonLd(SITE_URL.replace(/\/$/, ""), SEO_SITE_DESCRIPTION, SEO_ALTERNATE_NAMES)).replace(/</g, "\\u003c"),
+        }}
+      />
       <CategoryCircles categories={tiles} />
       {/* The stitched thread runs straight through the hero and starts its pattern below it. */}
       <div data-stitch-hero>
@@ -103,6 +115,7 @@ export default async function HomePage() {
         <HomeContact settings={settings} />
       </div>
       <RecentlyViewedRail />
+      <SareeAbout copy={t.home.sareeAbout} />
     </div>
   );
 }

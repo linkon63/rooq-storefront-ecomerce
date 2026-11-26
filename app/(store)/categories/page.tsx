@@ -3,8 +3,9 @@ import { CategoryBrowser } from "@/components/storefront/mobile/category-browser
 import { getCategoryTree } from "@/lib/storefront/catalog-data";
 
 export const metadata: Metadata = {
-  title: "Categories",
-  description: "Every Rooq category in one place.",
+  title: "Saree Categories",
+  description: "Browse every Rooq saree (sharee) category: cotton, tant, jamdani, manipuri and more.",
+  alternates: { canonical: "/categories" },
 };
 
 export default async function CategoriesPage() {

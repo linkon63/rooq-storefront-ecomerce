@@ -59,6 +59,14 @@ const en = {
     allQuestions: "All questions",
     askUs: "Ask us",
     headline: ["Woven by hand.", "Worn with pride."],
+    sareeAbout: {
+      title: "Buy saree online in Bangladesh",
+      body: [
+        "Rooq is a Bangladeshi online saree shop. Whether you search for saree, sharee, shari or sari, you will find handloom tant, cotton and Kota sarees with hand block prints, chosen for Pohela Boishakh, Durga Puja, Eid, holud, weddings and everyday wear.",
+        "Every BD sharee lists its fabric, colour, length, blouse piece and price in taka. Order from anywhere in Bangladesh with cash on delivery.",
+      ],
+      link: "See all sarees",
+    },
     heroCopy: "Soft handloom cotton and gleaming zari borders, in colours chosen for Puja, Eid, Boishakh and every celebration in between.",
     heritageBadge: "Pure handloom tant, straight from the loom",
     heritageCopy:
@@ -273,6 +281,14 @@ const bn: Messages = {
     allQuestions: "সব প্রশ্ন",
     askUs: "আমাদের জিজ্ঞেস করুন",
     headline: ["হাতে বোনা,", "গর্বে পরা।"],
+    sareeAbout: {
+      title: "অনলাইনে শাড়ি কিনুন বাংলাদেশে",
+      body: [
+        "রুক বাংলাদেশের অনলাইন শাড়ির দোকান। হ্যান্ডলুম তাঁত, সুতি ও কোটা শাড়ি, হ্যান্ড ব্লক প্রিন্টে — পহেলা বৈশাখ, দুর্গাপূজা, ঈদ, গায়ে হলুদ, বিয়ে কিংবা প্রতিদিনের সাজের জন্য।",
+        "প্রতিটি শাড়ির সাথে ফ্যাব্রিক, রং, দৈর্ঘ্য, ব্লাউজ পিস ও টাকায় দাম লেখা আছে। বাংলাদেশের যেকোনো জায়গা থেকে ক্যাশ অন ডেলিভারিতে অর্ডার করুন।",
+      ],
+      link: "সব শাড়ি দেখুন",
+    },
     heroCopy: "নরম হ্যান্ডলুম সুতি আর ঝলমলে জরির পাড় — পূজা, ঈদ, বৈশাখ আর প্রতিটি উৎসবের জন্য বাছাই করা রঙে।",
     heritageBadge: "খাঁটি হ্যান্ডলুম তাঁত, সরাসরি তাঁত থেকে",
     heritageCopy:

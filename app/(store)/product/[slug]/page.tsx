@@ -9,7 +9,7 @@ import { ProductSelectionProvider } from "@/components/storefront/product/select
 import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
 import { SITE_URL } from "@/lib/constants/storefront";
 import { getProductById, getProductBySlug, getStoreSettings } from "@/lib/storefront/catalog-data";
-import { leadImageUrl, looksLikeId, productJsonLd } from "@/utils/storefront/product-seo";
+import { leadImageUrl, looksLikeId, productJsonLd, productSeoCopy } from "@/utils/storefront/product-seo";
 import { clientProduct } from "@/utils/storefront/product-view";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -22,12 +22,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const product = await loadProduct((await params).slug);
   if (!product) return { title: "Not found" };
   const image = leadImageUrl(product);
-  const description = product.seo.metaDescription ?? product.shortDescription ?? `${product.name} by ${product.brand.name} at Rooq.`;
+  const { title, description, keywords } = productSeoCopy(product);
   return {
-    title: product.seo.metaTitle ?? product.name,
+    // A title typed in the admin may already carry the shop name.
+    title: title.includes("Rooq") ? { absolute: title } : title,
     description,
+    keywords,
     alternates: { canonical: `/product/${product.slug}` },
-    openGraph: { title: product.name, description, images: image ? [{ url: image }] : undefined },
+    openGraph: { title, description, url: `/product/${product.slug}`, siteName: "Rooq", images: image ? [{ url: image }] : undefined },
   };
 }
 

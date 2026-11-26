@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Noto_Serif_Bengali, Newsreader, Poppins } from "next/font/google";
 import "./globals.css";
+import { SEO_KEYWORDS, SEO_SITE_DESCRIPTION, SEO_SITE_TITLE } from "@/lib/constants/seo";
 import { StoreProvider } from "@/lib/store/store-provider";
 
 /**
@@ -46,9 +47,6 @@ const notoSerifBengali = Noto_Serif_Bengali({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store";
-const siteTitle = "Rooq — Modern Fashion for Men, Women & Kids";
-const siteDescription =
-  "Rooq is a modern fashion label: considered clothing, footwear and accessories for men, women and kids. New arrivals every week, easy size guides and free returns.";
 
 export const viewport: Viewport = { themeColor: "#1c3934", viewportFit: "cover" };
 
@@ -57,11 +55,11 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "Rooq", statusBarStyle: "default" },
   metadataBase: new URL(siteUrl),
   title: {
-    default: siteTitle,
+    default: SEO_SITE_TITLE,
     template: "%s | Rooq",
   },
-  description: siteDescription,
-  keywords: ["Rooq", "fashion", "clothing", "men's fashion", "women's fashion", "kids fashion", "footwear", "accessories"],
+  description: SEO_SITE_DESCRIPTION,
+  keywords: SEO_KEYWORDS,
   authors: [{ name: "Rooq" }],
   creator: "Rooq",
   publisher: "Rooq",
@@ -71,17 +69,18 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: siteTitle,
-    description: siteDescription,
+    title: SEO_SITE_TITLE,
+    description: SEO_SITE_DESCRIPTION,
     url: siteUrl,
     siteName: "Rooq",
-    locale: "en_US",
+    locale: "en_BD",
+    alternateLocale: ["bn_BD"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: siteTitle,
-    description: siteDescription,
+    title: SEO_SITE_TITLE,
+    description: SEO_SITE_DESCRIPTION,
   },
   robots: {
     index: true,
