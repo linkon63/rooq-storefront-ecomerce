@@ -14,7 +14,7 @@ type HighlightSliderProps = {
 /**
  * Compact spotlight image slider: portrait frame with prev/next arrows,
  * touch swipe, and a slim vertical thumbnail rail (horizontal on mobile)
- * so all images are visible at a glance without adding vertical height.
+ * (from md; phones swipe the photo) so the card stays short.
  */
 export function HighlightSlider({ images, href, productName }: HighlightSliderProps) {
   const [active, setActive] = useState(0);
@@ -23,7 +23,7 @@ export function HighlightSlider({ images, href, productName }: HighlightSliderPr
   if (images.length === 0) {
     return (
       <div className="p-3 sm:p-4 md:w-[42%] lg:w-[40%]">
-        <Link href={href} aria-label={productName} className="block aspect-[4/5] max-h-[400px] w-full bg-selvedge" />
+        <Link href={href} aria-label={productName} className="block aspect-[4/5] max-h-[240px] w-full bg-selvedge md:max-h-[340px]" />
       </div>
     );
   }
@@ -33,9 +33,9 @@ export function HighlightSlider({ images, href, productName }: HighlightSliderPr
   const go = (next: number) => setActive(((next % count) + count) % count);
 
   return (
-    <div className="flex flex-col gap-2.5 p-3 sm:p-4 md:w-[43%] md:shrink-0 md:flex-row lg:w-[41%] lg:p-5">
+    <div className="flex flex-col gap-2.5 p-3 md:w-[40%] md:shrink-0 md:flex-row lg:w-[36%] lg:p-4">
       <div
-        className="group/slider relative aspect-[4/5] max-h-[380px] w-full flex-1 overflow-hidden bg-selvedge ring-1 ring-gold/30 md:max-h-[420px]"
+        className="group/slider relative touch-pan-y aspect-[4/5] max-h-[240px] w-full flex-1 overflow-hidden bg-selvedge ring-1 ring-gold/30 md:max-h-[340px]"
         onTouchStart={(e) => {
           touchStartX.current = e.touches[0]?.clientX ?? null;
         }}
@@ -90,7 +90,7 @@ export function HighlightSlider({ images, href, productName }: HighlightSliderPr
 
       {count > 1 ? (
         <div
-          className="flex gap-2 overflow-x-auto pb-0.5 md:max-h-[420px] md:w-14 md:flex-col md:overflow-y-auto md:overflow-x-hidden md:pb-0"
+          className="hidden gap-2 md:flex md:max-h-[340px] md:w-14 md:flex-col md:overflow-y-auto md:overflow-x-hidden md:pb-0"
           role="tablist"
           aria-label={`${productName} gallery`}
         >

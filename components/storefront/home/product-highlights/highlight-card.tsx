@@ -45,7 +45,7 @@ export function HighlightCard({ card, detail, index, reverse, t }: HighlightCard
   return (
     <article
       data-panda-card={card.id}
-      className={`group/card relative isolate flex flex-col overflow-hidden border border-line/80 bg-[color-mix(in_oklab,var(--color-selvedge)_32%,var(--color-chalk))] md:flex-row ${
+      className={`group/card relative isolate flex w-full flex-col overflow-hidden border border-line/80 bg-[color-mix(in_oklab,var(--color-selvedge)_32%,var(--color-chalk))] md:flex-row ${
         reverse ? "md:flex-row-reverse" : ""
       }`}
     >
@@ -83,14 +83,14 @@ export function HighlightCard({ card, detail, index, reverse, t }: HighlightCard
       <HighlightSlider images={images} href={href} productName={card.name} />
 
       {/* Editorial story & loom details */}
-      <div className="flex flex-1 flex-col justify-center gap-3 px-5 pb-6 pt-2 md:py-7 lg:px-10">
+      <div className="flex flex-1 flex-col justify-center gap-2.5 px-4 pb-4 pt-1 md:gap-3 md:py-6 lg:px-10">
         <div className="flex items-center gap-3">
           <span className="type-label text-dye">No. {edition}</span>
           <span aria-hidden className="h-px w-8 bg-gold/60" />
           {card.brand?.name ? <span className="type-label text-stone">{card.brand.name}</span> : null}
         </div>
 
-        <h3 className="type-display text-[clamp(1.6rem,3vw,2.35rem)] leading-[1.06] text-ink">
+        <h3 className="type-display text-[clamp(1.35rem,3vw,2.1rem)] leading-[1.06] text-ink">
           <Link href={href} className="transition-colors hover:text-dye">
             {card.name}
           </Link>
@@ -101,8 +101,12 @@ export function HighlightCard({ card, detail, index, reverse, t }: HighlightCard
           {card.ratingCount > 0 ? <StarRating rating={card.ratingAvg} /> : null}
         </div>
 
-        {story ? <p className="line-clamp-3 max-w-[50ch] text-[0.9375rem] leading-relaxed text-stone">{story}</p> : null}
-        {detail ? <HighlightFacts detail={detail} t={t} /> : null}
+        {story ? <p className="line-clamp-2 max-w-[50ch] text-[0.9375rem] leading-relaxed text-stone">{story}</p> : null}
+        {detail ? (
+          <div className="hidden md:block">
+            <HighlightFacts detail={detail} t={t} />
+          </div>
+        ) : null}
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
           <HighlightCartButton card={card} detail={detail} />

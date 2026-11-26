@@ -5,13 +5,13 @@ import { SareeStage } from "./saree-stage";
 /**
  * "Six yards, unfolded": a folded tant saree (three.js) opens out as the
  * section scrolls into view, showing its paar, buti and aanchal. The copy
- * sends shoppers to the sarees.
+ * sends shoppers to the sarees. Large screens only (three.js never loads on phones).
  */
 export async function SareeUnfold() {
   const { t } = await getMessages();
   const copy = t.home.craft;
   return (
-    <section aria-labelledby="saree-unfold-title" className="overflow-hidden bg-ink text-chalk">
+    <section aria-labelledby="saree-unfold-title" className="hidden overflow-hidden bg-ink text-chalk lg:block">
       <div className="page-gutter grid items-center gap-6 py-12 lg:grid-cols-[1fr_1.7fr] lg:gap-10 lg:py-20">
         <div className="order-2 flex flex-col gap-5 lg:order-1">
           <h2 id="saree-unfold-title" className="type-display text-[clamp(2.25rem,5vw,4.5rem)] leading-[0.95]">

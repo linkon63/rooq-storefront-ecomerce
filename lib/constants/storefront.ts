@@ -79,8 +79,14 @@ export const TAG_TITLES = {
   "coming-soon": "Coming soon",
 } as const;
 
-/** How many products each home-page shelf shows. */
-export const HOME_SHELF_SIZE = 5;
+/** Home "New in": eight cards (two slides of four on phones). */
+export const HOME_NEW_IN_SIZE = 8;
+/** The newest products the phone hero cycles through. */
+export const HOME_HERO_PRODUCTS = 3;
+/** Phone hero: seconds per product. */
+export const HOME_HERO_INTERVAL_MS = 3000;
+/** Spotlight slider: seconds per piece. */
+export const SPOTLIGHT_INTERVAL_MS = 5000;
 /** Home "Best sellers": four large cards; the rest wait behind "See all". */
 export const HOME_BEST_SELLERS_SIZE = 4;
 

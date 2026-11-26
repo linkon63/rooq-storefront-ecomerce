@@ -1,7 +1,9 @@
 import { getMessages } from "@/lib/i18n/server";
 import { getProductById, productRail } from "@/lib/storefront/catalog-data";
+import { SPOTLIGHT_INTERVAL_MS } from "@/lib/constants/storefront";
 import type { ProductCard } from "@/types/storefront/catalog";
 import { SectionHeading } from "../../shared/section-heading";
+import { SnapSlider } from "../../shared/snap-slider";
 import { HighlightCard } from "./highlight-card";
 
 const HIGHLIGHT_COUNT = 2;
@@ -9,7 +11,7 @@ const HIGHLIGHT_COUNT = 2;
 /**
  * Two pieces in the spotlight, after the best sellers: the products marked
  * Featured in the admin, else the top best sellers passed in. Each shows its
- * pictures beside its story, price and details.
+ * pictures beside its story, price and details, one per slide.
  */
 export async function ProductHighlights({ fallback }: { fallback: ProductCard[] }) {
   const { t } = await getMessages();
@@ -23,7 +25,7 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
   return (
     <section aria-labelledby="highlights-title" className="page-gutter relative">
       <SectionHeading id="highlights-title" title={t.home.spotlight} />
-      <div className="flex flex-col gap-5 lg:gap-6">
+      <SnapSlider label={t.home.spotlight} dotLabel={t.home.goToSlide} interval={SPOTLIGHT_INTERVAL_MS}>
         {cards.map((card, index) => (
           <HighlightCard
             key={card.id}
@@ -34,7 +36,7 @@ export async function ProductHighlights({ fallback }: { fallback: ProductCard[] 
             t={t.home}
           />
         ))}
-      </div>
+      </SnapSlider>
     </section>
   );
 }

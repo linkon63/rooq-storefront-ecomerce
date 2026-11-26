@@ -12,15 +12,16 @@ import { OrderJourney } from "@/components/storefront/home/order-journey/order-j
 import { SaleCountdown } from "@/components/storefront/home/sale-countdown/sale-countdown";
 import { ProductRail } from "@/components/storefront/product-card/product-rail";
 import { RecentlyViewedRail } from "@/components/storefront/product-card/recently-viewed-rail";
-import { HOME_BEST_SELLERS_SIZE, HOME_SHELF_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
+import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS } from "@/lib/constants/storefront";
 import { getMessages } from "@/lib/i18n/server";
 import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail } from "@/lib/storefront/catalog-data";
 
 const OFFERS_LIMIT = 8;
 
 /**
- * Home: hero (slider of looks, woven headline), the 3D saree unfold,
- * categories (unrolling bolts), new in (5), offers,
+ * Home: hero (slider of looks, woven headline; the newest three on phones),
+ * the 3D saree unfold (lg+), categories (unrolling bolts), new in (8; slides
+ * of four on phones), offers,
  * collections (two newest pieces each), lookbook (parallax), best sellers (5),
  * two spotlight products, the made-by-hand numbers, the order journey, coming
  * soon, contact and recently viewed. The layout sews a thread down it as it
@@ -33,8 +34,8 @@ export default async function HomePage() {
     getStoreSettings(),
     getHomeHero(),
     getCategoryTree(),
-    productRail({ new: true, sort: "newest", limit: HOME_SHELF_SIZE }),
-    productRail({ sort: "newest", limit: HOME_SHELF_SIZE }),
+    productRail({ new: true, sort: "newest", limit: HOME_NEW_IN_SIZE }),
+    productRail({ sort: "newest", limit: HOME_NEW_IN_SIZE }),
     productRail({ onSale: true, sort: "newest", limit: OFFERS_LIMIT }),
     productRail({ tag: PRODUCT_TAGS.bestSeller, sort: "popular", limit: HOME_BEST_SELLERS_SIZE }),
     productRail({ tag: PRODUCT_TAGS.comingSoon, sort: "newest", limit: 4 }),
@@ -48,14 +49,20 @@ export default async function HomePage() {
     <div className="flex flex-col gap-12 lg:gap-20">
       {/* The stitched thread runs straight through the hero and starts its pattern below it. */}
       <div data-stitch-hero>
-        <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} />
+        <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} latest={latest.data.slice(0, HOME_HERO_PRODUCTS)} />
       </div>
       <SareeUnfold />
       <CategoryTiles categories={roots} />
       <Suspense fallback={null}>
         <SaleCountdown />
       </Suspense>
-      <ProductRail title={t.home.newIn} products={newIn.data.length ? newIn.data : latest.data} link={{ label: t.home.seeNewIn, href: "/new" }} />
+      <ProductRail
+        title={t.home.newIn}
+        products={newIn.data.length ? newIn.data : latest.data}
+        link={{ label: t.home.seeNewIn, href: "/new" }}
+        layout="pages"
+        dotLabel={t.home.goToSlide}
+      />
       <ProductRail title={t.home.offers} products={offers.data} link={{ label: t.home.seeOffers, href: "/sale" }} />
       <Suspense fallback={null}>
         <FeaturedCollections />
