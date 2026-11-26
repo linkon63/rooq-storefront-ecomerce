@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./animations.css";
 @import "./craft.css";
+@import "./mobile.css";
 
 @source "../node_modules/react-tailwindcss-datepicker/dist";
 

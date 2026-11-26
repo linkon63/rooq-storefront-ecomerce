@@ -52,7 +52,7 @@ export default async function ProductPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, SITE_URL, settings.currency)).replace(/</g, "\\u003c") }}
         />
         <div className="page-gutter pt-4 md:pt-6">
-          <div className="mb-4 md:mb-6">
+          <div className="mb-4 max-md:hidden md:mb-6">
             <Breadcrumbs items={crumbs} />
           </div>
           <ProductView product={viewProduct} details={<ProductDetails product={product} currency={settings.currency} />} />

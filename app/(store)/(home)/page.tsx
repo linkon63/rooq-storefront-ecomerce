@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { CategoryCircles } from "@/components/storefront/home/category-circles";
 import { CategoryTiles } from "@/components/storefront/home/category-tiles";
 import { MadeByHand } from "@/components/storefront/home/made-by-hand/made-by-hand";
 import { SareeUnfold } from "@/components/storefront/home/saree-unfold/saree-unfold";
@@ -51,13 +52,16 @@ export default async function HomePage() {
   const lookbook = lookbooks[0] ?? null;
 
   return (
-    <div className="flex flex-col gap-12 lg:gap-20">
+    <div data-home className="flex flex-col gap-8 md:gap-12 lg:gap-20">
+      <CategoryCircles categories={tiles} />
       {/* The stitched thread runs straight through the hero and starts its pattern below it. */}
       <div data-stitch-hero>
         <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} latest={latest.data.slice(0, HOME_HERO_PRODUCTS)} />
       </div>
       <SareeUnfold />
-      <CategoryTiles categories={tiles} />
+      <div className="max-md:hidden md:contents">
+        <CategoryTiles categories={tiles} />
+      </div>
       <Suspense fallback={null}>
         <SaleCountdown />
       </Suspense>
@@ -83,18 +87,21 @@ export default async function HomePage() {
             : undefined
         }
       />
-      <Suspense fallback={null}>
-        <FacebookReviews />
-      </Suspense>
-      <Suspense fallback={null}>
-        <ProductHighlights fallback={bestSellers.data} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <MadeByHand />
-      </Suspense>
-      <OrderJourney t={t.home} />
-      <ComingSoonSection categories={tiles.filter((category) => category.isComingSoon)} products={upcoming.data} />
-      <HomeContact settings={settings} />
+      {/* Left out of the phone home screen to keep it short. */}
+      <div className="max-md:hidden md:contents">
+        <Suspense fallback={null}>
+          <FacebookReviews />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ProductHighlights fallback={bestSellers.data} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <MadeByHand />
+        </Suspense>
+        <OrderJourney t={t.home} />
+        <ComingSoonSection categories={tiles.filter((category) => category.isComingSoon)} products={upcoming.data} />
+        <HomeContact settings={settings} />
+      </div>
       <RecentlyViewedRail />
     </div>
   );

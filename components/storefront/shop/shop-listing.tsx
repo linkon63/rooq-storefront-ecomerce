@@ -8,6 +8,7 @@ import { ProductGrid } from "../product-card/product-grid";
 import { EmptyState } from "../shared/empty-state";
 import { EmptyLoom } from "./empty-loom";
 import { FilterControls } from "./filter-controls";
+import { MoreProducts } from "./more-products";
 import { Pagination } from "./pagination";
 import { PendingResults } from "./pending-results";
 import { ShopPagePrefetch } from "./shop-page-prefetch";
@@ -69,7 +70,10 @@ export async function ShopListing({ title, intro, basePath, searchParams, preset
               ) : (
                 <>
                   <ProductGrid products={list.data} offset={(list.meta.page - 1) * SHOP_PAGE_SIZE} />
-                  <Pagination meta={list.meta} hrefFor={hrefFor} />
+                  <MoreProducts key={JSON.stringify(toProductQuery(filters, SHOP_PAGE_SIZE))} query={toProductQuery(filters, SHOP_PAGE_SIZE)} meta={list.meta} />
+                  <div className="max-md:hidden">
+                    <Pagination meta={list.meta} hrefFor={hrefFor} />
+                  </div>
                   <ShopPagePrefetch hrefs={neighbours} />
                 </>
               )}

@@ -9,8 +9,8 @@ export default async function CartPage() {
   const settings = await getStoreSettings();
   return (
     <div className="flex flex-col gap-20">
-      <div className="page-gutter pt-8 md:pt-12">
-        <h1 className="mb-8 font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Your bag</h1>
+      <div className="page-gutter pt-4 md:pt-12">
+        <h1 className="max-md:sr-only mb-8 font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Your bag</h1>
         <CartPageView delivery={settings.delivery} />
       </div>
       <RecentlyViewedRail />

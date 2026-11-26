@@ -50,7 +50,7 @@ const siteTitle = "Rooq — Modern Fashion for Men, Women & Kids";
 const siteDescription =
   "Rooq is a modern fashion label: considered clothing, footwear and accessories for men, women and kids. New arrivals every week, easy size guides and free returns.";
 
-export const viewport: Viewport = { themeColor: "#1c3934" };
+export const viewport: Viewport = { themeColor: "#1c3934", viewportFit: "cover" };
 
 export const metadata: Metadata = {
   applicationName: "Rooq",

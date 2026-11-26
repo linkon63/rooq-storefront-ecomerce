@@ -41,7 +41,9 @@ export function useStitchLayout(box: RefObject<HTMLDivElement | null>): StitchLa
       const hero = root.querySelector<HTMLElement>("[data-stitch-hero]");
       const width = Math.round(element.offsetWidth);
       const height = Math.round(element.offsetHeight);
-      const logoBox = logo?.getBoundingClientRect();
+      const measured = logo?.getBoundingClientRect();
+      // The header logo is hidden on phones: start from the middle instead.
+      const logoBox = measured?.width ? measured : null;
       const next: StitchLayout = {
         width,
         height,

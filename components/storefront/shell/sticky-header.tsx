@@ -49,7 +49,7 @@ export function StickyHeader({ children }: { children: ReactNode }) {
     <header
       ref={ref}
       style={{ "--p": 0 } as React.CSSProperties}
-      className="sticky top-0 z-40 mb-[calc(1rem*var(--p))] border-b border-ink/10 bg-chalk/90 backdrop-blur-md lg:mb-[calc(2rem*var(--p))]"
+      className="hidden md:block sticky top-0 z-40 mb-[calc(1rem*var(--p))] border-b border-ink/10 bg-chalk/90 backdrop-blur-md lg:mb-[calc(2rem*var(--p))]"
     >
       {children}
     </header>

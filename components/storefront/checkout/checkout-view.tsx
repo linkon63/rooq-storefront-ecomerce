@@ -16,12 +16,15 @@ import { CartSummary } from "../cart/cart-summary";
 import { EmptyState } from "../shared/empty-state";
 import { AddressFields } from "./address-fields";
 import { CheckoutLines } from "./checkout-lines";
+import { CheckoutPhoneBar } from "./checkout-phone-bar";
+import { CheckoutSteps } from "./checkout-steps";
 import { CouponField } from "./coupon-field";
 import { DeliveryChargeNotice } from "./delivery-charge-notice";
 import { OrderNoteField } from "./order-note-field";
 import { PaymentMethod } from "./payment-method";
 import { NEW_ADDRESS, SavedAddressPicker } from "./saved-address-picker";
 import { useAbandonedCart } from "./use-abandoned-cart";
+import { useCheckoutStep } from "./use-checkout-step";
 import { usePlaceOrder } from "./use-place-order";
 
 /** One page: who and where (left); items, payment and the summary with Place order (right). */
@@ -51,6 +54,7 @@ export function CheckoutView({ delivery }: { delivery: StoreSettings["delivery"]
 
   const saved = addresses.find((entry) => entry.id === selectedId) ?? null;
   useAbandonedCart(lines, saved ?? address);
+  const steps = useCheckoutStep(saved ? null : address);
 
   if (!hydrated || status === "unknown") {
     return <div className="h-96 animate-pulse rounded bg-selvedge" aria-busy="true" aria-label="Loading checkout" />;
@@ -66,9 +70,12 @@ export function CheckoutView({ delivery }: { delivery: StoreSettings["delivery"]
   const total = Math.max(0, summary.subtotal - discount) + shipping;
   const blocked = lines.some((line) => !line.inStock);
 
+  const placeOrderNow = () => void submit({ lines, zone, couponCode, signedIn: isSignedIn, addressId: saved?.id ?? null, address, note });
+
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_26rem]">
-      <div className="flex flex-col gap-10">
+    <div className="grid gap-10 max-md:gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
+      <CheckoutSteps current={steps.step} onSelect={steps.goTo} />
+      <div className={`flex flex-col gap-10 ${steps.step === 1 ? "" : "max-md:hidden"}`}>
         <section aria-labelledby="checkout-address" className="flex flex-col gap-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 id="checkout-address" className="font-wide text-xl font-bold">
@@ -89,14 +96,16 @@ export function CheckoutView({ delivery }: { delivery: StoreSettings["delivery"]
           <OrderNoteField value={note} onChange={setNote} />
         </section>
       </div>
-      <div className="flex flex-col gap-8 lg:self-start">
-        <section aria-labelledby="checkout-items">
+      <div className={`flex flex-col gap-8 lg:self-start ${steps.step === 1 ? "max-md:hidden" : ""}`}>
+        <section aria-labelledby="checkout-items" className={steps.step === 3 ? undefined : "max-md:hidden"}>
           <h2 id="checkout-items" className="mb-3 font-wide text-lg font-bold">
             Your items
           </h2>
           <CheckoutLines lines={lines} />
         </section>
-        <PaymentMethod />
+        <div className={steps.step === 2 ? undefined : "max-md:hidden"}>
+          <PaymentMethod />
+        </div>
         <CartSummary
           summary={summary}
           total={total}
@@ -114,14 +123,15 @@ export function CheckoutView({ delivery }: { delivery: StoreSettings["delivery"]
           <button
             type="button"
             disabled={placing || blocked}
-            onClick={() => void submit({ lines, zone, couponCode, signedIn: isSignedIn, addressId: saved?.id ?? null, address, note })}
-            className="h-12 rounded bg-ink text-sm font-semibold text-chalk hover:bg-ink-soft disabled:opacity-60"
+            onClick={placeOrderNow}
+            className="max-md:hidden h-12 rounded bg-ink text-sm font-semibold text-chalk hover:bg-ink-soft disabled:opacity-60"
           >
             {placing ? "Placing order…" : "Place order"}
           </button>
           <p className="text-xs text-stone">The final total is confirmed by our system when you place the order.</p>
         </CartSummary>
       </div>
+      <CheckoutPhoneBar step={steps.step} total={total} error={steps.error ?? error} busy={placing} blocked={blocked} onNext={steps.next} onPlace={placeOrderNow} />
     </div>
   );
 }

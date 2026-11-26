@@ -1,3 +1,5 @@
+import { InstallSheet } from "@/components/storefront/mobile/install-sheet";
+import { MobileTabBar } from "@/components/storefront/mobile/mobile-tab-bar";
 import { HomeStitch } from "@/components/storefront/home/stitch/home-stitch";
 import { StoreSync } from "@/app/_providers/store-sync";
 import { GoogleTagManagerNoScript, GoogleTagManagerScript } from "@/components/analytics/google-tag-manager";
@@ -62,6 +64,8 @@ export default async function StoreLayout({ children }: Readonly<{ children: Rea
         whatsappHref={whatsappChatHref(WHATSAPP_NUMBER)}
       />
       <StoreSync currency={settings.currency} />
+      <MobileTabBar />
+      <InstallSheet t={{ installApp: t.footer.installApp, installHintIos: t.footer.installHintIos }} />
       <StoreOverlays delivery={settings.delivery} />
       <WishlistFlyLayer />
       <StoreToaster />

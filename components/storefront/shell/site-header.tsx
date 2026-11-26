@@ -6,6 +6,7 @@ import Logo from "../shared/Logo";
 import { HeaderActions } from "./header-actions";
 import { MobileNavButton } from "./mobile-nav-button";
 import { Suspense } from "react";
+import { MobileAppBar } from "../mobile/mobile-app-bar";
 import { NavLink } from "./nav-link";
 import { StickyHeader } from "./sticky-header";
 import { TopBar } from "./top-bar";
@@ -36,6 +37,8 @@ export function SiteHeader({ nav: allNav, categories, announcement, phone, whats
       >
         {t.header.skip}
       </a>
+      {/* No Suspense: hydrating late would clash with the bag count already loaded into Redux. */}
+      <MobileAppBar />
       <TopBar phone={phone} whatsapp={whatsapp} announcement={announcement} locale={locale} t={t} />
       <StickyHeader>
         <div className="page-gutter grid h-[calc(4.5rem-1rem*var(--p))] grid-cols-[1fr_auto_1fr] items-center gap-3 lg:h-[calc(6rem-2rem*var(--p))] lg:gap-8">

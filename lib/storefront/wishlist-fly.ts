@@ -41,7 +41,9 @@ export function triggerWishlistFly(sourceEl: HTMLElement | null): boolean {
   if (typeof window === "undefined" || !sourceEl) return false;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
 
-  const targetEl = document.querySelector<HTMLElement>(`[${WISHLIST_TARGET_ATTR}]`);
+  // Header heart and phone tab both carry the attribute: fly to whichever is on screen.
+  const targets = [...document.querySelectorAll<HTMLElement>(`[${WISHLIST_TARGET_ATTR}]`)];
+  const targetEl = targets.find((element) => element.getBoundingClientRect().width > 0);
   if (!targetEl) return false;
 
   const targetRect = targetEl.getBoundingClientRect();

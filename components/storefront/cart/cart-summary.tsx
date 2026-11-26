@@ -46,7 +46,7 @@ export function CartSummary({ summary, extraRows = [], total, children, checkout
         <Link
           href={checkoutHref}
           aria-disabled={blocked}
-          className={`inline-flex h-12 items-center justify-center rounded text-sm font-semibold ${
+          className={`max-md:hidden inline-flex h-12 items-center justify-center rounded text-sm font-semibold ${
             blocked ? "pointer-events-none bg-selvedge text-stone" : "bg-ink text-chalk hover:bg-ink-soft"
           }`}
         >
