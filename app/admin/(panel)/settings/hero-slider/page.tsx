@@ -3,6 +3,7 @@
 import { PageHeader } from "../../../_components/admin-shell";
 import { SettingsCard } from "../_components/settings-ui";
 import { HeroModeCard } from "./_components/hero-mode-card";
+import { MobileProductsCard } from "./_components/mobile-products-card";
 import { SlideCard } from "./_components/slide-card";
 import { UploadCard } from "./_components/upload-card";
 import { useHeroSlides } from "./_hooks/use-hero-slides";
@@ -45,6 +46,12 @@ export default function HeroSliderPage() {
               </ol>
             )}
           </div>
+        </SettingsCard>
+        <SettingsCard
+          title="Mobile products"
+          description="On phones the hero shows these products instead of the slides, one at a time, in this order. Pick the photo each one shows. With none picked, phones show the newest products."
+        >
+          <MobileProductsCard />
         </SettingsCard>
       </div>
     </>

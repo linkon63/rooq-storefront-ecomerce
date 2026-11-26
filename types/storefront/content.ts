@@ -58,7 +58,8 @@ export type SaleCountdownCampaign = {
 export type HeroSlide = { id: string; image: HeroImage; product: ProductCard | null };
 
 /** What the home hero renders: the admin's chosen mode with its slides and the live hero campaign. */
-export type HomeHeroData = { mode: "SLIDER" | "CAMPAIGN"; slides: HeroSlide[]; campaign: HeroCampaign | null };
+/** `mobile`: the admin's phone-hero picks (card image = the chosen photo); empty means "show the newest". */
+export type HomeHeroData = { mode: "SLIDER" | "CAMPAIGN"; slides: HeroSlide[]; mobile: ProductCard[]; campaign: HeroCampaign | null };
 
 export type StorePolicy = { key: string; title: string; content: string };
 

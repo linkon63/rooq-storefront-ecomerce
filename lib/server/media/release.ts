@@ -22,6 +22,7 @@ const referenceCount = {
   lookImages: true,
   campaignMedia: true,
   heroSlides: true,
+  heroMobileProducts: true,
   newsCovers: true,
   settingLogos: true,
   settingIcons: true,

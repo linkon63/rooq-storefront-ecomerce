@@ -12,7 +12,7 @@ type HeroMobileProductsProps = {
   className?: string;
 };
 
-/** Phone hero: the newest pieces, one per slide, moving on every three seconds. */
+/** Phone hero: the admin's picks (or the newest pieces), one per slide, moving on every three seconds. */
 export function HeroMobileProducts({ products, labels, className = "" }: HeroMobileProductsProps) {
   return (
     <SnapSlider label={labels.region} dotLabel={labels.dot} interval={HOME_HERO_INTERVAL_MS} className={`pt-3 ${className}`}>

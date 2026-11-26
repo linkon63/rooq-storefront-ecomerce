@@ -471,6 +471,7 @@ model Media {
   lookImages           CollectionLook[]       @relation("LookImage")
   campaignMedia        CampaignMedia[]
   heroSlides           HeroSlide[]
+  heroMobileProducts   HeroMobileProduct[]
   newsCovers           News[]                 @relation("NewsCover")
   settingLogos         Setting[]              @relation("SettingLogo")
   settingIcons         Setting[]              @relation("SettingIcon")
@@ -819,6 +820,7 @@ model Product {
   tags            Tag[]                       @relation("product_tags")
   collections     CollectionProduct[]
   heroSlides      HeroSlide[]
+  heroMobile      HeroMobileProduct?
   reels           Reel[]
   lookItems       CollectionLookItem[]
   wishlists       Wishlist[]
@@ -1848,6 +1850,26 @@ model HeroSlide {
   @@map("hero_slides")
 }
 
+/// Phone hero: the products it cycles through, in order, each with the photo to show.
+model HeroMobileProduct {
+  id       String @id @default(uuid(7))
+  position Int    @default(0)
+
+  productId String  @unique @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  /// One of the product's own photos; null shows its main image.
+  mediaId String? @map("media_id")
+  media   Media?  @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([position])
+  @@index([mediaId])
+  @@map("hero_mobile_products")
+}
+
 enum AbandonedCartStatus {
   OPEN
   RECOVERED
@@ -1934,8 +1956,8 @@ model Reel {
   productId String  @map("product_id")
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  mimeType  String @map("mime_type")
-  sizeBytes Int    @map("size_bytes")
+  mimeType  String    @map("mime_type")
+  sizeBytes Int       @map("size_bytes")
   /// Bytes live in their own table so list queries never drag them along.
   blob      ReelBlob?
 

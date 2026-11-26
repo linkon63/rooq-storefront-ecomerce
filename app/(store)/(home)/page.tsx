@@ -28,7 +28,7 @@ const OFFERS_LIMIT = 8;
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /**
- * Home: hero (slider of looks, woven headline; the newest three on phones),
+ * Home: hero (slider of looks, woven headline; on phones the admin's picks, else the newest three),
  * the 3D saree unfold (lg+), categories (unrolling bolts), new in (8; slides
  * of four on phones), running offers with countdowns, offers,
  * collections (two newest pieces each), lookbook (parallax), best sellers (5),
@@ -69,7 +69,7 @@ export default async function HomePage() {
       <CategoryCircles categories={tiles} />
       {/* The stitched thread runs straight through the hero and starts its pattern below it. */}
       <div data-stitch-hero>
-        <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} latest={latest.data.slice(0, HOME_HERO_PRODUCTS)} />
+        <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} latest={hero.mobile.length ? hero.mobile : latest.data.slice(0, HOME_HERO_PRODUCTS)} />
       </div>
       <SareeUnfold />
       <div className="max-md:hidden md:contents">
