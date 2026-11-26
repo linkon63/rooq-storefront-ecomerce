@@ -6,6 +6,10 @@ import { POLICY_PAGE_TITLES, isPolicyKey } from "@/utils/storefront/policies";
 
 type PageProps = { params: Promise<{ key: string }> };
 
+export function generateStaticParams() {
+  return Object.keys(POLICY_PAGE_TITLES).map((key) => ({ key }));
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { key } = await params;
   return { title: isPolicyKey(key) ? POLICY_PAGE_TITLES[key] : "Not found" };

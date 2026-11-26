@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 

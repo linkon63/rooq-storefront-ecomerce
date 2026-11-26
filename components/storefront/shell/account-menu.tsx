@@ -7,7 +7,7 @@ import { FiLogOut, FiUser } from "react-icons/fi";
 import { toast } from "sonner";
 import { useSession } from "@/hooks/use-session";
 import { SUCCESS_MESSAGES } from "@/lib/constants/success-messages";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 
 const item = "flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm hover:bg-selvedge";
 

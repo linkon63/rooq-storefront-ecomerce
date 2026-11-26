@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { ERROR_MESSAGES } from "@/lib/constants/error-messages";
 import { SUCCESS_MESSAGES } from "@/lib/constants/success-messages";
 import { subscribeNewsletter } from "@/lib/storefront-api";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { isValidEmail } from "@/utils/storefront/forms";
 
 /** One field: "New drops, first." */

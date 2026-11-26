@@ -46,7 +46,7 @@ const notoSerifBengali = Noto_Serif_Bengali({
   preload: false,
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooqbd.com";
 
 export const viewport: Viewport = { themeColor: "#1c3934", viewportFit: "cover" };
 
@@ -74,7 +74,6 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Rooq",
     locale: "en_BD",
-    alternateLocale: ["bn_BD"],
     type: "website",
   },
   twitter: {

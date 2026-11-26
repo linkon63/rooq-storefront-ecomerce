@@ -3,7 +3,11 @@
 > **Status (2026-11-21):** done — custom `next/image` loader (`utils/image-loader.ts`)
 > resizes via `/api/v1/media/:id?w=` instead of `/_next/image`; `hoverImage` loads on
 > first hover; admin fallback is `/images/no-image.svg`; the app runs on Supabase's
-> transaction pooler. Still open: #2, #4, #5 and the long-term blob move.
+> transaction pooler. Still open: #2 and the long-term blob move.
+> **Status (2026-11-26):** #4 done — the storefront is English only, so no page reads
+> cookies: static pages and product pages are ISR (300 s), admin writes revalidate at once.
+> #5 cache time raised to 300 s. `/shop`, `/new`, `/sale` and `/collections/[slug]` stay
+> dynamic (`searchParams`); their data is cached.
 
 This document summarizes why some images intermittently fail to load and why page loads on Vercel can be slow, ordered as a step-by-step checklist so each issue can be fixed one by one.
 
@@ -57,7 +61,7 @@ This document summarizes why some images intermittently fail to load and why pag
   - Because `StoreLayout` wraps every route under `app/(store)/` (`/`, `/shop`, `/product/[slug]`, `/new`, `/sale`, `/collections`, etc.), Next.js treats **all storefront pages as dynamic**.
   - None of the storefront HTML can be served statically or via ISR from Vercel's Edge CDN; every visit hits a Serverless Function (and pays cold-start latency when idle).
 - **How to fix:**
-  - [ ] Stop calling `cookies()` in the shared `StoreLayout` for default-locale traffic (e.g., handle locale via URL/middleware rewrite or client-side switching) so public storefront pages can be cached at the edge with ISR (`revalidate`).
+  - [x] Stop calling `cookies()` in the shared `StoreLayout` for default-locale traffic (e.g., handle locale via URL/middleware rewrite or client-side switching) so public storefront pages can be cached at the edge with ISR (`revalidate`).
 
 ### 5. Heavy Parallel DB Fan-Out on Cache Miss + `RoutePrefetch`
 - **What happens:**
@@ -65,8 +69,8 @@ This document summarizes why some images intermittently fail to load and why pag
   - On a cache miss or cold instance, `app/(store)/(home)/page.tsx` (`Promise.all` of 10 calls), `app/(store)/layout.tsx` (3 calls), and 4 `<Suspense>` sections (`SaleCountdown`, `FeaturedCollections`, `ProductHighlights`, `MadeByHand`) fire ~15+ parallel queries through a `max: 3` connection pool.
   - Meanwhile, `components/storefront/shell/route-prefetch.tsx` prefetches `/shop`, `/new`, and `/sale` on idle from every page. Because those pages are also dynamic (due to `cookies()`), each prefetch triggers additional SSR + DB work.
 - **How to fix:**
-  - [ ] Fixing #4 (enabling ISR/edge caching) will dramatically reduce how often `RoutePrefetch` and page visits hit SSR/DB.
-  - [ ] Consider increasing `CATALOG_REVALIDATE_SECONDS` if 60s is shorter than needed, since admin writes already call `revalidateTag(CATALOG_CACHE_TAG, "max")`.
+  - [x] Fixing #4 (enabling ISR/edge caching) will dramatically reduce how often `RoutePrefetch` and page visits hit SSR/DB.
+  - [x] Consider increasing `CATALOG_REVALIDATE_SECONDS` if 60s is shorter than needed, since admin writes already call `revalidateTag(CATALOG_CACHE_TAG, "max")`.
 
 ### 6. Direct TCP Postgres Connection in Serverless
 - **What happens:**

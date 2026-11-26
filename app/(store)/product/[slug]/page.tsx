@@ -14,6 +14,11 @@ import { clientProduct } from "@/utils/storefront/product-view";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
+/** Nothing at build time: each product page is rendered on its first visit, then served from cache. */
+export function generateStaticParams() {
+  return [];
+}
+
 async function loadProduct(slug: string) {
   return looksLikeId(slug) ? getProductById(slug) : getProductBySlug(slug);
 }

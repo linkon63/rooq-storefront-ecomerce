@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { FiPause, FiPlay } from "react-icons/fi";
 import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/use-media-query";
 import { ORDER_JOURNEY_STEPS } from "@/lib/constants/storefront";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { JourneyCopy } from "./journey-copy";
 import { JourneyStage } from "./journey-stage";
 import { JourneySteps } from "./journey-steps";

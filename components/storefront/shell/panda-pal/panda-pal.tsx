@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { FiMoon, FiPhone, FiShoppingBag, FiX } from "react-icons/fi";
-import type { Locale } from "@/lib/i18n/locales";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectCartCount, selectCartHydrated } from "@/lib/store/slices/cart-slice";
 import { selectAuthOpen } from "@/lib/store/slices/session-slice";
@@ -71,7 +70,7 @@ type Bubble = { id: number; text: string; actions: BubbleAction[]; showPhone: bo
 type SayOptions = { actions?: BubbleAction[]; showPhone?: boolean; mood?: PandaMood; ms?: number; hop?: boolean };
 
 /** Same hotline, call link and WhatsApp link as the header's top bar (see the store layout). */
-export type PandaPalProps = { locale: Locale; phone: string; telHref: string; whatsappHref: string };
+export type PandaPalProps = { phone: string; telHref: string; whatsappHref: string };
 
 function store(kind: "local" | "session") {
   try {
@@ -98,8 +97,8 @@ const randomBetween = (min: number, max: number) => min + Math.random() * (max -
  * (rage clicks, an error page, a long pause at checkout), offers the shop's
  * phone number and WhatsApp.
  */
-export function PandaPal({ locale, phone, telHref, whatsappHref }: PandaPalProps) {
-  const t = PANDA_COPY[locale] ?? PANDA_COPY.en;
+export function PandaPal({ phone, telHref, whatsappHref }: PandaPalProps) {
+  const t = PANDA_COPY;
   const uid = useId().replace(/:/g, "");
   const pathname = usePathname() ?? "/";
   const dispatch = useAppDispatch();

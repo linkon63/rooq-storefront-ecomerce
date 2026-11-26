@@ -20,7 +20,7 @@ export function siteJsonLd(siteUrl: string, description: string, alternateName: 
         name: "Rooq",
         alternateName,
         url: siteUrl,
-        inLanguage: ["en", "bn"],
+        inLanguage: "en",
         publisher: { "@id": `${siteUrl}/#store` },
         potentialAction: {
           "@type": "SearchAction",

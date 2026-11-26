@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { pad2, timeLeft, type TimeLeft } from "@/utils/storefront/countdown";
 import { FlipCard } from "./flip-card";
 

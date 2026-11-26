@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import type { CollectionSummary, ProductCard as ProductCardData } from "@/types/storefront/catalog";
 import { ProductCard } from "../product-card/product-card";
 import { SectionHeading } from "../shared/section-heading";
@@ -9,7 +9,7 @@ export type CollectionHighlight = { collection: CollectionSummary; products: Pro
 
 /** Each featured collection: its cover and story, beside its two most recent pieces. */
 export async function CollectionHighlights({ items }: { items: CollectionHighlight[] }) {
-  const { t } = await getMessages();
+  const t = COPY;
   const shown = items.filter((item) => item.products.length > 0);
   if (shown.length === 0) return null;
   return (

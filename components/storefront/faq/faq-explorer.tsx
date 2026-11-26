@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { FiSearch, FiX } from "react-icons/fi";
 import { Disclosure } from "@/components/storefront/shared/disclosure";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import type { Faq, FaqCategory } from "@/utils/storefront/faqs";
 
 const CATEGORY_ORDER: FaqCategory[] = ["delivery", "orders", "sizing", "craft"];

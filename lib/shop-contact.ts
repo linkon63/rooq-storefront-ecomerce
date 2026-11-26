@@ -16,7 +16,7 @@ export const FALLBACK_PHONES: ShopContactEntry[] = [];
 export const FALLBACK_EMAILS: ShopContactEntry[] = [];
 export const FALLBACK_ADDRESS = "Dhaka, Bangladesh";
 /** The shop's website as printed on paper — the invoice letterhead. */
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooq.store").replace(/\/$/, "");
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://rooqbd.com").replace(/\/$/, "");
 export const SHOP_WEBSITE = { label: SITE.replace(/^https?:\/\//, ""), href: SITE };
 /** The shop's Facebook page, printed on invoices while Settings → Social has none. */
 export const FALLBACK_FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61594622716963";

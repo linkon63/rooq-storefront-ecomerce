@@ -11,7 +11,7 @@ import { selectCartCount } from "@/lib/store/slices/cart-slice";
 import { selectCompareCount, selectWishlistCount } from "@/lib/store/slices/product-lists-slice";
 import { setCartDrawerOpen, setSearchOpen } from "@/lib/store/slices/ui-slice";
 import { onWishlistFlyLand, onWishlistFlyStart } from "@/lib/storefront/wishlist-fly";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { AccountMenu } from "./account-menu";
 import { CountBadge } from "./count-badge";
 

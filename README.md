@@ -41,7 +41,7 @@ cp .env.example .env
 | `JWT_SECRET` | Yes | Secret that signs access tokens — a long random string |
 | `JWT_EXPIRES_IN` | No | Token lifetime, e.g. `7d` (default) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app origin, used in e-mail links (password reset), e.g. `http://localhost:3002` |
-| `NEXT_PUBLIC_SITE_URL` | No | Public site URL used in metadata, `robots.txt` and the sitemap (default `https://rooq.store`) |
+| `NEXT_PUBLIC_SITE_URL` | No | Public site URL used in metadata, `robots.txt` and the sitemap (default `https://rooqbd.com`) |
 | `SEED_ADMIN_EMAIL` | No | Staff account the seed creates (default `admin@rooq.local`) |
 | `SEED_ADMIN_PASSWORD` | No | Its first password (default `ChangeMe123!` — change it for any shared database) |
 | `RESEND_API_KEY` | No | Resend key for transactional e-mail (password reset, orders, back-in-stock). Without it mail is a logged dry run |

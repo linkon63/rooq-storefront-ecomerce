@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { CheckoutView } from "@/components/storefront/checkout/checkout-view";
 import { getStoreSettings } from "@/lib/storefront/catalog-data";
 
@@ -9,7 +10,9 @@ export default async function CheckoutPage() {
   return (
     <div className="page-gutter pt-4 md:pt-12">
       <h1 className="max-md:sr-only mb-8 font-display font-expanded text-[clamp(2rem,7vw,3.5rem)] font-extrabold leading-none">Checkout</h1>
-      <CheckoutView delivery={settings.delivery} />
+      <Suspense fallback={null}>
+        <CheckoutView delivery={settings.delivery} />
+      </Suspense>
     </div>
   );
 }

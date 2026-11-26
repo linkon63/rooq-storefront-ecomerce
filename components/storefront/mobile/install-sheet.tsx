@@ -1,13 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePwaInstall } from "@/hooks/use-pwa-install";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { shouldOfferInstall } from "@/lib/storefront/install-visits";
 import { isTabBarHidden } from "@/utils/storefront/mobile-nav";
-import { Modal } from "../shared/modal";
+
+/* The dialog code loads only when the offer is actually shown. */
+const Modal = dynamic(() => import("../shared/modal").then((m) => m.Modal), { ssr: false });
 
 /** From the second visit, phones are offered "Install Rooq" once. */
 export function InstallSheet({ t }: { t: Pick<Messages["footer"], "installApp" | "installHintIos"> }) {

@@ -1,4 +1,4 @@
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { getProductById, productRail } from "@/lib/storefront/catalog-data";
 import { SPOTLIGHT_INTERVAL_MS } from "@/lib/constants/storefront";
 import type { ProductCard } from "@/types/storefront/catalog";
@@ -13,7 +13,7 @@ const HIGHLIGHT_COUNT = 2;
  * pictures beside its story, price and details, one per slide.
  */
 export async function ProductHighlights({ fallback }: { fallback: ProductCard[] }) {
-  const { t } = await getMessages();
+  const t = COPY;
   const featured = await productRail({ featured: true, sort: "popular", limit: HIGHLIGHT_COUNT });
   const cards = [...featured.data, ...fallback.filter((card) => !featured.data.some((f) => f.id === card.id))].slice(
     0,

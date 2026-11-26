@@ -1,4 +1,4 @@
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { COMING_SOON_ANCHOR } from "@/lib/constants/storefront";
 import type { ProductCard as ProductCardData, ShopCategoryNode } from "@/types/storefront/catalog";
 import { ComingSoonTile, type ComingSoonItem } from "./coming-soon-tile";
@@ -14,7 +14,7 @@ const TILE_COUNT = 3;
  * tagged "coming-soon". The header's "Soon" tags link here.
  */
 export async function ComingSoonSection({ categories, products }: ComingSoonSectionProps) {
-  const { t } = await getMessages();
+  const t = COPY;
   const items: ComingSoonItem[] = [
     ...categories.map((c) => ({ id: c.id, name: c.name, imageUrl: c.imageUrl ?? null, href: null })),
     ...products.map((p) => ({ id: p.id, name: p.name, imageUrl: p.image?.url ?? null, href: `/product/${p.slug}` })),

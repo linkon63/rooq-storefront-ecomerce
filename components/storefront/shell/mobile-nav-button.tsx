@@ -1,19 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { useState } from "react";
 import { FiMenu } from "react-icons/fi";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectIsMobileNavOpen, setMobileNavOpen } from "@/lib/store/slices/ui-slice";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import type { NavItem, ShopCategoryNode } from "@/types/storefront/catalog";
-import { MobileNav } from "./mobile-nav";
 
-import type { Locale } from "@/lib/i18n/locales";
+/* The menu sheet loads the first time it is opened. */
+const MobileNav = dynamic(() => import("./mobile-nav").then((m) => m.MobileNav), { ssr: false });
 
-type Props = { locale: Locale; languageLabels: Messages["language"]; nav: NavItem[]; categories: ShopCategoryNode[]; t: Messages["mobileNav"]; openLabel: string; soon: string };
 
-export function MobileNavButton({ nav, categories, t, openLabel, soon, locale, languageLabels }: Props) {
+type Props = { nav: NavItem[]; categories: ShopCategoryNode[]; t: Messages["mobileNav"]; openLabel: string; soon: string };
+
+export function MobileNavButton({ nav, categories, t, openLabel, soon }: Props) {
   const dispatch = useAppDispatch();
   const open = useAppSelector(selectIsMobileNavOpen);
+  const [opened, setOpened] = useState(false);
+  if (open && !opened) setOpened(true);
   return (
     <>
       <button
@@ -25,7 +30,7 @@ export function MobileNavButton({ nav, categories, t, openLabel, soon, locale, l
       >
         <FiMenu aria-hidden className="size-5" />
       </button>
-      <MobileNav open={open} onOpenChange={(next) => dispatch(setMobileNavOpen(next))} nav={nav} categories={categories} t={t} soon={soon} locale={locale} languageLabels={languageLabels} />
+      {opened ? <MobileNav open={open} onOpenChange={(next) => dispatch(setMobileNavOpen(next))} nav={nav} categories={categories} t={t} soon={soon} /> : null}
     </>
   );
 }

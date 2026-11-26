@@ -1,7 +1,7 @@
 import { Fragment, type ReactNode } from "react";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { getHomeStats } from "@/lib/storefront/catalog-data";
-import { fillTemplate, numberLocale } from "@/utils/storefront/fill-template";
+import { fillTemplate } from "@/utils/storefront/fill-template";
 import { CountUp } from "./count-up";
 
 /** A stitched underline marks each live number in the sentence. */
@@ -15,10 +15,11 @@ function Figure({ children }: { children: ReactNode }) {
  * nothing to say yet are left out; nothing renders without stock.
  */
 export async function MadeByHand() {
-  const [stats, { locale, t }] = await Promise.all([getHomeStats(), getMessages()]);
+  const [stats] = await Promise.all([getHomeStats()]);
+  const t = COPY;
   if (!stats || stats.pieces === 0) return null;
   const copy = t.home.craft;
-  const tag = numberLocale(locale);
+  const tag = "en-BD";
   const count = (value: number, decimals = 0) => (
     <Figure>
       <CountUp value={value} locale={tag} decimals={decimals} />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AboutStoryExperience } from "@/components/storefront/about/about-story-experience";
 import { SareeHeroSlider } from "@/components/storefront/about/saree-hero-slider";
 import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 
 export const metadata: Metadata = {
   title: "About our handmade sarees",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const { t } = await getMessages();
+  const t = COPY;
   const about = t.about;
 
   return (

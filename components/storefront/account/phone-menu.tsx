@@ -1,15 +1,15 @@
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { telHref, WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
 import { getStorePolicies } from "@/lib/storefront/catalog-data";
 import { InstallAppButton } from "../shell/install-app-button";
-import { LanguageSwitch } from "../shell/language-switch";
 import { MenuRow } from "./menu-row";
 
 const contactButton = "press flex h-12 items-center justify-center rounded border border-ink text-sm font-semibold";
 
 /** The links a phone has no header or footer for. */
 export async function PhoneMenu() {
-  const [{ locale, t }, policies] = await Promise.all([getMessages(), getStorePolicies()]);
+  const t = COPY;
+  const policies = await getStorePolicies();
   const links = [
     { href: "/compare", label: t.mobileNav.compare },
     { href: "/collections", label: t.home.collections },
@@ -27,10 +27,6 @@ export async function PhoneMenu() {
           <MenuRow key={link.href} {...link} />
         ))}
       </ul>
-      <div className="flex items-center justify-between">
-        <span className="text-sm">{t.language.label}</span>
-        <LanguageSwitch locale={locale} labels={t.language} tone="light" />
-      </div>
       <div className="grid grid-cols-2 gap-2">
         <a href={telHref(WHATSAPP_NUMBER)} className={contactButton}>
           {t.topBar.call}

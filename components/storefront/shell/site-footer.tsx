@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa6";
 import { WHATSAPP_NUMBER, whatsappChatHref } from "@/lib/shop-contact";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import type { NavItem } from "@/types/storefront/catalog";
 import type { StorePolicy, StoreSettings } from "@/types/storefront/content";
 import Logo from "../shared/Logo";

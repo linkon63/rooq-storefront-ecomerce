@@ -1,9 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { FiArrowUpRight, FiMail } from "react-icons/fi";
-import { ContactForm } from "../contact/contact-form";
-import { Modal } from "../shared/modal";
+
+/* The sheet and form load the first time they are opened. */
+const ContactSheet = dynamic(() => import("./contact-sheet").then((m) => m.ContactSheet), { ssr: false });
 
 /**
  * Compact trigger on the home page that opens the contact form in a slide-over
@@ -11,12 +13,16 @@ import { Modal } from "../shared/modal";
  */
 export function CollapsibleContactForm() {
   const [open, setOpen] = useState(false);
+  const [opened, setOpened] = useState(false);
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpened(true);
+          setOpen(true);
+        }}
         className="group flex w-full items-center justify-between gap-4 self-start rounded border border-line bg-paper px-5 py-4 text-left transition-colors hover:border-ink/40 hover:bg-selvedge/30"
       >
         <span className="flex items-center gap-3">
@@ -34,9 +40,7 @@ export function CollapsibleContactForm() {
         />
       </button>
 
-      <Modal open={open} onOpenChange={setOpen} title="Send us a message" placement="right">
-        <ContactForm />
-      </Modal>
+      {opened ? <ContactSheet open={open} onOpenChange={setOpen} /> : null}
     </>
   );
 }

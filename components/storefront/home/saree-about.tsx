@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 
 type SareeAboutProps = { copy: Messages["home"]["sareeAbout"] };
 

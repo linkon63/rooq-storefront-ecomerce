@@ -12,8 +12,3 @@ export function fillTemplate<T>(template: string, values: Record<string, T>): (s
       return key !== undefined && key in values ? values[key] : part;
     });
 }
-
-/** BCP 47 tag for number formatting in each storefront language (Bengali digits for bn). */
-export function numberLocale(locale: "en" | "bn"): string {
-  return locale === "bn" ? "bn-BD" : "en-BD";
-}

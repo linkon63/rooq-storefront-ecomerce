@@ -1,16 +1,13 @@
 import Link from "next/link";
-import { LanguageSwitch } from "./language-switch";
 import { FaWhatsapp } from "react-icons/fa6";
 import { FiPackage, FiPhone, FiTruck } from "react-icons/fi";
-import type { Locale } from "@/lib/i18n/locales";
-import type { Messages } from "@/lib/i18n/messages";
+import type { Messages } from "@/lib/constants/storefront-copy";
 import { telHref, whatsappChatHref } from "@/lib/shop-contact";
 
 type TopBarProps = {
   phone: string | null;
   whatsapp: string;
   announcement: string | null;
-  locale: Locale;
   t: Messages;
 };
 
@@ -25,7 +22,7 @@ const item = "inline-flex items-center gap-1.5 whitespace-nowrap transition-opac
  * The thin bar above the header: call and WhatsApp on the left, the
  * announcement in the middle (wide screens), help links on the right.
  */
-export function TopBar({ phone, whatsapp, announcement, locale, t }: TopBarProps) {
+export function TopBar({ phone, whatsapp, announcement, t }: TopBarProps) {
   return (
     <div className="hidden bg-ink text-chalk md:block">
       <div className="page-gutter type-label flex h-9 items-center justify-between gap-4 text-[0.6875rem]">
@@ -51,7 +48,6 @@ export function TopBar({ phone, whatsapp, announcement, locale, t }: TopBarProps
               {t.topBar[key]}
             </Link>
           ))}
-          <LanguageSwitch locale={locale} labels={t.language} />
         </nav>
       </div>
     </div>

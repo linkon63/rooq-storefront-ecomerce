@@ -18,7 +18,7 @@ import { RecentlyViewedRail } from "@/components/storefront/product-card/recentl
 import { SareeAbout } from "@/components/storefront/home/saree-about";
 import { SEO_ALTERNATE_NAMES, SEO_SITE_DESCRIPTION } from "@/lib/constants/seo";
 import { HOME_BEST_SELLERS_SIZE, HOME_HERO_PRODUCTS, HOME_NEW_IN_SIZE, PRODUCT_TAGS, SITE_URL } from "@/lib/constants/storefront";
-import { getMessages } from "@/lib/i18n/server";
+import { COPY } from "@/lib/constants/storefront-copy";
 import { getCategoryTree, getHomeHero, getStoreSettings, listCollections, productRail } from "@/lib/storefront/catalog-data";
 import { siteJsonLd } from "@/utils/storefront/site-seo";
 
@@ -37,7 +37,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
  * stream in.
  */
 export default async function HomePage() {
-  const { t } = await getMessages();
+  const t = COPY;
   const [settings, hero, categories, newIn, latest, offers, bestSellers, upcoming, lookbooks] = await Promise.all([
     getStoreSettings(),
     getHomeHero(),
