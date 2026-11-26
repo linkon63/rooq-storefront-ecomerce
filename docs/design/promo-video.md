@@ -1,13 +1,17 @@
-# Rooq launch promo — 8 s motion video
+# Rooq launch promo — 9 s motion video
 
 Apple-launch style: dark ground, one idea per shot, big type, hard cuts on the beat,
 slow camera push on real product. Theme stays handloom (thread, tant border, loom),
 not generic tech glow.
 
-- **Length**: 8 s @ 30 fps (240 frames)
-- **Formats**: 1080×1920 (Reels/Story — main), 1920×1080 (web hero/YouTube)
-- **Build**: Remotion (React → MP4), assets from `data/promo-video/assets.json`
-- **Sound**: one 100–120 BPM track; cuts land on beats (≈0.5 s grid)
+- **Length**: 9.1 s @ 30 fps (273 frames)
+- **Formats**: 1080×1920 (Reels/Story — built), 1920×1080 (web hero/YouTube — later)
+- **Build**: Remotion project in `../promo-video/` (sibling of this app). Scene lengths
+  live in `src/timeline.json`; `node scripts/score.mjs` regenerates the synthesized
+  score from it, `npm run render` writes `out/rooq-promo-9x16.mp4`, `npm run studio`
+  opens the editor.
+- **Sound**: synthesized pad + kick on every cut (0.5 s grid), tap click, bag pop,
+  end shimmer. Swap `public/sfx/score.wav` for a licensed track any time.
 
 ## Look
 
@@ -27,21 +31,21 @@ Easing: `cubic-bezier(0.22, 1, 0.36, 1)` (site's `--ease-cloth`).
 
 | Time | Shot | Motion |
 | --- | --- | --- |
-| 0.0–1.0 | Ink-green black. One gold thread draws left → right across centre. | Line stroke, soft glow |
-| 1.0–2.0 | **"Woven."** in huge Newsreader, cream. | Letters rise + blur-in, thread stays under |
-| 2.0–3.5 | Macro crop of a tant border (Hoimonti 01, Shubhrota 01) — slow push-in. | Scale 1.15 → 1.0, maroon triangle border slides from top |
-| 3.5–5.0 | 3 sarees, 0.5 s each, hard cuts on beat: Roktojoba → Hawai Mithai → Ranga Padma. Name + ৳ price bottom-left. | Ken Burns, colour flash between cuts |
-| 5.0–6.5 | iPhone frame rises from below with `mobile-home` → scrolls to `mobile-product`; "Add to bag" taps, bag badge pops. (Landscape: MacBook frame with `desktop-home`.) | Device float + 3D tilt 8° → 0° |
-| 6.5–7.3 | **"Worn with pride."** | Same type move as shot 2 |
-| 7.3–8.0 | ROOQ wordmark: top & bottom maroon triangle rows close in, wordmark fades up. URL + "Handloom tant · Free delivery over ৳5,000". | Border rows slide in, hold last 0.4 s |
+| 0.0–2.0 | Launch: "Introducing" → **"Handloom, / now online."** → pill "rooqbd.com is live", over a gold thread drawn across. | Thread stroke, letters rise + blur-in, pulsing live dot |
+| 2.0–3.5 | Macro of Shubhrota's red tant border, "Pure handloom tant · Straight from the loom." | Fades up from dark, slow push-in, triangle band drops in |
+| 3.5–5.0 | Roktojoba → Hawai Mithai → Hoimonti, 0.5 s each with name + ৳ price. | Hard cuts on the beat, Ken Burns, no white flash |
+| 5.0–6.9 | Hoimonti shrinks into a phone screen; the real home page scrolls, Ranga Padma slides in, "Add to bag" tap, bag badge + toast. | Shrink-to-device (no cut), page push like real navigation |
+| 6.9–7.8 | **"Worn with pride."** | Letters rise, fast exit |
+| 7.8–9.1 | Cream end card opens from the centre line; scissors logo, `rooqbd.com`, "Handloom tant · Free delivery over ৳5,000". | Centre wipe (no flash), triangle bands close in |
 
-Line copy is taken from the live home hero ("Woven by hand. Worn with pride.").
+Rule: no full-frame brightness jumps — every dark ↔ light change is a fade, a wipe or a
+shrink.
 
 ## Assets
 
 Ready (in repo):
 
-- Screenshots — `data/promo-video/screenshots/` (desktop 1920×1080, mobile 390×844 @3x;
+- Screenshots — `../promo-video/assets/screenshots/` (outside git) (desktop 1920×1080, mobile 390×844 @3x;
   home, shop, product, collection, new, sale, cart, plus full-page home/product)
 - Logo — `public/images/logo-wordmark.png`, `public/images/logo-kechi-clear(-white).png`,
   `data/logo-variants/rooq-logo-4-kechi.svg`
