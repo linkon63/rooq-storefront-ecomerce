@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Hanken_Grotesk, Noto_Serif_Bengali, Newsreader, Poppins } from "next/font/google";
 import "./globals.css";
 import { SEO_KEYWORDS, SEO_SITE_DESCRIPTION, SEO_SITE_TITLE } from "@/lib/constants/seo";
@@ -107,6 +108,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <StoreProvider>{children}</StoreProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
