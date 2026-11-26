@@ -12,10 +12,9 @@ import { setSearchOpen } from "@/lib/store/slices/ui-slice";
 import type { ProductCard } from "@/types/storefront/catalog";
 import { Modal } from "../shared/modal";
 import { rememberSearch } from "@/lib/storefront/recent-searches";
+import { PopularSearches } from "./popular-searches";
 import { RecentSearches } from "./recent-searches";
 import { SearchResults } from "./search-results";
-
-const SUGGESTIONS = ["Linen shirt", "Wide-leg trousers", "Sneakers", "Denim jacket", "Kurta", "Tote bag"];
 
 /** Type-ahead product search; Enter opens the full shop results. */
 export function SearchOverlay() {
@@ -65,7 +64,7 @@ export function SearchOverlay() {
             autoFocus
             value={term}
             onChange={(event) => setTerm(event.target.value)}
-            placeholder="Shirts, trainers, linen…"
+            placeholder="Search sarees…"
             autoComplete="off"
             className="h-12 w-full rounded border border-line bg-chalk pl-10 pr-3 text-base"
           />
@@ -75,20 +74,7 @@ export function SearchOverlay() {
         ) : (
           <div>
             <RecentSearches onPick={setTerm} />
-            <p className="mb-3 text-sm text-stone">Popular searches</p>
-            <ul className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((suggestion) => (
-                <li key={suggestion}>
-                  <button
-                    type="button"
-                    onClick={() => setTerm(suggestion)}
-                    className="rounded-full border border-line px-3.5 py-1.5 text-sm hover:border-ink"
-                  >
-                    {suggestion}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <PopularSearches onPick={setTerm} />
           </div>
         )}
       </div>
