@@ -42,8 +42,8 @@ export async function seedStore(db: SeedDb) {
   await db.storeContact.deleteMany({ where: { settingId: setting.id } });
   await db.storeContact.createMany({
     data: [
-      { settingId: setting.id, kind: "PHONE", title: "Customer care", value: "+880 1700-000000", position: 0 },
-      { settingId: setting.id, kind: "EMAIL", title: "Support", value: "hello@rooq.local", position: 0 },
+      { settingId: setting.id, kind: "PHONE", title: "Customer care", value: "+880 1581-980988", position: 0 },
+      { settingId: setting.id, kind: "EMAIL", title: "Support", value: "rooqbd@gmail.com", position: 0 },
     ],
   });
   for (const [platform, url] of [

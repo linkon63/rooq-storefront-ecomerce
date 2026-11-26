@@ -6,7 +6,6 @@ import { displayPrice } from "@/utils/storefront/variant-selection";
 import { WishlistButton } from "../product-card/wishlist-button";
 import { LabelTag } from "../shared/label-tag";
 import { Price } from "../shared/price";
-import { StarRating } from "../shared/star-rating";
 import { AddToBag } from "./add-to-bag";
 import { BuyNow } from "./buy-now";
 import { BackInStockForm } from "./back-in-stock-form";
@@ -38,11 +37,6 @@ export function BuyPanel() {
           <Price price={price} compareAtPrice={compareAtPrice} className="text-lg" />
           {product.isOnSale && product.discountPercent > 0 ? <LabelTag tone="dye">−{product.discountPercent}%</LabelTag> : null}
         </div>
-        {product.rating.count > 0 ? (
-          <a href="#reviews" className="w-fit text-sm hover:underline">
-            <StarRating rating={product.rating.average} count={product.rating.count} />
-          </a>
-        ) : null}
       </header>
 
       <ColorPicker />

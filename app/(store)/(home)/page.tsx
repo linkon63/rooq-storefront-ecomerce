@@ -3,6 +3,7 @@ import { CategoryTiles } from "@/components/storefront/home/category-tiles";
 import { MadeByHand } from "@/components/storefront/home/made-by-hand/made-by-hand";
 import { SareeUnfold } from "@/components/storefront/home/saree-unfold/saree-unfold";
 import { ComingSoonSection } from "@/components/storefront/home/coming-soon-section";
+import { FacebookReviews } from "@/components/storefront/home/facebook-reviews";
 import { FeaturedCollections } from "@/components/storefront/home/featured-collections";
 import { HomeContact } from "@/components/storefront/home/home-contact";
 import { HomeHero } from "@/components/storefront/home/home-hero";
@@ -82,6 +83,9 @@ export default async function HomePage() {
             : undefined
         }
       />
+      <Suspense fallback={null}>
+        <FacebookReviews />
+      </Suspense>
       <Suspense fallback={null}>
         <ProductHighlights fallback={bestSellers.data} />
       </Suspense>

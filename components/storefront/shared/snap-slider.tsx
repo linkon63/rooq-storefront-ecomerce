@@ -1,7 +1,7 @@
 "use client";
 
-import { Children, useEffect, useRef, useState, type ReactNode } from "react";
-import { usePrefersReducedMotion } from "@/hooks/use-media-query";
+import { Children, useEffect, useState, type ReactNode } from "react";
+import { useSnapSlider } from "./use-snap-slider";
 
 type SnapSliderProps = {
   children: ReactNode;
@@ -19,48 +19,22 @@ type SnapSliderProps = {
  * `interval` it moves on by itself and loops; touching or hovering holds it.
  */
 export function SnapSlider({ children, label, dotLabel, interval, className = "" }: SnapSliderProps) {
-  const track = useRef<HTMLUListElement>(null);
   const slides = Children.toArray(children);
   const count = slides.length;
-  const reduced = usePrefersReducedMotion();
-  const [active, setActive] = useState(0);
+  const { track, active, goTo, reduced } = useSnapSlider();
   const [held, setHeld] = useState(false);
-  const activeRef = useRef(0);
-
-  const goTo = (index: number) => {
-    const list = track.current;
-    const item = list?.children[index] as HTMLElement | undefined;
-    if (!list || !item) return;
-    list.scrollTo({ left: item.offsetLeft, behavior: reduced ? "auto" : "smooth" });
-  };
-
-  useEffect(() => {
-    const list = track.current;
-    if (!list) return;
-    const onScroll = () => {
-      const items = Array.from(list.children) as HTMLElement[];
-      let nearest = 0;
-      items.forEach((item, index) => {
-        if (Math.abs(item.offsetLeft - list.scrollLeft) < Math.abs((items[nearest]?.offsetLeft ?? 0) - list.scrollLeft)) nearest = index;
-      });
-      activeRef.current = nearest;
-      setActive(nearest);
-    };
-    list.addEventListener("scroll", onScroll, { passive: true });
-    return () => list.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (!interval || reduced || held || count < 2) return;
     const timer = window.setInterval(() => {
       const list = track.current;
       if (!list || list.offsetParent === null || document.hidden) return;
-      const next = (activeRef.current + 1) % count;
-      const item = list.children[next] as HTMLElement | undefined;
-      if (item) list.scrollTo({ left: item.offsetLeft, behavior: "smooth" });
+      goTo((active + 1) % count);
     }, interval);
     return () => window.clearInterval(timer);
-  }, [interval, reduced, held, count]);
+    // goTo only reads the track ref; `active` restarts the wait after each move.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interval, reduced, held, count, active]);
 
   const hold = () => setHeld(true);
   const release = () => setHeld(false);

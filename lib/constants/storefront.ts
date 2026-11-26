@@ -86,7 +86,7 @@ export const HOME_HERO_PRODUCTS = 3;
 /** Phone hero: seconds per product. */
 export const HOME_HERO_INTERVAL_MS = 3000;
 /** Spotlight slider: seconds per piece. */
-export const SPOTLIGHT_INTERVAL_MS = 5000;
+export const SPOTLIGHT_INTERVAL_MS = 3000;
 /** Home "Best sellers": four large cards; the rest wait behind "See all". */
 export const HOME_BEST_SELLERS_SIZE = 4;
 

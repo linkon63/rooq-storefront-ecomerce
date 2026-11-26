@@ -2,21 +2,26 @@ import { FaFacebook } from "react-icons/fa6";
 import { StarRating } from "../shared/star-rating";
 import type { PublicGalleryEntry } from "@/types/gallery";
 
-type GalleryCardProps = { entry: PublicGalleryEntry; onZoom: (imageIndex: number) => void };
+type GalleryCardProps = {
+  entry: PublicGalleryEntry;
+  onZoom: (imageIndex: number) => void;
+  /** Fixed-height card: first photo fills 70%, feedback is clipped (home page). */
+  compact?: boolean;
+};
 
 /** One entry: tappable photo(s), stars, name, city and feedback. */
-export function GalleryCard({ entry, onZoom }: GalleryCardProps) {
+export function GalleryCard({ entry, onZoom, compact = false }: GalleryCardProps) {
   const isFacebook = entry.source === "FACEBOOK";
   return (
-    <article className="flex flex-col border border-line bg-paper">
-      <div className={isFacebook ? "" : "grid gap-[3px]"}>
-        {entry.images.map((image, index) => (
+    <article className={`flex flex-col overflow-hidden border border-line bg-paper ${compact ? "h-104" : ""}`}>
+      <div className={compact ? "h-[70%] shrink-0" : isFacebook ? "" : "grid gap-[3px]"}>
+        {(compact ? entry.images.slice(0, 1) : entry.images).map((image, index) => (
           <button
             key={image.id}
             type="button"
             onClick={() => onZoom(index)}
             aria-label={`Zoom photo ${index + 1} by ${entry.name}`}
-            className="block w-full cursor-zoom-in bg-selvedge"
+            className={`block w-full cursor-zoom-in bg-selvedge ${compact ? "h-full" : ""}`}
           >
             {/* Media route URLs are served as-is; dimensions reserve the space. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -26,12 +31,12 @@ export function GalleryCard({ entry, onZoom }: GalleryCardProps) {
               width={image.width ?? undefined}
               height={image.height ?? undefined}
               loading="lazy"
-              className="h-auto w-full"
+              className={compact ? "size-full object-cover object-top" : "h-auto w-full"}
             />
           </button>
         ))}
       </div>
-      <div className="flex flex-col gap-2 p-4">
+      <div className={`flex flex-col ${compact ? "gap-1.5 p-3" : "gap-2 p-4"}`}>
         <div className="flex items-center justify-between gap-2">
           <StarRating rating={entry.rating} />
           {isFacebook ? (
@@ -40,7 +45,7 @@ export function GalleryCard({ entry, onZoom }: GalleryCardProps) {
             </span>
           ) : null}
         </div>
-        <p className="text-[0.9375rem] leading-relaxed">{entry.feedback}</p>
+        <p className={compact ? "line-clamp-2 text-sm leading-relaxed" : "text-[0.9375rem] leading-relaxed"}>{entry.feedback}</p>
         <p className="text-sm font-semibold">
           {entry.name}
           {entry.city ? <span className="font-normal text-stone">, {entry.city}</span> : null}

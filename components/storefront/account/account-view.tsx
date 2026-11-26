@@ -21,7 +21,7 @@ export function AccountView() {
 
   if (status === "guest") {
     return (
-      <div className="grid max-w-md gap-6">
+      <div className="mx-auto grid w-full max-w-md gap-6">
         <p className="text-stone">Sign in to see your orders, returns and saved addresses.</p>
         <LoginForm />
         <button type="button" onClick={() => openAuth("register")} className="w-fit text-sm underline underline-offset-4">

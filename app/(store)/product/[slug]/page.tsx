@@ -6,7 +6,6 @@ import { ProductDetails } from "@/components/storefront/product/product-details"
 import { ProductView } from "@/components/storefront/product/product-view";
 import { SareeSurface } from "@/components/storefront/product/saree-surface";
 import { ProductSelectionProvider } from "@/components/storefront/product/selection-context";
-import { ReviewsSection } from "@/components/storefront/reviews/reviews-section";
 import { Breadcrumbs } from "@/components/storefront/shared/breadcrumbs";
 import { SITE_URL } from "@/lib/constants/storefront";
 import { getProductById, getProductBySlug, getStoreSettings } from "@/lib/storefront/catalog-data";
@@ -39,14 +38,6 @@ export default async function ProductPage({ params }: PageProps) {
   if (product.slug !== slug) permanentRedirect(`/product/${product.slug}`);
 
   const viewProduct = clientProduct(product);
-  const reviewProduct = {
-    id: product.id,
-    name: product.name,
-    colors: product.colors.map(({ id, name }) => ({ id, name })),
-    sizes: product.sizes,
-    variants: product.variants,
-  };
-
   const crumbs = [
     { label: "Home", href: "/" },
     ...product.breadcrumbs.map((crumb) => ({ label: crumb.name, href: `/shop?category=${encodeURIComponent(crumb.slug)}` })),
@@ -67,9 +58,6 @@ export default async function ProductPage({ params }: PageProps) {
           <ProductView product={viewProduct} details={<ProductDetails product={product} currency={settings.currency} />} />
         </div>
         <ProductRail title="Complete the look" products={product.completeTheLook} />
-        <div className="page-gutter">
-          <ReviewsSection product={reviewProduct} />
-        </div>
         <ProductRail title="You may also like" products={product.related} />
         <RecentlyViewedRail excludeId={product.id} />
       </SareeSurface>

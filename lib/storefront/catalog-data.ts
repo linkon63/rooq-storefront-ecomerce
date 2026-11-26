@@ -32,6 +32,8 @@ import { toSaleCountdown } from "@/utils/storefront/countdown";
 import { attachProducts, linkedProductIds, toHeroCampaign } from "@/utils/storefront/hero";
 import { EMPTY_SETTINGS, normalisePolicies, normaliseSettings } from "@/utils/storefront/settings";
 import { cachedRead, readOr, readOrNull } from "./server-api";
+import { listPublicGallery } from "@/lib/server/gallery/service";
+import type { PublicGalleryEntry } from "@/types/gallery";
 
 /**
  * Server-side loaders for storefront pages: in-process service calls (see
@@ -46,6 +48,7 @@ const queryObject = (qs: string) => searchParamsToObject(new URLSearchParams(qs)
 
 const readSettings = cachedRead<[], unknown>("settings", () => getSettings());
 const readPolicies = cachedRead<[], unknown>("policies", () => getPolicies());
+const readFacebookReviews = cachedRead<[], PublicGalleryEntry[]>("facebook-reviews", () => listPublicGallery("FACEBOOK"));
 const readCategories = cachedRead<[], ShopCategoryNode[]>("categories", () => listCategoryTree());
 const readBrands = cachedRead<[], ShopBrandRef[]>("brands", () => listBrands());
 const readProducts = cachedRead<[string], ProductList>("products", (qs) =>
@@ -124,3 +127,8 @@ export const getSaleCountdown = cache(
 
 /** Shop numbers for the home "made by hand" line, or null when they cannot be read. */
 export const getHomeStats = cache((): Promise<HomeStats | null> => readOr("home-stats", readHomeStats, null));
+
+/** Newest approved Facebook reviews for the home page; empty when they cannot be read. */
+export function getFacebookReviews(limit: number): Promise<PublicGalleryEntry[]> {
+  return readOr("facebook reviews", async () => (await readFacebookReviews()).slice(0, limit), []);
+}
