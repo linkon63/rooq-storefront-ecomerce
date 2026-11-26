@@ -1,19 +1,23 @@
 "use client";
 
-import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import Image from "next/image";
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { FiPause, FiPlay } from "react-icons/fi";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 import type { HeroSlide } from "@/types/storefront/content";
 import { HeroProductCard } from "./hero-product-card";
-
-gsap.registerPlugin(useGSAP);
+import { HeroSlidePhoto } from "./hero-slide-photo";
+import { useSliderLoop } from "./use-slider-loop";
 
 const SECONDS_PER_SLIDE = 11;
 const SIZES = "(min-width: 1024px) 30vw, 66vw";
+
+type HeroSliderProps = {
+  slides: HeroSlide[];
+  labels: { play: string; pause: string };
+  /** Media query where the parent hides the slider: its photos are not fetched there. */
+  hiddenOn?: string;
+};
 
 /**
  * The hero's line-up: looks on white, one after another, gliding left in a
@@ -23,7 +27,7 @@ const SIZES = "(min-width: 1024px) 30vw, 66vw";
  * button pauses the loop. With reduced motion it is a still row you scroll
  * by hand.
  */
-export function HeroSlider({ slides, labels }: { slides: HeroSlide[]; labels: { play: string; pause: string } }) {
+export function HeroSlider({ slides, labels, hiddenOn }: HeroSliderProps) {
   const track = useRef<HTMLUListElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const reduced = usePrefersReducedMotion();
@@ -35,31 +39,7 @@ export function HeroSlider({ slides, labels }: { slides: HeroSlide[]; labels: { 
   const items = loop ? [...slides, ...slides] : slides;
   const product = slides[active]?.product ?? null;
 
-  useGSAP(
-    () => {
-      const list = track.current;
-      if (!loop || !list) return;
-      const count = slides.length;
-      tween.current = gsap.to(list, {
-        xPercent: -50,
-        duration: count * SECONDS_PER_SLIDE,
-        ease: "none",
-        repeat: -1,
-        onUpdate() {
-          const half = list.scrollWidth / 2;
-          if (!half) return; // hidden (phones show the product slider instead)
-          const centre = this.progress() * half + (list.parentElement?.clientWidth ?? 0) / 2;
-          const next = Math.floor((centre % half) / (half / count)) % count;
-          setActive((current) => (current === next ? current : next));
-        },
-      });
-      return () => {
-        tween.current?.kill();
-        tween.current = null;
-      };
-    },
-    { scope: track, dependencies: [loop, slides.length] },
-  );
+  useSliderLoop({ track, tween, loop, count: slides.length, seconds: slides.length * SECONDS_PER_SLIDE, onSlide: setActive });
 
   const toggle = () => {
     if (!tween.current) return;
@@ -119,31 +99,7 @@ export function HeroSlider({ slides, labels }: { slides: HeroSlide[]; labels: { 
                 aria-hidden={copy || undefined}
                 className="relative aspect-3/4 h-[min(62svh,38rem)] shrink-0"
               >
-                {(() => {
-                  const photo = (
-                    <Image
-                      src={slide.image.url}
-                      alt={copy ? "" : (slide.product?.name ?? slide.image.alt ?? "")}
-                      fill
-                      sizes={SIZES}
-                      priority={index < 3}
-                      className="object-contain"
-                    />
-                  );
-                  return slide.product ? (
-                    <Link
-                      draggable={false}
-                      href={`/product/${slide.product.slug}`}
-                      tabIndex={copy ? -1 : undefined}
-                      aria-label={copy ? undefined : `View details: ${slide.product.name}`}
-                      className="absolute inset-0 block"
-                    >
-                      {photo}
-                    </Link>
-                  ) : (
-                    photo
-                  );
-                })()}
+                <HeroSlidePhoto slide={slide} copy={copy} eager={index < 3} sizes={SIZES} hiddenOn={hiddenOn} />
               </li>
             );
           })}

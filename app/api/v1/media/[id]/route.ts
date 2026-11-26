@@ -3,7 +3,7 @@ import { route } from "@/lib/server/http";
 import { getMediaForServing } from "@/lib/server/media/queries";
 import { resizeMedia } from "@/lib/server/media/resize";
 import { watermarkMedia } from "@/lib/server/media/watermark";
-import { MEDIA_CACHE_CONTROL, STORED_IMAGE_MIME } from "@/lib/constants/media";
+import { MEDIA_CACHE_CONTROL, MEDIA_URL_VERSION, STORED_IMAGE_MIME } from "@/lib/constants/media";
 import { etagFor, etagMatches, parseMediaWidth } from "@/utils/media-url";
 
 /**
@@ -21,7 +21,7 @@ export const GET = route<{ id: string }>(async (request, { params }) => {
   }
 
   const width = parseMediaWidth(request.nextUrl.searchParams.get("w"));
-  const variant = `${width ? `-w${width}` : ""}${media.isProductPhoto ? "-wm" : ""}`;
+  const variant = `${width ? `-w${width}` : ""}${media.isProductPhoto ? `-wm${MEDIA_URL_VERSION}` : ""}`;
   const etag = media.checksum ? etagFor(`${media.checksum}${variant}`) : null;
   const cacheHeaders: Record<string, string> = { "Cache-Control": MEDIA_CACHE_CONTROL };
   if (etag) cacheHeaders.ETag = etag;

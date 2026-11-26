@@ -44,13 +44,17 @@ export const MEDIA_RESIZE_QUALITY = 75;
 export const WATERMARK = {
   widthRatio: 0.22,
   marginRatio: 0.03,
-  opacity: 0.6,
+  /** Badge padding around the logo, relative to the logo width. */
+  paddingRatio: 0.08,
+  /** Badge corner radius, relative to the logo width. */
+  radiusRatio: 0.1,
+  badgeOpacity: 0.9,
   minImageWidth: 200,
   fullQuality: 85,
 } as const;
 
 /** Bump when served pixels change, so browsers and the CDN fetch images again. */
-export const MEDIA_URL_VERSION = "2";
+export const MEDIA_URL_VERSION = "3";
 
 /** Per-instance memory budget for recently served image bytes. */
 export const MEDIA_MEMORY_CACHE_BYTES = 64 * 1024 * 1024;

@@ -21,11 +21,11 @@ export default function Logo({
   if (uploaded) {
     const badge = variant === "light" ? "rounded bg-white p-2" : "";
     const width = className.includes("w-") ? "" : "w-auto max-w-[40vw]";
-    return <Image src={uploaded} alt="Rooq" width={832} height={559} priority className={`object-contain ${width} ${badge} ${className}`} />;
+    return <Image src={uploaded} alt="Rooq" width={832} height={559} sizes="160px" priority className={`object-contain ${width} ${badge} ${className}`} />;
   }
   if (kechi) {
     const src = variant === "light" ? "/images/logo-kechi-clear-white.png" : "/images/logo-kechi-clear.png";
-    return <Image src={src} alt="Rooq" width={832} height={559} priority className={`${className.includes("w-") ? "" : "w-auto"} ${className}`} />;
+    return <Image src={src} alt="Rooq" width={832} height={559} sizes="160px" priority className={`${className.includes("w-") ? "" : "w-auto"} ${className}`} />;
   }
   return (
     <Image

@@ -41,7 +41,7 @@ export function SiteFooter({ nav, settings, policies, t, newsletter }: SiteFoote
               <li key={item.label}>
                 <Link href={item.href} className="hover:text-chalk hover:underline">
                   {item.label}
-                  {item.soon ? <span className="ml-1.5 text-chalk/50">{t.soon}</span> : null}
+                  {item.soon ? <span className="ml-1.5 text-chalk/60">{t.soon}</span> : null}
                 </Link>
               </li>
             ))}

@@ -1,21 +1,51 @@
 /* Home craft moments: woven headline, flip clock, cloth bolts, review notes. */
 
-/* Woven headline: two copies of a line, each showing alternate weft rows. */
-.weft-a,
+/*
+ * Woven headline: two copies of a line, each cut into alternate weft rows,
+ * slide in from opposite sides and interlace into solid letters. CSS only and
+ * never transparent, so the headline paints with the first frame. At rest the
+ * first copy is solid and the second hidden. The copy below rises with it.
+ */
 .weft-b {
-  --weft: 0.075em;
-}
-.weft-a {
-  mask-image: repeating-linear-gradient(to bottom, #000 0 var(--weft), transparent var(--weft) calc(var(--weft) * 2));
-}
-.weft-b {
-  mask-image: repeating-linear-gradient(to bottom, transparent 0 var(--weft), #000 var(--weft) calc(var(--weft) * 2));
-}
-.weft-done .weft-a {
-  mask-image: none;
-}
-.weft-done .weft-b {
   visibility: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .weft-a {
+    animation: weft-in-a 1.1s var(--ease-weft) backwards;
+  }
+  .weft-b {
+    animation: weft-in-b 1.1s var(--ease-weft) backwards;
+  }
+  .hero-rise {
+    animation: hero-rise 0.6s var(--ease-weft) backwards;
+  }
+}
+@keyframes weft-in-a {
+  from,
+  to {
+    mask-image: repeating-linear-gradient(to bottom, #000 0 0.075em, transparent 0.075em 0.15em);
+  }
+  from {
+    transform: translateX(-14%);
+  }
+}
+@keyframes weft-in-b {
+  from,
+  to {
+    visibility: visible;
+    mask-image: repeating-linear-gradient(to bottom, transparent 0 0.075em, #000 0.075em 0.15em);
+  }
+  from {
+    transform: translateX(14%);
+  }
+}
+@keyframes hero-rise {
+  from {
+    transform: translateY(14px);
+  }
+}
+:root {
+  --ease-weft: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Split-flap clock card: two halves and two flaps that fold over the middle. */
@@ -187,7 +217,6 @@
 }
 @keyframes price-now-drop {
   from {
-    opacity: 0.2;
     transform: translateY(-5px);
   }
 }

@@ -17,7 +17,6 @@ export function HeroProductCard({ product }: { product: ProductCard }) {
     <Link
       key={product.id}
       href={`/product/${product.slug}`}
-      aria-label={`View details: ${product.name}`}
       className="group flex w-[min(19rem,calc(100vw-2rem))] animate-[fade-in_.45s_ease-out] items-stretch gap-3 bg-chalk/95 p-2.5 shadow-sheet ring-1 ring-ink/10 backdrop-blur-sm"
     >
       {product.image ? (
