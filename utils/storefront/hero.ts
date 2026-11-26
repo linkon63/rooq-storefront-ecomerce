@@ -27,6 +27,23 @@ export function linkedProductIds(slides: readonly SlideLike[]): string[] {
   return [...new Set(slides.flatMap((slide) => (slide.product?.status === "active" ? [slide.product.id] : [])))];
 }
 
+type MobileLike = { product: { id: string; status: string }; photo: HeroImage | null };
+
+/** Ids of the active products picked for the phone hero. */
+export function mobileProductIds(items: readonly MobileLike[]): string[] {
+  return items.flatMap((item) => (item.product.status === "active" ? [item.product.id] : []));
+}
+
+/** The phone-hero picks as cards, in order, showing the chosen photo (hidden or gone products drop out). */
+export function attachMobileCards(items: readonly MobileLike[], cards: readonly ProductCard[]): ProductCard[] {
+  const byId = new Map(cards.map((card) => [card.id, card]));
+  return items.flatMap((item) => {
+    const card = item.product.status === "active" ? byId.get(item.product.id) : undefined;
+    if (!card) return [];
+    return [item.photo ? { ...card, image: { ...item.photo, alt: item.photo.alt ?? card.name } } : card];
+  });
+}
+
 /** Slides with their product cards attached (a slide whose product is hidden or gone has none). */
 export function attachProducts(slides: readonly SlideLike[], cards: readonly ProductCard[]): HeroSlide[] {
   const byId = new Map(cards.map((card) => [card.id, card]));

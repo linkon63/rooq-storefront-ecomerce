@@ -11,6 +11,7 @@ import { productListQuery } from "@/lib/server/catalog/products/list-schema";
 import { getPolicies } from "@/lib/server/policies/service";
 import { listRecentReviews } from "@/lib/server/reviews/recent";
 import { listCampaigns } from "@/lib/server/campaigns/service";
+import { listHeroMobileProducts } from "@/lib/server/hero-slides/mobile-service";
 import { getHeroMode, listHeroSlides } from "@/lib/server/hero-slides/service";
 import { listReels } from "@/lib/server/reels/service";
 import { HOME_REEL_LIMIT } from "@/lib/constants/reels";
@@ -32,7 +33,7 @@ import type { HomeHeroData, HomeStats, SaleCountdownCampaign, StorePolicy, Store
 import { activeTree } from "@/utils/catalog/category-tree";
 import { toQueryString, type QueryParams } from "@/utils/query-string";
 import { toSaleCountdowns } from "@/utils/storefront/countdown";
-import { attachProducts, linkedProductIds, toHeroCampaign } from "@/utils/storefront/hero";
+import { attachMobileCards, attachProducts, linkedProductIds, mobileProductIds, toHeroCampaign } from "@/utils/storefront/hero";
 import { EMPTY_SETTINGS, normalisePolicies, normaliseSettings } from "@/utils/storefront/settings";
 import { cachedRead, readOr, readOrNull } from "./server-api";
 import { listPublicGallery } from "@/lib/server/gallery/service";
@@ -64,12 +65,17 @@ const readCollections = cachedRead<[string], CollectionSummary[]>("collections",
 );
 const readRecentReviews = cachedRead<[number], ReviewWithProduct[]>("recent-reviews", (limit) => listRecentReviews(limit));
 const readHero = cachedRead<[], HomeHeroData>("hero", async () => {
-  const [mode, slides, campaigns] = await Promise.all([getHeroMode(), listHeroSlides({ activeOnly: true }), listCampaigns()]);
-  const ids = linkedProductIds(slides);
+  const [mode, slides, mobile, campaigns] = await Promise.all([
+    getHeroMode(),
+    listHeroSlides({ activeOnly: true }),
+    listHeroMobileProducts(),
+    listCampaigns(),
+  ]);
+  const ids = [...new Set([...linkedProductIds(slides), ...mobileProductIds(mobile)])];
   const cards = ids.length
     ? (await listProducts(parseValue(queryObject(toQueryString({ ids, limit: ids.length, facets: false })), productListQuery), { isStaff: false })).data
     : [];
-  return { mode, slides: attachProducts(slides, cards), campaign: toHeroCampaign(campaigns) };
+  return { mode, slides: attachProducts(slides, cards), mobile: attachMobileCards(mobile, cards), campaign: toHeroCampaign(campaigns) };
 });
 const readHomeReels = cachedRead<[], HomeReel[]>("home-reels", async () => {
   const reels = await listReels({ activeOnly: true, limit: HOME_REEL_LIMIT });
@@ -130,7 +136,7 @@ export function recentReviews(limit: number): Promise<ReviewWithProduct[]> {
 
 /** The home hero: the admin's mode, the active slides (with linked product cards) and the live hero campaign. */
 export const getHomeHero = cache(
-  (): Promise<HomeHeroData> => readOr("hero", readHero, { mode: "SLIDER", slides: [], campaign: null }),
+  (): Promise<HomeHeroData> => readOr("hero", readHero, { mode: "SLIDER", slides: [], mobile: [], campaign: null }),
 );
 
 /** The live home "Sale Countdown" campaigns (end date still ahead), ending soonest first. */

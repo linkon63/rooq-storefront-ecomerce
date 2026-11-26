@@ -15,6 +15,7 @@ export const SUCCESS_MESSAGES = {
     deleted: "Slide deleted",
     reordered: "Slide order saved",
     modeSaved: "Hero updated",
+    mobileSaved: "Phone hero saved",
   },
   reel: {
     added: "Reel added",

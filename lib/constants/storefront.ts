@@ -85,8 +85,10 @@ export const TAG_TITLES = {
 
 /** Home "New in": eight cards (two slides of four on phones). */
 export const HOME_NEW_IN_SIZE = 8;
-/** The newest products the phone hero cycles through. */
+/** The newest products the phone hero cycles through when the admin picked none. */
 export const HOME_HERO_PRODUCTS = 3;
+/** Most products the admin can pick for the phone hero (Settings → Hero Slider). */
+export const HERO_MOBILE_MAX = 6;
 /** Phone hero: seconds per product. */
 export const HOME_HERO_INTERVAL_MS = 3000;
 /** Spotlight slider: seconds per piece. */

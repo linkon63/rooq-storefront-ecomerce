@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/admin/http";
-import type { AdminHeroSlide, HeroMode } from "@/types/admin/hero";
+import type { AdminHeroMobileProduct, AdminHeroSlide, HeroMobileItemInput, HeroMode } from "@/types/admin/hero";
 
 const UPLOAD_TIMEOUT_MS = 60_000;
 const json =(method: string, body: unknown) => ({ method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -27,4 +27,7 @@ export const heroApi = {
   reorder: (ids: readonly string[]) => apiRequest<AdminHeroSlide[]>("/hero-slides/reorder", json("PUT", { ids })),
   getMode: () => apiRequest<{ mode: HeroMode }>("/hero-slides/mode"),
   setMode: (mode: HeroMode) => apiRequest<{ mode: HeroMode }>("/hero-slides/mode", json("PUT", { mode })),
+  listMobile: () => apiRequest<AdminHeroMobileProduct[]>("/hero-slides/mobile"),
+  /** Replaces the phone hero's picks; order = array order. */
+  setMobile: (items: readonly HeroMobileItemInput[]) => apiRequest<AdminHeroMobileProduct[]>("/hero-slides/mobile", json("PUT", { items })),
 };

@@ -380,6 +380,11 @@ export const ERROR_MESSAGES = {
     saveFailed: "Could not save the hero slide. Please try again.",
     deleteFailed: "Could not delete the hero slide. Please try again.",
     modeFailed: "Could not change what the hero shows. Please try again.",
+    mobileTooMany: (max: number) => `The phone hero holds at most ${max} products.`,
+    mobileDuplicate: "Each product can be in the phone hero only once.",
+    mobilePhotoMismatch: "Pick one of the product's own photos.",
+    mobileLoadFailed: "Could not load the phone hero products. Refresh to try again.",
+    mobileSaveFailed: "Could not save the phone hero products. Please try again.",
   },
 
   reel: {
