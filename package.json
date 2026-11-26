@@ -16,6 +16,7 @@
     "db:copy": "tsx scripts/copy-database.ts",
     "db:seed": "tsx --conditions=react-server prisma/seed.ts",
     "db:seed:categories": "tsx --conditions=react-server scripts/seed-categories.ts",
+    "db:seed:reviews": "tsx --conditions=react-server scripts/seed-reviews.ts",
     "db:seed:products": "tsx --conditions=react-server scripts/seed-products.ts",
     "db:studio": "prisma studio"
   },

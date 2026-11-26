@@ -8,22 +8,32 @@ import { averageGalleryRating } from "@/utils/storefront/gallery";
 import { formatRating } from "@/utils/storefront/reviews";
 import type { GallerySource, PublicGalleryEntry } from "@/types/gallery";
 
-const TABS: { source: GallerySource; label: string }[] = [
-  { source: "WEBSITE", label: "Customer photos" },
+type Filter = GallerySource | "ALL";
+
+const TABS: { source: Filter; label: string }[] = [
+  { source: "ALL", label: "All" },
   { source: "FACEBOOK", label: "Facebook reviews" },
+  { source: "WEBSITE", label: "Customer photos" },
 ];
 
 /** Tabs, average rating, masonry grid and the zoom lightbox. */
 export function GalleryView({ entries }: { entries: PublicGalleryEntry[] }) {
-  const [source, setSource] = useState<GallerySource>("WEBSITE");
+  const [source, setSource] = useState<Filter>("ALL");
   const [open, setOpen] = useState<{ entry: PublicGalleryEntry; index: number } | null>(null);
-  const visible = useMemo(() => entries.filter((entry) => entry.source === source), [entries, source]);
+  // "All" leads with the Facebook reviews; each group stays newest first.
+  const visible = useMemo(
+    () =>
+      source === "ALL"
+        ? [...entries].sort((a, b) => Number(b.source === "FACEBOOK") - Number(a.source === "FACEBOOK"))
+        : entries.filter((entry) => entry.source === source),
+    [entries, source],
+  );
   const average = useMemo(() => averageGalleryRating(entries), [entries]);
 
   return (
     <section aria-label="Customer gallery" className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div role="tablist" aria-label="Gallery type" className="flex gap-2">
+        <div role="tablist" aria-label="Gallery type" className="flex flex-wrap gap-2">
           {TABS.map((tab) => (
             <button
               key={tab.source}
