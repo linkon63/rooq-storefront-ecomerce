@@ -10,7 +10,7 @@ import { MoreCategoriesTile } from "./more-categories-tile";
 const HOME_CATEGORY_LIMIT = 5;
 
 /**
- * Root categories as photo tiles (the image set in the admin). A category
+ * Root (and coming-soon) categories as photo tiles (the image set in the admin). A category
  * announced as coming soon says so and links to the coming-soon section.
  * Only the first five show; with more, the last tile sends shoppers to /shop.
  * Tiles below the fold unroll like bolts of cloth as they come into view.

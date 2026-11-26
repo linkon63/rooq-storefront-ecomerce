@@ -1,6 +1,7 @@
 import type { SeedDb } from "./db";
 import { stableNumber, storeSvg } from "./db";
 import { saveImage } from "../../lib/server/media/save-image";
+import { releaseMedia } from "../../lib/server/media/release";
 import { garmentSvg } from "./placeholder-art";
 import type { Masters } from "./masters";
 import type { CategoryIds } from "./categories";
@@ -37,6 +38,7 @@ function stockFor(sku: string): number {
 async function seedPhotoGallery(db: SeedDb, productId: string, seed: ProductSeed, folder: string, refs: Refs) {
   const color = refs.masters.colors.get(seed.colors[0])!;
   const photos = await readProductPhotos(folder);
+  const mediaIds: string[] = [];
   for (const [position, photo] of photos.entries()) {
     const saved = await saveImage(photo.bytes, { alt: `${seed.name}, photo ${position + 1}`, db });
     await db.productMedia.upsert({
@@ -44,7 +46,13 @@ async function seedPhotoGallery(db: SeedDb, productId: string, seed: ProductSeed
       update: { position, colorId: color.id, isPrimary: position === 0 },
       create: { productId, mediaId: saved.id, position, colorId: color.id, isPrimary: position === 0 },
     });
+    mediaIds.push(saved.id);
   }
+  // The folder is the source of truth: unlink photos that are no longer in it.
+  const stale = { productId, mediaId: { notIn: mediaIds } };
+  const removed = await db.productMedia.findMany({ where: stale, select: { mediaId: true } });
+  await db.productMedia.deleteMany({ where: stale });
+  await releaseMedia(removed.map((row) => row.mediaId), db);
 }
 
 async function seedGallery(db: SeedDb, productId: string, seed: ProductSeed, refs: Refs) {
@@ -115,7 +123,7 @@ export async function seedProducts(db: SeedDb, refs: Refs): Promise<Map<string, 
       name: seed.name,
       styleCode: seed.styleCode,
       shortDescription: seed.short,
-      description: `${seed.short} ${seed.material}, ${seed.composition.toLowerCase()}. Designed by Rooq for everyday wear.`,
+      description: seed.description ?? `${seed.short} ${seed.material}, ${seed.composition.toLowerCase()}. Designed by Rooq for everyday wear.`,
       status: "active" as const,
       isFeatured: seed.featured ?? false,
       price: seed.price,
@@ -166,5 +174,10 @@ export async function seedProducts(db: SeedDb, refs: Refs): Promise<Map<string, 
     await seedGallery(db, product.id, seed, refs);
     await seedVariants(db, product.id, seed, refs);
   }
+  // Sarees taken out of the README leave the shop; admin-created products are not touched.
+  await db.product.updateMany({
+    where: { styleCode: { startsWith: "RQ-SR-" }, slug: { notIn: [...ids.keys()] } },
+    data: { status: "inactive" },
+  });
   return ids;
 }

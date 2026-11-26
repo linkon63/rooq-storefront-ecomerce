@@ -42,7 +42,11 @@ export default async function HomePage() {
     listCollections({ type: "LOOKBOOK", featured: true }),
   ]);
 
-  const roots = categories.filter((category) => !category.parentId && category.isActive !== false);
+  // Roots get a tile; so do announced sub-categories, to show they are coming soon.
+  const tiles = categories
+    .filter((category) => !category.parentId)
+    .flatMap((root) => [root, ...(root.children ?? []).filter((child) => child.isComingSoon)])
+    .filter((category) => category.isActive !== false);
   const lookbook = lookbooks[0] ?? null;
 
   return (
@@ -52,7 +56,7 @@ export default async function HomePage() {
         <HomeHero returnDays={settings.delivery.returnWindowDays} hero={hero} latest={latest.data.slice(0, HOME_HERO_PRODUCTS)} />
       </div>
       <SareeUnfold />
-      <CategoryTiles categories={roots} />
+      <CategoryTiles categories={tiles} />
       <Suspense fallback={null}>
         <SaleCountdown />
       </Suspense>
@@ -85,7 +89,7 @@ export default async function HomePage() {
         <MadeByHand />
       </Suspense>
       <OrderJourney t={t.home} />
-      <ComingSoonSection categories={roots.filter((category) => category.isComingSoon)} products={upcoming.data} />
+      <ComingSoonSection categories={tiles.filter((category) => category.isComingSoon)} products={upcoming.data} />
       <HomeContact settings={settings} />
       <RecentlyViewedRail />
     </div>

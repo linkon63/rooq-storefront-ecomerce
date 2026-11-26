@@ -31,7 +31,7 @@ const DAY = 24 * 60 * 60 * 1000;
 
 const CAMPAIGNS: CampaignSeed[] = [
   // Hero campaign (hero "Campaign" mode): its first photo is the banner. Edit it in the admin under Campaigns.
-  { section: SECTION_TITLES.hero, title: "The Saree Edit", description: "Handloom cottons and zari borders in colours made for the season.", linkUrl: "/collections/saree-edit", linkLabel: "Shop the edit", tone: ["#B0125B", "#F2B8C6"], size: [1600, 900], photos: "product-photos/bright-pink-saree" },
+  { section: SECTION_TITLES.hero, title: "The Saree Edit", description: "Handloom cottons and zari borders in colours made for the season.", linkUrl: "/collections/saree-edit", linkLabel: "Shop the edit", tone: ["#B0125B", "#F2B8C6"], size: [1600, 900], photos: "product-photos/roktojoba" },
   { section: SECTION_TITLES.newArrivals, title: "Just Landed", description: "New sarees every week.", linkUrl: "/new", linkLabel: "Shop new arrivals", tone: ["#D39A1F", "#F0DFC6"], size: [1600, 700] },
   ...HERO_BANNER_SLOTS.map((slot, index) => ({
     section: SECTION_TITLES.banner,

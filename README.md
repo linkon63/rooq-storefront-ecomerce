@@ -56,6 +56,8 @@ The API is served by this app at `/api/v1` (same origin), so there is no API URL
 ```bash
 pnpm db:migrate:deploy   # apply prisma/migrations to DIRECT_URL (or: pnpm db:migrate:pg — see below)
 pnpm db:seed             # roles, admin account, sizes, colours, categories, demo fashion catalogue, images (~3 min on a remote DB)
+pnpm db:seed:categories  # optional: only update categories from data/category-photos
+pnpm db:seed:products    # optional: only update products from data/product-photos (README.md + photos)
 ```
 
 - `pnpm db:migrate` — create a new migration while developing (`prisma migrate dev`).

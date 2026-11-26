@@ -14,6 +14,11 @@
 const notFound = (entity: string) => (id: string) => `${entity} with ID ${id} not found`;
 
 export const ERROR_MESSAGES = {
+  seed: {
+    readmeEmpty: "data/product-photos/README.md has no product sections.",
+    readmeSection: (folder: string) => `README section "${folder}" needs **Name:**, **Price:** (… BDT) and an English description.`,
+    missingMeta: (folder: string) => `Add "${folder}" to META in prisma/seed/saree-data.ts (slug, style code, colour).`,
+  },
   common: {
     badRequest: "The server rejected this request as invalid. Check the values entered and try again.",
     unauthorized: "Unauthorized",

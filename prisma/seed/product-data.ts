@@ -29,6 +29,7 @@ export type ProductSeed = {
   pattern: Pattern;
   modelInfo?: string;
   short: string;
+  description?: string;
   features: string[];
   tags?: string[];
   attributes?: string[];
